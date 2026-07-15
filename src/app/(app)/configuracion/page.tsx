@@ -11,7 +11,27 @@ export default function ConfiguracionPage() {
   const [metaMargen, setMetaMargen] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [fetchingTrm, setFetchingTrm] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  async function handleFetchTrm() {
+    setFetchingTrm(true);
+    setMessage(null);
+    try {
+      const res = await fetch("https://open.er-api.com/v6/latest/USD");
+      const data = await res.json();
+      const cop = data?.rates?.COP;
+      if (cop) {
+        setTrm(String(Math.round(cop)));
+        setMessage(`TRM traída de internet: ${Math.round(cop).toLocaleString("es-CO")}. Revisa y dale Guardar.`);
+      } else {
+        setMessage("No se pudo leer la tasa. Intenta de nuevo.");
+      }
+    } catch {
+      setMessage("No se pudo conectar al servicio de tasas. Intenta de nuevo.");
+    }
+    setFetchingTrm(false);
+  }
 
   useEffect(() => {
     async function load() {
@@ -57,7 +77,24 @@ export default function ConfiguracionPage() {
       <form onSubmit={handleSave} className="flex flex-col gap-4 max-w-xs">
         <label className="flex flex-col gap-1 text-sm">
           TRM del día (COP/USD)
-          <input type="number" step="any" value={trm} onChange={(e) => setTrm(e.target.value)} required />
+          <div className="flex gap-2">
+            <input
+              type="number"
+              step="any"
+              value={trm}
+              onChange={(e) => setTrm(e.target.value)}
+              required
+              className="flex-1"
+            />
+            <button
+              type="button"
+              onClick={handleFetchTrm}
+              disabled={fetchingTrm}
+              className="rounded-md border border-border bg-surface-alt px-2 text-xs text-muted hover:text-foreground disabled:opacity-60"
+            >
+              {fetchingTrm ? "..." : "Traer del día"}
+            </button>
+          </div>
         </label>
         <label className="flex flex-col gap-1 text-sm">
           Mes activo

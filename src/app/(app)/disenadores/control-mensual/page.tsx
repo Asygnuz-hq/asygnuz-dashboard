@@ -16,6 +16,12 @@ const tareasColumns: ColumnDef[] = [
     required: true,
     foreignKey: { table: "disenadores", valueField: "id", labelField: "nombre" },
   },
+  {
+    key: "cliente_id",
+    label: "Cliente",
+    type: "foreign-select",
+    foreignKey: { table: "clientes", valueField: "id", labelField: "nombre" },
+  },
   { key: "mes", label: "Mes", type: "month", required: true },
   { key: "proyecto_tarea", label: "Proyecto / Tarea", type: "text", required: true },
   { key: "tipo", label: "Tipo", type: "select", options: TIPOS_PIEZA },

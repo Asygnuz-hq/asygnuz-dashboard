@@ -78,6 +78,10 @@ export function DataTable({
     return ["*", ...foreignSelects].join(", ");
   }, [columns]);
 
+  // filters is an array literal from the caller; key by JSON to avoid refetch
+  // loops from a new-but-equal array reference on every render.
+  const filtersKey = useMemo(() => JSON.stringify(filters ?? []), [filters]);
+
   const loadRows = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -88,10 +92,8 @@ export function DataTable({
     if (error) setError(error.message);
     setRows((data as Row[]) ?? []);
     setLoading(false);
-    // filters is an array literal from the caller; compare by JSON to avoid
-    // refetch loops from a new-but-equal array reference on every render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, table, selectString, orderBy, ascending, JSON.stringify(filters)]);
+  }, [supabase, table, selectString, orderBy, ascending, filtersKey]);
 
   useEffect(() => {
     // loadRows is an async data fetch; its setState calls happen after
@@ -304,6 +306,27 @@ export function DataTable({
     }
   }
 
+  function exportCSV() {
+    const header = columns.map((c) => c.label);
+    const rows = filteredRows.map((row) =>
+      columns.map((col) => {
+        const raw = col.type === "foreign-select" && col.foreignKey
+          ? row[col.foreignKey.table]?.[col.foreignKey.labelField]
+          : row[col.key];
+        const text = raw === null || raw === undefined ? "" : String(raw);
+        return `"${text.replace(/"/g, '""')}"`;
+      })
+    );
+    const csv = [header.map((h) => `"${h}"`).join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${table}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -319,14 +342,22 @@ export function DataTable({
             </select>
           )}
         </div>
-        {!creating && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={startCreate}
-            className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5"
+            onClick={exportCSV}
+            className="rounded-md border border-border bg-surface-alt text-sm px-3 py-1.5 text-muted hover:text-foreground"
           >
-            + Agregar fila
+            Exportar CSV
           </button>
-        )}
+          {!creating && (
+            <button
+              onClick={startCreate}
+              className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5"
+            >
+              + Agregar fila
+            </button>
+          )}
+        </div>
       </div>
 
       {error && (

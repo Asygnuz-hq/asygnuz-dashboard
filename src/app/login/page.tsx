@@ -41,7 +41,12 @@ export default function LoginPage() {
       >
         <div className="mb-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Asygnuz" className="h-9 w-auto brightness-0 invert mb-2" />
+          <img
+            src="/logo.png"
+            alt="Asygnuz"
+            className="h-9 w-auto mb-2"
+            style={{ filter: "var(--logo-filter)" }}
+          />
           <p className="text-sm text-muted">Ingresa a tu dashboard</p>
         </div>
 

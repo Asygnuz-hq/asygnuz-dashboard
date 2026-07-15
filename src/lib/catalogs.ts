@@ -38,3 +38,14 @@ export const MONEDAS = ["COP", "USD"];
 export const ESTADOS_CLIENTE = ["Activo", "En riesgo", "Pausado", "Terminado"];
 
 export const TIPOS_ACTIVIDAD = ["Reunión", "Entrega", "Llamada", "Tarea", "Nota"];
+
+export const TIPOS_CUENTA = ["Banco", "Efectivo", "Billetera digital", "Otro"];
+
+export const TIPOS_MOVIMIENTO = [
+  "Ingreso",
+  "Gasto",
+  "Compra USD",
+  "Venta USD",
+  "Transferencia Entrada",
+  "Transferencia Salida",
+];

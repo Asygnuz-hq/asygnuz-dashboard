@@ -21,6 +21,7 @@ import { KpiCard } from "@/components/KpiCard";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Semaforo, calcularSemaforo } from "@/components/Semaforo";
 import { formatCOP, formatMonth, formatPercent } from "@/lib/format";
+import { useTheme, CHART_COLORS } from "@/lib/useTheme";
 
 type HistoricoRow = {
   mes: string;
@@ -30,9 +31,19 @@ type HistoricoRow = {
   margen_pct: number;
 };
 
+type IngresoVencido = {
+  id: string;
+  cliente: string;
+  monto_cop: number;
+  fecha_pago_esperada: string;
+  dias_vencido: number;
+};
+
 const PALETTE = ["#183057", "#3c5e99", "#8fa8c7", "#c9a227", "#d9534f", "#5c8a72", "#8b6ba6", "#a8763e"];
 
 export default function DashboardPage() {
+  const theme = useTheme();
+  const chartColors = CHART_COLORS[theme];
   const [trm, setTrm] = useState(0);
   const [mesActivo, setMesActivo] = useState<string>("");
   const [metaIngresos, setMetaIngresos] = useState(0);
@@ -41,6 +52,9 @@ export default function DashboardPage() {
   const [gastosFijosTotal, setGastosFijosTotal] = useState(0);
   const [historico, setHistorico] = useState<HistoricoRow[]>([]);
   const [gastosPorCategoria, setGastosPorCategoria] = useState<{ categoria: string; monto_cop: number }[]>([]);
+  const [cajaTotalCop, setCajaTotalCop] = useState(0);
+  const [topCliente, setTopCliente] = useState<{ nombre: string; pct: number } | null>(null);
+  const [carteraVencida, setCarteraVencida] = useState<IngresoVencido[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -60,14 +74,53 @@ export default function DashboardPage() {
         .order("mes", { ascending: true });
       setHistorico((hist as HistoricoRow[]) ?? []);
 
-      const [{ data: variables }, { data: fijos }, { data: pendientes }] = await Promise.all([
-        supabase.from("gastos_variables").select("categoria, monto_cop").eq("mes", activeMes),
-        supabase.from("gastos_fijos").select("categoria, monto_cop").eq("activo", true),
-        supabase.from("ingresos").select("monto_cop").eq("estado", "Pendiente"),
-      ]);
+      const [{ data: variables }, { data: fijos }, { data: pendientes }, { data: saldos }, { data: ingresosCliente }] =
+        await Promise.all([
+          supabase.from("gastos_variables").select("categoria, monto_cop").eq("mes", activeMes),
+          supabase.from("gastos_fijos").select("categoria, monto_cop").eq("activo", true),
+          supabase
+            .from("ingresos")
+            .select("id, monto_cop, fecha_pago_esperada, cliente, clientes(nombre)")
+            .eq("estado", "Pendiente"),
+          supabase.from("v_saldo_cuentas").select("moneda, activa, saldo_actual"),
+          supabase.from("ingresos").select("monto_cop, cliente, clientes(nombre)").not("cliente_id", "is", null),
+        ]);
 
       setGastosFijosTotal((fijos ?? []).reduce((sum, g) => sum + (g.monto_cop ?? 0), 0));
       setIngresosPendientes((pendientes ?? []).reduce((sum, i) => sum + (i.monto_cop ?? 0), 0));
+
+      const trmActual = config?.trm_actual ?? 0;
+      const caja = (saldos ?? [])
+        .filter((s) => s.activa)
+        .reduce((sum, s) => sum + (s.moneda === "USD" ? s.saldo_actual * trmActual : s.saldo_actual), 0);
+      setCajaTotalCop(caja);
+
+      const hoy = new Date().toISOString().slice(0, 10);
+      const vencidos = (pendientes ?? [])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((i: any) => i.fecha_pago_esperada && i.fecha_pago_esperada < hoy)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((i: any) => ({
+          id: i.id,
+          cliente: i.clientes?.nombre ?? i.cliente,
+          monto_cop: i.monto_cop,
+          fecha_pago_esperada: i.fecha_pago_esperada,
+          dias_vencido: Math.floor(
+            (new Date(hoy).getTime() - new Date(i.fecha_pago_esperada).getTime()) / 86_400_000
+          ),
+        }))
+        .sort((a, b) => b.dias_vencido - a.dias_vencido);
+      setCarteraVencida(vencidos.slice(0, 5));
+
+      const clienteTotals = new Map<string, number>();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (ingresosCliente ?? []).forEach((i: any) => {
+        const nombre = i.clientes?.nombre ?? i.cliente;
+        clienteTotals.set(nombre, (clienteTotals.get(nombre) ?? 0) + (i.monto_cop ?? 0));
+      });
+      const totalClientes = Array.from(clienteTotals.values()).reduce((a, b) => a + b, 0);
+      const top = Array.from(clienteTotals.entries()).sort((a, b) => b[1] - a[1])[0];
+      setTopCliente(top && totalClientes > 0 ? { nombre: top[0], pct: top[1] / totalClientes } : null);
 
       const totals = new Map<string, number>();
       [...(variables ?? []), ...(fijos ?? [])].forEach((row) => {
@@ -96,6 +149,7 @@ export default function DashboardPage() {
 
   const proyeccionCaja = ingresosPendientes - gastosFijosTotal;
   const semaforoNivel = calcularSemaforo(mesKpis?.margen_pct ?? 0, metaMargen);
+  const runwayMeses = gastosFijosTotal > 0 ? cajaTotalCop / gastosFijosTotal : null;
 
   const chartData = useMemo(
     () =>
@@ -191,16 +245,53 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      <div>
+        <p className="text-sm font-medium mb-3">Salud del negocio</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <KpiCard
+            label="Caja total (COP)"
+            value={formatCOP(cajaTotalCop)}
+            hint={
+              runwayMeses !== null
+                ? `Runway: ${runwayMeses.toFixed(1)} meses de gastos fijos`
+                : "Registra tus cuentas en Cuentas / Caja"
+            }
+          />
+          <KpiCard
+            label="Concentración de cliente"
+            value={topCliente ? formatPercent(topCliente.pct) : "-"}
+            hint={topCliente ? `${topCliente.nombre} de tus ingresos vinculados` : "Vincula ingresos a clientes"}
+          />
+          <div className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-2">
+            <p className="text-xs uppercase tracking-wide text-muted">Cartera vencida</p>
+            {carteraVencida.length === 0 ? (
+              <p className="text-sm text-accent-bright">Sin cobros vencidos.</p>
+            ) : (
+              <ul className="flex flex-col gap-1">
+                {carteraVencida.map((v) => (
+                  <li key={v.id} className="flex justify-between text-xs">
+                    <span className="truncate">{v.cliente}</span>
+                    <span className="text-danger shrink-0 ml-2">
+                      {v.dias_vencido}d · {formatCOP(v.monto_cop)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-lg border border-border bg-surface p-4">
           <p className="text-sm font-medium mb-3">Ingresos vs. Gastos por mes</p>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2b3140" />
-              <XAxis dataKey="mes" stroke="#8b93a6" fontSize={12} />
-              <YAxis stroke="#8b93a6" fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+              <XAxis dataKey="mes" stroke={chartColors.axis} fontSize={12} />
+              <YAxis stroke={chartColors.axis} fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
               <Tooltip
-                contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
+                contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                 formatter={(value) => formatCOP(Number(value))}
               />
               <Bar dataKey="Ingresos" fill="#3c5e99" radius={[4, 4, 0, 0]} />
@@ -213,11 +304,11 @@ export default function DashboardPage() {
           <p className="text-sm font-medium mb-3">Utilidad neta histórica</p>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#2b3140" />
-              <XAxis dataKey="mes" stroke="#8b93a6" fontSize={12} />
-              <YAxis stroke="#8b93a6" fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+              <XAxis dataKey="mes" stroke={chartColors.axis} fontSize={12} />
+              <YAxis stroke={chartColors.axis} fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
               <Tooltip
-                contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
+                contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                 formatter={(value) => formatCOP(Number(value))}
               />
               <Line type="monotone" dataKey="Utilidad" stroke="#3c5e99" strokeWidth={2} dot={false} />
@@ -240,7 +331,7 @@ export default function DashboardPage() {
                     innerRadius={55}
                     outerRadius={100}
                     paddingAngle={2}
-                    stroke="#12151d"
+                    stroke={chartColors.tooltipBg}
                     strokeWidth={2}
                   >
                     {gastosPorCategoria.map((_, i) => (
@@ -248,7 +339,7 @@ export default function DashboardPage() {
                     ))}
                   </Pie>
                   <Tooltip
-                    contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
+                    contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                     formatter={(value) => formatCOP(Number(value))}
                   />
                 </PieChart>
