@@ -28,7 +28,7 @@ type HistoricoRow = {
   margen_pct: number;
 };
 
-const PALETTE = ["#1d9e75", "#c9a227", "#d9534f", "#4f8fd9", "#a86cd9", "#d97706", "#6b7280", "#e2c799"];
+const PALETTE = ["#183057", "#3c5e99", "#8fa8c7", "#c9a227", "#d9534f", "#5c8a72", "#8b6ba6", "#a8763e"];
 
 export default function DashboardPage() {
   const [trm, setTrm] = useState(0);
@@ -106,14 +106,14 @@ export default function DashboardPage() {
           <p className="text-sm font-medium mb-3">Ingresos vs. Gastos por mes</p>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#322f28" />
-              <XAxis dataKey="mes" stroke="#a89e8a" fontSize={12} />
-              <YAxis stroke="#a89e8a" fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2b3140" />
+              <XAxis dataKey="mes" stroke="#8b93a6" fontSize={12} />
+              <YAxis stroke="#8b93a6" fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
               <Tooltip
-                contentStyle={{ background: "#171613", border: "1px solid #322f28", color: "#f2ead9" }}
+                contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
                 formatter={(value) => formatCOP(Number(value))}
               />
-              <Bar dataKey="Ingresos" fill="#1d9e75" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Ingresos" fill="#3c5e99" radius={[4, 4, 0, 0]} />
               <Bar dataKey="Gastos" fill="#d9534f" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -123,14 +123,14 @@ export default function DashboardPage() {
           <p className="text-sm font-medium mb-3">Utilidad neta histórica</p>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#322f28" />
-              <XAxis dataKey="mes" stroke="#a89e8a" fontSize={12} />
-              <YAxis stroke="#a89e8a" fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#2b3140" />
+              <XAxis dataKey="mes" stroke="#8b93a6" fontSize={12} />
+              <YAxis stroke="#8b93a6" fontSize={12} tickFormatter={(v) => `${(v / 1_000_000).toFixed(0)}M`} />
               <Tooltip
-                contentStyle={{ background: "#171613", border: "1px solid #322f28", color: "#f2ead9" }}
+                contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
                 formatter={(value) => formatCOP(Number(value))}
               />
-              <Line type="monotone" dataKey="Utilidad" stroke="#1d9e75" strokeWidth={2} dot={false} />
+              <Line type="monotone" dataKey="Utilidad" stroke="#3c5e99" strokeWidth={2} dot={false} />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{ background: "#171613", border: "1px solid #322f28", color: "#f2ead9" }}
+                  contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
                   formatter={(value) => formatCOP(Number(value))}
                 />
               </PieChart>

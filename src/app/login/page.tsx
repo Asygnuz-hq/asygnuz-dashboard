@@ -40,7 +40,8 @@ export default function LoginPage() {
         className="w-full max-w-sm rounded-lg border border-border bg-surface p-8 flex flex-col gap-4"
       >
         <div className="mb-2">
-          <p className="text-xl font-bold text-accent">ASYGNUZ</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="Asygnuz" className="h-10 w-auto brightness-0 invert mb-2" />
           <p className="text-sm text-muted">Ingresa a tu dashboard</p>
         </div>
 

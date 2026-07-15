@@ -42,9 +42,10 @@ export function Sidebar() {
 
   return (
     <nav className="w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">
-      <div className="px-2">
-        <p className="text-lg font-bold tracking-tight text-accent">ASYGNUZ</p>
-        <p className="text-xs text-muted">Dashboard</p>
+      <div className="px-2 py-1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.svg" alt="Asygnuz" className="h-8 w-auto brightness-0 invert" />
+        <p className="text-xs text-muted mt-1">Dashboard</p>
       </div>
 
       {sections.map((section, i) => (
