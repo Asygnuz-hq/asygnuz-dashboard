@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ASYGNUZ Dashboard
 
-## Getting Started
+Panel financiero y operativo de ASYGNUZ: Finanzas, Diseñadores y Deudas Personales.
+Reemplaza los 3 Excel (`Asygnuz_Control_Diseñadores`, `ASYGNUZ_Finanzas`, `Contabilidad personales`)
+por una app web multiusuario con base de datos real.
 
-First, run the development server:
+**Stack:** Next.js 16 (App Router) + TypeScript + Tailwind CSS + Recharts · Supabase (Postgres + Auth + RLS) · Vercel.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Puesta en marcha
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1. **Base de datos**: crea un proyecto en [supabase.com](https://supabase.com), luego en
+   **SQL Editor** pega y corre el contenido de [`supabase/schema.sql`](supabase/schema.sql).
+2. **Variables de entorno**: copia `.env.local.example` a `.env.local` y completa con los
+   valores de tu proyecto (Project Settings → API en Supabase):
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=
+   SUPABASE_SERVICE_ROLE_KEY=
+   ```
+3. **Usuarios**: en Supabase → Authentication → Users, crea un usuario (email + contraseña)
+   por cada persona que va a usar el dashboard.
+4. **Instalar y correr en local**:
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Abre http://localhost:3000 e inicia sesión con uno de los usuarios creados.
+5. **Migrar los datos de los Excel existentes** (una sola vez, después del paso 1):
+   ```bash
+   pip3 install --user openpyxl requests
+   python3 scripts/migrate.py
+   ```
+   Lee las rutas de los 3 Excel por defecto desde `~/Downloads`; usa `--control`,
+   `--finanzas`, `--personal` si están en otra ubicación.
+6. **Desplegar en Vercel**:
+   ```bash
+   npx vercel login
+   npx vercel --prod
+   ```
+   Agrega las mismas 3 variables de entorno del paso 2 en el proyecto de Vercel
+   (Project Settings → Environment Variables) antes de desplegar.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estructura
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `src/app/(app)/` — páginas protegidas (dashboard + módulos), requieren sesión.
+- `src/app/login/` — inicio de sesión.
+- `src/components/data-table/` — tabla editable reutilizable (CRUD) y tabla de solo lectura para vistas calculadas.
+- `supabase/schema.sql` — esquema completo: tablas, columnas calculadas, vistas de resumen y políticas de acceso.
+- `scripts/migrate.py` — migración única de los 3 Excel a Supabase.
