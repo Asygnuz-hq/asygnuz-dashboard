@@ -176,6 +176,16 @@ class Supabase:
         if resp.status_code >= 300:
             print(f"  ERROR actualizando {table}: {resp.status_code} {resp.text[:400]}")
 
+    def update_raw(self, table, filters, patch):
+        """filters values are full PostgREST operator strings, e.g. {'cliente': 'ilike.*claudia*'}."""
+        endpoint = f"{self.url}/rest/v1/{table}"
+        headers = dict(self.headers, Prefer="return=representation")
+        resp = requests.patch(endpoint, headers=headers, params=filters, data=json.dumps(patch, default=str))
+        if resp.status_code >= 300:
+            print(f"  ERROR actualizando {table}: {resp.status_code} {resp.text[:400]}")
+            return []
+        return resp.json()
+
     def select(self, table, select="*", filters=None):
         endpoint = f"{self.url}/rest/v1/{table}"
         params = {"select": select}
@@ -455,6 +465,56 @@ def migrate_personal(sb, path):
 
 
 # --------------------------------------------------------------------------
+# Migración: Clientes (agrupa nombres inconsistentes entre hojas y los
+# vincula a los ingresos / cobros ya migrados)
+# --------------------------------------------------------------------------
+
+CLIENTES_CANONICOS = [
+    {
+        "nombre": "Claudia Uribe (MIA)",
+        "tipo": "Consultoría / Diseño",
+        "ingresos_ilike": "*claudia*",
+        "cobros_ilike": "*claudia*",
+    },
+    {
+        "nombre": "Lamparas",
+        "tipo": "Proyecto",
+        "ingresos_eq": "Lamparas",
+    },
+    {
+        "nombre": "Mayra Fit",
+        "tipo": "Proyecto",
+        "ingresos_eq": "Mayra fit",
+    },
+]
+
+
+def migrate_clientes(sb):
+    print("\n== Clientes ==")
+    sb.insert(
+        "clientes",
+        [{"nombre": c["nombre"], "tipo": c["tipo"], "estado": "Activo"} for c in CLIENTES_CANONICOS],
+        on_conflict="nombre",
+    )
+    id_map = {c["nombre"]: c["id"] for c in sb.select("clientes", "id,nombre")}
+
+    for c in CLIENTES_CANONICOS:
+        cid = id_map.get(c["nombre"])
+        if not cid:
+            continue
+        if "ingresos_ilike" in c:
+            sb.update_raw("ingresos", {"cliente": f"ilike.{c['ingresos_ilike']}"}, {"cliente_id": cid})
+        if "ingresos_eq" in c:
+            sb.update_raw("ingresos", {"cliente": f"eq.{c['ingresos_eq']}"}, {"cliente_id": cid})
+        if "cobros_ilike" in c:
+            sb.update_raw("cobros_clientes", {"cliente": f"ilike.{c['cobros_ilike']}"}, {"cliente_id": cid})
+        if "cobros_eq" in c:
+            sb.update_raw("cobros_clientes", {"cliente": f"eq.{c['cobros_eq']}"}, {"cliente_id": cid})
+
+    print(f"  {len(id_map)} clientes creados/actualizados y vinculados a ingresos/cobros existentes.")
+
+
+# --------------------------------------------------------------------------
 # Verificación final
 # --------------------------------------------------------------------------
 
@@ -478,14 +538,24 @@ def main():
     parser.add_argument("--control", default=DEFAULT_FILES["control"])
     parser.add_argument("--finanzas", default=DEFAULT_FILES["finanzas"])
     parser.add_argument("--personal", default=DEFAULT_FILES["personal"])
+    parser.add_argument(
+        "--only-clientes",
+        action="store_true",
+        help="Solo crea/actualiza clientes y los vincula a ingresos/cobros ya migrados (no reinserta nada más).",
+    )
     args = parser.parse_args()
 
     url, key = get_config()
     sb = Supabase(url, key)
 
+    if args.only_clientes:
+        migrate_clientes(sb)
+        return
+
     mes_activo = migrate_finanzas(sb, args.finanzas)
     migrate_control(sb, args.control)
     migrate_personal(sb, args.personal)
+    migrate_clientes(sb)
     print_verification(sb, mes_activo)
     print("\nMigración completa.")
 

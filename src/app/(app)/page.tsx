@@ -18,6 +18,8 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
+import { ProgressBar } from "@/components/ProgressBar";
+import { Semaforo, calcularSemaforo } from "@/components/Semaforo";
 import { formatCOP, formatMonth, formatPercent } from "@/lib/format";
 
 type HistoricoRow = {
@@ -33,6 +35,10 @@ const PALETTE = ["#183057", "#3c5e99", "#8fa8c7", "#c9a227", "#d9534f", "#5c8a72
 export default function DashboardPage() {
   const [trm, setTrm] = useState(0);
   const [mesActivo, setMesActivo] = useState<string>("");
+  const [metaIngresos, setMetaIngresos] = useState(0);
+  const [metaMargen, setMetaMargen] = useState(0);
+  const [ingresosPendientes, setIngresosPendientes] = useState(0);
+  const [gastosFijosTotal, setGastosFijosTotal] = useState(0);
   const [historico, setHistorico] = useState<HistoricoRow[]>([]);
   const [gastosPorCategoria, setGastosPorCategoria] = useState<{ categoria: string; monto_cop: number }[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +51,8 @@ export default function DashboardPage() {
       const activeMes = config?.mes_activo ?? "";
       setTrm(config?.trm_actual ?? 0);
       setMesActivo(activeMes);
+      setMetaIngresos(config?.meta_ingresos_cop ?? 0);
+      setMetaMargen(config?.meta_margen_pct ?? 0);
 
       const { data: hist } = await supabase
         .from("v_historico_mensual")
@@ -52,10 +60,14 @@ export default function DashboardPage() {
         .order("mes", { ascending: true });
       setHistorico((hist as HistoricoRow[]) ?? []);
 
-      const [{ data: variables }, { data: fijos }] = await Promise.all([
+      const [{ data: variables }, { data: fijos }, { data: pendientes }] = await Promise.all([
         supabase.from("gastos_variables").select("categoria, monto_cop").eq("mes", activeMes),
         supabase.from("gastos_fijos").select("categoria, monto_cop").eq("activo", true),
+        supabase.from("ingresos").select("monto_cop").eq("estado", "Pendiente"),
       ]);
+
+      setGastosFijosTotal((fijos ?? []).reduce((sum, g) => sum + (g.monto_cop ?? 0), 0));
+      setIngresosPendientes((pendientes ?? []).reduce((sum, i) => sum + (i.monto_cop ?? 0), 0));
 
       const totals = new Map<string, number>();
       [...(variables ?? []), ...(fijos ?? [])].forEach((row) => {
@@ -63,7 +75,9 @@ export default function DashboardPage() {
         totals.set(key, (totals.get(key) ?? 0) + (row.monto_cop ?? 0));
       });
       setGastosPorCategoria(
-        Array.from(totals.entries()).map(([categoria, monto_cop]) => ({ categoria, monto_cop }))
+        Array.from(totals.entries())
+          .map(([categoria, monto_cop]) => ({ categoria, monto_cop }))
+          .sort((a, b) => b.monto_cop - a.monto_cop)
       );
 
       setLoading(false);
@@ -71,10 +85,17 @@ export default function DashboardPage() {
     load();
   }, []);
 
-  const mesKpis = useMemo(
-    () => historico.find((h) => h.mes === mesActivo),
-    [historico, mesActivo]
-  );
+  const mesIndex = useMemo(() => historico.findIndex((h) => h.mes === mesActivo), [historico, mesActivo]);
+  const mesKpis = mesIndex >= 0 ? historico[mesIndex] : undefined;
+  const mesAnterior = mesIndex > 0 ? historico[mesIndex - 1] : undefined;
+
+  function delta(actual?: number, anterior?: number) {
+    if (actual === undefined || anterior === undefined || anterior === 0) return undefined;
+    return (actual - anterior) / Math.abs(anterior);
+  }
+
+  const proyeccionCaja = ingresosPendientes - gastosFijosTotal;
+  const semaforoNivel = calcularSemaforo(mesKpis?.margen_pct ?? 0, metaMargen);
 
   const chartData = useMemo(
     () =>
@@ -87,18 +108,87 @@ export default function DashboardPage() {
     [historico]
   );
 
+  const totalGastosCategoria = useMemo(
+    () => gastosPorCategoria.reduce((sum, g) => sum + g.monto_cop, 0),
+    [gastosPorCategoria]
+  );
+
   if (loading) return <p className="text-muted">Cargando dashboard...</p>;
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader title="Dashboard financiero" subtitle={`Mes activo: ${formatMonth(mesActivo)}`} />
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <PageHeader title="Dashboard financiero" subtitle={`Mes activo: ${formatMonth(mesActivo)}`} />
+        <Semaforo nivel={semaforoNivel} />
+      </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <KpiCard label="TRM del día" value={trm ? trm.toLocaleString("es-CO") : "-"} hint="COP/USD" />
-        <KpiCard label="Ingresos del mes" value={formatCOP(mesKpis?.ingresos_cop ?? 0)} />
-        <KpiCard label="Gastos del mes" value={formatCOP(mesKpis?.gastos_cop ?? 0)} />
-        <KpiCard label="Utilidad neta" value={formatCOP(mesKpis?.utilidad_neta_cop ?? 0)} />
+        <KpiCard
+          label="Ingresos del mes"
+          value={formatCOP(mesKpis?.ingresos_cop ?? 0)}
+          delta={
+            delta(mesKpis?.ingresos_cop, mesAnterior?.ingresos_cop) !== undefined
+              ? { pct: delta(mesKpis?.ingresos_cop, mesAnterior?.ingresos_cop)! }
+              : undefined
+          }
+        />
+        <KpiCard
+          label="Gastos del mes"
+          value={formatCOP(mesKpis?.gastos_cop ?? 0)}
+          delta={
+            delta(mesKpis?.gastos_cop, mesAnterior?.gastos_cop) !== undefined
+              ? { pct: delta(mesKpis?.gastos_cop, mesAnterior?.gastos_cop)!, invertColor: true }
+              : undefined
+          }
+        />
+        <KpiCard
+          label="Utilidad neta"
+          value={formatCOP(mesKpis?.utilidad_neta_cop ?? 0)}
+          delta={
+            delta(mesKpis?.utilidad_neta_cop, mesAnterior?.utilidad_neta_cop) !== undefined
+              ? { pct: delta(mesKpis?.utilidad_neta_cop, mesAnterior?.utilidad_neta_cop)! }
+              : undefined
+          }
+        />
         <KpiCard label="Margen" value={formatPercent(mesKpis?.margen_pct ?? 0)} />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-4 justify-center">
+          <p className="text-sm font-medium">Metas del mes activo</p>
+          <ProgressBar label="Ingresos" value={mesKpis?.ingresos_cop ?? 0} target={metaIngresos} formatValue={formatCOP} />
+          <ProgressBar
+            label="Margen"
+            value={(mesKpis?.margen_pct ?? 0) * 100}
+            target={metaMargen * 100}
+            formatValue={(n) => `${n.toFixed(1)}%`}
+          />
+          {metaIngresos === 0 && metaMargen === 0 && (
+            <p className="text-xs text-muted">
+              Define tus metas en Configuración para ver el avance del mes.
+            </p>
+          )}
+        </div>
+
+        <div className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-2 justify-center">
+          <p className="text-sm font-medium mb-1">Proyección de caja</p>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted">Por cobrar (pendiente)</span>
+            <span className="font-medium">{formatCOP(ingresosPendientes)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted">Gastos fijos recurrentes</span>
+            <span className="font-medium">{formatCOP(gastosFijosTotal)}</span>
+          </div>
+          <hr className="border-border my-1" />
+          <div className="flex justify-between text-sm">
+            <span className="text-muted">Proyección neta</span>
+            <span className={`font-bold ${proyeccionCaja >= 0 ? "text-accent-bright" : "text-danger"}`}>
+              {formatCOP(proyeccionCaja)}
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -140,25 +230,50 @@ export default function DashboardPage() {
           {gastosPorCategoria.length === 0 ? (
             <p className="text-sm text-muted">No hay gastos registrados para este mes.</p>
           ) : (
-            <ResponsiveContainer width="100%" height={280}>
-              <PieChart>
-                <Pie
-                  data={gastosPorCategoria}
-                  dataKey="monto_cop"
-                  nameKey="categoria"
-                  outerRadius={100}
-                  label={(entry: unknown) => (entry as { categoria?: string }).categoria ?? ""}
-                >
-                  {gastosPorCategoria.map((_, i) => (
-                    <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
-                  formatter={(value) => formatCOP(Number(value))}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <ResponsiveContainer width="100%" height={260} className="md:max-w-[260px]">
+                <PieChart>
+                  <Pie
+                    data={gastosPorCategoria}
+                    dataKey="monto_cop"
+                    nameKey="categoria"
+                    innerRadius={55}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    stroke="#12151d"
+                    strokeWidth={2}
+                  >
+                    {gastosPorCategoria.map((_, i) => (
+                      <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ background: "#12151d", border: "1px solid #2b3140", color: "#edeef2" }}
+                    formatter={(value) => formatCOP(Number(value))}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+
+              <ul className="flex-1 w-full flex flex-col gap-2">
+                {gastosPorCategoria.map((g, i) => (
+                  <li key={g.categoria} className="flex items-center gap-3 text-sm">
+                    <span
+                      className="h-3 w-3 rounded-sm shrink-0"
+                      style={{ backgroundColor: PALETTE[i % PALETTE.length] }}
+                    />
+                    <span className="flex-1 truncate">{g.categoria}</span>
+                    <span className="text-muted tabular-nums">
+                      {totalGastosCategoria > 0
+                        ? formatPercent(g.monto_cop / totalGastosCategoria)
+                        : "-"}
+                    </span>
+                    <span className="font-medium tabular-nums w-28 text-right">
+                      {formatCOP(g.monto_cop)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       </div>

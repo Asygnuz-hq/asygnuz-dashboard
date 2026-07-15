@@ -9,6 +9,13 @@ type NavSection = { title: string; items: NavItem[] };
 const sections: NavSection[] = [
   { title: "", items: [{ href: "/", label: "Dashboard" }] },
   {
+    title: "Clientes",
+    items: [
+      { href: "/clientes", label: "Clientes" },
+      { href: "/clientes/rentabilidad", label: "Rentabilidad por Cliente" },
+    ],
+  },
+  {
     title: "Finanzas",
     items: [
       { href: "/finanzas/ingresos", label: "Ingresos" },
@@ -44,7 +51,7 @@ export function Sidebar() {
     <nav className="w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">
       <div className="px-2 py-1">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="Asygnuz" className="h-8 w-auto brightness-0 invert" />
+        <img src="/logo.png" alt="Asygnuz" className="h-7 w-auto brightness-0 invert" />
         <p className="text-xs text-muted mt-1">Dashboard</p>
       </div>
 

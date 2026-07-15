@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { ColumnDef } from "./types";
 import {
@@ -23,6 +24,12 @@ type DataTableProps = {
   orderBy?: string;
   ascending?: boolean;
   hasCreatedBy?: boolean;
+  /** Extra fixed `.eq()` filters applied to every query, e.g. scoping rows to a client. */
+  filters?: { column: string; value: string }[];
+  /** Values merged into every new row on create (e.g. cliente_id when scoped to a client). */
+  fixedValues?: Row;
+  /** If set, each row gets a "Ver" link to `${detailBasePath}/${row.id}`. */
+  detailBasePath?: string;
 };
 
 function buildPayload(values: Row, cols: ColumnDef[]) {
@@ -47,6 +54,9 @@ export function DataTable({
   orderBy,
   ascending = false,
   hasCreatedBy = true,
+  filters,
+  fixedValues,
+  detailBasePath,
 }: DataTableProps) {
   const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Row[]>([]);
@@ -72,12 +82,16 @@ export function DataTable({
     setLoading(true);
     setError(null);
     let query = supabase.from(table).select(selectString);
+    for (const f of filters ?? []) query = query.eq(f.column, f.value);
     if (orderBy) query = query.order(orderBy, { ascending });
     const { data, error } = await query;
     if (error) setError(error.message);
     setRows((data as Row[]) ?? []);
     setLoading(false);
-  }, [supabase, table, selectString, orderBy, ascending]);
+    // filters is an array literal from the caller; compare by JSON to avoid
+    // refetch loops from a new-but-equal array reference on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supabase, table, selectString, orderBy, ascending, JSON.stringify(filters)]);
 
   useEffect(() => {
     // loadRows is an async data fetch; its setState calls happen after
@@ -135,7 +149,7 @@ export function DataTable({
 
   async function saveCreate() {
     setError(null);
-    const payload = buildPayload(newValues, editableColumns);
+    const payload = { ...buildPayload(newValues, editableColumns), ...fixedValues };
     if (hasCreatedBy) {
       const {
         data: { user },
@@ -402,12 +416,22 @@ export function DataTable({
                           </button>
                         </>
                       ) : (
-                        <button
-                          onClick={() => startEdit(row)}
-                          className="text-foreground/80 text-sm mr-3"
-                        >
-                          Editar
-                        </button>
+                        <>
+                          {detailBasePath && (
+                            <Link
+                              href={`${detailBasePath}/${row.id}`}
+                              className="text-accent text-sm font-medium mr-3"
+                            >
+                              Ver
+                            </Link>
+                          )}
+                          <button
+                            onClick={() => startEdit(row)}
+                            className="text-foreground/80 text-sm mr-3"
+                          >
+                            Editar
+                          </button>
+                        </>
                       )}
                       <button onClick={() => deleteRow(row.id)} className="text-danger text-sm">
                         Eliminar

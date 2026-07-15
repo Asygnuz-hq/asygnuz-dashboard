@@ -34,3 +34,7 @@ export const ESTADOS_TAREA = [
 export const ESTADOS_COBRO = ["Pendiente", "En disputa", "Pagado"];
 
 export const MONEDAS = ["COP", "USD"];
+
+export const ESTADOS_CLIENTE = ["Activo", "En riesgo", "Pausado", "Terminado"];
+
+export const TIPOS_ACTIVIDAD = ["Reunión", "Entrega", "Llamada", "Tarea", "Nota"];
