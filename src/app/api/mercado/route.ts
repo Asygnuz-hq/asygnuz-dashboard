@@ -20,40 +20,43 @@ async function fetchYahoo(symbol: string): Promise<PriceResult> {
   }
 }
 
-async function fetchCoingecko(ids: string[]): Promise<Record<string, PriceResult>> {
-  const results: Record<string, PriceResult> = {};
-  if (ids.length === 0) return results;
+// CoinGecko and Binance both block or rate-limit requests from US-based
+// cloud/serverless IPs (Vercel's functions run in us-east-1). Coinbase is a
+// US-regulated exchange, so its public API works reliably from there.
+async function fetchCoinbase(symbol: string): Promise<PriceResult> {
   try {
-    const res = await fetch(
-      `https://api.coingecko.com/api/v3/simple/price?ids=${ids.map(encodeURIComponent).join(",")}&vs_currencies=usd&include_24hr_change=true`,
-      { cache: "no-store" }
-    );
+    const res = await fetch(`https://api.exchange.coinbase.com/products/${encodeURIComponent(symbol)}-USD/stats`, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      cache: "no-store",
+    });
     const data = await res.json();
-    for (const id of ids) {
-      const entry = data?.[id];
-      results[id] = entry
-        ? { price: entry.usd ?? null, changePct: typeof entry.usd_24h_change === "number" ? entry.usd_24h_change / 100 : null }
-        : { price: null, changePct: null };
-    }
+    const price = Number(data?.last);
+    const open = Number(data?.open);
+    return {
+      price: Number.isFinite(price) ? price : null,
+      changePct: Number.isFinite(price) && Number.isFinite(open) && open !== 0 ? (price - open) / open : null,
+    };
   } catch {
-    for (const id of ids) results[id] = { price: null, changePct: null };
+    return { price: null, changePct: null };
   }
-  return results;
 }
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const yahooSymbols = (searchParams.get("yahoo") ?? "").split(",").filter(Boolean);
-  const coingeckoIds = (searchParams.get("coingecko") ?? "").split(",").filter(Boolean);
+  const coinbaseSymbols = (searchParams.get("coinbase") ?? "").split(",").filter(Boolean);
 
-  const [yahooResults, coingeckoResults] = await Promise.all([
+  const [yahooResults, coinbaseResults] = await Promise.all([
     Promise.all(yahooSymbols.map((s) => fetchYahoo(s))),
-    fetchCoingecko(coingeckoIds),
+    Promise.all(coinbaseSymbols.map((s) => fetchCoinbase(s))),
   ]);
 
-  const results: Record<string, PriceResult> = { ...coingeckoResults };
+  const results: Record<string, PriceResult> = {};
   yahooSymbols.forEach((symbol, i) => {
     results[symbol] = yahooResults[i];
+  });
+  coinbaseSymbols.forEach((symbol, i) => {
+    results[symbol] = coinbaseResults[i];
   });
 
   return Response.json(results);

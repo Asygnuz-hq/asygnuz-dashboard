@@ -9,16 +9,16 @@ type Preset = {
   simbolo: string;
   nombre: string;
   categoria: "Cripto" | "Acción" | "ETF / Fondo" | "Metal" | "Divisa";
-  fuente: "yahoo" | "coingecko";
+  fuente: "yahoo" | "coinbase";
   query_id: string;
 };
 
 const PRESETS: Preset[] = [
-  { simbolo: "BTC", nombre: "Bitcoin", categoria: "Cripto", fuente: "coingecko", query_id: "bitcoin" },
-  { simbolo: "ETH", nombre: "Ethereum", categoria: "Cripto", fuente: "coingecko", query_id: "ethereum" },
-  { simbolo: "BNB", nombre: "BNB", categoria: "Cripto", fuente: "coingecko", query_id: "binancecoin" },
-  { simbolo: "SOL", nombre: "Solana", categoria: "Cripto", fuente: "coingecko", query_id: "solana" },
-  { simbolo: "XRP", nombre: "XRP", categoria: "Cripto", fuente: "coingecko", query_id: "ripple" },
+  { simbolo: "BTC", nombre: "Bitcoin", categoria: "Cripto", fuente: "coinbase", query_id: "BTC" },
+  { simbolo: "ETH", nombre: "Ethereum", categoria: "Cripto", fuente: "coinbase", query_id: "ETH" },
+  { simbolo: "BNB", nombre: "BNB", categoria: "Cripto", fuente: "coinbase", query_id: "BNB" },
+  { simbolo: "SOL", nombre: "Solana", categoria: "Cripto", fuente: "coinbase", query_id: "SOL" },
+  { simbolo: "XRP", nombre: "XRP", categoria: "Cripto", fuente: "coinbase", query_id: "XRP" },
   { simbolo: "AAPL", nombre: "Apple", categoria: "Acción", fuente: "yahoo", query_id: "AAPL" },
   { simbolo: "MSFT", nombre: "Microsoft", categoria: "Acción", fuente: "yahoo", query_id: "MSFT" },
   { simbolo: "GOOGL", nombre: "Alphabet (Google)", categoria: "Acción", fuente: "yahoo", query_id: "GOOGL" },
@@ -61,10 +61,10 @@ export default function MercadoPage() {
     }
     setLoadingPrices(true);
     const yahoo = items.filter((i) => i.fuente === "yahoo").map((i) => i.query_id);
-    const coingecko = items.filter((i) => i.fuente === "coingecko").map((i) => i.query_id);
+    const coinbase = items.filter((i) => i.fuente === "coinbase").map((i) => i.query_id);
     const params = new URLSearchParams();
     if (yahoo.length) params.set("yahoo", yahoo.join(","));
-    if (coingecko.length) params.set("coingecko", coingecko.join(","));
+    if (coinbase.length) params.set("coinbase", coinbase.join(","));
     try {
       const res = await fetch(`/api/mercado?${params.toString()}`);
       const data = await res.json();
