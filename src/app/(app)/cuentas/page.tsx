@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/data-table/DataTable";
+import { CambioDivisa } from "@/components/CambioDivisa";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP, formatUSD } from "@/lib/format";
 import { TIPOS_CUENTA } from "@/lib/catalogs";
@@ -23,15 +24,17 @@ export default function CuentasPage() {
   const [saldos, setSaldos] = useState<Saldo[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      const supabase = createClient();
-      const { data } = await supabase.from("v_saldo_cuentas").select("*").order("cuenta", { ascending: true });
-      setSaldos((data as Saldo[]) ?? []);
-      setLoading(false);
-    }
-    load();
+  const loadSaldos = useCallback(async () => {
+    const supabase = createClient();
+    const { data } = await supabase.from("v_saldo_cuentas").select("*").order("cuenta", { ascending: true });
+    setSaldos((data as Saldo[]) ?? []);
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadSaldos();
+  }, [loadSaldos]);
 
   const totalCOP = saldos.filter((s) => s.moneda === "COP" && s.activa).reduce((sum, s) => sum + s.saldo_actual, 0);
   const totalUSD = saldos.filter((s) => s.moneda === "USD" && s.activa).reduce((sum, s) => sum + s.saldo_actual, 0);
@@ -50,6 +53,8 @@ export default function CuentasPage() {
           <p className="text-2xl font-bold">{formatUSD(totalUSD)}</p>
         </div>
       </div>
+
+      <CambioDivisa onDone={loadSaldos} />
 
       {!loading && saldos.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border">
@@ -82,7 +87,14 @@ export default function CuentasPage() {
 
       <div>
         <h2 className="text-sm font-semibold mb-3">Administrar cuentas</h2>
-        <DataTable table="cuentas" columns={columns} orderBy="nombre" ascending detailBasePath="/cuentas" />
+        <DataTable
+          table="cuentas"
+          columns={columns}
+          orderBy="nombre"
+          ascending
+          detailBasePath="/cuentas"
+          onChange={loadSaldos}
+        />
       </div>
     </div>
   );

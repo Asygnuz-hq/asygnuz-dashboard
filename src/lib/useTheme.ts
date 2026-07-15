@@ -9,7 +9,6 @@ export function useTheme(): "dark" | "light" {
 
   useEffect(() => {
     const read = () => setTheme(document.documentElement.dataset.theme === "light" ? "light" : "dark");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     read();
     window.addEventListener(THEME_CHANGE_EVENT, read);
     return () => window.removeEventListener(THEME_CHANGE_EVENT, read);

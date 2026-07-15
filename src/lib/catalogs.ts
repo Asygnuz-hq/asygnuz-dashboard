@@ -49,3 +49,9 @@ export const TIPOS_MOVIMIENTO = [
   "Transferencia Entrada",
   "Transferencia Salida",
 ];
+
+export const PLATAFORMAS_MARKETING = ["Meta Ads", "Google Ads", "TikTok Ads", "LinkedIn Ads", "Otro"];
+
+export const TIPOS_RESULTADO_MARKETING = ["Leads", "Ventas", "Ingresos", "Otro"];
+
+export const ESTADOS_CAMPANA = ["Activa", "Pausada", "Finalizada"];

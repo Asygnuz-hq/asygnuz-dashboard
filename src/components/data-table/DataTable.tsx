@@ -30,6 +30,8 @@ type DataTableProps = {
   fixedValues?: Row;
   /** If set, each row gets a "Ver" link to `${detailBasePath}/${row.id}`. */
   detailBasePath?: string;
+  /** Called after any successful create/update/delete, e.g. to refresh KPIs elsewhere on the page. */
+  onChange?: () => void;
 };
 
 function buildPayload(values: Row, cols: ColumnDef[]) {
@@ -57,6 +59,7 @@ export function DataTable({
   filters,
   fixedValues,
   detailBasePath,
+  onChange,
 }: DataTableProps) {
   const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Row[]>([]);
@@ -166,6 +169,7 @@ export function DataTable({
     setCreating(false);
     setNewValues({});
     loadRows();
+    onChange?.();
   }
 
   function startEdit(row: Row) {
@@ -188,6 +192,7 @@ export function DataTable({
     }
     setEditingId(null);
     loadRows();
+    onChange?.();
   }
 
   async function deleteRow(id: string) {
@@ -199,6 +204,7 @@ export function DataTable({
       return;
     }
     loadRows();
+    onChange?.();
   }
 
   function renderReadValue(col: ColumnDef, row: Row) {

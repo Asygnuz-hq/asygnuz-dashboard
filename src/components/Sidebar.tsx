@@ -24,6 +24,7 @@ const sections: NavSection[] = [
       { href: "/finanzas/gastos-variables", label: "Gastos Variables" },
       { href: "/finanzas/historico", label: "Histórico" },
       { href: "/finanzas/inversiones", label: "Inversiones" },
+      { href: "/finanzas/mercado", label: "Watchlist de Mercado" },
       { href: "/finanzas/fundacion", label: "Fundación" },
     ],
   },
@@ -34,6 +35,13 @@ const sections: NavSection[] = [
       { href: "/disenadores/resumen", label: "Resumen por Diseñador" },
       { href: "/disenadores/cobros-clientes", label: "Cobros a Clientes" },
       { href: "/disenadores/resumen-cobros", label: "Resumen de Cobros" },
+    ],
+  },
+  {
+    title: "Equipo",
+    items: [
+      { href: "/equipo", label: "Equipo / RRHH" },
+      { href: "/marketing", label: "Marketing" },
     ],
   },
   {
