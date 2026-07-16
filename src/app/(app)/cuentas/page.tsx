@@ -19,9 +19,19 @@ const columns: ColumnDef[] = [
 ];
 
 type Saldo = { cuenta_id: string; cuenta: string; moneda: string; tipo: string; activa: boolean; saldo_actual: number };
+type MovimientoFx = { tipo: string; monto: number; tasa_cambio: number | null };
+
+type FxResumen = {
+  usdComprado: number;
+  tasaCompraProm: number | null;
+  usdVendido: number;
+  tasaVentaProm: number | null;
+  gananciaRealizada: number | null;
+};
 
 export default function CuentasPage() {
   const [saldos, setSaldos] = useState<Saldo[]>([]);
+  const [fx, setFx] = useState<FxResumen | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadSaldos = useCallback(async () => {
@@ -31,13 +41,47 @@ export default function CuentasPage() {
     setLoading(false);
   }, []);
 
+  const loadFx = useCallback(async () => {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("movimientos_cuenta")
+      .select("tipo, monto, tasa_cambio")
+      .in("tipo", ["Compra USD", "Venta USD"])
+      .not("tasa_cambio", "is", null);
+
+    const movimientos = (data as MovimientoFx[]) ?? [];
+    const compras = movimientos.filter((m) => m.tipo === "Compra USD");
+    const ventas = movimientos.filter((m) => m.tipo === "Venta USD");
+
+    const usdComprado = compras.reduce((sum, m) => sum + m.monto, 0);
+    const usdVendido = ventas.reduce((sum, m) => sum + m.monto, 0);
+    const tasaCompraProm =
+      usdComprado > 0 ? compras.reduce((sum, m) => sum + m.monto * (m.tasa_cambio ?? 0), 0) / usdComprado : null;
+    const tasaVentaProm =
+      usdVendido > 0 ? ventas.reduce((sum, m) => sum + m.monto * (m.tasa_cambio ?? 0), 0) / usdVendido : null;
+
+    const volumenRealizado = Math.min(usdComprado, usdVendido);
+    const gananciaRealizada =
+      volumenRealizado > 0 && tasaCompraProm !== null && tasaVentaProm !== null
+        ? volumenRealizado * (tasaVentaProm - tasaCompraProm)
+        : null;
+
+    setFx({ usdComprado, tasaCompraProm, usdVendido, tasaVentaProm, gananciaRealizada });
+  }, []);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadSaldos();
-  }, [loadSaldos]);
+    loadFx();
+  }, [loadSaldos, loadFx]);
 
   const totalCOP = saldos.filter((s) => s.moneda === "COP" && s.activa).reduce((sum, s) => sum + s.saldo_actual, 0);
   const totalUSD = saldos.filter((s) => s.moneda === "USD" && s.activa).reduce((sum, s) => sum + s.saldo_actual, 0);
+
+  function refreshAll() {
+    loadSaldos();
+    loadFx();
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -54,7 +98,35 @@ export default function CuentasPage() {
         </div>
       </div>
 
-      <CambioDivisa onDone={loadSaldos} />
+      <CambioDivisa onDone={refreshAll} />
+
+      {fx && (fx.usdComprado > 0 || fx.usdVendido > 0) && (
+        <div className="rounded-lg border border-border bg-surface p-4 max-w-2xl">
+          <p className="text-sm font-medium mb-3">Rentabilidad de cambio de divisa</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <p className="text-xs text-muted">USD comprados</p>
+              <p className="font-medium">{formatUSD(fx.usdComprado)}</p>
+              {fx.tasaCompraProm !== null && (
+                <p className="text-xs text-muted">a {fx.tasaCompraProm.toLocaleString("es-CO", { maximumFractionDigits: 0 })} prom.</p>
+              )}
+            </div>
+            <div>
+              <p className="text-xs text-muted">USD vendidos</p>
+              <p className="font-medium">{formatUSD(fx.usdVendido)}</p>
+              {fx.tasaVentaProm !== null && (
+                <p className="text-xs text-muted">a {fx.tasaVentaProm.toLocaleString("es-CO", { maximumFractionDigits: 0 })} prom.</p>
+              )}
+            </div>
+            <div className="col-span-2">
+              <p className="text-xs text-muted">Ganancia realizada (sobre lo ya vendido)</p>
+              <p className={`font-bold ${fx.gananciaRealizada === null ? "" : fx.gananciaRealizada >= 0 ? "text-accent-bright" : "text-danger"}`}>
+                {fx.gananciaRealizada !== null ? formatCOP(fx.gananciaRealizada) : "Aún no has vendido USD"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!loading && saldos.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border">
@@ -93,7 +165,7 @@ export default function CuentasPage() {
           orderBy="nombre"
           ascending
           detailBasePath="/cuentas"
-          onChange={loadSaldos}
+          onChange={refreshAll}
         />
       </div>
     </div>
