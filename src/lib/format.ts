@@ -16,6 +16,15 @@ export function formatUSD(value: number | null | undefined) {
   }).format(value);
 }
 
+export function formatEUR(value: number | null | undefined) {
+  if (value === null || value === undefined) return "-";
+  return new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
 export function formatPercent(value: number | null | undefined) {
   if (value === null || value === undefined) return "-";
   return new Intl.NumberFormat("es-CO", {

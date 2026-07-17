@@ -8,10 +8,11 @@ type Cuenta = { id: string; nombre: string; moneda: string };
 export function CambioDivisa({ onDone }: { onDone: () => void }) {
   const [open, setOpen] = useState(false);
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
+  const [monedaExtranjera, setMonedaExtranjera] = useState<"USD" | "EUR">("USD");
   const [operacion, setOperacion] = useState<"Comprar" | "Vender">("Comprar");
   const [origenId, setOrigenId] = useState("");
   const [destinoId, setDestinoId] = useState("");
-  const [montoUsd, setMontoUsd] = useState("");
+  const [montoDivisa, setMontoDivisa] = useState("");
   const [tasa, setTasa] = useState("");
   const [fecha, setFecha] = useState(() => new Date().toISOString().slice(0, 10));
   const [descripcion, setDescripcion] = useState("");
@@ -28,8 +29,8 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
     load();
   }, [open]);
 
-  const monedaOrigen = operacion === "Comprar" ? "COP" : "USD";
-  const monedaDestino = operacion === "Comprar" ? "USD" : "COP";
+  const monedaOrigen = operacion === "Comprar" ? "COP" : monedaExtranjera;
+  const monedaDestino = operacion === "Comprar" ? monedaExtranjera : "COP";
   const cuentasOrigen = cuentas.filter((c) => c.moneda === monedaOrigen);
   const cuentasDestino = cuentas.filter((c) => c.moneda === monedaDestino);
 
@@ -37,13 +38,13 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
     e.preventDefault();
     setError(null);
 
-    const usd = Number(montoUsd);
+    const divisa = Number(montoDivisa);
     const tasaNum = Number(tasa);
-    if (!origenId || !destinoId || !usd || !tasaNum) {
-      setError("Completa cuenta origen, destino, monto USD y tasa.");
+    if (!origenId || !destinoId || !divisa || !tasaNum) {
+      setError(`Completa cuenta origen, destino, monto ${monedaExtranjera} y tasa.`);
       return;
     }
-    const montoCop = Math.round(usd * tasaNum);
+    const montoCop = Math.round(divisa * tasaNum);
     const nota = descripcion || `Cambio de divisa ${fecha}`;
 
     setSaving(true);
@@ -56,10 +57,10 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
       operacion === "Comprar"
         ? [
             { cuenta_id: origenId, tipo: "Gasto", monto: montoCop, tasa_cambio: tasaNum },
-            { cuenta_id: destinoId, tipo: "Compra USD", monto: usd, tasa_cambio: tasaNum },
+            { cuenta_id: destinoId, tipo: `Compra ${monedaExtranjera}`, monto: divisa, tasa_cambio: tasaNum },
           ]
         : [
-            { cuenta_id: origenId, tipo: "Venta USD", monto: usd, tasa_cambio: tasaNum },
+            { cuenta_id: origenId, tipo: `Venta ${monedaExtranjera}`, monto: divisa, tasa_cambio: tasaNum },
             { cuenta_id: destinoId, tipo: "Ingreso", monto: montoCop, tasa_cambio: tasaNum },
           ];
 
@@ -78,7 +79,7 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
       return;
     }
 
-    setMontoUsd("");
+    setMontoDivisa("");
     setTasa("");
     setDescripcion("");
     setOpen(false);
@@ -91,7 +92,7 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
         onClick={() => setOpen(true)}
         className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5"
       >
-        Cambio de Divisa (Comprar/Vender USD)
+        Cambio de Divisa (Comprar/Vender USD o EUR)
       </button>
     );
   }
@@ -107,10 +108,18 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
       </p>
 
       <label className="flex flex-col gap-1 text-sm">
+        Moneda extranjera
+        <select value={monedaExtranjera} onChange={(e) => setMonedaExtranjera(e.target.value as "USD" | "EUR")}>
+          <option value="USD">Dólares (USD)</option>
+          <option value="EUR">Euros (EUR)</option>
+        </select>
+      </label>
+
+      <label className="flex flex-col gap-1 text-sm">
         Operación
         <select value={operacion} onChange={(e) => setOperacion(e.target.value as "Comprar" | "Vender")}>
-          <option value="Comprar">Comprar USD (sale COP, entra USD)</option>
-          <option value="Vender">Vender USD (sale USD, entra COP)</option>
+          <option value="Comprar">Comprar {monedaExtranjera} (sale COP, entra {monedaExtranjera})</option>
+          <option value="Vender">Vender {monedaExtranjera} (sale {monedaExtranjera}, entra COP)</option>
         </select>
       </label>
 
@@ -143,17 +152,17 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Monto en USD
-        <input type="number" step="any" value={montoUsd} onChange={(e) => setMontoUsd(e.target.value)} required />
+        Monto en {monedaExtranjera}
+        <input type="number" step="any" value={montoDivisa} onChange={(e) => setMontoDivisa(e.target.value)} required />
       </label>
 
       <label className="flex flex-col gap-1 text-sm">
-        Tasa de cambio (COP por USD)
+        Tasa de cambio (COP por {monedaExtranjera})
         <input type="number" step="any" value={tasa} onChange={(e) => setTasa(e.target.value)} required />
       </label>
 
-      {montoUsd && tasa && (
-        <p className="text-xs text-muted">Equivale a {formatPreview(Number(montoUsd) * Number(tasa))} COP</p>
+      {montoDivisa && tasa && (
+        <p className="text-xs text-muted">Equivale a {formatPreview(Number(montoDivisa) * Number(tasa))} COP</p>
       )}
 
       <label className="flex flex-col gap-1 text-sm">

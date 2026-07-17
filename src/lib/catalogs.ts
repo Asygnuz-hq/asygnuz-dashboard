@@ -41,11 +41,16 @@ export const TIPOS_ACTIVIDAD = ["Reunión", "Entrega", "Llamada", "Tarea", "Nota
 
 export const TIPOS_CUENTA = ["Banco", "Efectivo", "Billetera digital", "Otro"];
 
+export const MONEDAS_CUENTA = ["COP", "USD", "EUR"];
+
 export const TIPOS_MOVIMIENTO = [
   "Ingreso",
   "Gasto",
   "Compra USD",
   "Venta USD",
+  "Compra EUR",
+  "Venta EUR",
+  "Rendimiento",
   "Transferencia Entrada",
   "Transferencia Salida",
 ];
