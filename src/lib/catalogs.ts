@@ -55,6 +55,17 @@ export const TIPOS_MOVIMIENTO = [
   "Transferencia Salida",
 ];
 
+// Compra/Venta USD/EUR quedan fuera: esos tipos afectan DOS cuentas a la vez
+// y solo deben crearse desde el botón "Cambio de Divisa", nunca como una fila
+// manual dentro de una sola cuenta (eso deja el otro lado sin registrar).
+export const TIPOS_MOVIMIENTO_MANUAL = [
+  "Ingreso",
+  "Gasto",
+  "Rendimiento",
+  "Transferencia Entrada",
+  "Transferencia Salida",
+];
+
 export const PLATAFORMAS_MARKETING = ["Meta Ads", "Google Ads", "TikTok Ads", "LinkedIn Ads", "Otro"];
 
 export const TIPOS_RESULTADO_MARKETING = ["Leads", "Ventas", "Ingresos", "Otro"];

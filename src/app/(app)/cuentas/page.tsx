@@ -40,7 +40,23 @@ export default function CuentasPage() {
   const [saldos, setSaldos] = useState<Saldo[]>([]);
   const [fx, setFx] = useState<FxResumen[]>([]);
   const [rendimientos, setRendimientos] = useState<Record<string, number>>({});
+  const [tasasActuales, setTasasActuales] = useState<Record<string, number | null>>({});
   const [loading, setLoading] = useState(true);
+
+  const loadTasasActuales = useCallback(async () => {
+    try {
+      const res = await fetch("https://open.er-api.com/v6/latest/USD");
+      const data = await res.json();
+      const copPorUsd = data?.rates?.COP ?? null;
+      const eurPorUsd = data?.rates?.EUR ?? null;
+      setTasasActuales({
+        USD: copPorUsd,
+        EUR: copPorUsd && eurPorUsd ? copPorUsd / eurPorUsd : null,
+      });
+    } catch {
+      setTasasActuales({});
+    }
+  }, []);
 
   const loadSaldos = useCallback(async () => {
     const supabase = createClient();
@@ -99,7 +115,8 @@ export default function CuentasPage() {
     loadSaldos();
     loadFx();
     loadRendimientos();
-  }, [loadSaldos, loadFx, loadRendimientos]);
+    loadTasasActuales();
+  }, [loadSaldos, loadFx, loadRendimientos, loadTasasActuales]);
 
   function refreshAll() {
     loadSaldos();
@@ -170,6 +187,40 @@ export default function CuentasPage() {
                   </p>
                 </div>
               </div>
+
+              {(() => {
+                const saldoActual = saldos
+                  .filter((s) => s.moneda === r.moneda && s.activa)
+                  .reduce((sum, s) => sum + s.saldo_actual, 0);
+                const tasaActual = tasasActuales[r.moneda] ?? null;
+                const gananciaNoRealizada =
+                  saldoActual > 0 && r.tasaCompraProm !== null && tasaActual !== null
+                    ? saldoActual * (tasaActual - r.tasaCompraProm)
+                    : null;
+                if (saldoActual <= 0 || r.tasaCompraProm === null) return null;
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4 pt-4 border-t border-border">
+                    <div>
+                      <p className="text-xs text-muted">Tienes ahora en {r.moneda}</p>
+                      <p className="font-medium">{FORMATTERS[r.moneda](saldoActual)}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted">Tasa actual de mercado</p>
+                      <p className="font-medium">
+                        {tasaActual !== null ? tasaActual.toLocaleString("es-CO", { maximumFractionDigits: 0 }) : "No disponible"}
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-xs text-muted">
+                        Ganancia no realizada (si vendieras hoy, a {r.tasaCompraProm.toLocaleString("es-CO", { maximumFractionDigits: 0 })} de compra prom.)
+                      </p>
+                      <p className={`font-bold ${gananciaNoRealizada === null ? "" : gananciaNoRealizada >= 0 ? "text-accent-bright" : "text-danger"}`}>
+                        {gananciaNoRealizada !== null ? formatCOP(gananciaNoRealizada) : "No disponible"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ))}
         </div>

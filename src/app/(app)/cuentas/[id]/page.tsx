@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
@@ -10,7 +11,7 @@ import { DataTable } from "@/components/data-table/DataTable";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP, formatUSD, formatEUR, formatMonth } from "@/lib/format";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
-import { TIPOS_MOVIMIENTO } from "@/lib/catalogs";
+import { TIPOS_MOVIMIENTO_MANUAL } from "@/lib/catalogs";
 
 type Cuenta = { id: string; nombre: string; moneda: string; tipo: string; activa: boolean };
 type Saldo = { saldo_actual: number };
@@ -24,7 +25,7 @@ const FORMATTERS: Record<string, (v: number) => string> = {
 
 const movimientoColumns: ColumnDef[] = [
   { key: "fecha", label: "Fecha", type: "date", required: true },
-  { key: "tipo", label: "Tipo", type: "select", options: TIPOS_MOVIMIENTO, required: true, defaultValue: "Ingreso" },
+  { key: "tipo", label: "Tipo", type: "select", options: TIPOS_MOVIMIENTO_MANUAL, required: true, defaultValue: "Ingreso" },
   { key: "monto", label: "Monto", type: "number", required: true },
   { key: "tasa_cambio", label: "Tasa de Cambio (si aplica)", type: "number" },
   { key: "descripcion", label: "Descripción", type: "text" },
@@ -115,8 +116,12 @@ export default function CuentaDetailPage() {
       <div>
         <h2 className="text-sm font-semibold mb-3">Movimientos</h2>
         <p className="text-xs text-muted mb-3">
-          En Compra/Venta USD o EUR registra la tasa de cambio para llevar el histórico de a cómo compraste o vendiste.
-          Usa &quot;Rendimiento&quot; para los intereses que te paga la cuenta.
+          ¿Vas a comprar o vender {cuenta.moneda === "COP" ? "USD/EUR" : cuenta.moneda}? Usa el botón{" "}
+          <Link href="/cuentas" className="text-accent underline">
+            Cambio de Divisa
+          </Link>{" "}
+          en la página de Cuentas — ahí sí se descuenta de una cuenta y se suma a la otra automáticamente. Una fila
+          aquí solo afecta esta cuenta. Usa &quot;Rendimiento&quot; para los intereses que te paga la cuenta.
         </p>
         <DataTable
           table="movimientos_cuenta"
