@@ -41,8 +41,18 @@ export default function ControlMensualPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <PageHeader title="Diseñadores" subtitle="Agrega o desactiva diseñadores del equipo." />
-        <DataTable table="disenadores" columns={disenadoresColumns} orderBy="nombre" ascending hasCreatedBy={false} />
+        <PageHeader
+          title="Diseñadores"
+          subtitle="Agrega o desactiva diseñadores del equipo. Haz clic en 'Ver' para trabajar solo con uno."
+        />
+        <DataTable
+          table="disenadores"
+          columns={disenadoresColumns}
+          orderBy="nombre"
+          ascending
+          hasCreatedBy={false}
+          detailBasePath="/disenadores"
+        />
       </div>
 
       <div>
