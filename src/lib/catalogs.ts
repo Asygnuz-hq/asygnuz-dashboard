@@ -35,6 +35,10 @@ export const ESTADOS_COBRO = ["Pendiente", "En disputa", "Pagado"];
 
 export const MONEDAS = ["COP", "USD"];
 
+// Ingresos sí admite EUR (clientes que pagan en euros); Gastos Fijos/Variables
+// se quedan en COP/USD porque su tabla no tiene esa columna todavía.
+export const MONEDAS_INGRESO = ["COP", "USD", "EUR"];
+
 export const ESTADOS_CLIENTE = ["Activo", "En riesgo", "Pausado", "Terminado"];
 
 export const TIPOS_ACTIVIDAD = ["Reunión", "Entrega", "Llamada", "Tarea", "Nota"];

@@ -20,8 +20,14 @@ import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Semaforo, calcularSemaforo } from "@/components/Semaforo";
-import { formatCOP, formatMonth, formatPercent } from "@/lib/format";
+import { formatCOP, formatUSD, formatEUR, formatMonth, formatPercent } from "@/lib/format";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
+
+const FORMATTERS_MONEDA: Record<string, (v: number) => string> = {
+  COP: formatCOP,
+  USD: formatUSD,
+  EUR: formatEUR,
+};
 
 type HistoricoRow = {
   mes: string;
@@ -53,6 +59,7 @@ export default function DashboardPage() {
   const [historico, setHistorico] = useState<HistoricoRow[]>([]);
   const [gastosPorCategoria, setGastosPorCategoria] = useState<{ categoria: string; monto_cop: number }[]>([]);
   const [cajaTotalCop, setCajaTotalCop] = useState(0);
+  const [cajaPorMoneda, setCajaPorMoneda] = useState<Record<string, number>>({});
   const [topCliente, setTopCliente] = useState<{ nombre: string; pct: number } | null>(null);
   const [carteraVencida, setCarteraVencida] = useState<IngresoVencido[]>([]);
   const [loading, setLoading] = useState(true);
@@ -89,10 +96,33 @@ export default function DashboardPage() {
       setGastosFijosTotal((fijos ?? []).reduce((sum, g) => sum + (g.monto_cop ?? 0), 0));
       setIngresosPendientes((pendientes ?? []).reduce((sum, i) => sum + (i.monto_cop ?? 0), 0));
 
-      const trmActual = config?.trm_actual ?? 0;
-      const caja = (saldos ?? [])
+      const trmOficial = config?.trm_actual ?? 0;
+
+      const porMoneda: Record<string, number> = { COP: 0, USD: 0, EUR: 0 };
+      (saldos ?? [])
         .filter((s) => s.activa)
-        .reduce((sum, s) => sum + (s.moneda === "USD" ? s.saldo_actual * trmActual : s.saldo_actual), 0);
+        .forEach((s) => {
+          porMoneda[s.moneda] = (porMoneda[s.moneda] ?? 0) + s.saldo_actual;
+        });
+      setCajaPorMoneda(porMoneda);
+
+      // Para el total consolidado en COP: USD usa la TRM oficial (config.trm_actual,
+      // la actualiza el cron diario). EUR no tiene fuente oficial integrada todavía,
+      // así que se aproxima con la tasa de mercado en vivo — solo para este total.
+      let eurCop = 0;
+      if (porMoneda.EUR > 0) {
+        try {
+          const res = await fetch("https://open.er-api.com/v6/latest/USD");
+          const data = await res.json();
+          const copPorUsd = data?.rates?.COP;
+          const eurPorUsd = data?.rates?.EUR;
+          eurCop = copPorUsd && eurPorUsd ? copPorUsd / eurPorUsd : 0;
+        } catch {
+          eurCop = 0;
+        }
+      }
+
+      const caja = porMoneda.COP + porMoneda.USD * trmOficial + porMoneda.EUR * eurCop;
       setCajaTotalCop(caja);
 
       const hoy = new Date().toISOString().slice(0, 10);
@@ -247,6 +277,18 @@ export default function DashboardPage() {
 
       <div>
         <p className="text-sm font-medium mb-3">Salud del negocio</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          {["COP", "USD", "EUR"].map((moneda) => (
+            <KpiCard
+              key={moneda}
+              label={`Caja en ${moneda}`}
+              value={FORMATTERS_MONEDA[moneda](cajaPorMoneda[moneda] ?? 0)}
+              hint={moneda === "COP" ? "Lo que puedes gastar hoy sin vender divisas" : undefined}
+            />
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <KpiCard
             label="Caja total (COP)"

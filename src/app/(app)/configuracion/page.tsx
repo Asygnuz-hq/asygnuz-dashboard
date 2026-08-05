@@ -18,17 +18,17 @@ export default function ConfiguracionPage() {
     setFetchingTrm(true);
     setMessage(null);
     try {
-      const res = await fetch("https://open.er-api.com/v6/latest/USD");
+      const res = await fetch(`/api/trm?fecha=${new Date().toISOString().slice(0, 10)}`);
       const data = await res.json();
-      const cop = data?.rates?.COP;
-      if (cop) {
-        setTrm(String(Math.round(cop)));
-        setMessage(`TRM traída de internet: ${Math.round(cop).toLocaleString("es-CO")}. Revisa y dale Guardar.`);
+      const valor = data?.valor;
+      if (valor) {
+        setTrm(String(Math.round(valor)));
+        setMessage(`TRM oficial (Banco de la República) de hoy: ${Math.round(valor).toLocaleString("es-CO")}. Revisa y dale Guardar.`);
       } else {
-        setMessage("No se pudo leer la tasa. Intenta de nuevo.");
+        setMessage("No se pudo leer la TRM oficial. Intenta de nuevo.");
       }
     } catch {
-      setMessage("No se pudo conectar al servicio de tasas. Intenta de nuevo.");
+      setMessage("No se pudo conectar al servicio de TRM. Intenta de nuevo.");
     }
     setFetchingTrm(false);
   }
@@ -72,7 +72,7 @@ export default function ConfiguracionPage() {
     <div>
       <PageHeader
         title="Configuración"
-        subtitle="TRM del día, mes activo y metas mensuales del dashboard financiero."
+        subtitle="TRM oficial (se actualiza sola cada día), mes activo y metas mensuales del dashboard financiero."
       />
       <form onSubmit={handleSave} className="flex flex-col gap-4 max-w-xs">
         <label className="flex flex-col gap-1 text-sm">

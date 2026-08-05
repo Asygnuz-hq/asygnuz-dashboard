@@ -1,15 +1,19 @@
+"use client";
+
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/data-table/DataTable";
+import { MarcarCobrado, type Ingreso } from "@/components/MarcarCobrado";
 import type { ColumnDef } from "@/components/data-table/types";
-import { MONEDAS } from "@/lib/catalogs";
+import { MONEDAS_INGRESO } from "@/lib/catalogs";
 
 const columns: ColumnDef[] = [
   { key: "cliente", label: "Cliente", type: "text", required: true },
   { key: "concepto", label: "Concepto", type: "text" },
   { key: "mes", label: "Mes", type: "month", required: true },
-  { key: "moneda", label: "Moneda", type: "select", options: MONEDAS, required: true, defaultValue: "COP" },
+  { key: "moneda", label: "Moneda", type: "select", options: MONEDAS_INGRESO, required: true, defaultValue: "COP" },
   { key: "monto_original", label: "Monto", type: "number", required: true },
   { key: "trm_aplicada", label: "TRM aplicada", type: "number" },
+  { key: "trm_estimada_hoy", label: "TRM estimada hoy", type: "readonly-number" },
   { key: "monto_cop", label: "Equiv. COP", type: "readonly-cop" },
   { key: "monto_usd", label: "Equiv. USD", type: "readonly-usd" },
   { key: "estado", label: "Estado", type: "select", options: ["Cobrado", "Pendiente"], defaultValue: "Pendiente" },
@@ -22,8 +26,18 @@ const columns: ColumnDef[] = [
 export default function IngresosPage() {
   return (
     <div>
-      <PageHeader title="Ingresos por cliente" subtitle="Registra cada ingreso. La conversión COP/USD es automática con la TRM que apliques a esa fila." />
-      <DataTable table="ingresos" columns={columns} monthFilterKey="mes" orderBy="mes" ascending={false} />
+      <PageHeader
+        title="Ingresos por cliente"
+        subtitle="Mientras está Pendiente, la TRM aplicada es solo tu estimado y 'TRM estimada hoy' se actualiza sola cada día. Al usar 'Marcar cobrado' se trae la TRM oficial del día real de pago, sin que tengas que buscarla."
+      />
+      <DataTable
+        table="ingresos"
+        columns={columns}
+        monthFilterKey="mes"
+        orderBy="mes"
+        ascending={false}
+        rowActions={(row, reload) => <MarcarCobrado key={row.id} ingreso={row as Ingreso} onDone={reload} />}
+      />
     </div>
   );
 }

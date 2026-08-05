@@ -25,7 +25,8 @@ const FORMATTERS: Record<string, (v: number) => string> = {
 };
 
 type Saldo = { cuenta_id: string; cuenta: string; moneda: string; tipo: string; activa: boolean; saldo_actual: number };
-type MovimientoFx = { tipo: string; monto: number; tasa_cambio: number | null };
+
+type Bolsillo = { nombre: string; saldo: number; tasaReferencia: number | null };
 
 type FxResumen = {
   moneda: string;
@@ -34,6 +35,8 @@ type FxResumen = {
   vendido: number;
   tasaVentaProm: number | null;
   gananciaRealizada: number | null;
+  bolsillos: Bolsillo[];
+  saldoSinClasificar: number;
 };
 
 export default function CuentasPage() {
@@ -67,30 +70,71 @@ export default function CuentasPage() {
 
   const loadFx = useCallback(async () => {
     const supabase = createClient();
-    const { data } = await supabase
-      .from("movimientos_cuenta")
-      .select("tipo, monto, tasa_cambio")
-      .in("tipo", ["Compra USD", "Venta USD", "Compra EUR", "Venta EUR"])
-      .not("tasa_cambio", "is", null);
+    const [{ data }, { data: saldosData }] = await Promise.all([
+      supabase
+        .from("movimientos_cuenta")
+        .select("tipo, monto, tasa_cambio, cuentas(moneda)")
+        .in("tipo", ["Compra USD", "Venta USD", "Compra EUR", "Venta EUR", "Ingreso", "Rendimiento"]),
+      supabase.from("v_saldo_cuentas").select("moneda, activa, saldo_actual"),
+    ]);
 
-    const movimientos = (data as MovimientoFx[]) ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const movimientos = (data as any[]) ?? [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const saldosPorCuenta = (saldosData as any[]) ?? [];
+
     const resumen: FxResumen[] = ["USD", "EUR"].map((moneda) => {
-      const compras = movimientos.filter((m) => m.tipo === `Compra ${moneda}`);
-      const ventas = movimientos.filter((m) => m.tipo === `Venta ${moneda}`);
+      const compras = movimientos.filter((m) => m.tipo === `Compra ${moneda}` && m.tasa_cambio !== null);
+      const ventas = movimientos.filter((m) => m.tipo === `Venta ${moneda}` && m.tasa_cambio !== null);
+      // Pagos de clientes que llegaron directo a una cuenta en esta moneda,
+      // con la TRM oficial del día de pago ya registrada (flujo "Marcar cobrado").
+      const pagosCliente = movimientos.filter(
+        (m) => m.tipo === "Ingreso" && m.cuentas?.moneda === moneda && m.tasa_cambio !== null
+      );
+      const rendimientos = movimientos.filter((m) => m.tipo === "Rendimiento" && m.cuentas?.moneda === moneda);
+
       const comprado = compras.reduce((sum, m) => sum + m.monto, 0);
       const vendido = ventas.reduce((sum, m) => sum + m.monto, 0);
       const tasaCompraProm =
-        comprado > 0 ? compras.reduce((sum, m) => sum + m.monto * (m.tasa_cambio ?? 0), 0) / comprado : null;
+        comprado > 0 ? compras.reduce((sum, m) => sum + m.monto * m.tasa_cambio, 0) / comprado : null;
       const tasaVentaProm =
-        vendido > 0 ? ventas.reduce((sum, m) => sum + m.monto * (m.tasa_cambio ?? 0), 0) / vendido : null;
+        vendido > 0 ? ventas.reduce((sum, m) => sum + m.monto * m.tasa_cambio, 0) / vendido : null;
       const volumenRealizado = Math.min(comprado, vendido);
       const gananciaRealizada =
         volumenRealizado > 0 && tasaCompraProm !== null && tasaVentaProm !== null
           ? volumenRealizado * (tasaVentaProm - tasaCompraProm)
           : null;
-      return { moneda, comprado, tasaCompraProm, vendido, tasaVentaProm, gananciaRealizada };
+
+      const saldoComprados = Math.max(comprado - vendido, 0);
+      const totalClientes = pagosCliente.reduce((sum, m) => sum + m.monto, 0);
+      const tasaClientesProm =
+        totalClientes > 0 ? pagosCliente.reduce((sum, m) => sum + m.monto * m.tasa_cambio, 0) / totalClientes : null;
+      const totalRendimientos = rendimientos.reduce((sum, m) => sum + m.monto, 0);
+
+      const saldoCuentaTotal = saldosPorCuenta
+        .filter((s) => s.moneda === moneda && s.activa)
+        .reduce((sum, s) => sum + s.saldo_actual, 0);
+      const saldoClasificado = saldoComprados + totalClientes + totalRendimientos;
+      const saldoSinClasificar = Math.max(saldoCuentaTotal - saldoClasificado, 0);
+
+      const bolsillos: Bolsillo[] = [
+        { nombre: "Comprados con pesos", saldo: saldoComprados, tasaReferencia: tasaCompraProm },
+        { nombre: "Pagos de clientes", saldo: totalClientes, tasaReferencia: tasaClientesProm },
+        { nombre: "Rendimientos del banco", saldo: totalRendimientos, tasaReferencia: 0 },
+      ].filter((b) => b.saldo > 0);
+
+      return {
+        moneda,
+        comprado,
+        tasaCompraProm,
+        vendido,
+        tasaVentaProm,
+        gananciaRealizada,
+        bolsillos,
+        saldoSinClasificar,
+      };
     });
-    setFx(resumen.filter((r) => r.comprado > 0 || r.vendido > 0));
+    setFx(resumen.filter((r) => r.comprado > 0 || r.vendido > 0 || r.bolsillos.length > 0));
   }, []);
 
   const loadRendimientos = useCallback(async () => {
@@ -188,39 +232,56 @@ export default function CuentasPage() {
                 </div>
               </div>
 
-              {(() => {
-                const saldoActual = saldos
-                  .filter((s) => s.moneda === r.moneda && s.activa)
-                  .reduce((sum, s) => sum + s.saldo_actual, 0);
-                const tasaActual = tasasActuales[r.moneda] ?? null;
-                const gananciaNoRealizada =
-                  saldoActual > 0 && r.tasaCompraProm !== null && tasaActual !== null
-                    ? saldoActual * (tasaActual - r.tasaCompraProm)
-                    : null;
-                if (saldoActual <= 0 || r.tasaCompraProm === null) return null;
-                return (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4 pt-4 border-t border-border">
-                    <div>
-                      <p className="text-xs text-muted">Tienes ahora en {r.moneda}</p>
-                      <p className="font-medium">{FORMATTERS[r.moneda](saldoActual)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted">Tasa actual de mercado</p>
-                      <p className="font-medium">
-                        {tasaActual !== null ? tasaActual.toLocaleString("es-CO", { maximumFractionDigits: 0 }) : "No disponible"}
+              {r.bolsillos.length > 0 &&
+                (() => {
+                  const tasaActual = tasasActuales[r.moneda] ?? null;
+                  const gananciaTotal =
+                    tasaActual !== null
+                      ? r.bolsillos.reduce((sum, b) => sum + b.saldo * (tasaActual - (b.tasaReferencia ?? 0)), 0)
+                      : null;
+                  return (
+                    <div className="mt-4 pt-4 border-t border-border">
+                      <div className="flex items-baseline justify-between mb-3">
+                        <p className="text-xs text-muted">
+                          Si vendieras hoy tus {r.moneda}, a tasa de mercado en vivo de{" "}
+                          {tasaActual !== null ? tasaActual.toLocaleString("es-CO", { maximumFractionDigits: 0 }) : "no disponible"}
+                        </p>
+                        <p className={`font-bold ${gananciaTotal === null ? "" : gananciaTotal >= 0 ? "text-accent-bright" : "text-danger"}`}>
+                          {gananciaTotal !== null ? formatCOP(gananciaTotal) : "No disponible"}
+                        </p>
+                      </div>
+                      <ul className="flex flex-col gap-2">
+                        {r.bolsillos.map((b) => {
+                          const ganancia =
+                            tasaActual !== null ? b.saldo * (tasaActual - (b.tasaReferencia ?? 0)) : null;
+                          const positivo = ganancia !== null && ganancia >= 0;
+                          return (
+                            <li key={b.nombre} className="flex items-center gap-3 text-xs">
+                              <span className={`h-2 w-2 rounded-full shrink-0 ${ganancia === null ? "bg-muted" : positivo ? "bg-accent-bright" : "bg-danger"}`} />
+                              <span className="flex-1">{b.nombre}</span>
+                              <span className="text-muted tabular-nums">{FORMATTERS[r.moneda](b.saldo)}</span>
+                              <span className="text-muted tabular-nums w-24">
+                                {b.tasaReferencia !== null ? `ref. ${b.tasaReferencia.toLocaleString("es-CO", { maximumFractionDigits: 0 })}` : "sin tasa"}
+                              </span>
+                              <span className={`font-medium tabular-nums w-28 text-right ${ganancia === null ? "text-muted" : positivo ? "text-accent-bright" : "text-danger"}`}>
+                                {ganancia !== null ? formatCOP(ganancia) : "-"}
+                              </span>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                      {r.saldoSinClasificar > 0 && (
+                        <p className="text-xs text-muted mt-2">
+                          + {FORMATTERS[r.moneda](r.saldoSinClasificar)} sin tasa de referencia registrada (saldo previo a
+                          este sistema, o movimientos manuales sin tasa) — no se incluye arriba.
+                        </p>
+                      )}
+                      <p className="text-xs text-muted mt-2">
+                        Esto es solo tu propia matemática de costo vs. mercado, no es asesoría de inversión.
                       </p>
                     </div>
-                    <div className="col-span-2">
-                      <p className="text-xs text-muted">
-                        Ganancia no realizada (si vendieras hoy, a {r.tasaCompraProm.toLocaleString("es-CO", { maximumFractionDigits: 0 })} de compra prom.)
-                      </p>
-                      <p className={`font-bold ${gananciaNoRealizada === null ? "" : gananciaNoRealizada >= 0 ? "text-accent-bright" : "text-danger"}`}>
-                        {gananciaNoRealizada !== null ? formatCOP(gananciaNoRealizada) : "No disponible"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })()}
+                  );
+                })()}
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import type { ColumnDef } from "./types";
@@ -32,6 +32,8 @@ type DataTableProps = {
   detailBasePath?: string;
   /** Called after any successful create/update/delete, e.g. to refresh KPIs elsewhere on the page. */
   onChange?: () => void;
+  /** Extra buttons rendered per row (before Editar/Eliminar), e.g. "Marcar cobrado". */
+  rowActions?: (row: Row, reload: () => void) => ReactNode;
 };
 
 function buildPayload(values: Row, cols: ColumnDef[]) {
@@ -60,6 +62,7 @@ export function DataTable({
   fixedValues,
   detailBasePath,
   onChange,
+  rowActions,
 }: DataTableProps) {
   const supabase = useMemo(() => createClient(), []);
   const [rows, setRows] = useState<Row[]>([]);
@@ -462,6 +465,10 @@ export function DataTable({
                               Ver
                             </Link>
                           )}
+                          {rowActions?.(row, () => {
+                            loadRows();
+                            onChange?.();
+                          })}
                           <button
                             onClick={() => startEdit(row)}
                             className="text-foreground/80 text-sm mr-3"
