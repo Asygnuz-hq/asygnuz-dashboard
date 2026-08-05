@@ -1,5 +1,8 @@
+"use client";
+
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/data-table/DataTable";
+import { VincularGasto, type Gasto } from "@/components/VincularGasto";
 import type { ColumnDef } from "@/components/data-table/types";
 import { CATEGORIAS_GASTO, MONEDAS } from "@/lib/catalogs";
 
@@ -20,8 +23,18 @@ const columns: ColumnDef[] = [
 export default function GastosVariablesPage() {
   return (
     <div>
-      <PageHeader title="Gastos variables del mes" subtitle="Registra cada gasto variable. El equivalente en COP se calcula solo con la TRM que apliques." />
-      <DataTable table="gastos_variables" columns={columns} monthFilterKey="mes" orderBy="mes" ascending={false} />
+      <PageHeader
+        title="Gastos variables del mes"
+        subtitle="Registra cada gasto variable. Usa 'Vincular a cuenta' para que el pago se descuente de tu caja real, no solo del reporte."
+      />
+      <DataTable
+        table="gastos_variables"
+        columns={columns}
+        monthFilterKey="mes"
+        orderBy="mes"
+        ascending={false}
+        rowActions={(row, reload) => <VincularGasto key={row.id} gasto={row as Gasto} onDone={reload} />}
+      />
     </div>
   );
 }
