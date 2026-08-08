@@ -384,7 +384,7 @@ export function DataTable({
                   {col.label}
                 </th>
               ))}
-              <th className="px-3 py-2 text-right">Acciones</th>
+              <th className="px-3 py-2 text-right sticky right-0 bg-surface-alt border-l border-border">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -401,7 +401,7 @@ export function DataTable({
                     </td>
                   )
                 )}
-                <td className="px-3 py-2 text-right whitespace-nowrap">
+                <td className="px-3 py-2 text-right whitespace-nowrap sticky right-0 bg-surface-alt border-l border-border">
                   <button onClick={saveCreate} className="text-accent text-sm font-medium mr-3">
                     Guardar
                   </button>
@@ -439,7 +439,7 @@ export function DataTable({
                           : renderReadValue(col, row)}
                       </td>
                     ))}
-                    <td className="px-3 py-2 text-right whitespace-nowrap">
+                    <td className="px-3 py-2 text-right whitespace-nowrap sticky right-0 bg-surface border-l border-border">
                       {isEditing ? (
                         <>
                           <button
