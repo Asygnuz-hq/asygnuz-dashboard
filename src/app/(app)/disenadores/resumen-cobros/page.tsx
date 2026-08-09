@@ -12,7 +12,10 @@ const columns: ColumnDef[] = [
 export default function ResumenCobrosPage() {
   return (
     <div>
-      <PageHeader title="Resumen mensual de cobros a clientes" subtitle="Totales calculados automáticamente desde Cobros a Clientes." />
+      <PageHeader
+        title="Resumen mensual de cobros a clientes (histórico)"
+        subtitle="Totales de Cobros a Clientes hasta que se migró a Ingresos. Los cobros nuevos se ven en Ingresos y en el Dashboard."
+      />
       <ReadOnlyTable source="v_resumen_cobros" columns={columns} orderBy="mes" ascending={false} />
     </div>
   );

@@ -1,28 +1,26 @@
 import { PageHeader } from "@/components/PageHeader";
-import { DataTable } from "@/components/data-table/DataTable";
+import { ReadOnlyTable } from "@/components/data-table/ReadOnlyTable";
 import type { ColumnDef } from "@/components/data-table/types";
-import { ESTADOS_COBRO, TIPOS_PIEZA } from "@/lib/catalogs";
 
 const columns: ColumnDef[] = [
-  { key: "cliente", label: "Cliente", type: "text", required: true },
-  { key: "mes", label: "Mes", type: "month", required: true },
+  { key: "cliente", label: "Cliente", type: "text" },
+  { key: "mes", label: "Mes", type: "month" },
   { key: "proyecto_pieza", label: "Proyecto / Pieza", type: "text" },
-  { key: "tipo", label: "Tipo", type: "select", options: TIPOS_PIEZA },
-  { key: "piezas_cobradas", label: "Piezas Cobradas", type: "number" },
-  { key: "tarifa_unit_usd", label: "Tarifa Unit. USD", type: "number" },
+  { key: "tipo", label: "Tipo", type: "text" },
+  { key: "piezas_cobradas", label: "Piezas Cobradas", type: "readonly-number" },
+  { key: "tarifa_unit_usd", label: "Tarifa Unit. USD", type: "readonly-number" },
   { key: "total_cobrado_usd", label: "Total Cobrado USD", type: "readonly-usd" },
-  { key: "fecha_factura", label: "Fecha Factura", type: "date" },
-  { key: "estado_cobro", label: "Estado Cobro", type: "select", options: ESTADOS_COBRO, defaultValue: "Pendiente" },
-  { key: "pagado", label: "¿Pagado?", type: "boolean" },
-  { key: "margen_adicional_usd", label: "Margen Adicional USD", type: "number" },
-  { key: "notas", label: "Notas", type: "text" },
+  { key: "estado_cobro", label: "Estado Cobro", type: "text" },
 ];
 
 export default function CobrosClientesPage() {
   return (
     <div>
-      <PageHeader title="Cobros a clientes por diseño" subtitle="Lo que ASYGNUZ cobra al cliente por cada pieza entregada." />
-      <DataTable table="cobros_clientes" columns={columns} monthFilterKey="mes" orderBy="mes" ascending={false} />
+      <PageHeader
+        title="Cobros a clientes por diseño (histórico)"
+        subtitle="Este módulo quedó reemplazado por Ingresos (tipo 'Piezas adicionales'), donde sí se ve en el Dashboard y en pendientes por cobrar. Esto queda solo de consulta, ya no se agregan filas nuevas aquí."
+      />
+      <ReadOnlyTable source="cobros_clientes" columns={columns} orderBy="mes" ascending={false} />
     </div>
   );
 }

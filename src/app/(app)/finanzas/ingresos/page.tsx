@@ -4,11 +4,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/data-table/DataTable";
 import { MarcarCobrado, type Ingreso } from "@/components/MarcarCobrado";
 import type { ColumnDef } from "@/components/data-table/types";
-import { MONEDAS_INGRESO } from "@/lib/catalogs";
+import { MONEDAS_INGRESO, TIPOS_INGRESO } from "@/lib/catalogs";
 
 const columns: ColumnDef[] = [
   { key: "cliente", label: "Cliente", type: "text", required: true },
   { key: "concepto", label: "Concepto", type: "text" },
+  { key: "tipo_ingreso", label: "Tipo", type: "select", options: TIPOS_INGRESO },
   { key: "mes", label: "Mes", type: "month", required: true },
   { key: "moneda", label: "Moneda", type: "select", options: MONEDAS_INGRESO, required: true, defaultValue: "COP" },
   { key: "monto_original", label: "Monto", type: "number", required: true },

@@ -39,6 +39,8 @@ export const MONEDAS = ["COP", "USD"];
 // se quedan en COP/USD porque su tabla no tiene esa columna todavía.
 export const MONEDAS_INGRESO = ["COP", "USD", "EUR"];
 
+export const TIPOS_INGRESO = ["Retainer", "Piezas adicionales", "Proyecto único", "Otro"];
+
 export const ESTADOS_CLIENTE = ["Activo", "En riesgo", "Pausado", "Terminado"];
 
 export const TIPOS_ACTIVIDAD = ["Reunión", "Entrega", "Llamada", "Tarea", "Nota"];

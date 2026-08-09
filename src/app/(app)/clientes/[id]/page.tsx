@@ -7,8 +7,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { DataTable } from "@/components/data-table/DataTable";
 import type { ColumnDef } from "@/components/data-table/types";
-import { formatCOP, formatUSD } from "@/lib/format";
-import { MONEDAS, TIPOS_ACTIVIDAD } from "@/lib/catalogs";
+import { formatCOP } from "@/lib/format";
+import { MONEDAS_INGRESO, TIPOS_INGRESO, TIPOS_ACTIVIDAD } from "@/lib/catalogs";
 
 type Cliente = {
   id: string;
@@ -22,30 +22,20 @@ type Cliente = {
 
 type Rentabilidad = {
   ingresos_cop: number;
-  cobrado_usd: number;
   costo_disenador_cop: number;
   margen_cop: number;
 };
 
 const ingresoColumns: ColumnDef[] = [
   { key: "concepto", label: "Concepto", type: "text" },
+  { key: "tipo_ingreso", label: "Tipo", type: "select", options: TIPOS_INGRESO },
   { key: "mes", label: "Mes", type: "month", required: true },
-  { key: "moneda", label: "Moneda", type: "select", options: MONEDAS, required: true, defaultValue: "COP" },
+  { key: "moneda", label: "Moneda", type: "select", options: MONEDAS_INGRESO, required: true, defaultValue: "COP" },
   { key: "monto_original", label: "Monto", type: "number", required: true },
   { key: "trm_aplicada", label: "TRM aplicada", type: "number" },
   { key: "monto_cop", label: "Equiv. COP", type: "readonly-cop" },
   { key: "estado", label: "Estado", type: "select", options: ["Cobrado", "Pendiente"], defaultValue: "Pendiente" },
   { key: "fecha_pago_esperada", label: "Fecha Pago Esperada", type: "date" },
-  { key: "notas", label: "Notas", type: "text" },
-];
-
-const cobroColumns: ColumnDef[] = [
-  { key: "mes", label: "Mes", type: "month", required: true },
-  { key: "proyecto_pieza", label: "Proyecto / Pieza", type: "text" },
-  { key: "piezas_cobradas", label: "Piezas", type: "number" },
-  { key: "tarifa_unit_usd", label: "Tarifa Unit. USD", type: "number" },
-  { key: "total_cobrado_usd", label: "Total USD", type: "readonly-usd" },
-  { key: "estado_cobro", label: "Estado", type: "select", options: ["Pendiente", "En disputa", "Pagado"], defaultValue: "Pendiente" },
   { key: "notas", label: "Notas", type: "text" },
 ];
 
@@ -87,30 +77,21 @@ export default function ClienteDetailPage() {
         subtitle={`${cliente.tipo ?? "Sin tipo"} · ${cliente.estado}${cliente.contacto ? ` · ${cliente.contacto}` : ""}`}
       />
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <KpiCard label="Ingresos totales" value={formatCOP(rentabilidad?.ingresos_cop ?? 0)} />
-        <KpiCard label="Cobrado (diseño) USD" value={formatUSD(rentabilidad?.cobrado_usd ?? 0)} />
         <KpiCard label="Costo diseñador" value={formatCOP(rentabilidad?.costo_disenador_cop ?? 0)} />
         <KpiCard label="Margen" value={formatCOP(rentabilidad?.margen_cop ?? 0)} />
       </div>
 
       <div>
         <h2 className="text-sm font-semibold mb-3">Ingresos</h2>
+        <p className="text-xs text-muted mb-3">
+          Usa el tipo &quot;Piezas adicionales&quot; para cobros de diseño extra al retainer — así quedan en el
+          Dashboard y en pendientes por cobrar, no solo en la ficha del cliente.
+        </p>
         <DataTable
           table="ingresos"
           columns={ingresoColumns}
-          filters={[{ column: "cliente_id", value: clienteId }]}
-          fixedValues={{ cliente_id: clienteId, cliente: cliente.nombre }}
-          orderBy="mes"
-          ascending={false}
-        />
-      </div>
-
-      <div>
-        <h2 className="text-sm font-semibold mb-3">Cobros a cliente (piezas de diseño)</h2>
-        <DataTable
-          table="cobros_clientes"
-          columns={cobroColumns}
           filters={[{ column: "cliente_id", value: clienteId }]}
           fixedValues={{ cliente_id: clienteId, cliente: cliente.nombre }}
           orderBy="mes"
