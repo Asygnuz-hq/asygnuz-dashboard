@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
+import { Seguridad2FA } from "@/components/Seguridad2FA";
 
 export default function ConfiguracionPage() {
   const [trm, setTrm] = useState("");
@@ -134,6 +135,10 @@ export default function ConfiguracionPage() {
         </button>
         {message && <p className="text-sm text-muted">{message}</p>}
       </form>
+
+      <div className="mt-8">
+        <Seguridad2FA />
+      </div>
     </div>
   );
 }

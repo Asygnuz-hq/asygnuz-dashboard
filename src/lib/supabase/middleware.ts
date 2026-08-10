@@ -37,10 +37,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isLoginPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+  if (user) {
+    // Sesión creada con contraseña pero sin completar el segundo factor
+    // todavía (ej. cerró la pestaña a mitad del login) — no dejar pasar
+    // a rutas protegidas hasta que termine la verificación en /login.
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    const requiereSegundoFactor = aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2";
+
+    if (requiereSegundoFactor && !isLoginPage) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+
+    if (isLoginPage && !requiereSegundoFactor) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;

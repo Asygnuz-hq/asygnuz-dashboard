@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { useIsAdmin } from "@/lib/useIsAdmin";
 import type { ColumnDef } from "./types";
 import {
   formatCOP,
@@ -65,6 +66,7 @@ export function DataTable({
   rowActions,
 }: DataTableProps) {
   const supabase = useMemo(() => createClient(), []);
+  const isAdmin = useIsAdmin();
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -469,12 +471,16 @@ export function DataTable({
                     ))}
                     <td className="px-3 py-2 text-right whitespace-nowrap sticky right-0 bg-surface border-l border-border">
                       {viewingTrash ? (
-                        <button
-                          onClick={() => restoreRow(row.id)}
-                          className="text-accent-bright text-sm font-medium"
-                        >
-                          Restaurar
-                        </button>
+                        isAdmin ? (
+                          <button
+                            onClick={() => restoreRow(row.id)}
+                            className="text-accent-bright text-sm font-medium"
+                          >
+                            Restaurar
+                          </button>
+                        ) : (
+                          <span className="text-muted text-xs">Solo un admin restaura</span>
+                        )
                       ) : isEditing ? (
                         <>
                           <button
@@ -510,9 +516,11 @@ export function DataTable({
                           >
                             Editar
                           </button>
-                          <button onClick={() => deleteRow(row.id)} className="text-danger text-sm">
-                            Eliminar
-                          </button>
+                          {isAdmin && (
+                            <button onClick={() => deleteRow(row.id)} className="text-danger text-sm">
+                              Eliminar
+                            </button>
+                          )}
                         </>
                       )}
                     </td>
