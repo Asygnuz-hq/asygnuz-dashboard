@@ -7,7 +7,13 @@ import type { ColumnDef } from "@/components/data-table/types";
 import { MONEDAS_INGRESO, TIPOS_INGRESO } from "@/lib/catalogs";
 
 const columns: ColumnDef[] = [
-  { key: "cliente", label: "Cliente", type: "text", required: true },
+  {
+    key: "cliente_id",
+    label: "Cliente",
+    type: "foreign-select",
+    required: true,
+    foreignKey: { table: "clientes", valueField: "id", labelField: "nombre" },
+  },
   { key: "concepto", label: "Concepto", type: "text" },
   { key: "tipo_ingreso", label: "Tipo", type: "select", options: TIPOS_INGRESO },
   { key: "mes", label: "Mes", type: "month", required: true },
