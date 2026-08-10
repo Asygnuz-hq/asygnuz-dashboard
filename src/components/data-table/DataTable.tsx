@@ -74,6 +74,7 @@ export function DataTable({
   const [editValues, setEditValues] = useState<Row>({});
   const [creating, setCreating] = useState(false);
   const [newValues, setNewValues] = useState<Row>({});
+  const [viewingTrash, setViewingTrash] = useState(false);
 
   const editableColumns = columns.filter((c) => !c.type.startsWith("readonly"));
 
@@ -93,13 +94,14 @@ export function DataTable({
     setError(null);
     let query = supabase.from(table).select(selectString);
     for (const f of filters ?? []) query = query.eq(f.column, f.value);
+    query = viewingTrash ? query.not("eliminado_en", "is", null) : query.is("eliminado_en", null);
     if (orderBy) query = query.order(orderBy, { ascending });
     const { data, error } = await query;
     if (error) setError(error.message);
     setRows((data as Row[]) ?? []);
     setLoading(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [supabase, table, selectString, orderBy, ascending, filtersKey]);
+  }, [supabase, table, selectString, orderBy, ascending, filtersKey, viewingTrash]);
 
   useEffect(() => {
     // loadRows is an async data fetch; its setState calls happen after
@@ -199,9 +201,23 @@ export function DataTable({
   }
 
   async function deleteRow(id: string) {
-    if (!confirm("¿Eliminar esta fila? Esta acción no se puede deshacer.")) return;
+    if (!confirm('¿Enviar esta fila a la papelera? Puedes recuperarla luego desde "Ver papelera".')) return;
     setError(null);
-    const { error } = await supabase.from(table).delete().eq("id", id);
+    const { error } = await supabase
+      .from(table)
+      .update({ eliminado_en: new Date().toISOString() })
+      .eq("id", id);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    loadRows();
+    onChange?.();
+  }
+
+  async function restoreRow(id: string) {
+    setError(null);
+    const { error } = await supabase.from(table).update({ eliminado_en: null }).eq("id", id);
     if (error) {
       setError(error.message);
       return;
@@ -358,7 +374,13 @@ export function DataTable({
           >
             Exportar CSV
           </button>
-          {!creating && (
+          <button
+            onClick={() => setViewingTrash((v) => !v)}
+            className="rounded-md border border-border bg-surface-alt text-sm px-3 py-1.5 text-muted hover:text-foreground"
+          >
+            {viewingTrash ? "Volver" : "Ver papelera"}
+          </button>
+          {!creating && !viewingTrash && (
             <button
               onClick={startCreate}
               className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5"
@@ -368,6 +390,12 @@ export function DataTable({
           )}
         </div>
       </div>
+
+      {viewingTrash && (
+        <p className="text-xs text-muted">
+          Filas eliminadas — puedes restaurarlas. No cuentan en el Dashboard ni en ningún cálculo.
+        </p>
+      )}
 
       {error && (
         <p className="text-sm text-danger rounded-md border border-danger/40 bg-danger/10 px-3 py-2">
@@ -440,7 +468,14 @@ export function DataTable({
                       </td>
                     ))}
                     <td className="px-3 py-2 text-right whitespace-nowrap sticky right-0 bg-surface border-l border-border">
-                      {isEditing ? (
+                      {viewingTrash ? (
+                        <button
+                          onClick={() => restoreRow(row.id)}
+                          className="text-accent-bright text-sm font-medium"
+                        >
+                          Restaurar
+                        </button>
+                      ) : isEditing ? (
                         <>
                           <button
                             onClick={() => saveEdit(row.id)}
@@ -475,11 +510,11 @@ export function DataTable({
                           >
                             Editar
                           </button>
+                          <button onClick={() => deleteRow(row.id)} className="text-danger text-sm">
+                            Eliminar
+                          </button>
                         </>
                       )}
-                      <button onClick={() => deleteRow(row.id)} className="text-danger text-sm">
-                        Eliminar
-                      </button>
                     </td>
                   </tr>
                 );

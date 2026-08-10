@@ -83,14 +83,19 @@ export default function DashboardPage() {
 
       const [{ data: variables }, { data: fijos }, { data: pendientes }, { data: saldos }, { data: ingresosCliente }] =
         await Promise.all([
-          supabase.from("gastos_variables").select("categoria, monto_cop").eq("mes", activeMes),
-          supabase.from("gastos_fijos").select("categoria, monto_cop").eq("activo", true),
+          supabase.from("gastos_variables").select("categoria, monto_cop").eq("mes", activeMes).is("eliminado_en", null),
+          supabase.from("gastos_fijos").select("categoria, monto_cop").eq("activo", true).is("eliminado_en", null),
           supabase
             .from("ingresos")
             .select("id, monto_cop, fecha_pago_esperada, cliente, clientes(nombre)")
-            .eq("estado", "Pendiente"),
+            .eq("estado", "Pendiente")
+            .is("eliminado_en", null),
           supabase.from("v_saldo_cuentas").select("moneda, activa, saldo_actual"),
-          supabase.from("ingresos").select("monto_cop, cliente, clientes(nombre)").not("cliente_id", "is", null),
+          supabase
+            .from("ingresos")
+            .select("monto_cop, cliente, clientes(nombre)")
+            .not("cliente_id", "is", null)
+            .is("eliminado_en", null),
         ]);
 
       setGastosFijosTotal((fijos ?? []).reduce((sum, g) => sum + (g.monto_cop ?? 0), 0));

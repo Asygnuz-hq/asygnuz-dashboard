@@ -54,7 +54,8 @@ export default function DisenadorDetailPage() {
       supabase
         .from("control_mensual_tareas")
         .select("piezas_entregadas, total_cop, calificacion, estado")
-        .eq("disenador_id", disenadorId),
+        .eq("disenador_id", disenadorId)
+        .is("eliminado_en", null),
     ]);
     setDisenador(d as Disenador);
     setTareas((t as Tarea[]) ?? []);

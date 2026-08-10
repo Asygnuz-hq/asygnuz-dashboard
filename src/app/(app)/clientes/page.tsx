@@ -40,7 +40,7 @@ export default function ClientesPage() {
   const load = useCallback(async () => {
     const supabase = createClient();
     const [{ data: c }, { data: r }] = await Promise.all([
-      supabase.from("clientes").select("id, nombre, estado"),
+      supabase.from("clientes").select("id, nombre, estado").is("eliminado_en", null),
       supabase.from("v_rentabilidad_cliente").select("cliente, ingresos_cop"),
     ]);
     setClientes((c as Cliente[]) ?? []);

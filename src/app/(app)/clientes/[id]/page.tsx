@@ -57,7 +57,7 @@ export default function ClienteDetailPage() {
     async function load() {
       const supabase = createClient();
       const [{ data: c }, { data: r }] = await Promise.all([
-        supabase.from("clientes").select("*").eq("id", clienteId).single(),
+        supabase.from("clientes").select("*").eq("id", clienteId).is("eliminado_en", null).single(),
         supabase.from("v_rentabilidad_cliente").select("*").eq("cliente_id", clienteId).maybeSingle(),
       ]);
       setCliente(c as Cliente);

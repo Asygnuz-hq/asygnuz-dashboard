@@ -23,7 +23,11 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
     if (!open) return;
     async function load() {
       const supabase = createClient();
-      const { data } = await supabase.from("cuentas").select("id, nombre, moneda").eq("activa", true);
+      const { data } = await supabase
+        .from("cuentas")
+        .select("id, nombre, moneda")
+        .eq("activa", true)
+        .is("eliminado_en", null);
       setCuentas((data as Cuenta[]) ?? []);
     }
     load();

@@ -74,7 +74,8 @@ export default function CuentasPage() {
       supabase
         .from("movimientos_cuenta")
         .select("tipo, monto, tasa_cambio, cuentas(moneda)")
-        .in("tipo", ["Compra USD", "Venta USD", "Compra EUR", "Venta EUR", "Ingreso", "Rendimiento"]),
+        .in("tipo", ["Compra USD", "Venta USD", "Compra EUR", "Venta EUR", "Ingreso", "Rendimiento"])
+        .is("eliminado_en", null),
       supabase.from("v_saldo_cuentas").select("moneda, activa, saldo_actual"),
     ]);
 
@@ -142,7 +143,8 @@ export default function CuentasPage() {
     const { data } = await supabase
       .from("movimientos_cuenta")
       .select("monto, cuentas(moneda)")
-      .eq("tipo", "Rendimiento");
+      .eq("tipo", "Rendimiento")
+      .is("eliminado_en", null);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows = (data as any[]) ?? [];

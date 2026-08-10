@@ -41,7 +41,8 @@ export function VincularGasto({ gasto, onDone }: { gasto: Gasto; onDone: () => v
         .from("cuentas")
         .select("id, nombre, moneda")
         .eq("activa", true)
-        .eq("moneda", gasto.moneda);
+        .eq("moneda", gasto.moneda)
+        .is("eliminado_en", null);
       setCuentas((data as Cuenta[]) ?? []);
     }
     load();

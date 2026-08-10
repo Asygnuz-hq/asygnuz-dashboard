@@ -37,8 +37,8 @@ export function GlobalSearch() {
     const timeout = setTimeout(async () => {
       const supabase = createClient();
       const [{ data: clientes }, { data: cuentas }] = await Promise.all([
-        supabase.from("clientes").select("id, nombre, estado").ilike("nombre", `%${query}%`).limit(5),
-        supabase.from("cuentas").select("id, nombre, moneda").ilike("nombre", `%${query}%`).limit(5),
+        supabase.from("clientes").select("id, nombre, estado").ilike("nombre", `%${query}%`).is("eliminado_en", null).limit(5),
+        supabase.from("cuentas").select("id, nombre, moneda").ilike("nombre", `%${query}%`).is("eliminado_en", null).limit(5),
       ]);
       setResults([
         ...(clientes ?? []).map((c) => ({

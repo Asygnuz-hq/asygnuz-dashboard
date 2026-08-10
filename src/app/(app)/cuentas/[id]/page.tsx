@@ -51,6 +51,7 @@ export default function CuentaDetailPage() {
         .select("fecha, monto")
         .eq("cuenta_id", cuentaId)
         .eq("tipo", "Rendimiento")
+        .is("eliminado_en", null)
         .order("fecha", { ascending: true }),
     ]);
     setCuenta(c as Cuenta);

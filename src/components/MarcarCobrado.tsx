@@ -22,7 +22,8 @@ export function MarcarCobrado({ ingreso, onDone }: { ingreso: Ingreso; onDone: (
         .from("cuentas")
         .select("id, nombre, moneda")
         .eq("activa", true)
-        .eq("moneda", ingreso.moneda);
+        .eq("moneda", ingreso.moneda)
+        .is("eliminado_en", null);
       setCuentas((data as Cuenta[]) ?? []);
     }
     load();
