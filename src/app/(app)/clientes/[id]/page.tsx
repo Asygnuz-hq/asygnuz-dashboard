@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { DataTable } from "@/components/data-table/DataTable";
+import { MarcarCobrado, type Ingreso } from "@/components/MarcarCobrado";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP } from "@/lib/format";
 import { MONEDAS_INGRESO, TIPOS_INGRESO, TIPOS_ACTIVIDAD } from "@/lib/catalogs";
@@ -34,7 +35,8 @@ const ingresoColumns: ColumnDef[] = [
   { key: "monto_original", label: "Monto", type: "number", required: true },
   { key: "trm_aplicada", label: "TRM aplicada", type: "number" },
   { key: "monto_cop", label: "Equiv. COP", type: "readonly-cop" },
-  { key: "estado", label: "Estado", type: "select", options: ["Cobrado", "Pendiente"], defaultValue: "Pendiente" },
+  { key: "estado", label: "Estado", type: "readonly-text" },
+  { key: "fecha_pago_real", label: "Fecha Pago Real", type: "readonly-date" },
   { key: "fecha_pago_esperada", label: "Fecha Pago Esperada", type: "date" },
   { key: "notas", label: "Notas", type: "text" },
 ];
@@ -96,6 +98,7 @@ export default function ClienteDetailPage() {
           fixedValues={{ cliente_id: clienteId, cliente: cliente.nombre }}
           orderBy="mes"
           ascending={false}
+          rowActions={(row, reload) => <MarcarCobrado key={row.id} ingreso={row as Ingreso} onDone={reload} />}
         />
       </div>
 

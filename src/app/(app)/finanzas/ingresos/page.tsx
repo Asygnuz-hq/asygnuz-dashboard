@@ -23,8 +23,8 @@ const columns: ColumnDef[] = [
   { key: "trm_estimada_hoy", label: "TRM estimada hoy", type: "readonly-number" },
   { key: "monto_cop", label: "Equiv. COP", type: "readonly-cop" },
   { key: "monto_usd", label: "Equiv. USD", type: "readonly-usd" },
-  { key: "estado", label: "Estado", type: "select", options: ["Cobrado", "Pendiente"], defaultValue: "Pendiente" },
-  { key: "fecha_pago_real", label: "Fecha Pago Real", type: "date" },
+  { key: "estado", label: "Estado", type: "readonly-text" },
+  { key: "fecha_pago_real", label: "Fecha Pago Real", type: "readonly-date" },
   { key: "fecha_pago_esperada", label: "Fecha Pago Esperada", type: "date" },
   { key: "factura_no", label: "Factura No.", type: "text" },
   { key: "notas", label: "Notas", type: "text" },
@@ -35,7 +35,7 @@ export default function IngresosPage() {
     <div>
       <PageHeader
         title="Ingresos por cliente"
-        subtitle="Mientras está Pendiente, la TRM aplicada es solo tu estimado y 'TRM estimada hoy' se actualiza sola cada día. Al usar 'Marcar cobrado' se trae la TRM oficial del día real de pago, sin que tengas que buscarla."
+        subtitle="Mientras está Pendiente, la TRM aplicada es solo tu estimado y 'TRM estimada hoy' se actualiza sola cada día. El paso a Cobrado y la fecha de pago solo se cambian con los botones 'Marcar cobrado' / 'Corregir TRM' de cada fila — así la TRM oficial siempre queda acorde a la fecha real, sin que tengas que buscarla."
       />
       <DataTable
         table="ingresos"

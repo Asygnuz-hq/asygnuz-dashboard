@@ -4,7 +4,92 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type Cuenta = { id: string; nombre: string; moneda: string };
-export type Ingreso = { id: string; estado: string; moneda: string; monto_original: number };
+export type Ingreso = {
+  id: string;
+  estado: string;
+  moneda: string;
+  monto_original: number;
+  fecha_pago_real: string | null;
+};
+
+function CorregirTrm({ ingreso, onDone }: { ingreso: Ingreso; onDone: () => void }) {
+  const [open, setOpen] = useState(false);
+  const [fecha, setFecha] = useState(ingreso.fecha_pago_real ?? new Date().toISOString().slice(0, 10));
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  if (ingreso.moneda === "COP") return null;
+
+  async function handleConfirm() {
+    setError(null);
+    setSaving(true);
+
+    const res = await fetch(`/api/trm?fecha=${fecha}`);
+    const data = await res.json();
+    const trm = data?.valor ?? null;
+    if (!trm) {
+      setSaving(false);
+      setError("No se pudo traer la TRM oficial de esa fecha. Intenta de nuevo en un momento.");
+      return;
+    }
+
+    const supabase = createClient();
+    const { error: updateError } = await supabase
+      .from("ingresos")
+      .update({ fecha_pago_real: fecha, trm_aplicada: trm })
+      .eq("id", ingreso.id);
+    if (updateError) {
+      setSaving(false);
+      setError(updateError.message);
+      return;
+    }
+
+    // El movimiento en Cuentas que nació al marcar "Cobrado" queda igual de
+    // sincronizado, para que la fecha y la tasa coincidan en los dos lados.
+    await supabase.from("movimientos_cuenta").update({ fecha, tasa_cambio: trm }).eq("ingreso_id", ingreso.id);
+
+    setSaving(false);
+    setOpen(false);
+    onDone();
+  }
+
+  if (!open) {
+    return (
+      <button onClick={() => setOpen(true)} className="text-muted text-xs hover:text-foreground mr-3">
+        Corregir TRM
+      </button>
+    );
+  }
+
+  return (
+    <span className="relative inline-block mr-3">
+      <div className="absolute right-0 top-6 z-10 w-64 rounded-lg border border-border bg-surface p-3 flex flex-col gap-2 shadow-lg">
+        <p className="text-xs font-medium">Corregir fecha y TRM</p>
+        <label className="flex flex-col gap-1 text-xs">
+          Fecha real de pago
+          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+        </label>
+        <p className="text-xs text-muted">
+          Se trae la TRM oficial de esa fecha y se actualiza también el movimiento en Cuentas.
+        </p>
+        {error && <p className="text-xs text-danger">{error}</p>}
+        <div className="flex gap-2">
+          <button
+            onClick={handleConfirm}
+            disabled={saving}
+            className="rounded-md bg-accent text-accent-foreground text-xs font-medium px-2 py-1 disabled:opacity-60"
+          >
+            {saving ? "Guardando..." : "Confirmar"}
+          </button>
+          <button onClick={() => setOpen(false)} className="rounded-md border border-border text-xs px-2 py-1 text-muted">
+            Cancelar
+          </button>
+        </div>
+      </div>
+      <button className="text-muted text-xs">Corregir TRM</button>
+    </span>
+  );
+}
 
 export function MarcarCobrado({ ingreso, onDone }: { ingreso: Ingreso; onDone: () => void }) {
   const [open, setOpen] = useState(false);
@@ -29,6 +114,9 @@ export function MarcarCobrado({ ingreso, onDone }: { ingreso: Ingreso; onDone: (
     load();
   }, [open, ingreso.moneda]);
 
+  if (ingreso.estado === "Cobrado") {
+    return <CorregirTrm ingreso={ingreso} onDone={onDone} />;
+  }
   if (ingreso.estado !== "Pendiente") return null;
 
   async function handleConfirm() {

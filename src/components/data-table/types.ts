@@ -10,7 +10,8 @@ export type ColumnType =
   | "readonly-usd"
   | "readonly-percent"
   | "readonly-number"
-  | "readonly-text";
+  | "readonly-text"
+  | "readonly-date";
 
 export type ForeignKeyConfig = {
   /** Supabase table this column references */

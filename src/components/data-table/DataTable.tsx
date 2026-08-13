@@ -239,6 +239,8 @@ export function DataTable({
         return formatPercent(value);
       case "readonly-number":
         return value ?? "-";
+      case "readonly-date":
+        return formatDate(value);
       case "date":
         return formatDate(value);
       case "month":
