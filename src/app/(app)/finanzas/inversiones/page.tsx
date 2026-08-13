@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { DataTable } from "@/components/data-table/DataTable";
+import { VincularCuenta, type ItemVinculable } from "@/components/VincularCuenta";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP, formatPercent } from "@/lib/format";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
@@ -92,7 +93,7 @@ export default function InversionesPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Portafolio de inversiones"
-        subtitle="El valor actual y la TRM de valoración se actualizan manualmente; la conversión y el retorno se calculan solos."
+        subtitle="El valor actual y la TRM de valoración se actualizan manualmente. Usa 'Vincular a cuenta' para que la inversión descuente tu caja real."
       />
 
       {!loading && inversiones.length > 0 && (
@@ -167,7 +168,31 @@ export default function InversionesPage() {
         </>
       )}
 
-      <DataTable table="inversiones" columns={columns} orderBy="fecha_entrada" ascending={false} onChange={load} />
+      <DataTable
+        table="inversiones"
+        columns={columns}
+        orderBy="fecha_entrada"
+        ascending={false}
+        onChange={load}
+        rowActions={(row, reload) => (
+          <VincularCuenta
+            key={row.id}
+            item={{
+              id: row.id,
+              moneda: row.moneda,
+              monto: row.monto_invertido,
+              trm_aplicada: row.trm_entrada,
+              fecha: row.fecha_entrada,
+              concepto: row.activo_descripcion,
+              cuenta_id: row.cuenta_id,
+            } as ItemVinculable}
+            table="inversiones"
+            fkColumn="inversion_id"
+            pregunta="¿Con qué cuenta hiciste esta inversión?"
+            onDone={reload}
+          />
+        )}
+      />
     </div>
   );
 }

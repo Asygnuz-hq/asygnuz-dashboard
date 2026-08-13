@@ -1,5 +1,8 @@
+"use client";
+
 import { PageHeader } from "@/components/PageHeader";
 import { DataTable } from "@/components/data-table/DataTable";
+import { VincularCuenta, type ItemVinculable } from "@/components/VincularCuenta";
 import type { ColumnDef } from "@/components/data-table/types";
 import { MONEDAS } from "@/lib/catalogs";
 
@@ -21,9 +24,32 @@ export default function FundacionPage() {
     <div>
       <PageHeader
         title="Fundación — donaciones"
-        subtitle="Comprometido = intención confirmada · Pagado = desembolsado."
+        subtitle="Comprometido = intención confirmada · Pagado = desembolsado. Usa 'Vincular a cuenta' para que la donación descuente tu caja real."
       />
-      <DataTable table="fundacion_donaciones" columns={columns} orderBy="fecha" ascending={false} />
+      <DataTable
+        table="fundacion_donaciones"
+        columns={columns}
+        orderBy="fecha"
+        ascending={false}
+        rowActions={(row, reload) => (
+          <VincularCuenta
+            key={row.id}
+            item={{
+              id: row.id,
+              moneda: row.moneda,
+              monto: row.monto,
+              trm_aplicada: row.trm_aplicada,
+              fecha: row.fecha_pago ?? row.fecha,
+              concepto: row.causa_proyecto,
+              cuenta_id: row.cuenta_id,
+            } as ItemVinculable}
+            table="fundacion_donaciones"
+            fkColumn="donacion_id"
+            pregunta="¿Con qué cuenta hiciste esta donación?"
+            onDone={reload}
+          />
+        )}
+      />
     </div>
   );
 }
