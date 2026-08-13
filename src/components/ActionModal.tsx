@@ -1,0 +1,28 @@
+"use client";
+
+import type { ReactNode } from "react";
+
+export function ActionModal({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-sm rounded-lg border border-border bg-surface p-4 flex flex-col gap-3 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <p className="text-sm font-medium">{title}</p>
+        {children}
+      </div>
+    </div>
+  );
+}

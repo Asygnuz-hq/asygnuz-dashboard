@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ActionModal } from "@/components/ActionModal";
 
 type Cuenta = { id: string; nombre: string; moneda: string };
 export type Gasto = {
@@ -105,42 +106,37 @@ export function VincularGasto({ gasto, onDone }: { gasto: Gasto; onDone: () => v
   }
 
   return (
-    <span className="relative inline-block mr-3">
-      <div className="absolute right-0 top-6 z-10 w-64 rounded-lg border border-border bg-surface p-3 flex flex-col gap-2 shadow-lg">
-        <p className="text-xs font-medium">¿Con qué cuenta pagaste este gasto?</p>
-        <label className="flex flex-col gap-1 text-xs">
-          Cuenta ({gasto.moneda})
-          <select value={cuentaId} onChange={(e) => setCuentaId(e.target.value)}>
-            <option value="" disabled>
-              Selecciona
+    <ActionModal title="¿Con qué cuenta pagaste este gasto?" onClose={() => setOpen(false)}>
+      <label className="flex flex-col gap-1 text-sm">
+        Cuenta ({gasto.moneda})
+        <select value={cuentaId} onChange={(e) => setCuentaId(e.target.value)}>
+          <option value="" disabled>
+            Selecciona
+          </option>
+          {cuentas.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
             </option>
-            {cuentas.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-        {cuentas.length === 0 && (
-          <p className="text-xs text-danger">No tienes cuentas activas en {gasto.moneda}.</p>
-        )}
-        {error && <p className="text-xs text-danger">{error}</p>}
-        <div className="flex gap-2">
-          <button
-            onClick={handleConfirm}
-            disabled={saving}
-            className="rounded-md bg-accent text-accent-foreground text-xs font-medium px-2 py-1 disabled:opacity-60"
-          >
-            {saving ? "Guardando..." : "Confirmar"}
-          </button>
-          <button onClick={() => setOpen(false)} className="rounded-md border border-border text-xs px-2 py-1 text-muted">
-            Cancelar
-          </button>
-        </div>
+          ))}
+        </select>
+      </label>
+      {cuentas.length === 0 && <p className="text-sm text-danger">No tienes cuentas activas en {gasto.moneda}.</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <div className="flex gap-2">
+        <button
+          onClick={handleConfirm}
+          disabled={saving}
+          className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5 disabled:opacity-60"
+        >
+          {saving ? "Guardando..." : "Confirmar"}
+        </button>
+        <button
+          onClick={() => setOpen(false)}
+          className="rounded-md border border-border text-sm px-3 py-1.5 text-muted"
+        >
+          Cancelar
+        </button>
       </div>
-      <button onClick={() => setOpen(false)} className="text-accent-bright text-sm font-medium">
-        Vincular a cuenta
-      </button>
-    </span>
+    </ActionModal>
   );
 }

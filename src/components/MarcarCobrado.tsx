@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { ActionModal } from "@/components/ActionModal";
 
 type Cuenta = { id: string; nombre: string; moneda: string };
 export type Ingreso = {
@@ -62,32 +63,31 @@ function CorregirTrm({ ingreso, onDone }: { ingreso: Ingreso; onDone: () => void
   }
 
   return (
-    <span className="relative inline-block mr-3">
-      <div className="absolute right-0 top-6 z-10 w-64 rounded-lg border border-border bg-surface p-3 flex flex-col gap-2 shadow-lg">
-        <p className="text-xs font-medium">Corregir fecha y TRM</p>
-        <label className="flex flex-col gap-1 text-xs">
-          Fecha real de pago
-          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        </label>
-        <p className="text-xs text-muted">
-          Se trae la TRM oficial de esa fecha y se actualiza también el movimiento en Cuentas.
-        </p>
-        {error && <p className="text-xs text-danger">{error}</p>}
-        <div className="flex gap-2">
-          <button
-            onClick={handleConfirm}
-            disabled={saving}
-            className="rounded-md bg-accent text-accent-foreground text-xs font-medium px-2 py-1 disabled:opacity-60"
-          >
-            {saving ? "Guardando..." : "Confirmar"}
-          </button>
-          <button onClick={() => setOpen(false)} className="rounded-md border border-border text-xs px-2 py-1 text-muted">
-            Cancelar
-          </button>
-        </div>
+    <ActionModal title="Corregir fecha y TRM" onClose={() => setOpen(false)}>
+      <label className="flex flex-col gap-1 text-sm">
+        Fecha real de pago
+        <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+      </label>
+      <p className="text-xs text-muted">
+        Se trae la TRM oficial de esa fecha y se actualiza también el movimiento en Cuentas.
+      </p>
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <div className="flex gap-2">
+        <button
+          onClick={handleConfirm}
+          disabled={saving}
+          className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5 disabled:opacity-60"
+        >
+          {saving ? "Guardando..." : "Confirmar"}
+        </button>
+        <button
+          onClick={() => setOpen(false)}
+          className="rounded-md border border-border text-sm px-3 py-1.5 text-muted"
+        >
+          Cancelar
+        </button>
       </div>
-      <button className="text-muted text-xs">Corregir TRM</button>
-    </span>
+    </ActionModal>
   );
 }
 
@@ -189,44 +189,43 @@ export function MarcarCobrado({ ingreso, onDone }: { ingreso: Ingreso; onDone: (
   }
 
   return (
-    <span className="relative inline-block mr-3">
-      <div className="absolute right-0 top-6 z-10 w-64 rounded-lg border border-border bg-surface p-3 flex flex-col gap-2 shadow-lg">
-        <p className="text-xs font-medium">¿Cuándo y dónde entró la plata?</p>
-        <label className="flex flex-col gap-1 text-xs">
-          Fecha real de pago
-          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        </label>
-        <label className="flex flex-col gap-1 text-xs">
-          Cuenta ({ingreso.moneda})
-          <select value={cuentaId} onChange={(e) => setCuentaId(e.target.value)}>
-            <option value="" disabled>
-              Selecciona
+    <ActionModal title="¿Cuándo y dónde entró la plata?" onClose={() => setOpen(false)}>
+      <label className="flex flex-col gap-1 text-sm">
+        Fecha real de pago
+        <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+      </label>
+      <label className="flex flex-col gap-1 text-sm">
+        Cuenta ({ingreso.moneda})
+        <select value={cuentaId} onChange={(e) => setCuentaId(e.target.value)}>
+          <option value="" disabled>
+            Selecciona
+          </option>
+          {cuentas.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.nombre}
             </option>
-            {cuentas.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-        {ingreso.moneda !== "COP" && (
-          <p className="text-xs text-muted">Se trae automáticamente la TRM oficial de esa fecha.</p>
-        )}
-        {error && <p className="text-xs text-danger">{error}</p>}
-        <div className="flex gap-2">
-          <button
-            onClick={handleConfirm}
-            disabled={saving}
-            className="rounded-md bg-accent text-accent-foreground text-xs font-medium px-2 py-1 disabled:opacity-60"
-          >
-            {saving ? "Guardando..." : "Confirmar"}
-          </button>
-          <button onClick={() => setOpen(false)} className="rounded-md border border-border text-xs px-2 py-1 text-muted">
-            Cancelar
-          </button>
-        </div>
+          ))}
+        </select>
+      </label>
+      {ingreso.moneda !== "COP" && (
+        <p className="text-xs text-muted">Se trae automáticamente la TRM oficial de esa fecha.</p>
+      )}
+      {error && <p className="text-sm text-danger">{error}</p>}
+      <div className="flex gap-2">
+        <button
+          onClick={handleConfirm}
+          disabled={saving}
+          className="rounded-md bg-accent text-accent-foreground text-sm font-medium px-3 py-1.5 disabled:opacity-60"
+        >
+          {saving ? "Guardando..." : "Confirmar"}
+        </button>
+        <button
+          onClick={() => setOpen(false)}
+          className="rounded-md border border-border text-sm px-3 py-1.5 text-muted"
+        >
+          Cancelar
+        </button>
       </div>
-      <button className="text-accent-bright text-sm font-medium">Marcar cobrado</button>
-    </span>
+    </ActionModal>
   );
 }
