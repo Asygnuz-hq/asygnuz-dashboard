@@ -1,16 +1,8 @@
 import { calcularMetricas } from "@/lib/kaneo/metrics";
 
 export async function GET() {
-  const workspaceId = process.env.KANEO_WORKSPACE_ID;
-  if (!workspaceId) {
-    return Response.json(
-      { error: "Falta KANEO_WORKSPACE_ID en las variables de entorno." },
-      { status: 500 }
-    );
-  }
-
   try {
-    const metricas = await calcularMetricas(workspaceId);
+    const metricas = await calcularMetricas();
     return Response.json(metricas);
   } catch (err) {
     return Response.json(

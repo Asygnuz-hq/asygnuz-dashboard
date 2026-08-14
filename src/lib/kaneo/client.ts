@@ -64,3 +64,19 @@ export async function fetchProjectTasks(projectId: string): Promise<KaneoTask[]>
   );
   return resp.data.columns.flatMap((c) => c.tasks);
 }
+
+export type KaneoTaskRelation = {
+  id: string;
+  sourceTaskId: string;
+  targetTaskId: string;
+  relationType: "subtask" | "blocks" | "related";
+};
+
+// No hay endpoint masivo de relaciones: se consulta tarea por tarea.
+export async function fetchTaskRelations(taskId: string): Promise<KaneoTaskRelation[]> {
+  try {
+    return await kaneoFetch<KaneoTaskRelation[]>(`/api/task-relation/${taskId}`);
+  } catch {
+    return [];
+  }
+}

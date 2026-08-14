@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -74,13 +74,49 @@ export default function MetricasPage() {
                     contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                   />
                   <Legend />
-                  <Bar dataKey="activas" name="Activas" fill={PALETTE.activas} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="completadas" name="Completadas" fill={PALETTE.completadas} radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="atrasadas" name="Atrasadas" fill={PALETTE.atrasadas} radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="activas" name="Activas" fill={PALETTE.activas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                  <Bar dataKey="completadas" name="Completadas" fill={PALETTE.completadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                  <Bar dataKey="atrasadas" name="Atrasadas" fill={PALETTE.atrasadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
+
+          {metricas.tendenciaCreacion.length > 1 && (
+            <div>
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                Tendencia — tareas creadas por semana
+              </h2>
+              <div className="h-64 rounded-lg border border-border bg-surface p-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={metricas.tendenciaCreacion}>
+                    <defs>
+                      <linearGradient id="gGrowth" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#5c8a72" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#5c8a72" stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="gSoftware" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3c5e99" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#3c5e99" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                    <XAxis dataKey="etiqueta" stroke={chartColors.axis} fontSize={11} />
+                    <YAxis stroke={chartColors.axis} fontSize={12} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
+                    />
+                    <Legend />
+                    <Area type="monotone" dataKey="Growth" stroke="#5c8a72" fill="url(#gGrowth)" strokeWidth={2} isAnimationActive={false} />
+                    <Area type="monotone" dataKey="Software" stroke="#3c5e99" fill="url(#gSoftware)" strokeWidth={2} isAnimationActive={false} />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+              <p className="text-xs text-muted mt-2">
+                Se calcula desde la fecha de creación de cada tarea — va a ganar más sentido semana a semana a medida que se acumula historial.
+              </p>
+            </div>
+          )}
 
           <div>
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Proyectos</h2>
@@ -90,7 +126,10 @@ export default function MetricasPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{p.nombre}</p>
-                      <p className="text-xs text-muted">{p.frente} · {p.totalTareas} tareas · {p.atrasadas} atrasadas</p>
+                      <p className="text-xs text-muted">
+                        {p.frente} · {p.totalTareas} tareas · {p.atrasadas} atrasadas
+                        {p.epics.length > 0 && ` · ${p.epics.length} épicas`}
+                      </p>
                     </div>
                     <Semaforo nivel={nivelProyecto(p)} />
                   </div>

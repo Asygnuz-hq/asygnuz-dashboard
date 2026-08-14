@@ -5,6 +5,17 @@ import { PageHeader } from "@/components/PageHeader";
 import { useMetricas } from "@/lib/kaneo/useMetricas";
 import type { MetricasKaneo } from "@/lib/kaneo/metrics";
 
+const ESTADO_COLOR: Record<string, string> = {
+  "to-do": "bg-muted",
+  "in-progress": "bg-accent-bright",
+  "in-review": "bg-amber-500",
+  done: "bg-emerald-500",
+};
+
+function EstadoBadge({ estado }: { estado: string }) {
+  return <span className={`inline-block h-2 w-2 rounded-full shrink-0 ${ESTADO_COLOR[estado] ?? "bg-muted"}`} />;
+}
+
 function descargarCSV(metricas: MetricasKaneo) {
   const filas = [["Proyecto", "Frente", "Total tareas", "Completadas", "Atrasadas", "% avance"]];
   metricas.porProyecto.forEach((p) => {
@@ -135,6 +146,47 @@ export default function ReportePage() {
               </tbody>
             </table>
           </div>
+
+          {metricas.porProyecto.some((p) => p.epics.length > 0) && (
+            <div>
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                Detalle por proyecto — épicas y tareas
+              </h2>
+              <div className="flex flex-col gap-4">
+                {metricas.porProyecto
+                  .filter((p) => p.epics.length > 0)
+                  .map((p) => (
+                    <div key={p.id} className="break-inside-avoid rounded-lg border border-border p-3 print:border-black/20">
+                      <p className="font-medium mb-2">
+                        {p.nombre} <span className="text-muted font-normal">({p.frente})</span>
+                      </p>
+                      <div className="flex flex-col gap-3">
+                        {p.epics.map((epic) => (
+                          <div key={epic.id}>
+                            <div className="flex items-center gap-2 text-sm">
+                              <EstadoBadge estado={epic.estado} />
+                              <span className="font-medium">{epic.titulo}</span>
+                              <span className="text-xs text-muted">
+                                ({epic.hijos.filter((h) => h.estado === "done").length}/{epic.hijos.length} listas)
+                              </span>
+                            </div>
+                            <ul className="mt-1 ml-6 flex flex-col gap-1">
+                              {epic.hijos.map((hijo) => (
+                                <li key={hijo.id} className="flex items-center gap-2 text-xs text-muted">
+                                  <EstadoBadge estado={hijo.estado} />
+                                  <span>{hijo.titulo}</span>
+                                  {hijo.asignado && <span>· {hijo.asignado}</span>}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
 
           <div className="break-inside-avoid">
             <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">Carga por persona</h2>

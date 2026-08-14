@@ -1,22 +1,13 @@
-import { fetchProjects, fetchProjectTasks, type KaneoTask } from "./client";
+import { fetchProjects, fetchProjectTasks, fetchTaskRelations, type KaneoTask } from "./client";
 
-// Mientras el workspace de Kaneo siga sin dividirse en Growth/Software, esta
-// tabla es la que decide a qué frente pertenece cada proyecto para las
-// métricas. Si el workspace ya está dividido, esto deja de usarse (cada
-// proyecto ya vive en su propio workspace) — ver memoria del proyecto Kaneo.
-const FRENTE_POR_SLUG: Record<string, "Growth" | "Software"> = {
-  growth: "Growth",
-  "hybrid-2160": "Growth",
-  "mayra-fit": "Growth",
-  "glam-studio": "Growth",
-  "santi-saga": "Growth",
-  "mariana-henao": "Growth",
-  "video-analitica": "Software",
-  "pro-app": "Software",
-  eficacia: "Software",
-  software: "Software",
-  financieramente: "Software",
-};
+// Los 2 workspaces reales tras la separación (2026-08-13). Cada uno ya trae
+// sus propios proyectos — no hace falta clasificar por slug como antes de
+// dividir el workspace único.
+function env(name: string): string {
+  const value = process.env[name];
+  if (!value) throw new Error(`Falta la variable de entorno ${name}.`);
+  return value;
+}
 
 const DONE_STATUS_SLUGS = new Set(["done"]);
 
@@ -24,11 +15,19 @@ export type ProyectoMetrica = {
   id: string;
   nombre: string;
   slug: string;
-  frente: "Growth" | "Software" | "Sin clasificar";
+  frente: "Growth" | "Software";
   totalTareas: number;
   completadas: number;
   atrasadas: number;
   pctAvance: number;
+  epics: EpicResumen[];
+};
+
+export type EpicResumen = {
+  id: string;
+  titulo: string;
+  estado: string;
+  hijos: { id: string; titulo: string; estado: string; asignado: string | null }[];
 };
 
 export type PersonaMetrica = {
@@ -37,6 +36,8 @@ export type PersonaMetrica = {
   atrasadas: number;
   completadas: number;
 };
+
+export type PuntoTendencia = { etiqueta: string; Growth: number; Software: number };
 
 export type MetricasKaneo = {
   generadoEn: string;
@@ -49,6 +50,7 @@ export type MetricasKaneo = {
   porProyecto: ProyectoMetrica[];
   porPersona: PersonaMetrica[];
   prioridadAltaEstancada: { proyecto: string; titulo: string; prioridad: string; dias: number }[];
+  tendenciaCreacion: PuntoTendencia[];
 };
 
 function esAtrasada(t: KaneoTask): boolean {
@@ -60,31 +62,81 @@ function diasDesde(iso: string): number {
   return Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
 }
 
-export async function calcularMetricas(workspaceId: string): Promise<MetricasKaneo> {
+function inicioDeSemana(iso: string): string {
+  const d = new Date(iso);
+  const dia = d.getDay();
+  const diff = d.getDate() - dia + (dia === 0 ? -6 : 1); // lunes como inicio
+  const lunes = new Date(d.setDate(diff));
+  return lunes.toISOString().slice(0, 10);
+}
+
+async function tareasConFrente(workspaceId: string, frente: "Growth" | "Software") {
   const proyectos = await fetchProjects(workspaceId);
   const activos = proyectos.filter((p) => !p.archivedAt);
-
-  const tareasPorProyecto = await Promise.all(
+  const porProyecto = await Promise.all(
     activos.map(async (p) => ({ proyecto: p, tareas: await fetchProjectTasks(p.id) }))
   );
+  return porProyecto.map(({ proyecto, tareas }) => ({ proyecto, tareas, frente }));
+}
 
-  const porProyecto: ProyectoMetrica[] = tareasPorProyecto.map(({ proyecto, tareas }) => {
-    const completadas = tareas.filter((t) => DONE_STATUS_SLUGS.has(t.status)).length;
-    const atrasadas = tareas.filter(esAtrasada).length;
-    return {
-      id: proyecto.id,
-      nombre: proyecto.name,
-      slug: proyecto.slug,
-      frente: FRENTE_POR_SLUG[proyecto.slug] ?? "Sin clasificar",
-      totalTareas: tareas.length,
-      completadas,
-      atrasadas,
-      pctAvance: tareas.length > 0 ? completadas / tareas.length : 0,
-    };
-  });
+async function construirEpics(tareas: KaneoTask[]): Promise<EpicResumen[]> {
+  // Una tarea es "epic" para efectos del reporte si tiene al menos una
+  // relación de subtarea donde ella es el origen (padre).
+  const porTarea = await Promise.all(
+    tareas.map(async (t) => ({ tarea: t, relaciones: await fetchTaskRelations(t.id) }))
+  );
+  const tareaPorId = new Map(tareas.map((t) => [t.id, t]));
 
-  const todasLasTareas = tareasPorProyecto.flatMap(({ proyecto, tareas }) =>
-    tareas.map((t) => ({ ...t, __proyectoNombre: proyecto.name }))
+  const epics: EpicResumen[] = [];
+  for (const { tarea, relaciones } of porTarea) {
+    const hijosIds = relaciones
+      .filter((r) => r.relationType === "subtask" && r.sourceTaskId === tarea.id)
+      .map((r) => r.targetTaskId);
+    if (hijosIds.length === 0) continue;
+    epics.push({
+      id: tarea.id,
+      titulo: tarea.title,
+      estado: tarea.status,
+      hijos: hijosIds
+        .map((id) => tareaPorId.get(id))
+        .filter((t): t is KaneoTask => Boolean(t))
+        .map((t) => ({ id: t.id, titulo: t.title, estado: t.status, asignado: t.assigneeName })),
+    });
+  }
+  return epics;
+}
+
+export async function calcularMetricas(): Promise<MetricasKaneo> {
+  const wsGrowth = env("KANEO_WORKSPACE_ID_GROWTH");
+  const wsSoftware = env("KANEO_WORKSPACE_ID_SOFTWARE");
+
+  const [growthData, softwareData] = await Promise.all([
+    tareasConFrente(wsGrowth, "Growth"),
+    tareasConFrente(wsSoftware, "Software"),
+  ]);
+  const porProyectoData = [...growthData, ...softwareData];
+
+  const porProyecto: ProyectoMetrica[] = await Promise.all(
+    porProyectoData.map(async ({ proyecto, tareas, frente }) => {
+      const completadas = tareas.filter((t) => DONE_STATUS_SLUGS.has(t.status)).length;
+      const atrasadas = tareas.filter(esAtrasada).length;
+      const epics = await construirEpics(tareas);
+      return {
+        id: proyecto.id,
+        nombre: proyecto.name,
+        slug: proyecto.slug,
+        frente,
+        totalTareas: tareas.length,
+        completadas,
+        atrasadas,
+        pctAvance: tareas.length > 0 ? completadas / tareas.length : 0,
+        epics,
+      };
+    })
+  );
+
+  const todasLasTareas = porProyectoData.flatMap(({ proyecto, tareas, frente }) =>
+    tareas.map((t) => ({ ...t, __proyectoNombre: proyecto.name, __frente: frente }))
   );
 
   const totalCompletadas = todasLasTareas.filter((t) => DONE_STATUS_SLUGS.has(t.status)).length;
@@ -123,6 +175,19 @@ export async function calcularMetricas(workspaceId: string): Promise<MetricasKan
     .sort((a, b) => b.dias - a.dias)
     .slice(0, 15);
 
+  // Tendencia: tareas creadas por semana, por frente (con lo que hay hoy;
+  // se vuelve más útil semana a semana a medida que se acumula historial).
+  const semanaMap = new Map<string, { Growth: number; Software: number }>();
+  for (const t of todasLasTareas) {
+    const semana = inicioDeSemana(t.createdAt);
+    const acc = semanaMap.get(semana) ?? { Growth: 0, Software: 0 };
+    acc[t.__frente] += 1;
+    semanaMap.set(semana, acc);
+  }
+  const tendenciaCreacion: PuntoTendencia[] = Array.from(semanaMap.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([semana, v]) => ({ etiqueta: semana, ...v }));
+
   return {
     generadoEn: new Date().toISOString(),
     totalTareas: todasLasTareas.length,
@@ -134,5 +199,6 @@ export async function calcularMetricas(workspaceId: string): Promise<MetricasKan
     porProyecto: porProyecto.sort((a, b) => b.totalTareas - a.totalTareas),
     porPersona: Array.from(personaMap.values()).sort((a, b) => b.activas - a.activas),
     prioridadAltaEstancada,
+    tendenciaCreacion,
   };
 }
