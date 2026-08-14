@@ -1,7 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { Area, AreaChart, Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { ProgressBar } from "@/components/ProgressBar";
@@ -11,6 +25,19 @@ import { useMetricas } from "@/lib/kaneo/useMetricas";
 import type { ProyectoMetrica } from "@/lib/kaneo/metrics";
 
 const PALETTE = { activas: "#3c5e99", completadas: "#5c8a72", atrasadas: "#d9534f" };
+const ESTADO_COLOR: Record<string, string> = {
+  "to-do": "#8b93a6",
+  "in-progress": "#3c5e99",
+  "in-review": "#c9a227",
+  done: "#5c8a72",
+};
+const PRIORIDAD_LABEL: Record<string, string> = {
+  urgent: "Urgente",
+  high: "Alta",
+  medium: "Media",
+  low: "Baja",
+  "no-priority": "Sin prioridad",
+};
 
 function nivelProyecto(p: ProyectoMetrica): "verde" | "amarillo" | "rojo" {
   if (p.totalTareas === 0) return "verde";
@@ -20,19 +47,38 @@ function nivelProyecto(p: ProyectoMetrica): "verde" | "amarillo" | "rojo" {
   return "rojo";
 }
 
+function IndicadorEnVivo({ actualizando }: { actualizando: boolean }) {
+  return (
+    <div className="flex items-center gap-1.5 text-xs text-muted">
+      <span className={`h-1.5 w-1.5 rounded-full ${actualizando ? "bg-accent-bright animate-pulse" : "bg-emerald-500"}`} />
+      {actualizando ? "Actualizando…" : "En vivo · se refresca solo cada 2 min"}
+    </div>
+  );
+}
+
 export default function MetricasPage() {
   const theme = useTheme();
   const chartColors = CHART_COLORS[theme];
-  const { metricas, error, loading } = useMetricas();
+  const { metricas, error, loading, actualizando, recargar } = useMetricas();
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between">
-        <PageHeader
-          title="Métricas — Vista Ejecutiva"
-          subtitle="Carga de trabajo y avance en tiempo real, leído directo de Kaneo."
-        />
+        <div>
+          <PageHeader
+            title="Métricas — Vista Ejecutiva"
+            subtitle="Carga de trabajo y avance en tiempo real, leído directo de Kaneo."
+          />
+          {metricas && <IndicadorEnVivo actualizando={actualizando} />}
+        </div>
         <div className="flex gap-2">
+          <button
+            onClick={() => recargar()}
+            disabled={loading || actualizando}
+            className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt disabled:opacity-50"
+          >
+            Actualizar ahora
+          </button>
           <Link href="/metricas/carga" className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt">
             Carga por persona
           </Link>
@@ -62,23 +108,52 @@ export default function MetricasPage() {
             <KpiCard label="Sin asignar" value={String(metricas.sinAsignar)} hint="Nadie las tiene en su lista" />
           </div>
 
-          <div>
-            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Growth vs Software</h2>
-            <div className="h-64 rounded-lg border border-border bg-surface p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={metricas.porFrente}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
-                  <XAxis dataKey="frente" stroke={chartColors.axis} fontSize={12} />
-                  <YAxis stroke={chartColors.axis} fontSize={12} />
-                  <Tooltip
-                    contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
-                  />
-                  <Legend />
-                  <Bar dataKey="activas" name="Activas" fill={PALETTE.activas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                  <Bar dataKey="completadas" name="Completadas" fill={PALETTE.completadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                  <Bar dataKey="atrasadas" name="Atrasadas" fill={PALETTE.atrasadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                </BarChart>
-              </ResponsiveContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2">
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Growth vs Software</h2>
+              <div className="h-64 rounded-lg border border-border bg-surface p-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={metricas.porFrente}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                    <XAxis dataKey="frente" stroke={chartColors.axis} fontSize={12} />
+                    <YAxis stroke={chartColors.axis} fontSize={12} />
+                    <Tooltip
+                      contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
+                    />
+                    <Legend />
+                    <Bar dataKey="activas" name="Activas" fill={PALETTE.activas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="completadas" name="Completadas" fill={PALETTE.completadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="atrasadas" name="Atrasadas" fill={PALETTE.atrasadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Por estado</h2>
+              <div className="h-64 rounded-lg border border-border bg-surface p-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={metricas.porEstado}
+                      dataKey="total"
+                      nameKey="etiqueta"
+                      innerRadius="55%"
+                      outerRadius="85%"
+                      paddingAngle={2}
+                      isAnimationActive={false}
+                    >
+                      {metricas.porEstado.map((e) => (
+                        <Cell key={e.estado} fill={ESTADO_COLOR[e.estado] ?? "#8b93a6"} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
+                    />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
 
@@ -118,29 +193,60 @@ export default function MetricasPage() {
             </div>
           )}
 
-          <div>
-            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Proyectos</h2>
-            <div className="flex flex-col gap-3">
-              {metricas.porProyecto.map((p) => (
-                <div key={p.id} className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">{p.nombre}</p>
-                      <p className="text-xs text-muted">
-                        {p.frente} · {p.totalTareas} tareas · {p.atrasadas} atrasadas
-                        {p.epics.length > 0 && ` · ${p.epics.length} épicas`}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Proyectos</h2>
+              <div className="flex flex-col gap-3">
+                {metricas.porProyecto.map((p) => (
+                  <div key={p.id} className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium">{p.nombre}</p>
+                        <p className="text-xs text-muted">
+                          {p.frente} · {p.totalTareas} tareas · {p.atrasadas} atrasadas
+                          {p.epics.length > 0 && ` · ${p.epics.length} épicas`}
+                        </p>
+                      </div>
+                      <Semaforo nivel={nivelProyecto(p)} />
+                    </div>
+                    <ProgressBar
+                      label="Avance"
+                      value={p.completadas}
+                      target={p.totalTareas}
+                      formatValue={(n) => String(n)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                Tareas más recientes
+              </h2>
+              <div className="flex flex-col gap-2">
+                {metricas.tareasRecientes.map((t) => (
+                  <div key={t.id} className="rounded-lg border border-border bg-surface p-3 flex items-center gap-3">
+                    <span
+                      className="h-2 w-2 rounded-full shrink-0"
+                      style={{ backgroundColor: ESTADO_COLOR[t.estado] ?? "#8b93a6" }}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm truncate">{t.titulo}</p>
+                      <p className="text-xs text-muted truncate">
+                        {t.proyecto} · {t.frente}
+                        {t.asignado && ` · ${t.asignado}`}
+                        {(t.prioridad === "urgent" || t.prioridad === "high") && (
+                          <span className="text-danger"> · {PRIORIDAD_LABEL[t.prioridad]}</span>
+                        )}
                       </p>
                     </div>
-                    <Semaforo nivel={nivelProyecto(p)} />
+                    <span className="text-xs text-muted shrink-0">
+                      {t.creadaHace === 0 ? "hoy" : `hace ${t.creadaHace}d`}
+                    </span>
                   </div>
-                  <ProgressBar
-                    label="Avance"
-                    value={p.completadas}
-                    target={p.totalTareas}
-                    formatValue={(n) => String(n)}
-                  />
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </>

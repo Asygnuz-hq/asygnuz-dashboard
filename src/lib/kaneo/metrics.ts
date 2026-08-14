@@ -39,6 +39,24 @@ export type PersonaMetrica = {
 
 export type PuntoTendencia = { etiqueta: string; Growth: number; Software: number };
 
+export type TareaResumen = {
+  id: string;
+  titulo: string;
+  proyecto: string;
+  frente: "Growth" | "Software";
+  estado: string;
+  prioridad: string;
+  asignado: string | null;
+  creadaHace: number;
+};
+
+const ESTADO_LABEL: Record<string, string> = {
+  "to-do": "Por hacer",
+  "in-progress": "En progreso",
+  "in-review": "En revisión",
+  done: "Completada",
+};
+
 export type MetricasKaneo = {
   generadoEn: string;
   totalTareas: number;
@@ -47,10 +65,12 @@ export type MetricasKaneo = {
   totalAtrasadas: number;
   sinAsignar: number;
   porFrente: { frente: string; total: number; activas: number; completadas: number; atrasadas: number }[];
+  porEstado: { estado: string; etiqueta: string; total: number }[];
   porProyecto: ProyectoMetrica[];
   porPersona: PersonaMetrica[];
   prioridadAltaEstancada: { proyecto: string; titulo: string; prioridad: string; dias: number }[];
   tendenciaCreacion: PuntoTendencia[];
+  tareasRecientes: TareaResumen[];
 };
 
 function esAtrasada(t: KaneoTask): boolean {
@@ -188,6 +208,30 @@ export async function calcularMetricas(): Promise<MetricasKaneo> {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([semana, v]) => ({ etiqueta: semana, ...v }));
 
+  const estadoMap = new Map<string, number>();
+  for (const t of todasLasTareas) {
+    estadoMap.set(t.status, (estadoMap.get(t.status) ?? 0) + 1);
+  }
+  const porEstado = Array.from(estadoMap.entries()).map(([estado, total]) => ({
+    estado,
+    etiqueta: ESTADO_LABEL[estado] ?? estado,
+    total,
+  }));
+
+  const tareasRecientes: TareaResumen[] = [...todasLasTareas]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 12)
+    .map((t) => ({
+      id: t.id,
+      titulo: t.title,
+      proyecto: t.__proyectoNombre,
+      frente: t.__frente,
+      estado: t.status,
+      prioridad: t.priority,
+      asignado: t.assigneeName,
+      creadaHace: diasDesde(t.createdAt),
+    }));
+
   return {
     generadoEn: new Date().toISOString(),
     totalTareas: todasLasTareas.length,
@@ -196,9 +240,11 @@ export async function calcularMetricas(): Promise<MetricasKaneo> {
     totalAtrasadas,
     sinAsignar,
     porFrente: Array.from(frenteMap.entries()).map(([frente, v]) => ({ frente, ...v })),
+    porEstado,
     porProyecto: porProyecto.sort((a, b) => b.totalTareas - a.totalTareas),
     porPersona: Array.from(personaMap.values()).sort((a, b) => b.activas - a.activas),
     prioridadAltaEstancada,
     tendenciaCreacion,
+    tareasRecientes,
   };
 }
