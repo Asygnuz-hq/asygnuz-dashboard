@@ -18,7 +18,7 @@ export default async function AppLayout({
     <div className="flex flex-1 min-h-screen">
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="flex items-center justify-between border-b border-border bg-surface px-6 py-3 gap-4">
+        <header className="print:hidden flex items-center justify-between border-b border-border bg-surface px-6 py-3 gap-4">
           <span className="text-sm text-muted shrink-0">
             {user?.user_metadata?.full_name ?? user?.email}
           </span>

@@ -45,6 +45,14 @@ const sections: NavSection[] = [
     ],
   },
   {
+    title: "Métricas",
+    items: [
+      { href: "/metricas", label: "Vista Ejecutiva" },
+      { href: "/metricas/carga", label: "Carga por Persona" },
+      { href: "/metricas/reporte", label: "Reporte para Junta" },
+    ],
+  },
+  {
     title: "",
     items: [
       { href: "/deudas-personales", label: "Deudas Personales" },
@@ -57,7 +65,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <nav className="w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">
+    <nav className="print:hidden w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">
       <div className="px-2 py-1">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
