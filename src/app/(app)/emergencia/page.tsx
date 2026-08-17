@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
@@ -17,30 +17,70 @@ const columns: ColumnDef[] = [
   { key: "notas", label: "Notas", type: "text" },
 ];
 
+const columnasInventario: ColumnDef[] = [
+  { key: "item", label: "Item", type: "text", required: true },
+  { key: "cantidad", label: "Cantidad", type: "number", required: true, defaultValue: 0 },
+  { key: "unidad", label: "Unidad", type: "text", defaultValue: "unidades" },
+  { key: "notas", label: "Notas", type: "text" },
+];
+
 type Caso = {
   id: string;
   nombre: string;
+  necesidad: string;
   zona: string | null;
   estado: "Pendiente" | "Atendido";
   creado_en: string;
   atendido_en: string | null;
 };
 
+type ItemInventario = {
+  id: string;
+  item: string;
+  cantidad: number;
+  unidad: string;
+};
+
 function diasDesde(iso: string): number {
   return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24)));
 }
 
+// Cruce simple por palabras en común entre lo que pide el caso y el nombre
+// del item en bodega ("agua" en necesidad ↔ "Agua embotellada" en bodega).
+// No es IA, es una coincidencia de texto — funciona bien para esto y no
+// depende de nada externo.
+const PALABRAS_VACIAS = new Set(["de", "la", "el", "los", "las", "y", "para", "con", "en", "un", "una"]);
+
+function palabrasClave(texto: string): string[] {
+  return texto
+    .toLowerCase()
+    .replace(/[.,;:()]/g, " ")
+    .split(/\s+/)
+    .filter((p) => p.length > 2 && !PALABRAS_VACIAS.has(p));
+}
+
+function hayCoincidencia(necesidad: string, item: string): boolean {
+  const palabrasNecesidad = palabrasClave(necesidad);
+  const palabrasItem = palabrasClave(item);
+  return palabrasNecesidad.some((pn) => palabrasItem.some((pi) => pi.includes(pn) || pn.includes(pi)));
+}
+
 export default function EmergenciaPage() {
   const [casos, setCasos] = useState<Caso[]>([]);
+  const [inventario, setInventario] = useState<ItemInventario[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     const supabase = createClient();
-    const { data } = await supabase
-      .from("casos_emergencia")
-      .select("id, nombre, zona, estado, creado_en, atendido_en")
-      .order("creado_en", { ascending: false });
-    setCasos((data as Caso[]) ?? []);
+    const [{ data: c }, { data: i }] = await Promise.all([
+      supabase
+        .from("casos_emergencia")
+        .select("id, nombre, necesidad, zona, estado, creado_en, atendido_en")
+        .order("creado_en", { ascending: false }),
+      supabase.from("inventario_emergencia").select("id, item, cantidad, unidad").order("item"),
+    ]);
+    setCasos((c as Caso[]) ?? []);
+    setInventario((i as ItemInventario[]) ?? []);
     setLoading(false);
   }, []);
 
@@ -70,12 +110,23 @@ export default function EmergenciaPage() {
     .map(([zona, v]) => ({ zona, ...v }))
     .sort((a, b) => b.total - a.total);
 
+  const sugerencias = useMemo(() => {
+    const disponibles = inventario.filter((i) => i.cantidad > 0);
+    return pendientes
+      .flatMap((caso) =>
+        disponibles
+          .filter((item) => hayCoincidencia(caso.necesidad, item.item))
+          .map((item) => ({ caso, item }))
+      )
+      .slice(0, 20);
+  }, [pendientes, inventario]);
+
   return (
     <div className="flex flex-col gap-8">
       <PageHeader title="Emergencia — Casos del terremoto" subtitle="Seguimiento de personas atendidas y pendientes." />
 
       {loading ? (
-        <p className="text-sm text-muted">Cargando casos…</p>
+        <p className="text-sm text-muted">Cargando…</p>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -102,6 +153,41 @@ export default function EmergenciaPage() {
               ))}
               {porZona.length === 0 && <p className="text-sm text-muted">Sin casos todavía.</p>}
             </div>
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+              Qué le podemos dar a quién — según lo que hay en bodega
+            </h2>
+            <div className="flex flex-col gap-2">
+              {sugerencias.map(({ caso, item }, idx) => (
+                <div
+                  key={`${caso.id}-${item.id}-${idx}`}
+                  className="rounded-lg border border-accent/40 bg-accent/5 p-3 flex items-center justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm">
+                      <span className="font-medium">{caso.nombre}</span>{" "}
+                      <span className="text-muted">necesita: {caso.necesidad}</span>
+                    </p>
+                    <p className="text-xs text-muted">{caso.zona || "Sin zona"}</p>
+                  </div>
+                  <span className="text-xs shrink-0 rounded-full bg-accent text-accent-foreground px-2.5 py-1">
+                    Tienes {item.cantidad} {item.unidad} de {item.item}
+                  </span>
+                </div>
+              ))}
+              {sugerencias.length === 0 && (
+                <p className="text-sm text-muted">
+                  Sin coincidencias todavía entre lo pendiente y lo que hay en bodega.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Bodega — lo que tenemos para repartir</h2>
+            <DataTable table="inventario_emergencia" columns={columnasInventario} orderBy="item" ascending onChange={load} />
           </div>
 
           <div>
