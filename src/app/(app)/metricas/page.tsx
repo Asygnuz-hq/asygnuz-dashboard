@@ -23,6 +23,8 @@ import { Semaforo } from "@/components/Semaforo";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
 import { useMetricas } from "@/lib/kaneo/useMetricas";
 import type { ProyectoMetrica } from "@/lib/kaneo/metrics";
+import { useMetricasCrecimiento } from "@/lib/espocrm/useMetricasCrecimiento";
+import { SeccionCrecimiento } from "./SeccionCrecimiento";
 
 const PALETTE = { activas: "#3c5e99", completadas: "#5c8a72", atrasadas: "#d9534f" };
 const ESTADO_COLOR: Record<string, string> = {
@@ -60,6 +62,7 @@ export default function MetricasPage() {
   const theme = useTheme();
   const chartColors = CHART_COLORS[theme];
   const { metricas, error, loading, actualizando, recargar } = useMetricas();
+  const crecimiento = useMetricasCrecimiento();
 
   return (
     <div className="flex flex-col gap-8">
@@ -251,6 +254,8 @@ export default function MetricasPage() {
           </div>
         </>
       )}
+
+      <SeccionCrecimiento {...crecimiento} chartColors={chartColors} />
     </div>
   );
 }

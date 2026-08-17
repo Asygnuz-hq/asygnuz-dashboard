@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useIsEmergencia } from "@/lib/useIsEmergencia";
 
 type NavItem = { href: string; label: string };
 type NavSection = { title: string; items: NavItem[] };
@@ -62,8 +63,18 @@ const sections: NavSection[] = [
   },
 ];
 
+const seccionEmergencia: NavSection = {
+  title: "Emergencia",
+  items: [{ href: "/emergencia", label: "Casos del Terremoto" }],
+};
+
 export function Sidebar() {
   const pathname = usePathname();
+  const isEmergencia = useIsEmergencia();
+
+  // El usuario externo del caso del terremoto solo ve su propia sección —
+  // el resto del negocio de ASYGNUZ no le pertenece ni le interesa.
+  const visibleSections = isEmergencia ? [seccionEmergencia] : [...sections, seccionEmergencia];
 
   return (
     <nav className="print:hidden w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">
@@ -78,7 +89,7 @@ export function Sidebar() {
         <p className="text-xs text-muted mt-1">Dashboard</p>
       </div>
 
-      {sections.map((section, i) => (
+      {visibleSections.map((section, i) => (
         <div key={i} className="flex flex-col gap-1">
           {section.title && (
             <p className="px-2 text-xs uppercase tracking-wide text-muted mb-1">

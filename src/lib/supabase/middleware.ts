@@ -55,6 +55,23 @@ export async function updateSession(request: NextRequest) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
+
+    // Usuario externo del caso del terremoto — solo puede ver /emergencia,
+    // sin importar qué otra ruta pida. Aislamiento de UI; el aislamiento
+    // real de datos vive en las políticas RLS (schema-emergencia-terremoto.sql).
+    if (!requiereSegundoFactor && !isLoginPage) {
+      // RPC en vez de leer la tabla directo: es_emergencia() es
+      // security definer y no queda bloqueada por su propia política RLS
+      // (que le niega a este mismo usuario leer profiles).
+      const { data: esEmergencia } = await supabase.rpc("es_emergencia");
+      const enRutaEmergencia = request.nextUrl.pathname.startsWith("/emergencia");
+
+      if (esEmergencia && !enRutaEmergencia) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/emergencia";
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return response;
