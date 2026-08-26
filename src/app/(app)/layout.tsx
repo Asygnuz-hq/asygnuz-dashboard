@@ -2,6 +2,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { LogoutButton } from "@/components/LogoutButton";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { GlobalSearch } from "@/components/GlobalSearch";
+import { IdleLogout } from "@/components/IdleLogout";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -16,6 +17,7 @@ export default async function AppLayout({
 
   return (
     <div className="flex flex-1 min-h-screen">
+      <IdleLogout />
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <header className="print:hidden flex items-center justify-between border-b border-border bg-surface px-6 py-3 gap-4">

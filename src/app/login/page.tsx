@@ -1,8 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (
+        container: HTMLElement,
+        options: { sitekey: string; callback: (token: string) => void }
+      ) => string;
+    };
+  }
+}
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +25,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<HTMLDivElement>(null);
 
   const [factorId, setFactorId] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -30,15 +46,30 @@ export default function LoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  function renderTurnstile() {
+    if (!TURNSTILE_SITE_KEY || !turnstileRef.current || !window.turnstile) return;
+    turnstileRef.current.innerHTML = "";
+    window.turnstile.render(turnstileRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: (token: string) => setCaptchaToken(token),
+    });
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: captchaToken ? { captchaToken } : undefined,
+    });
     if (error) {
       setLoading(false);
       setError("Correo o contraseña incorrectos.");
+      setCaptchaToken(null);
+      renderTurnstile();
       return;
     }
 
@@ -168,11 +199,21 @@ export default function LoginPage() {
           />
         </label>
 
+        {TURNSTILE_SITE_KEY && (
+          <>
+            <Script
+              src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+              onLoad={renderTurnstile}
+            />
+            <div ref={turnstileRef} />
+          </>
+        )}
+
         {error && <p className="text-sm text-danger">{error}</p>}
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || (Boolean(TURNSTILE_SITE_KEY) && !captchaToken)}
           className="mt-2 rounded-md bg-accent text-accent-foreground font-medium py-2 disabled:opacity-60"
         >
           {loading ? "Ingresando..." : "Ingresar"}
