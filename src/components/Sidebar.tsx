@@ -51,6 +51,7 @@ const sections: NavSection[] = [
       { href: "/metricas", label: "Vista Ejecutiva" },
       { href: "/metricas/carga", label: "Carga por Persona" },
       { href: "/metricas/reporte", label: "Reporte para Junta" },
+      { href: "/metricas/clientes", label: "Meta Ads por Cliente" },
       { href: "/metricas/permisos", label: "Permisos" },
     ],
   },
