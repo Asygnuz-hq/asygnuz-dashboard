@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
-import type { MetaInsightRow } from "@/lib/meta/client";
+import type { MetaInsightRow, InstagramMedia } from "@/lib/meta/client";
 
 type Conexion = {
   id: string;
@@ -31,6 +31,18 @@ function moneda(valor: string): string {
   );
 }
 
+function tipoLegible(m: InstagramMedia): string {
+  if (m.media_product_type === "STORY") return "Historia";
+  if (m.media_product_type === "REELS") return "Reel";
+  if (m.media_type === "CAROUSEL_ALBUM") return "Carrusel";
+  if (m.media_type === "VIDEO") return "Video";
+  return "Imagen";
+}
+
+function fechaCorta(iso: string): string {
+  return new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short" });
+}
+
 export default function MetricasClientesPage() {
   const searchParams = useSearchParams();
   const [conexiones, setConexiones] = useState<Conexion[] | null>(null);
@@ -40,6 +52,10 @@ export default function MetricasClientesPage() {
   const [insights, setInsights] = useState<MetaInsightRow[] | null>(null);
   const [errorInsights, setErrorInsights] = useState<string | null>(null);
   const [cargandoInsights, setCargandoInsights] = useState(false);
+  const [media, setMedia] = useState<InstagramMedia[] | null>(null);
+  const [historias, setHistorias] = useState<InstagramMedia[] | null>(null);
+  const [errorInstagram, setErrorInstagram] = useState<string | null>(null);
+  const [cargandoInstagram, setCargandoInstagram] = useState(false);
 
   async function cargarConexiones() {
     try {
@@ -61,15 +77,33 @@ export default function MetricasClientesPage() {
     setInsights(null);
     setErrorInsights(null);
     setCargandoInsights(true);
-    try {
-      const res = await fetch(`/api/meta/insights?conexion_id=${conexion.id}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setInsights(data.insights);
-    } catch (err) {
-      setErrorInsights(err instanceof Error ? err.message : "Error desconocido");
-    } finally {
-      setCargandoInsights(false);
+    setMedia(null);
+    setHistorias(null);
+    setErrorInstagram(null);
+
+    const promesaAds = fetch(`/api/meta/insights?conexion_id=${conexion.id}`)
+      .then((res) => res.json().then((data) => ({ res, data })))
+      .then(({ res, data }) => {
+        if (!res.ok) throw new Error(data.error);
+        setInsights(data.insights);
+      })
+      .catch((err) => setErrorInsights(err instanceof Error ? err.message : "Error desconocido"))
+      .finally(() => setCargandoInsights(false));
+
+    if (conexion.instagram_business_id) {
+      setCargandoInstagram(true);
+      const promesaIg = fetch(`/api/meta/instagram?conexion_id=${conexion.id}`)
+        .then((res) => res.json().then((data) => ({ res, data })))
+        .then(({ res, data }) => {
+          if (!res.ok) throw new Error(data.error);
+          setMedia(data.media);
+          setHistorias(data.historias);
+        })
+        .catch((err) => setErrorInstagram(err instanceof Error ? err.message : "Error desconocido"))
+        .finally(() => setCargandoInstagram(false));
+      await Promise.all([promesaAds, promesaIg]);
+    } else {
+      await promesaAds;
     }
   }
 
@@ -206,6 +240,85 @@ export default function MetricasClientesPage() {
                 </table>
               </div>
             </>
+          )}
+
+          {seleccionado.instagram_business_id && (
+            <div className="flex flex-col gap-4 pt-4 border-t border-border">
+              <h2 className="text-lg font-semibold">Instagram — contenido orgánico</h2>
+
+              {cargandoInstagram && <p className="text-sm text-muted">Consultando Instagram…</p>}
+              {errorInstagram && <p className="text-sm text-danger">No se pudo leer Instagram: {errorInstagram}</p>}
+
+              {historias && historias.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                    Historias activas ahora ({historias.length})
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                    {historias.map((h) => (
+                      <a
+                        key={h.id}
+                        href={h.permalink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg border border-border bg-surface p-2 text-xs hover:border-accent"
+                      >
+                        <p className="font-medium">Alcance: {h.metricas.reach ?? "—"}</p>
+                        <p className="text-muted">Respuestas: {h.metricas.replies ?? 0}</p>
+                      </a>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted mt-1">
+                    Solo se pueden leer las historias mientras siguen activas (24h) — Meta no expone historial de historias vencidas.
+                  </p>
+                </div>
+              )}
+
+              {media && media.length === 0 && (
+                <p className="text-sm text-muted">Sin publicaciones recientes en esta cuenta.</p>
+              )}
+
+              {media && media.length > 0 && (
+                <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
+                        <th className="p-3">Publicación</th>
+                        <th className="p-3">Tipo</th>
+                        <th className="p-3">Fecha</th>
+                        <th className="p-3 text-right">Alcance</th>
+                        <th className="p-3 text-right">Likes</th>
+                        <th className="p-3 text-right">Comentarios</th>
+                        <th className="p-3 text-right">Compartidos</th>
+                        <th className="p-3 text-right">Guardados</th>
+                        <th className="p-3 text-right">Reproducciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {media.map((m) => (
+                        <tr key={m.id} className="border-b border-border last:border-0">
+                          <td className="p-3 max-w-xs truncate">
+                            <a href={m.permalink} target="_blank" rel="noreferrer" className="hover:underline">
+                              {m.caption ? m.caption.slice(0, 60) : "(sin texto)"}
+                            </a>
+                          </td>
+                          <td className="p-3">
+                            <span className="text-xs rounded-full bg-surface-alt px-2 py-0.5">{tipoLegible(m)}</span>
+                          </td>
+                          <td className="p-3 text-muted">{fechaCorta(m.timestamp)}</td>
+                          <td className="p-3 text-right">{m.metricas.reach ?? "—"}</td>
+                          <td className="p-3 text-right">{m.metricas.likes ?? "—"}</td>
+                          <td className="p-3 text-right">{m.metricas.comments ?? "—"}</td>
+                          <td className="p-3 text-right">{m.metricas.shares ?? "—"}</td>
+                          <td className="p-3 text-right">{m.metricas.saved ?? "—"}</td>
+                          <td className="p-3 text-right">{m.metricas.plays ?? "—"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           )}
         </div>
       )}

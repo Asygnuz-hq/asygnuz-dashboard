@@ -39,11 +39,13 @@ function env(name: string): string {
 export function buildAuthUrl(state: string): string {
   const appId = env("META_APP_ID");
   const redirectUri = env("META_REDIRECT_URI");
-  // instagram_basic queda fuera por ahora: pide tener el producto de
-  // Instagram agregado en la App de Meta, que todavía no está. Sin él, el
-  // conector igual lee métricas de anuncios normal — solo no trae el
-  // instagram_business_id de cada página. Se agrega más adelante si hace falta.
-  const scopes = ["ads_read", "pages_show_list", "business_management"].join(",");
+  const scopes = [
+    "ads_read",
+    "pages_show_list",
+    "business_management",
+    "instagram_basic",
+    "instagram_manage_insights",
+  ].join(",");
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
@@ -150,4 +152,124 @@ export async function fetchInsights(
     params
   );
   return data.data;
+}
+
+// -------- Instagram: contenido orgánico (reels, imágenes, carruseles, historias) --------
+
+export type InstagramMedia = {
+  id: string;
+  caption: string | null;
+  media_type: "IMAGE" | "VIDEO" | "CAROUSEL_ALBUM";
+  // REELS / STORY / FEED (viene distinto según el tipo real de la publicación).
+  media_product_type: string;
+  timestamp: string;
+  permalink: string;
+  thumbnail_url?: string;
+  metricas: Record<string, number>;
+};
+
+// Métricas válidas por tipo — pedirle a la Graph API una métrica que no
+// aplica a ese tipo de media da error, así que se arma la lista según
+// media_product_type en vez de pedir siempre las mismas.
+function metricasParaTipo(mediaProductType: string): string[] {
+  if (mediaProductType === "REELS") {
+    return ["reach", "likes", "comments", "shares", "saved", "plays", "total_interactions"];
+  }
+  if (mediaProductType === "STORY") {
+    // Las historias expiran a las 24h — solo se pueden leer mientras siguen activas.
+    return ["reach", "replies", "exits", "taps_forward", "taps_back"];
+  }
+  // Publicaciones normales de feed: foto, video o carrusel.
+  return ["reach", "likes", "comments", "shares", "saved", "total_interactions"];
+}
+
+async function fetchInsightsDeMedia(mediaId: string, mediaProductType: string, accessToken: string): Promise<Record<string, number>> {
+  const metricas = metricasParaTipo(mediaProductType);
+  try {
+    const data = await graphFetch<{ data: { name: string; values: { value: number }[] }[] }>(
+      `/${mediaId}/insights`,
+      { access_token: accessToken, metric: metricas.join(",") }
+    );
+    const out: Record<string, number> = {};
+    for (const m of data.data) {
+      out[m.name] = m.values?.[0]?.value ?? 0;
+    }
+    return out;
+  } catch {
+    // Publicaciones muy viejas o historias ya expiradas a veces no traen
+    // insights — se muestra la publicación igual, solo sin métricas.
+    return {};
+  }
+}
+
+// Trae las últimas publicaciones (feed + reels) de la cuenta de Instagram
+// conectada, con sus métricas. Las historias no se incluyen aquí porque
+// expiran a las 24h y /media no las lista — ver fetchInstagramStoriesActivas.
+export async function fetchInstagramMedia(conexion: MetaConexion, limite = 25): Promise<InstagramMedia[]> {
+  if (!conexion.instagram_business_id) {
+    throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene cuenta de Instagram asociada.`);
+  }
+  const lista = await graphFetch<{
+    data: {
+      id: string;
+      caption?: string;
+      media_type: InstagramMedia["media_type"];
+      media_product_type: string;
+      timestamp: string;
+      permalink: string;
+      thumbnail_url?: string;
+    }[];
+  }>(`/${conexion.instagram_business_id}/media`, {
+    access_token: conexion.access_token,
+    fields: "id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url",
+    limit: String(limite),
+  });
+
+  const conMetricas = await Promise.all(
+    lista.data.map(async (m) => ({
+      id: m.id,
+      caption: m.caption ?? null,
+      media_type: m.media_type,
+      media_product_type: m.media_product_type,
+      timestamp: m.timestamp,
+      permalink: m.permalink,
+      thumbnail_url: m.thumbnail_url,
+      metricas: await fetchInsightsDeMedia(m.id, m.media_product_type, conexion.access_token),
+    }))
+  );
+
+  return conMetricas;
+}
+
+// Historias activas ahora mismo (últimas 24h) — es la única ventana en la
+// que la Graph API las expone, no hay forma de ver historias ya vencidas.
+export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Promise<InstagramMedia[]> {
+  if (!conexion.instagram_business_id) {
+    throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene cuenta de Instagram asociada.`);
+  }
+  const lista = await graphFetch<{
+    data: {
+      id: string;
+      media_type: InstagramMedia["media_type"];
+      timestamp: string;
+      permalink: string;
+      thumbnail_url?: string;
+    }[];
+  }>(`/${conexion.instagram_business_id}/stories`, {
+    access_token: conexion.access_token,
+    fields: "id,media_type,timestamp,permalink,thumbnail_url",
+  });
+
+  return Promise.all(
+    lista.data.map(async (m) => ({
+      id: m.id,
+      caption: null,
+      media_type: m.media_type,
+      media_product_type: "STORY",
+      timestamp: m.timestamp,
+      permalink: m.permalink,
+      thumbnail_url: m.thumbnail_url,
+      metricas: await fetchInsightsDeMedia(m.id, "STORY", conexion.access_token),
+    }))
+  );
 }
