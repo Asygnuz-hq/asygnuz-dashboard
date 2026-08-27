@@ -20,9 +20,12 @@ create table if not exists meta_conexiones (
   actualizado_en timestamptz not null default now()
 );
 
-create unique index if not exists idx_meta_conexiones_ad_account
-  on meta_conexiones (ad_account_id)
-  where ad_account_id is not null;
+-- Restricción única normal (no parcial) — la necesita el upsert con
+-- ON CONFLICT (ad_account_id) del callback de OAuth. Postgres trata NULL
+-- como distinto entre sí, así que varias filas sin ad_account_id igual
+-- están permitidas.
+alter table meta_conexiones
+  add constraint meta_conexiones_ad_account_id_key unique (ad_account_id);
 
 alter table meta_conexiones enable row level security;
 drop policy if exists "team_full_access" on meta_conexiones;
