@@ -44,6 +44,17 @@ function fechaCorta(iso: string): string {
   return new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short" });
 }
 
+// Algunas métricas no aplican a todos los tipos de publicación (ej. "plays"
+// no existe en una foto) — se muestra "—" solo cuando de verdad no aplica,
+// en vez de mezclar eso con un 0 real.
+function numeroOMenos(valor: number | undefined): string {
+  return valor !== undefined ? numero(String(valor)) : "—";
+}
+
+function interacciones(m: InstagramMedia): number {
+  return (m.metricas.likes ?? 0) + (m.metricas.comments ?? 0) + (m.metricas.shares ?? 0) + (m.metricas.saved ?? 0);
+}
+
 export default function MetricasClientesPage() {
   const searchParams = useSearchParams();
   const [conexiones, setConexiones] = useState<Conexion[] | null>(null);
@@ -135,6 +146,11 @@ export default function MetricasClientesPage() {
   const totalGasto = insights?.reduce((acc, r) => acc + Number(r.spend), 0) ?? 0;
   const totalImpresiones = insights?.reduce((acc, r) => acc + Number(r.impressions), 0) ?? 0;
   const cpmPonderado = totalImpresiones ? (totalGasto / totalImpresiones) * 1000 : 0;
+
+  const totalAlcanceIG = media?.reduce((acc, m) => acc + (m.metricas.reach ?? 0), 0) ?? 0;
+  const totalInteraccionesIG = media?.reduce((acc, m) => acc + interacciones(m), 0) ?? 0;
+  const mejorPublicacion =
+    media && media.length > 0 ? [...media].sort((a, b) => (b.metricas.reach ?? 0) - (a.metricas.reach ?? 0))[0] : null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -298,6 +314,18 @@ export default function MetricasClientesPage() {
               {cargandoInstagram && <p className="text-sm text-muted">Consultando Instagram…</p>}
               {errorInstagram && <p className="text-sm text-danger">No se pudo leer Instagram: {errorInstagram}</p>}
 
+              {media && media.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <KpiCard label="Publicaciones (últimas 25)" value={String(media.length)} />
+                  <KpiCard label="Alcance total" value={numero(String(totalAlcanceIG))} />
+                  <KpiCard label="Interacciones totales" value={numero(String(totalInteraccionesIG))} />
+                  <KpiCard
+                    label="Mejor publicación (alcance)"
+                    value={mejorPublicacion ? numeroOMenos(mejorPublicacion.metricas.reach) : "—"}
+                  />
+                </div>
+              )}
+
               {historias && historias.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
@@ -310,10 +338,16 @@ export default function MetricasClientesPage() {
                         href={h.permalink}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-border bg-surface p-2 text-xs hover:border-accent"
+                        className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
                       >
-                        <p className="font-medium">Alcance: {h.metricas.reach ?? "—"}</p>
-                        <p className="text-muted">Respuestas: {h.metricas.replies ?? 0}</p>
+                        {h.imagenUrl && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={h.imagenUrl} alt="" className="w-full aspect-[9/16] object-cover bg-surface-alt" />
+                        )}
+                        <div className="p-2">
+                          <p className="font-medium">Alcance: {numeroOMenos(h.metricas.reach)}</p>
+                          <p className="text-muted">Respuestas: {numeroOMenos(h.metricas.replies)}</p>
+                        </div>
                       </a>
                     ))}
                   </div>
@@ -345,22 +379,40 @@ export default function MetricasClientesPage() {
                     </thead>
                     <tbody>
                       {media.map((m) => (
-                        <tr key={m.id} className="border-b border-border last:border-0">
-                          <td className="p-3 max-w-xs truncate">
-                            <a href={m.permalink} target="_blank" rel="noreferrer" className="hover:underline">
-                              {m.caption ? m.caption.slice(0, 60) : "(sin texto)"}
+                        <tr
+                          key={m.id}
+                          className={`border-b border-border last:border-0 ${
+                            mejorPublicacion?.id === m.id ? "bg-surface-alt" : ""
+                          }`}
+                        >
+                          <td className="p-3">
+                            <a href={m.permalink} target="_blank" rel="noreferrer" className="flex items-center gap-3 hover:underline">
+                              {m.imagenUrl ? (
+                                /* eslint-disable-next-line @next/next/no-img-element */
+                                <img
+                                  src={m.imagenUrl}
+                                  alt=""
+                                  className="w-10 h-10 rounded object-cover shrink-0 bg-surface-alt"
+                                />
+                              ) : (
+                                <span className="w-10 h-10 rounded shrink-0 bg-surface-alt" />
+                              )}
+                              <span className="max-w-xs truncate">
+                                {mejorPublicacion?.id === m.id && "⭐ "}
+                                {m.caption ? m.caption.slice(0, 60) : "(sin texto)"}
+                              </span>
                             </a>
                           </td>
                           <td className="p-3">
                             <span className="text-xs rounded-full bg-surface-alt px-2 py-0.5">{tipoLegible(m)}</span>
                           </td>
                           <td className="p-3 text-muted">{fechaCorta(m.timestamp)}</td>
-                          <td className="p-3 text-right">{m.metricas.reach ?? "—"}</td>
-                          <td className="p-3 text-right">{m.metricas.likes ?? "—"}</td>
-                          <td className="p-3 text-right">{m.metricas.comments ?? "—"}</td>
-                          <td className="p-3 text-right">{m.metricas.shares ?? "—"}</td>
-                          <td className="p-3 text-right">{m.metricas.saved ?? "—"}</td>
-                          <td className="p-3 text-right">{m.metricas.plays ?? "—"}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.reach)}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.likes)}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.comments)}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.shares)}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.saved)}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.plays)}</td>
                         </tr>
                       ))}
                     </tbody>

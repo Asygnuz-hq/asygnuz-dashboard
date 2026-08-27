@@ -255,7 +255,9 @@ export type InstagramMedia = {
   media_product_type: string;
   timestamp: string;
   permalink: string;
-  thumbnail_url?: string;
+  // thumbnail_url solo viene en videos/reels — para fotos hay que usar
+  // media_url. Se combinan en imagenUrl para no tener que decidirlo en la UI.
+  imagenUrl: string | null;
   metricas: Record<string, number>;
 };
 
@@ -274,6 +276,19 @@ function metricasParaTipo(mediaProductType: string): string[] {
   return ["reach", "likes", "comments", "shares", "saved", "total_interactions"];
 }
 
+async function pedirMetricaUnica(mediaId: string, metric: string, accessToken: string): Promise<number | null> {
+  try {
+    const data = await graphFetch<{ data: { name: string; values: { value: number }[] }[] }>(
+      `/${mediaId}/insights`,
+      { access_token: accessToken, metric },
+      GRAPH_INSTAGRAM_URL
+    );
+    return data.data?.[0]?.values?.[0]?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchInsightsDeMedia(mediaId: string, mediaProductType: string, accessToken: string): Promise<Record<string, number>> {
   const metricas = metricasParaTipo(mediaProductType);
   try {
@@ -288,9 +303,17 @@ async function fetchInsightsDeMedia(mediaId: string, mediaProductType: string, a
     }
     return out;
   } catch {
-    // Publicaciones muy viejas o historias ya expiradas a veces no traen
-    // insights — se muestra la publicación igual, solo sin métricas.
-    return {};
+    // Si UNA sola métrica de la lista no aplica a esta publicación, la API
+    // rechaza el pedido completo y antes se perdían todas las demás. Ahora
+    // se piden una por una para quedarse con las que sí respondan.
+    const out: Record<string, number> = {};
+    await Promise.all(
+      metricas.map(async (metric) => {
+        const valor = await pedirMetricaUnica(mediaId, metric, accessToken);
+        if (valor !== null) out[metric] = valor;
+      })
+    );
+    return out;
   }
 }
 
@@ -311,28 +334,40 @@ export async function fetchInstagramMedia(conexion: MetaConexion, limite = 25): 
       timestamp: string;
       permalink: string;
       thumbnail_url?: string;
+      media_url?: string;
+      like_count?: number;
+      comments_count?: number;
     }[];
   }>(
     `/${conexion.instagram_business_id}/media`,
     {
       access_token: token,
-      fields: "id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url",
+      fields:
+        "id,caption,media_type,media_product_type,timestamp,permalink,thumbnail_url,media_url,like_count,comments_count",
       limit: String(limite),
     },
     GRAPH_INSTAGRAM_URL
   );
 
   const conMetricas = await Promise.all(
-    lista.data.map(async (m) => ({
-      id: m.id,
-      caption: m.caption ?? null,
-      media_type: m.media_type,
-      media_product_type: m.media_product_type,
-      timestamp: m.timestamp,
-      permalink: m.permalink,
-      thumbnail_url: m.thumbnail_url,
-      metricas: await fetchInsightsDeMedia(m.id, m.media_product_type, token),
-    }))
+    lista.data.map(async (m) => {
+      const metricas = await fetchInsightsDeMedia(m.id, m.media_product_type, token);
+      // like_count/comments_count vienen del objeto de la publicación, no
+      // de Insights — casi nunca fallan, así que sirven de respaldo cuando
+      // Insights no trae esas dos métricas para este tipo de publicación.
+      if (metricas.likes === undefined && m.like_count !== undefined) metricas.likes = m.like_count;
+      if (metricas.comments === undefined && m.comments_count !== undefined) metricas.comments = m.comments_count;
+      return {
+        id: m.id,
+        caption: m.caption ?? null,
+        media_type: m.media_type,
+        media_product_type: m.media_product_type,
+        timestamp: m.timestamp,
+        permalink: m.permalink,
+        imagenUrl: m.thumbnail_url ?? m.media_url ?? null,
+        metricas,
+      };
+    })
   );
 
   return conMetricas;
@@ -367,7 +402,7 @@ export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Prom
       media_product_type: "STORY",
       timestamp: m.timestamp,
       permalink: m.permalink,
-      thumbnail_url: m.thumbnail_url,
+      imagenUrl: m.thumbnail_url ?? null,
       metricas: await fetchInsightsDeMedia(m.id, "STORY", token),
     }))
   );
