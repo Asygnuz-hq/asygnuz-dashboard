@@ -11,6 +11,7 @@ type Conexion = {
   cliente_nombre: string;
   ad_account_id: string | null;
   instagram_business_id: string | null;
+  instagram_username: string | null;
   token_expira_en: string | null;
 };
 
@@ -170,7 +171,18 @@ export default function MetricasClientesPage() {
               : "bg-surface-alt text-muted pointer-events-none"
           }`}
         >
-          Conectar cliente
+          Conectar anuncios
+        </a>
+        <a
+          href={nuevoCliente ? `/api/meta/instagram-connect?cliente=${encodeURIComponent(nuevoCliente)}` : "#"}
+          aria-disabled={!nuevoCliente}
+          className={`text-sm rounded-md px-4 py-2 font-medium border ${
+            nuevoCliente
+              ? "border-border hover:bg-surface-alt"
+              : "border-border text-muted pointer-events-none opacity-50"
+          }`}
+        >
+          Conectar Instagram
         </a>
       </div>
 
@@ -190,9 +202,9 @@ export default function MetricasClientesPage() {
             >
               <button onClick={() => verMetricas(c)} className="text-left w-full hover:opacity-80">
                 <p className="font-medium pr-16">{c.cliente_nombre}</p>
-                <p className="text-xs text-muted mt-1">
-                  {c.ad_account_id ?? "sin cuenta de anuncios"}
-                  {c.instagram_business_id && " · IG conectado"}
+                <p className="text-xs text-muted mt-1">{c.ad_account_id ?? "sin cuenta de anuncios"}</p>
+                <p className="text-xs text-muted">
+                  {c.instagram_username ? `Instagram: @${c.instagram_username}` : "Instagram no conectado"}
                 </p>
               </button>
               <button
@@ -202,6 +214,14 @@ export default function MetricasClientesPage() {
               >
                 {desconectando === c.id ? "..." : "Desconectar"}
               </button>
+              {!c.instagram_business_id && (
+                <a
+                  href={`/api/meta/instagram-connect?cliente=${encodeURIComponent(c.cliente_nombre)}`}
+                  className="mt-2 inline-block text-xs rounded-md px-2 py-1 bg-surface-alt hover:bg-accent hover:text-accent-foreground transition"
+                >
+                  Conectar Instagram
+                </a>
+              )}
             </div>
           ))}
         </div>

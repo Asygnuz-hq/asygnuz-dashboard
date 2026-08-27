@@ -13,7 +13,9 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from("meta_conexiones")
-    .select("id, cliente_nombre, ad_account_id, instagram_business_id, token_expira_en, actualizado_en")
+    .select(
+      "id, cliente_nombre, ad_account_id, instagram_business_id, instagram_username, token_expira_en, actualizado_en"
+    )
     .order("cliente_nombre");
 
   if (error) {
