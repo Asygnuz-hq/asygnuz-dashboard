@@ -151,8 +151,9 @@ export default function EmergenciaPage() {
         .select(
           "id, numero_caso, nombre, necesidad, prioridad, zona, ciudad, ubicacion_detalle, estado, creado_en, atendido_en"
         )
+        .is("eliminado_en", null)
         .order("creado_en", { ascending: false }),
-      supabase.from("inventario_emergencia").select("id, item, cantidad, unidad").order("item"),
+      supabase.from("inventario_emergencia").select("id, item, cantidad, unidad").is("eliminado_en", null).order("item"),
       supabase.from("items_caso_emergencia").select("entregado"),
     ]);
     setCasos((c as Caso[]) ?? []);
