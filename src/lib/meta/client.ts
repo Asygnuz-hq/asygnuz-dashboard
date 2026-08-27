@@ -266,14 +266,18 @@ export type InstagramMedia = {
 // media_product_type en vez de pedir siempre las mismas.
 function metricasParaTipo(mediaProductType: string): string[] {
   if (mediaProductType === "REELS") {
-    return ["reach", "likes", "comments", "shares", "saved", "plays", "total_interactions"];
+    // Meta renombró "plays" a "views" en versiones recientes de la API —
+    // se piden las dos porque según la fecha de publicación responde una
+    // u otra (el fallback por métrica individual descarta la que falle).
+    return ["reach", "likes", "comments", "shares", "saved", "plays", "views", "total_interactions"];
   }
   if (mediaProductType === "STORY") {
     // Las historias expiran a las 24h — solo se pueden leer mientras siguen activas.
     return ["reach", "replies", "exits", "taps_forward", "taps_back"];
   }
-  // Publicaciones normales de feed: foto, video o carrusel.
-  return ["reach", "likes", "comments", "shares", "saved", "total_interactions"];
+  // Publicaciones normales de feed: foto, video o carrusel. Se incluye
+  // "views" también por si es un video de feed (no reel).
+  return ["reach", "likes", "comments", "shares", "saved", "views", "total_interactions"];
 }
 
 async function pedirMetricaUnica(mediaId: string, metric: string, accessToken: string): Promise<number | null> {
