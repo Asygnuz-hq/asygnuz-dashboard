@@ -11,6 +11,9 @@
   --accent-bright: #3c5e99;
   --accent-foreground: #ffffff;
   --danger: #d9534f;
+  --danger-strong: #a3241e;
+  --warning: #d97706;
+  --success: #1d9e75;
   --logo-filter: brightness(0) invert(1);
 }
 
@@ -25,6 +28,9 @@
   --accent-bright: #2f5c99;
   --accent-foreground: #ffffff;
   --danger: #c0392b;
+  --danger-strong: #7f1d1a;
+  --warning: #b45309;
+  --success: #178a63;
   --logo-filter: none;
 }
 
@@ -39,6 +45,9 @@
   --color-accent-bright: var(--accent-bright);
   --color-accent-foreground: var(--accent-foreground);
   --color-danger: var(--danger);
+  --color-danger-strong: var(--danger-strong);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
 }
 
 body {
