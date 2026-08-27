@@ -39,7 +39,11 @@ function env(name: string): string {
 export function buildAuthUrl(state: string): string {
   const appId = env("META_APP_ID");
   const redirectUri = env("META_REDIRECT_URI");
-  const scopes = ["ads_read", "instagram_basic", "pages_show_list", "business_management"].join(",");
+  // instagram_basic queda fuera por ahora: pide tener el producto de
+  // Instagram agregado en la App de Meta, que todavía no está. Sin él, el
+  // conector igual lee métricas de anuncios normal — solo no trae el
+  // instagram_business_id de cada página. Se agrega más adelante si hace falta.
+  const scopes = ["ads_read", "pages_show_list", "business_management"].join(",");
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
