@@ -39,16 +39,14 @@ function env(name: string): string {
 export function buildAuthUrl(state: string): string {
   const appId = env("META_APP_ID");
   const redirectUri = env("META_REDIRECT_URI");
-  // Meta renombró los permisos de Instagram — los antiguos "instagram_basic"
-  // e "instagram_manage_insights" quedaron obsoletos, ahora son estos con
-  // "business" en el nombre.
-  const scopes = [
-    "ads_read",
-    "pages_show_list",
-    "business_management",
-    "instagram_business_basic",
-    "instagram_business_manage_insights",
-  ].join(",");
+  // Este flujo pasa por el diálogo de FACEBOOK (facebook.com/dialog/oauth),
+  // que solo entiende permisos de anuncios/páginas. Los permisos de
+  // Instagram (instagram_business_basic, etc.) pertenecen al producto
+  // separado "Instagram API with Instagram Login", cuyo diálogo es
+  // instagram.com — no se pueden pedir aquí, Facebook los rechaza con
+  // "Invalid Scopes". El contenido orgánico de Instagram se conecta con un
+  // flujo aparte (ver /api/meta/instagram-connect).
+  const scopes = ["ads_read", "pages_show_list", "business_management"].join(",");
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
