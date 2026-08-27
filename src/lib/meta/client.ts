@@ -266,14 +266,21 @@ export type InstagramMedia = {
 // media_product_type en vez de pedir siempre las mismas.
 function metricasParaTipo(mediaProductType: string): string[] {
   if (mediaProductType === "REELS") {
-    // Meta renombró "plays" a "views" en versiones recientes de la API —
-    // se piden las dos porque según la fecha de publicación responde una
-    // u otra (el fallback por métrica individual descarta la que falle).
-    return ["reach", "likes", "comments", "shares", "saved", "plays", "views", "total_interactions"];
+    // "plays" quedó obsoleta (Meta la reemplazó por "views") — pedirla
+    // junto con las demás en un solo llamado hacía fallar TODO el paquete
+    // (la API rechaza la lista completa si una sola métrica no es válida),
+    // lo que dejaba en blanco hasta el alcance. Confirmado contra la API en
+    // vivo: la lista vigente ya no incluye "plays".
+    return ["reach", "likes", "comments", "shares", "saved", "views", "total_interactions"];
   }
   if (mediaProductType === "STORY") {
-    // Las historias expiran a las 24h — solo se pueden leer mientras siguen activas.
-    return ["reach", "replies", "exits", "taps_forward", "taps_back"];
+    // Las historias expiran a las 24h — solo se pueden leer mientras siguen
+    // activas. "exits"/"taps_forward"/"taps_back" también quedaron
+    // obsoletas (confirmado contra la API en vivo) — el reemplazo moderno
+    // es "navigation", pero devuelve un desglose en vez de un número
+    // simple, así que por ahora se deja fuera y solo se pide lo que sí
+    // encaja en el modelo actual (un valor por métrica).
+    return ["reach", "replies", "total_interactions"];
   }
   // Publicaciones normales de feed: foto, video o carrusel. Se incluye
   // "views" también por si es un video de feed (no reel).

@@ -683,7 +683,7 @@ export default function MetricasClientesPage() {
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.comments)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.shares)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.saved)}</td>
-                          <td className="p-3 text-right">{numeroOMenos(m.metricas.plays ?? m.metricas.views)}</td>
+                          <td className="p-3 text-right">{numeroOMenos(m.metricas.views)}</td>
                         </tr>
                       ))}
                     </tbody>
