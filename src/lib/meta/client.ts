@@ -98,6 +98,7 @@ export async function exchangeForLongLivedToken(shortLivedToken: string): Promis
 export type CuentaDisponible = {
   ad_account_id: string;
   ad_account_name: string;
+  business_name: string | null;
   page_id: string | null;
   page_name: string | null;
   instagram_business_id: string | null;
@@ -105,12 +106,14 @@ export type CuentaDisponible = {
 
 // Trae las cuentas de anuncios y páginas a las que el usuario que autorizó
 // el login le dio acceso a la App — para que elija cuál conectar a qué
-// cliente si maneja varias.
+// cliente. Una misma persona (ej. la cuenta de Facebook de un familiar)
+// puede tener acceso a varios portafolios de Business Manager distintos,
+// así que se incluye el nombre del portafolio (business.name) para que se
+// pueda distinguir de un vistazo cuál es la cuenta correcta.
 export async function fetchCuentasDisponibles(accessToken: string): Promise<CuentaDisponible[]> {
-  const cuentas = await graphFetch<{ data: { account_id: string; name: string }[] }>(
-    "/me/adaccounts",
-    { access_token: accessToken, fields: "account_id,name" }
-  );
+  const cuentas = await graphFetch<{
+    data: { account_id: string; name: string; business?: { name: string } }[];
+  }>("/me/adaccounts", { access_token: accessToken, fields: "account_id,name,business" });
   const paginas = await graphFetch<{
     data: { id: string; name: string; instagram_business_account?: { id: string } }[];
   }>("/me/accounts", {
@@ -123,6 +126,7 @@ export async function fetchCuentasDisponibles(accessToken: string): Promise<Cuen
   return cuentas.data.map((c) => ({
     ad_account_id: `act_${c.account_id}`,
     ad_account_name: c.name,
+    business_name: c.business?.name ?? null,
     page_id: primeraPagina?.id ?? null,
     page_name: primeraPagina?.name ?? null,
     instagram_business_id: primeraPagina?.instagram_business_account?.id ?? null,

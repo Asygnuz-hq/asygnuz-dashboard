@@ -56,6 +56,7 @@ export default function MetricasClientesPage() {
   const [historias, setHistorias] = useState<InstagramMedia[] | null>(null);
   const [errorInstagram, setErrorInstagram] = useState<string | null>(null);
   const [cargandoInstagram, setCargandoInstagram] = useState(false);
+  const [desconectando, setDesconectando] = useState<string | null>(null);
 
   async function cargarConexiones() {
     try {
@@ -71,6 +72,26 @@ export default function MetricasClientesPage() {
   useEffect(() => {
     cargarConexiones();
   }, []);
+
+  async function desconectar(c: Conexion) {
+    if (!confirm(`¿Desconectar "${c.cliente_nombre}"? Puedes volver a conectarla cuando quieras.`)) return;
+    setDesconectando(c.id);
+    try {
+      const res = await fetch("/api/meta/desconectar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: c.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      if (seleccionado?.id === c.id) setSeleccionado(null);
+      await cargarConexiones();
+    } catch (err) {
+      setErrorLista(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setDesconectando(null);
+    }
+  }
 
   async function verMetricas(conexion: Conexion) {
     setSeleccionado(conexion);
@@ -161,19 +182,27 @@ export default function MetricasClientesPage() {
         )}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {conexiones?.map((c) => (
-            <button
+            <div
               key={c.id}
-              onClick={() => verMetricas(c)}
-              className={`text-left rounded-lg border p-4 hover:bg-surface-alt transition ${
+              className={`relative rounded-lg border p-4 transition ${
                 seleccionado?.id === c.id ? "border-accent" : "border-border"
               } bg-surface`}
             >
-              <p className="font-medium">{c.cliente_nombre}</p>
-              <p className="text-xs text-muted mt-1">
-                {c.ad_account_id ?? "sin cuenta de anuncios"}
-                {c.instagram_business_id && " · IG conectado"}
-              </p>
-            </button>
+              <button onClick={() => verMetricas(c)} className="text-left w-full hover:opacity-80">
+                <p className="font-medium pr-16">{c.cliente_nombre}</p>
+                <p className="text-xs text-muted mt-1">
+                  {c.ad_account_id ?? "sin cuenta de anuncios"}
+                  {c.instagram_business_id && " · IG conectado"}
+                </p>
+              </button>
+              <button
+                onClick={() => desconectar(c)}
+                disabled={desconectando === c.id}
+                className="absolute top-3 right-3 text-xs text-muted hover:text-danger disabled:opacity-50"
+              >
+                {desconectando === c.id ? "..." : "Desconectar"}
+              </button>
+            </div>
           ))}
         </div>
       </div>
