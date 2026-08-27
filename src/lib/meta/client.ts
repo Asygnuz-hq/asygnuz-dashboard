@@ -324,7 +324,7 @@ async function fetchInsightsDeMedia(mediaId: string, mediaProductType: string, a
 // Trae las últimas publicaciones (feed + reels) de la cuenta de Instagram
 // conectada, con sus métricas. Las historias no se incluyen aquí porque
 // expiran a las 24h y /media no las lista — ver fetchInstagramStoriesActivas.
-export async function fetchInstagramMedia(conexion: MetaConexion, limite = 25): Promise<InstagramMedia[]> {
+export async function fetchInstagramMedia(conexion: MetaConexion, limite = 50): Promise<InstagramMedia[]> {
   if (!conexion.instagram_business_id || !conexion.instagram_access_token) {
     throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene Instagram conectado.`);
   }

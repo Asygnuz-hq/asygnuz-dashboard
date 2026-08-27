@@ -55,6 +55,52 @@ function interacciones(m: InstagramMedia): number {
   return (m.metricas.likes ?? 0) + (m.metricas.comments ?? 0) + (m.metricas.shares ?? 0) + (m.metricas.saved ?? 0);
 }
 
+// Interacciones sobre alcance — mide qué tan bien conectó la publicación
+// con la gente que la vio, no solo cuánta gente la vio.
+function tasaInteraccion(m: InstagramMedia): number | null {
+  const alcance = m.metricas.reach;
+  if (!alcance) return null;
+  return (interacciones(m) / alcance) * 100;
+}
+
+const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+const FRANJAS = [
+  { nombre: "Madrugada (12am–6am)", desde: 0, hasta: 6 },
+  { nombre: "Mañana (6am–12pm)", desde: 6, hasta: 12 },
+  { nombre: "Tarde (12pm–6pm)", desde: 12, hasta: 18 },
+  { nombre: "Noche (6pm–12am)", desde: 18, hasta: 24 },
+];
+
+type MomentoStats = { dia: string; franja: string; promedio: number; publicaciones: number };
+
+// Agrupa las publicaciones por día de la semana + franja horaria y calcula
+// la tasa de interacción promedio de cada combinación, para detectar cuándo
+// conviene publicar. Necesita al menos un par de publicaciones por franja
+// para que el promedio no sea ruido de una sola publicación.
+function mejoresMomentos(media: InstagramMedia[]): MomentoStats[] {
+  const grupos = new Map<string, { suma: number; cuenta: number }>();
+  for (const m of media) {
+    const tasa = tasaInteraccion(m);
+    if (tasa === null) continue;
+    const fecha = new Date(m.timestamp);
+    const dia = DIAS[fecha.getDay()];
+    const hora = fecha.getHours();
+    const franja = FRANJAS.find((f) => hora >= f.desde && hora < f.hasta)?.nombre ?? FRANJAS[0].nombre;
+    const key = `${dia}|${franja}`;
+    const actual = grupos.get(key) ?? { suma: 0, cuenta: 0 };
+    actual.suma += tasa;
+    actual.cuenta += 1;
+    grupos.set(key, actual);
+  }
+  return Array.from(grupos.entries())
+    .map(([key, { suma, cuenta }]) => {
+      const [dia, franja] = key.split("|");
+      return { dia, franja, promedio: suma / cuenta, publicaciones: cuenta };
+    })
+    .filter((g) => g.publicaciones >= 2)
+    .sort((a, b) => b.promedio - a.promedio);
+}
+
 export default function MetricasClientesPage() {
   const searchParams = useSearchParams();
   const [conexiones, setConexiones] = useState<Conexion[] | null>(null);
@@ -151,6 +197,9 @@ export default function MetricasClientesPage() {
   const totalInteraccionesIG = media?.reduce((acc, m) => acc + interacciones(m), 0) ?? 0;
   const mejorPublicacion =
     media && media.length > 0 ? [...media].sort((a, b) => (b.metricas.reach ?? 0) - (a.metricas.reach ?? 0))[0] : null;
+  const tasasValidas = media?.map(tasaInteraccion).filter((t): t is number => t !== null) ?? [];
+  const tasaPromedio = tasasValidas.length ? tasasValidas.reduce((a, b) => a + b, 0) / tasasValidas.length : null;
+  const momentos = media ? mejoresMomentos(media) : [];
 
   return (
     <div className="flex flex-col gap-8">
@@ -160,15 +209,15 @@ export default function MetricasClientesPage() {
       />
 
       {conectado && (
-        <p className="text-sm rounded-md border border-border bg-surface p-3 text-accent-bright">
+        <p className="text-sm rounded-md border border-border bg-surface p-3 text-accent-bright print:hidden">
           "{conectado}" quedó conectado correctamente.
         </p>
       )}
       {errorConexion && (
-        <p className="text-sm rounded-md border border-border bg-surface p-3 text-danger">{errorConexion}</p>
+        <p className="text-sm rounded-md border border-border bg-surface p-3 text-danger print:hidden">{errorConexion}</p>
       )}
 
-      <div className="rounded-lg border border-border bg-surface p-4 flex items-end gap-3">
+      <div className="rounded-lg border border-border bg-surface p-4 flex items-end gap-3 print:hidden">
         <label className="flex flex-col gap-1 text-sm flex-1 max-w-sm">
           Nombre del cliente
           <input
@@ -202,7 +251,7 @@ export default function MetricasClientesPage() {
         </a>
       </div>
 
-      <div>
+      <div className="print:hidden">
         <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Clientes conectados</h2>
         {errorLista && <p className="text-sm text-danger">{errorLista}</p>}
         {conexiones && conexiones.length === 0 && (
@@ -244,8 +293,29 @@ export default function MetricasClientesPage() {
       </div>
 
       {seleccionado && (
-        <div className="flex flex-col gap-4 pt-4 border-t border-border">
-          <h2 className="text-lg font-semibold">{seleccionado.cliente_nombre} — últimos 30 días</h2>
+        <div className="flex flex-col gap-4 pt-4 border-t border-border print:text-black">
+          {/* Encabezado solo visible al imprimir — el sidebar y los botones no salen en el PDF */}
+          <div className="hidden print:flex items-center gap-3 pb-4 border-b border-border">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Asygnuz" className="h-8 w-auto" />
+            <div>
+              <p className="font-bold">Reporte de métricas — {seleccionado.cliente_nombre}</p>
+              <p className="text-sm text-muted">
+                Generado el {new Date().toLocaleDateString("es-CO", { year: "numeric", month: "long", day: "numeric" })}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between print:hidden">
+            <h2 className="text-lg font-semibold">{seleccionado.cliente_nombre} — últimos 30 días</h2>
+            <button
+              onClick={() => window.print()}
+              className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright"
+            >
+              Descargar PDF
+            </button>
+          </div>
+          <h2 className="hidden print:block text-lg font-semibold">Últimos 30 días</h2>
 
           {cargandoInsights && <p className="text-sm text-muted">Consultando Meta…</p>}
           {errorInsights && (
@@ -316,13 +386,41 @@ export default function MetricasClientesPage() {
 
               {media && media.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <KpiCard label="Publicaciones (últimas 25)" value={String(media.length)} />
+                  <KpiCard label={`Publicaciones (últimas ${media.length})`} value={String(media.length)} />
                   <KpiCard label="Alcance total" value={numero(String(totalAlcanceIG))} />
-                  <KpiCard label="Interacciones totales" value={numero(String(totalInteraccionesIG))} />
+                  <KpiCard
+                    label="Tasa de interacción promedio"
+                    value={tasaPromedio !== null ? `${tasaPromedio.toFixed(1)}%` : "—"}
+                  />
                   <KpiCard
                     label="Mejor publicación (alcance)"
                     value={mejorPublicacion ? numeroOMenos(mejorPublicacion.metricas.reach) : "—"}
                   />
+                </div>
+              )}
+
+              {momentos.length > 0 && (
+                <div className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                    Mejor momento para publicar (según el histórico de esta cuenta)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {momentos.slice(0, 3).map((m, i) => (
+                      <div key={`${m.dia}-${m.franja}`} className="rounded-md bg-surface-alt p-3 text-sm">
+                        <p className="font-medium">
+                          {i === 0 && "🏆 "}
+                          {m.dia} — {m.franja}
+                        </p>
+                        <p className="text-muted text-xs mt-1">
+                          {m.promedio.toFixed(1)}% interacción promedio · {m.publicaciones} publicaciones
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-muted mt-3">
+                    Calculado sobre las publicaciones con al menos 2 posts en esa combinación de día/franja — con más
+                    historial, más confiable.
+                  </p>
                 </div>
               )}
 
@@ -370,6 +468,7 @@ export default function MetricasClientesPage() {
                         <th className="p-3">Tipo</th>
                         <th className="p-3">Fecha</th>
                         <th className="p-3 text-right">Alcance</th>
+                        <th className="p-3 text-right">Interacción</th>
                         <th className="p-3 text-right">Likes</th>
                         <th className="p-3 text-right">Comentarios</th>
                         <th className="p-3 text-right">Compartidos</th>
@@ -408,6 +507,12 @@ export default function MetricasClientesPage() {
                           </td>
                           <td className="p-3 text-muted">{fechaCorta(m.timestamp)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.reach)}</td>
+                          <td className="p-3 text-right">
+                            {(() => {
+                              const t = tasaInteraccion(m);
+                              return t !== null ? `${t.toFixed(1)}%` : "—";
+                            })()}
+                          </td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.likes)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.comments)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.shares)}</td>
