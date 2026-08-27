@@ -384,6 +384,9 @@ export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Prom
     throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene Instagram conectado.`);
   }
   const token = conexion.instagram_access_token;
+  // El máximo real que devuelve este edge son las historias activas de las
+  // últimas 24h (Meta no pagina más allá de eso) — se pide un límite alto
+  // solo por si acaso, no debería recortar nada real.
   const lista = await graphFetch<{
     data: {
       id: string;
@@ -394,7 +397,7 @@ export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Prom
     }[];
   }>(
     `/${conexion.instagram_business_id}/stories`,
-    { access_token: token, fields: "id,media_type,timestamp,permalink,thumbnail_url" },
+    { access_token: token, fields: "id,media_type,timestamp,permalink,thumbnail_url", limit: "100" },
     GRAPH_INSTAGRAM_URL
   );
 
@@ -410,4 +413,55 @@ export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Prom
       metricas: await fetchInsightsDeMedia(m.id, "STORY", token),
     }))
   );
+}
+
+// -------- Tendencia de la cuenta (alcance / visitas al perfil / seguidores en el tiempo) --------
+
+export type PuntoDiario = { fecha: string; valor: number };
+
+// Métricas a nivel de CUENTA (no por publicación) — sirven para ver la
+// evolución día a día, no solo el corte de los últimos 30 días. No todas
+// las cuentas tienen historial suficiente ni todas las métricas están
+// disponibles según el tipo de cuenta, así que se piden una por una y se
+// devuelve solo lo que sí respondió (igual que con las publicaciones).
+export async function fetchInstagramTendenciaCuenta(
+  conexion: MetaConexion,
+  dias = 30
+): Promise<Record<string, PuntoDiario[]>> {
+  if (!conexion.instagram_business_id || !conexion.instagram_access_token) {
+    throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene Instagram conectado.`);
+  }
+  const token = conexion.instagram_access_token;
+  const hasta = Math.floor(Date.now() / 1000);
+  const desde = hasta - dias * 86400;
+  const metricas = ["reach", "profile_views", "follower_count"];
+
+  const resultado: Record<string, PuntoDiario[]> = {};
+  await Promise.all(
+    metricas.map(async (metric) => {
+      try {
+        const data = await graphFetch<{
+          data: { name: string; values: { value: number; end_time: string }[] }[];
+        }>(
+          `/${conexion.instagram_business_id}/insights`,
+          {
+            access_token: token,
+            metric,
+            period: "day",
+            since: String(desde),
+            until: String(hasta),
+          },
+          GRAPH_INSTAGRAM_URL
+        );
+        const serie = data.data?.[0]?.values ?? [];
+        if (serie.length > 0) {
+          resultado[metric] = serie.map((v) => ({ fecha: v.end_time, valor: v.value }));
+        }
+      } catch {
+        // Esta métrica no aplica a este tipo de cuenta o no hay permiso —
+        // se omite, las demás se muestran igual.
+      }
+    })
+  );
+  return resultado;
 }

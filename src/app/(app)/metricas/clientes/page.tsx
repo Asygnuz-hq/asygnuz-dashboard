@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
-import type { MetaInsightRow, InstagramMedia } from "@/lib/meta/client";
+import type { MetaInsightRow, InstagramMedia, PuntoDiario } from "@/lib/meta/client";
 
 type Conexion = {
   id: string;
@@ -101,6 +102,37 @@ function mejoresMomentos(media: InstagramMedia[]): MomentoStats[] {
     .sort((a, b) => b.promedio - a.promedio);
 }
 
+const TIPO_METRIC_LABEL: Record<string, string> = {
+  reach: "Alcance de la cuenta",
+  profile_views: "Visitas al perfil",
+  follower_count: "Seguidores nuevos",
+};
+
+type RendimientoTipo = { tipo: string; publicaciones: number; alcancePromedio: number; tasaPromedio: number };
+
+// Promedio de alcance y tasa de interacción por tipo de contenido (Reel,
+// Carrusel, Imagen, Video) — para ver de un vistazo qué formato le
+// funciona mejor a esta cuenta, no solo publicación por publicación.
+function rendimientoPorTipo(media: InstagramMedia[]): RendimientoTipo[] {
+  const grupos = new Map<string, { alcance: number[]; tasas: number[] }>();
+  for (const m of media) {
+    const tipo = tipoLegible(m);
+    const actual = grupos.get(tipo) ?? { alcance: [], tasas: [] };
+    if (m.metricas.reach !== undefined) actual.alcance.push(m.metricas.reach);
+    const tasa = tasaInteraccion(m);
+    if (tasa !== null) actual.tasas.push(tasa);
+    grupos.set(tipo, actual);
+  }
+  return Array.from(grupos.entries())
+    .map(([tipo, { alcance, tasas }]) => ({
+      tipo,
+      publicaciones: Math.max(alcance.length, tasas.length),
+      alcancePromedio: alcance.length ? alcance.reduce((a, b) => a + b, 0) / alcance.length : 0,
+      tasaPromedio: tasas.length ? tasas.reduce((a, b) => a + b, 0) / tasas.length : 0,
+    }))
+    .sort((a, b) => b.tasaPromedio - a.tasaPromedio);
+}
+
 export default function MetricasClientesPage() {
   const searchParams = useSearchParams();
   const [conexiones, setConexiones] = useState<Conexion[] | null>(null);
@@ -114,6 +146,7 @@ export default function MetricasClientesPage() {
   const [historias, setHistorias] = useState<InstagramMedia[] | null>(null);
   const [errorInstagram, setErrorInstagram] = useState<string | null>(null);
   const [cargandoInstagram, setCargandoInstagram] = useState(false);
+  const [tendencia, setTendencia] = useState<Record<string, PuntoDiario[]> | null>(null);
   const [desconectando, setDesconectando] = useState<string | null>(null);
 
   async function cargarConexiones() {
@@ -159,6 +192,7 @@ export default function MetricasClientesPage() {
     setMedia(null);
     setHistorias(null);
     setErrorInstagram(null);
+    setTendencia(null);
 
     const promesaAds = fetch(`/api/meta/insights?conexion_id=${conexion.id}`)
       .then((res) => res.json().then((data) => ({ res, data })))
@@ -180,7 +214,15 @@ export default function MetricasClientesPage() {
         })
         .catch((err) => setErrorInstagram(err instanceof Error ? err.message : "Error desconocido"))
         .finally(() => setCargandoInstagram(false));
-      await Promise.all([promesaAds, promesaIg]);
+      const promesaTendencia = fetch(`/api/meta/instagram-tendencia?conexion_id=${conexion.id}`)
+        .then((res) => res.json().then((data) => ({ res, data })))
+        .then(({ res, data }) => {
+          if (res.ok) setTendencia(data.tendencia);
+        })
+        .catch(() => {
+          // La tendencia es un extra — si falla no debe tapar el resto del dashboard.
+        });
+      await Promise.all([promesaAds, promesaIg, promesaTendencia]);
     } else {
       await promesaAds;
     }
@@ -200,6 +242,15 @@ export default function MetricasClientesPage() {
   const tasasValidas = media?.map(tasaInteraccion).filter((t): t is number => t !== null) ?? [];
   const tasaPromedio = tasasValidas.length ? tasasValidas.reduce((a, b) => a + b, 0) / tasasValidas.length : null;
   const momentos = media ? mejoresMomentos(media) : [];
+  const publicacionesConTasa = media?.filter((m) => tasaInteraccion(m) !== null) ?? [];
+  const topPublicaciones = [...publicacionesConTasa].sort(
+    (a, b) => (tasaInteraccion(b) ?? 0) - (tasaInteraccion(a) ?? 0)
+  );
+  const mejores5 = topPublicaciones.slice(0, 5);
+  // Solo se muestran las que peor rindieron si hay suficientes publicaciones
+  // para que "peor" no sea simplemente repetir las mismas 5 de arriba.
+  const peores5 = topPublicaciones.length > 8 ? [...topPublicaciones].reverse().slice(0, 5) : [];
+  const porTipo = media ? rendimientoPorTipo(media) : [];
 
   return (
     <div className="flex flex-col gap-8">
@@ -421,6 +472,121 @@ export default function MetricasClientesPage() {
                     Calculado sobre las publicaciones con al menos 2 posts en esa combinación de día/franja — con más
                     historial, más confiable.
                   </p>
+                </div>
+              )}
+
+              {porTipo.length > 1 && (
+                <div className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                    Rendimiento por tipo de contenido
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
+                          <th className="p-2">Tipo</th>
+                          <th className="p-2 text-right">Publicaciones</th>
+                          <th className="p-2 text-right">Alcance promedio</th>
+                          <th className="p-2 text-right">Interacción promedio</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {porTipo.map((t, i) => (
+                          <tr key={t.tipo} className="border-b border-border last:border-0">
+                            <td className="p-2 font-medium">
+                              {i === 0 && "🏆 "}
+                              {t.tipo}
+                            </td>
+                            <td className="p-2 text-right">{t.publicaciones}</td>
+                            <td className="p-2 text-right">{numero(String(Math.round(t.alcancePromedio)))}</td>
+                            <td className="p-2 text-right">{t.tasaPromedio.toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs text-muted mt-2">
+                    Esto te dice qué formato conviene usar más — no solo cuál publicación individual funcionó mejor.
+                  </p>
+                </div>
+              )}
+
+              {mejores5.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                    Top 5 publicaciones (por tasa de interacción)
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    {mejores5.map((m) => (
+                      <a
+                        key={m.id}
+                        href={m.permalink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                      >
+                        {m.imagenUrl && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={m.imagenUrl} alt="" className="w-full aspect-square object-cover bg-surface-alt" />
+                        )}
+                        <div className="p-2">
+                          <p className="font-medium">{tasaInteraccion(m)?.toFixed(1)}% interacción</p>
+                          <p className="text-muted">{tipoLegible(m)} · {fechaCorta(m.timestamp)}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {peores5.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                    Lo que menos funcionó
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                    {peores5.map((m) => (
+                      <a
+                        key={m.id}
+                        href={m.permalink}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-danger flex flex-col opacity-80"
+                      >
+                        {m.imagenUrl && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={m.imagenUrl} alt="" className="w-full aspect-square object-cover bg-surface-alt" />
+                        )}
+                        <div className="p-2">
+                          <p className="font-medium">{tasaInteraccion(m)?.toFixed(1)}% interacción</p>
+                          <p className="text-muted">{tipoLegible(m)} · {fechaCorta(m.timestamp)}</p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tendencia && Object.keys(tendencia).length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
+                  {Object.entries(tendencia).map(([metric, puntos]) => (
+                    <div key={metric} className="rounded-lg border border-border bg-surface p-4">
+                      <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                        {TIPO_METRIC_LABEL[metric] ?? metric} — últimos 30 días
+                      </h3>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <LineChart data={puntos.map((p) => ({ ...p, fecha: fechaCorta(p.fecha) }))}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                          <XAxis dataKey="fecha" tick={{ fontSize: 11 }} stroke="var(--muted)" />
+                          <YAxis tick={{ fontSize: 11 }} stroke="var(--muted)" />
+                          <Tooltip
+                            contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", fontSize: 12 }}
+                          />
+                          <Line type="monotone" dataKey="valor" stroke="var(--accent-bright)" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  ))}
                 </div>
               )}
 

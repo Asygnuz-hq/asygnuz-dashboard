@@ -77,3 +77,34 @@ select:focus,
 textarea:focus {
   outline: 1px solid var(--accent);
 }
+
+/* Reportes en PDF (window.print desde /metricas/reporte y
+   /metricas/clientes): sin esto, el navegador imprime en carta vertical y
+   las tablas anchas (muchas columnas de métricas) quedan cortadas al borde
+   de la hoja en vez de encogerse para caber. */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  table {
+    font-size: 9px;
+    width: 100%;
+    table-layout: auto;
+  }
+  th,
+  td {
+    padding: 4px 6px !important;
+  }
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+  /* Que una fila de la tabla no se parta entre dos hojas. */
+  tr {
+    break-inside: avoid;
+  }
+}
