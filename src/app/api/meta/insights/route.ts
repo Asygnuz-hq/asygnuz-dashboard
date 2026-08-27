@@ -14,6 +14,8 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const conexionId = searchParams.get("conexion_id");
+  const since = searchParams.get("since") ?? undefined;
+  const until = searchParams.get("until") ?? undefined;
   if (!conexionId) {
     return Response.json({ error: "Falta conexion_id." }, { status: 400 });
   }
@@ -29,7 +31,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const insights = await fetchInsights(conexion);
+    const insights = await fetchInsights(conexion, since && until ? { since, until } : {});
     return Response.json({ cliente: conexion.cliente_nombre, insights });
   } catch (err) {
     return Response.json(

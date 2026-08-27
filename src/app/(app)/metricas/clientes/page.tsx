@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import type { MetaInsightRow, InstagramMedia, PuntoDiario } from "@/lib/meta/client";
@@ -41,11 +51,23 @@ function tipoLegible(m: InstagramMedia): string {
   return "Imagen";
 }
 
+const TIPO_ICONO: Record<string, string> = {
+  Reel: "🎬",
+  Carrusel: "🎠",
+  Imagen: "🖼️",
+  Video: "📹",
+  Historia: "⭕",
+};
+
+function tipoIcono(m: InstagramMedia): string {
+  return TIPO_ICONO[tipoLegible(m)] ?? "📄";
+}
+
 function fechaCorta(iso: string): string {
   return new Date(iso).toLocaleDateString("es-CO", { day: "2-digit", month: "short" });
 }
 
-// Algunas métricas no aplican a todos los tipos de publicación (ej. "plays"
+// Algunas métricas no aplican a todos los tipos de publicación (ej. "views"
 // no existe en una foto) — se muestra "—" solo cuando de verdad no aplica,
 // en vez de mezclar eso con un 0 real.
 function numeroOMenos(valor: number | undefined): string {
@@ -62,6 +84,13 @@ function tasaInteraccion(m: InstagramMedia): number | null {
   const alcance = m.metricas.reach;
   if (!alcance) return null;
   return (interacciones(m) / alcance) * 100;
+}
+
+// % de cambio vs. un período anterior — null cuando no hay con qué comparar
+// (evita mostrar un falso "+infinito%" o "-100%" engañoso).
+function pctDelta(actual: number, anterior: number): number | null {
+  if (!anterior) return null;
+  return (actual - anterior) / anterior;
 }
 
 const DIAS = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -133,6 +162,56 @@ function rendimientoPorTipo(media: InstagramMedia[]): RendimientoTipo[] {
     .sort((a, b) => b.tasaPromedio - a.tasaPromedio);
 }
 
+// Fechas YYYY-MM-DD para pedir el período de 30 días anterior al actual
+// (31 a 60 días atrás) — se usa para las comparaciones "vs. mes anterior".
+function rangoPeriodoAnterior(): { since: string; until: string } {
+  const fmt = (d: Date) => d.toISOString().slice(0, 10);
+  const hoy = new Date();
+  const finAnterior = new Date(hoy.getTime() - 31 * 86400000);
+  const inicioAnterior = new Date(hoy.getTime() - 60 * 86400000);
+  return { since: fmt(inicioAnterior), until: fmt(finAnterior) };
+}
+
+function descargarCSV(cliente: string, media: InstagramMedia[] | null, insights: MetaInsightRow[] | null) {
+  const filas: string[][] = [];
+  if (insights && insights.length > 0) {
+    filas.push(["Anuncios — últimos 30 días"]);
+    filas.push(["Campaña", "Gasto", "Impresiones", "Alcance", "CPC", "CPM", "CTR"]);
+    insights.forEach((r) => {
+      filas.push([r.campaign_name, r.spend, r.impressions, r.reach, r.cpc, r.cpm, r.ctr]);
+    });
+    filas.push([]);
+  }
+  if (media && media.length > 0) {
+    filas.push(["Instagram — publicaciones"]);
+    filas.push(["Fecha", "Tipo", "Alcance", "Interacción %", "Likes", "Comentarios", "Compartidos", "Guardados", "Reproducciones"]);
+    media.forEach((m) => {
+      const t = tasaInteraccion(m);
+      filas.push([
+        m.timestamp.slice(0, 10),
+        tipoLegible(m),
+        String(m.metricas.reach ?? ""),
+        t !== null ? t.toFixed(1) : "",
+        String(m.metricas.likes ?? ""),
+        String(m.metricas.comments ?? ""),
+        String(m.metricas.shares ?? ""),
+        String(m.metricas.saved ?? ""),
+        String(m.metricas.views ?? ""),
+      ]);
+    });
+  }
+  const csv = filas.map((fila) => fila.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `asygnuz-${cliente.toLowerCase().replace(/\s+/g, "-")}-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+type Tab = "resumen" | "anuncios" | "instagram" | "tendencia";
+
 export default function MetricasClientesPage() {
   const searchParams = useSearchParams();
   const [conexiones, setConexiones] = useState<Conexion[] | null>(null);
@@ -140,6 +219,7 @@ export default function MetricasClientesPage() {
   const [nuevoCliente, setNuevoCliente] = useState("");
   const [seleccionado, setSeleccionado] = useState<Conexion | null>(null);
   const [insights, setInsights] = useState<MetaInsightRow[] | null>(null);
+  const [insightsAnterior, setInsightsAnterior] = useState<MetaInsightRow[] | null>(null);
   const [errorInsights, setErrorInsights] = useState<string | null>(null);
   const [cargandoInsights, setCargandoInsights] = useState(false);
   const [media, setMedia] = useState<InstagramMedia[] | null>(null);
@@ -148,6 +228,8 @@ export default function MetricasClientesPage() {
   const [cargandoInstagram, setCargandoInstagram] = useState(false);
   const [tendencia, setTendencia] = useState<Record<string, PuntoDiario[]> | null>(null);
   const [desconectando, setDesconectando] = useState<string | null>(null);
+  const [tab, setTab] = useState<Tab>("resumen");
+  const [vistaCliente, setVistaCliente] = useState(false);
 
   async function cargarConexiones() {
     try {
@@ -186,7 +268,9 @@ export default function MetricasClientesPage() {
 
   async function verMetricas(conexion: Conexion) {
     setSeleccionado(conexion);
+    setTab("resumen");
     setInsights(null);
+    setInsightsAnterior(null);
     setErrorInsights(null);
     setCargandoInsights(true);
     setMedia(null);
@@ -202,6 +286,16 @@ export default function MetricasClientesPage() {
       })
       .catch((err) => setErrorInsights(err instanceof Error ? err.message : "Error desconocido"))
       .finally(() => setCargandoInsights(false));
+
+    const { since, until } = rangoPeriodoAnterior();
+    const promesaAdsAnterior = fetch(`/api/meta/insights?conexion_id=${conexion.id}&since=${since}&until=${until}`)
+      .then((res) => res.json().then((data) => ({ res, data })))
+      .then(({ res, data }) => {
+        if (res.ok) setInsightsAnterior(data.insights);
+      })
+      .catch(() => {
+        // Comparación mes vs. mes anterior es un extra — si falla no tapa el resto.
+      });
 
     if (conexion.instagram_business_id) {
       setCargandoInstagram(true);
@@ -222,9 +316,9 @@ export default function MetricasClientesPage() {
         .catch(() => {
           // La tendencia es un extra — si falla no debe tapar el resto del dashboard.
         });
-      await Promise.all([promesaAds, promesaIg, promesaTendencia]);
+      await Promise.all([promesaAds, promesaAdsAnterior, promesaIg, promesaTendencia]);
     } else {
-      await promesaAds;
+      await Promise.all([promesaAds, promesaAdsAnterior]);
     }
   }
 
@@ -233,10 +327,27 @@ export default function MetricasClientesPage() {
 
   const totalGasto = insights?.reduce((acc, r) => acc + Number(r.spend), 0) ?? 0;
   const totalImpresiones = insights?.reduce((acc, r) => acc + Number(r.impressions), 0) ?? 0;
+  const totalAlcanceAds = insights?.reduce((acc, r) => acc + Number(r.reach), 0) ?? 0;
   const cpmPonderado = totalImpresiones ? (totalGasto / totalImpresiones) * 1000 : 0;
 
-  const totalAlcanceIG = media?.reduce((acc, m) => acc + (m.metricas.reach ?? 0), 0) ?? 0;
-  const totalInteraccionesIG = media?.reduce((acc, m) => acc + interacciones(m), 0) ?? 0;
+  const gastoAnterior = insightsAnterior?.reduce((acc, r) => acc + Number(r.spend), 0) ?? 0;
+  const impresionesAnterior = insightsAnterior?.reduce((acc, r) => acc + Number(r.impressions), 0) ?? 0;
+
+  // Con hasta 50 publicaciones recientes se puede aproximar el mes anterior
+  // sin pedirle otra vez la API — se parte lo que ya se trajo por fecha.
+  const hoyTs = Date.now();
+  const mediaActual = media?.filter((m) => hoyTs - new Date(m.timestamp).getTime() <= 30 * 86400000) ?? [];
+  const mediaAnterior =
+    media?.filter((m) => {
+      const dias = (hoyTs - new Date(m.timestamp).getTime()) / 86400000;
+      return dias > 30 && dias <= 60;
+    }) ?? [];
+
+  const totalAlcanceIG = mediaActual.reduce((acc, m) => acc + (m.metricas.reach ?? 0), 0);
+  const totalInteraccionesIG = mediaActual.reduce((acc, m) => acc + interacciones(m), 0);
+  const totalAlcanceIGAnterior = mediaAnterior.reduce((acc, m) => acc + (m.metricas.reach ?? 0), 0);
+  const totalInteraccionesIGAnterior = mediaAnterior.reduce((acc, m) => acc + interacciones(m), 0);
+
   const mejorPublicacion =
     media && media.length > 0 ? [...media].sort((a, b) => (b.metricas.reach ?? 0) - (a.metricas.reach ?? 0))[0] : null;
   const tasasValidas = media?.map(tasaInteraccion).filter((t): t is number => t !== null) ?? [];
@@ -251,6 +362,9 @@ export default function MetricasClientesPage() {
   // para que "peor" no sea simplemente repetir las mismas 5 de arriba.
   const peores5 = topPublicaciones.length > 8 ? [...topPublicaciones].reverse().slice(0, 5) : [];
   const porTipo = media ? rendimientoPorTipo(media) : [];
+
+  const tieneAds = Boolean(insights && insights.length > 0);
+  const tieneIG = Boolean(seleccionado?.instagram_business_id);
 
   return (
     <div className="flex flex-col gap-8">
@@ -359,86 +473,242 @@ export default function MetricasClientesPage() {
 
           <div className="flex items-center justify-between print:hidden">
             <h2 className="text-lg font-semibold">{seleccionado.cliente_nombre} — últimos 30 días</h2>
-            <button
-              onClick={() => window.print()}
-              className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright"
-            >
-              Descargar PDF
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setVistaCliente((v) => !v)}
+                className={`text-sm rounded-md px-3 py-1.5 font-medium border ${
+                  vistaCliente ? "bg-accent text-accent-foreground border-accent" : "border-border hover:bg-surface-alt"
+                }`}
+              >
+                {vistaCliente ? "Vista de trabajo" : "Vista para cliente"}
+              </button>
+              <button
+                onClick={() => descargarCSV(seleccionado.cliente_nombre, media, insights)}
+                className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt"
+              >
+                Descargar Excel
+              </button>
+              <button
+                onClick={() => window.print()}
+                className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright"
+              >
+                Descargar PDF
+              </button>
+            </div>
           </div>
           <h2 className="hidden print:block text-lg font-semibold">Últimos 30 días</h2>
 
-          {cargandoInsights && <p className="text-sm text-muted">Consultando Meta…</p>}
-          {errorInsights && (
-            <p className="text-sm text-danger">
-              No se pudo leer Meta: {errorInsights}
-            </p>
-          )}
+          {/* Pestañas — no se ven al imprimir, ahí sale todo junto */}
+          <div className="flex gap-1 border-b border-border print:hidden">
+            {(
+              [
+                ["resumen", "Resumen"],
+                ["anuncios", "Anuncios"],
+                ["instagram", "Instagram"],
+                ["tendencia", "Tendencia"],
+              ] as [Tab, string][]
+            ).map(([valor, label]) => (
+              <button
+                key={valor}
+                onClick={() => setTab(valor)}
+                className={`text-sm px-3 py-2 border-b-2 -mb-px transition ${
+                  tab === valor ? "border-accent text-foreground font-medium" : "border-transparent text-muted hover:text-foreground"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
 
-          {insights && insights.length === 0 && (
-            <p className="text-sm text-muted">Sin campañas con actividad en este período.</p>
-          )}
+          {cargandoInsights && <p className="text-sm text-muted print:hidden">Consultando Meta…</p>}
+          {errorInsights && <p className="text-sm text-danger print:hidden">No se pudo leer Meta: {errorInsights}</p>}
 
-          {insights && insights.length > 0 && (
-            <>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <KpiCard label="Inversión (30d)" value={moneda(String(totalGasto))} />
-                <KpiCard label="Impresiones" value={numero(String(totalImpresiones))} />
-                <KpiCard label="CPM ponderado" value={moneda(String(cpmPonderado))} />
-                <KpiCard label="Campañas activas" value={String(insights.length)} />
+          {/* -------- RESUMEN -------- */}
+          <div className={`${tab === "resumen" ? "flex" : "hidden"} print:flex flex-col gap-4`}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {tieneAds && (
+                <>
+                  <KpiCard
+                    label="Inversión en anuncios (30d)"
+                    value={moneda(String(totalGasto))}
+                    delta={
+                      pctDelta(totalGasto, gastoAnterior) !== null
+                        ? { pct: pctDelta(totalGasto, gastoAnterior)! }
+                        : undefined
+                    }
+                  />
+                  <KpiCard
+                    label="Impresiones"
+                    value={numero(String(totalImpresiones))}
+                    delta={
+                      pctDelta(totalImpresiones, impresionesAnterior) !== null
+                        ? { pct: pctDelta(totalImpresiones, impresionesAnterior)! }
+                        : undefined
+                    }
+                  />
+                </>
+              )}
+              {tieneIG && media && media.length > 0 && (
+                <>
+                  <KpiCard
+                    label="Alcance orgánico (30d)"
+                    value={numero(String(totalAlcanceIG))}
+                    delta={
+                      pctDelta(totalAlcanceIG, totalAlcanceIGAnterior) !== null
+                        ? { pct: pctDelta(totalAlcanceIG, totalAlcanceIGAnterior)! }
+                        : undefined
+                    }
+                  />
+                  <KpiCard
+                    label="Interacciones orgánicas (30d)"
+                    value={numero(String(totalInteraccionesIG))}
+                    delta={
+                      pctDelta(totalInteraccionesIG, totalInteraccionesIGAnterior) !== null
+                        ? { pct: pctDelta(totalInteraccionesIG, totalInteraccionesIGAnterior)! }
+                        : undefined
+                    }
+                  />
+                </>
+              )}
+            </div>
+
+            {!tieneAds && !tieneIG && (
+              <p className="text-sm text-muted">Conecta anuncios o Instagram para este cliente para ver su resumen.</p>
+            )}
+
+            {momentos.length > 0 && (
+              <div className="rounded-lg border border-border bg-surface p-4">
+                <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                  Mejor momento para publicar (según el histórico de esta cuenta)
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  {momentos.slice(0, 3).map((m, i) => (
+                    <div key={`${m.dia}-${m.franja}`} className="rounded-md bg-surface-alt p-3 text-sm">
+                      <p className="font-medium">
+                        {i === 0 && "🏆 "}
+                        {m.dia} — {m.franja}
+                      </p>
+                      <p className="text-muted text-xs mt-1">
+                        {m.promedio.toFixed(1)}% interacción promedio · {m.publicaciones} publicaciones
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
 
-              <div className="overflow-x-auto rounded-lg border border-border bg-surface">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
-                      <th className="p-3">Campaña</th>
-                      <th className="p-3 text-right">Gasto</th>
-                      <th className="p-3 text-right">Impresiones</th>
-                      <th className="p-3 text-right">Alcance</th>
-                      <th className="p-3 text-right">CPC</th>
-                      <th className="p-3 text-right">CPM</th>
-                      <th className="p-3 text-right">CTR</th>
-                      <th className="p-3 text-right">Resultado principal</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {insights.map((r, i) => {
-                      const accionPrincipal = r.actions?.sort((a, b) => Number(b.value) - Number(a.value))[0];
-                      return (
-                        <tr key={i} className="border-b border-border last:border-0">
-                          <td className="p-3">{r.campaign_name}</td>
-                          <td className="p-3 text-right">{moneda(r.spend)}</td>
-                          <td className="p-3 text-right">{numero(r.impressions)}</td>
-                          <td className="p-3 text-right">{numero(r.reach)}</td>
-                          <td className="p-3 text-right">{moneda(r.cpc)}</td>
-                          <td className="p-3 text-right">{moneda(r.cpm)}</td>
-                          <td className="p-3 text-right">{Number(r.ctr).toFixed(2)}%</td>
-                          <td className="p-3 text-right">
-                            {accionPrincipal
-                              ? `${numero(accionPrincipal.value)} ${ACCION_LABEL[accionPrincipal.action_type] ?? accionPrincipal.action_type}`
-                              : "—"}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+            {mejores5.length > 0 && (
+              <div>
+                <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
+                  Top 5 publicaciones (por tasa de interacción)
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                  {mejores5.map((m) => (
+                    <a
+                      key={m.id}
+                      href={m.permalink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                    >
+                      {m.imagenUrl && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={m.imagenUrl} alt="" className="w-full aspect-square object-cover bg-surface-alt" />
+                      )}
+                      <div className="p-2">
+                        <p className="font-medium">{tasaInteraccion(m)?.toFixed(1)}% interacción</p>
+                        <p className="text-muted">
+                          {tipoIcono(m)} {tipoLegible(m)} · {fechaCorta(m.timestamp)}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
               </div>
-            </>
-          )}
+            )}
+          </div>
 
-          {seleccionado.instagram_business_id && (
-            <div className="flex flex-col gap-4 pt-4 border-t border-border">
-              <h2 className="text-lg font-semibold">Instagram — contenido orgánico</h2>
+          {/* -------- ANUNCIOS -------- */}
+          <div className={`${tab === "anuncios" ? "flex" : "hidden"} print:flex flex-col gap-4`}>
+            {insights && insights.length === 0 && (
+              <p className="text-sm text-muted">Sin campañas con actividad en este período.</p>
+            )}
+            {insights && insights.length > 0 && (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <KpiCard
+                    label="Inversión (30d)"
+                    value={moneda(String(totalGasto))}
+                    delta={
+                      pctDelta(totalGasto, gastoAnterior) !== null
+                        ? { pct: pctDelta(totalGasto, gastoAnterior)! }
+                        : undefined
+                    }
+                  />
+                  <KpiCard label="Impresiones" value={numero(String(totalImpresiones))} />
+                  <KpiCard label="Alcance" value={numero(String(totalAlcanceAds))} />
+                  <KpiCard label="CPM ponderado" value={moneda(String(cpmPonderado))} />
+                </div>
 
-              {cargandoInstagram && <p className="text-sm text-muted">Consultando Instagram…</p>}
-              {errorInstagram && <p className="text-sm text-danger">No se pudo leer Instagram: {errorInstagram}</p>}
+                <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
+                        <th className="p-3">Campaña</th>
+                        <th className="p-3 text-right">Gasto</th>
+                        <th className="p-3 text-right">Impresiones</th>
+                        <th className="p-3 text-right">Alcance</th>
+                        <th className="p-3 text-right">CPC</th>
+                        <th className="p-3 text-right">CPM</th>
+                        <th className="p-3 text-right">CTR</th>
+                        <th className="p-3 text-right">Resultado principal</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {insights.map((r, i) => {
+                        const accionPrincipal = r.actions?.sort((a, b) => Number(b.value) - Number(a.value))[0];
+                        return (
+                          <tr key={i} className="border-b border-border last:border-0">
+                            <td className="p-3">{r.campaign_name}</td>
+                            <td className="p-3 text-right">{moneda(r.spend)}</td>
+                            <td className="p-3 text-right">{numero(r.impressions)}</td>
+                            <td className="p-3 text-right">{numero(r.reach)}</td>
+                            <td className="p-3 text-right">{moneda(r.cpc)}</td>
+                            <td className="p-3 text-right">{moneda(r.cpm)}</td>
+                            <td className="p-3 text-right">{Number(r.ctr).toFixed(2)}%</td>
+                            <td className="p-3 text-right">
+                              {accionPrincipal
+                                ? `${numero(accionPrincipal.value)} ${ACCION_LABEL[accionPrincipal.action_type] ?? accionPrincipal.action_type}`
+                                : "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* -------- INSTAGRAM -------- */}
+          {tieneIG && (
+            <div className={`${tab === "instagram" ? "flex" : "hidden"} print:flex flex-col gap-4`}>
+              {cargandoInstagram && <p className="text-sm text-muted print:hidden">Consultando Instagram…</p>}
+              {errorInstagram && <p className="text-sm text-danger print:hidden">No se pudo leer Instagram: {errorInstagram}</p>}
 
               {media && media.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <KpiCard label={`Publicaciones (últimas ${media.length})`} value={String(media.length)} />
-                  <KpiCard label="Alcance total" value={numero(String(totalAlcanceIG))} />
+                  <KpiCard
+                    label="Alcance total"
+                    value={numero(String(totalAlcanceIG))}
+                    delta={
+                      pctDelta(totalAlcanceIG, totalAlcanceIGAnterior) !== null
+                        ? { pct: pctDelta(totalAlcanceIG, totalAlcanceIGAnterior)! }
+                        : undefined
+                    }
+                  />
                   <KpiCard
                     label="Tasa de interacción promedio"
                     value={tasaPromedio !== null ? `${tasaPromedio.toFixed(1)}%` : "—"}
@@ -450,37 +720,29 @@ export default function MetricasClientesPage() {
                 </div>
               )}
 
-              {momentos.length > 0 && (
-                <div className="rounded-lg border border-border bg-surface p-4">
-                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
-                    Mejor momento para publicar (según el histórico de esta cuenta)
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    {momentos.slice(0, 3).map((m, i) => (
-                      <div key={`${m.dia}-${m.franja}`} className="rounded-md bg-surface-alt p-3 text-sm">
-                        <p className="font-medium">
-                          {i === 0 && "🏆 "}
-                          {m.dia} — {m.franja}
-                        </p>
-                        <p className="text-muted text-xs mt-1">
-                          {m.promedio.toFixed(1)}% interacción promedio · {m.publicaciones} publicaciones
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-xs text-muted mt-3">
-                    Calculado sobre las publicaciones con al menos 2 posts en esa combinación de día/franja — con más
-                    historial, más confiable.
-                  </p>
-                </div>
-              )}
-
               {porTipo.length > 1 && (
                 <div className="rounded-lg border border-border bg-surface p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                     Rendimiento por tipo de contenido
                   </h3>
-                  <div className="overflow-x-auto">
+                  <ResponsiveContainer width="100%" height={180} className="print:hidden">
+                    <BarChart data={porTipo}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis
+                        dataKey="tipo"
+                        tick={{ fontSize: 11 }}
+                        stroke="var(--muted)"
+                        tickFormatter={(v) => `${TIPO_ICONO[v] ?? ""} ${v}`}
+                      />
+                      <YAxis tick={{ fontSize: 11 }} stroke="var(--muted)" unit="%" />
+                      <Tooltip
+                        formatter={(v) => `${Number(v).toFixed(1)}%`}
+                        contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", fontSize: 12 }}
+                      />
+                      <Bar dataKey="tasaPromedio" name="Interacción promedio" fill="var(--accent-bright)" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                  <div className="overflow-x-auto mt-2">
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
@@ -495,7 +757,7 @@ export default function MetricasClientesPage() {
                           <tr key={t.tipo} className="border-b border-border last:border-0">
                             <td className="p-2 font-medium">
                               {i === 0 && "🏆 "}
-                              {t.tipo}
+                              {TIPO_ICONO[t.tipo] ?? ""} {t.tipo}
                             </td>
                             <td className="p-2 text-right">{t.publicaciones}</td>
                             <td className="p-2 text-right">{numero(String(Math.round(t.alcancePromedio)))}</td>
@@ -531,7 +793,9 @@ export default function MetricasClientesPage() {
                         )}
                         <div className="p-2">
                           <p className="font-medium">{tasaInteraccion(m)?.toFixed(1)}% interacción</p>
-                          <p className="text-muted">{tipoLegible(m)} · {fechaCorta(m.timestamp)}</p>
+                          <p className="text-muted">
+                            {tipoIcono(m)} {tipoLegible(m)} · {fechaCorta(m.timestamp)}
+                          </p>
                         </div>
                       </a>
                     ))}
@@ -541,9 +805,7 @@ export default function MetricasClientesPage() {
 
               {peores5.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
-                    Lo que menos funcionó
-                  </h3>
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">Lo que menos funcionó</h3>
                   <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
                     {peores5.map((m) => (
                       <a
@@ -559,34 +821,13 @@ export default function MetricasClientesPage() {
                         )}
                         <div className="p-2">
                           <p className="font-medium">{tasaInteraccion(m)?.toFixed(1)}% interacción</p>
-                          <p className="text-muted">{tipoLegible(m)} · {fechaCorta(m.timestamp)}</p>
+                          <p className="text-muted">
+                            {tipoIcono(m)} {tipoLegible(m)} · {fechaCorta(m.timestamp)}
+                          </p>
                         </div>
                       </a>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {tendencia && Object.keys(tendencia).length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 print:hidden">
-                  {Object.entries(tendencia).map(([metric, puntos]) => (
-                    <div key={metric} className="rounded-lg border border-border bg-surface p-4">
-                      <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
-                        {TIPO_METRIC_LABEL[metric] ?? metric} — últimos 30 días
-                      </h3>
-                      <ResponsiveContainer width="100%" height={200}>
-                        <LineChart data={puntos.map((p) => ({ ...p, fecha: fechaCorta(p.fecha) }))}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-                          <XAxis dataKey="fecha" tick={{ fontSize: 11 }} stroke="var(--muted)" />
-                          <YAxis tick={{ fontSize: 11 }} stroke="var(--muted)" />
-                          <Tooltip
-                            contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", fontSize: 12 }}
-                          />
-                          <Line type="monotone" dataKey="valor" stroke="var(--accent-bright)" strokeWidth={2} dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ))}
                 </div>
               )}
 
@@ -625,7 +866,7 @@ export default function MetricasClientesPage() {
                 <p className="text-sm text-muted">Sin publicaciones recientes en esta cuenta.</p>
               )}
 
-              {media && media.length > 0 && (
+              {!vistaCliente && media && media.length > 0 && (
                 <div className="overflow-x-auto rounded-lg border border-border bg-surface">
                   <table className="w-full text-sm">
                     <thead>
@@ -669,7 +910,9 @@ export default function MetricasClientesPage() {
                             </a>
                           </td>
                           <td className="p-3">
-                            <span className="text-xs rounded-full bg-surface-alt px-2 py-0.5">{tipoLegible(m)}</span>
+                            <span className="text-xs rounded-full bg-surface-alt px-2 py-0.5">
+                              {tipoIcono(m)} {tipoLegible(m)}
+                            </span>
                           </td>
                           <td className="p-3 text-muted">{fechaCorta(m.timestamp)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.reach)}</td>
@@ -690,6 +933,30 @@ export default function MetricasClientesPage() {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* -------- TENDENCIA -------- */}
+          {tieneIG && tendencia && Object.keys(tendencia).length > 0 && (
+            <div className={`${tab === "tendencia" ? "grid" : "hidden"} print:grid grid-cols-1 md:grid-cols-2 gap-4`}>
+              {Object.entries(tendencia).map(([metric, puntos]) => (
+                <div key={metric} className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                    {TIPO_METRIC_LABEL[metric] ?? metric} — últimos 30 días
+                  </h3>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <LineChart data={puntos.map((p) => ({ ...p, fecha: fechaCorta(p.fecha) }))}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="fecha" tick={{ fontSize: 11 }} stroke="var(--muted)" />
+                      <YAxis tick={{ fontSize: 11 }} stroke="var(--muted)" />
+                      <Tooltip
+                        contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", fontSize: 12 }}
+                      />
+                      <Line type="monotone" dataKey="valor" stroke="var(--accent-bright)" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              ))}
             </div>
           )}
         </div>
