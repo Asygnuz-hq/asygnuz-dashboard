@@ -11,7 +11,8 @@ export type ColumnType =
   | "readonly-percent"
   | "readonly-number"
   | "readonly-text"
-  | "readonly-date";
+  | "readonly-date"
+  | "readonly-days-since";
 
 export type ForeignKeyConfig = {
   /** Supabase table this column references */
@@ -30,4 +31,6 @@ export type ColumnDef = {
   required?: boolean;
   foreignKey?: ForeignKeyConfig;
   defaultValue?: string | number | boolean;
+  /** For type "readonly-days-since": which column holds the date to count from (defaults to "creado_en"). */
+  sinceKey?: string;
 };

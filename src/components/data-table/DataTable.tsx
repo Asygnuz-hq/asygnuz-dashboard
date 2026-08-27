@@ -35,7 +35,15 @@ type DataTableProps = {
   onChange?: () => void;
   /** Extra buttons rendered per row (before Editar/Eliminar), e.g. "Marcar cobrado". */
   rowActions?: (row: Row, reload: () => void) => ReactNode;
+  /** Client-side filter applied on top of the loaded rows, e.g. drill-down by zone from elsewhere on the page. */
+  externalFilter?: (row: Row) => boolean;
+  /** Extra classes per row/card, e.g. a colored left border for "overdue" or "done". */
+  rowClassName?: (row: Row) => string;
 };
+
+function diasDesde(iso: string): number {
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24)));
+}
 
 function buildPayload(values: Row, cols: ColumnDef[]) {
   const payload: Row = {};
@@ -64,6 +72,8 @@ export function DataTable({
   detailBasePath,
   onChange,
   rowActions,
+  externalFilter,
+  rowClassName,
 }: DataTableProps) {
   const supabase = useMemo(() => createClient(), []);
   const isAdmin = useIsAdmin();
@@ -143,9 +153,15 @@ export function DataTable({
   }, [rows, monthFilterKey]);
 
   const filteredRows = useMemo(() => {
-    if (!monthFilterKey || monthFilter === "todos") return rows;
-    return rows.filter((r) => r[monthFilterKey] === monthFilter);
-  }, [rows, monthFilterKey, monthFilter]);
+    let result = rows;
+    if (monthFilterKey && monthFilter !== "todos") {
+      result = result.filter((r) => r[monthFilterKey] === monthFilter);
+    }
+    if (externalFilter) {
+      result = result.filter(externalFilter);
+    }
+    return result;
+  }, [rows, monthFilterKey, monthFilter, externalFilter]);
 
   function startCreate() {
     const defaults: Row = {};
@@ -241,6 +257,10 @@ export function DataTable({
         return value ?? "-";
       case "readonly-date":
         return formatDate(value);
+      case "readonly-days-since": {
+        const dias = diasDesde(row[col.sinceKey ?? "creado_en"]);
+        return dias === 0 ? "Hoy" : dias === 1 ? "1 día" : `${dias} días`;
+      }
       case "date":
         return formatDate(value);
       case "month":
@@ -407,7 +427,7 @@ export function DataTable({
         </p>
       )}
 
-      <div className="overflow-x-auto rounded-lg border border-border">
+      <div className="hidden md:block overflow-x-auto rounded-lg border border-border">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-surface-alt text-left text-xs uppercase tracking-wide text-muted">
@@ -463,7 +483,10 @@ export function DataTable({
               filteredRows.map((row) => {
                 const isEditing = editingId === row.id;
                 return (
-                  <tr key={row.id} className="border-t border-border hover:bg-surface-alt/40">
+                  <tr
+                    key={row.id}
+                    className={`border-t border-t-border hover:bg-surface-alt/40 ${rowClassName?.(row) ?? ""}`}
+                  >
                     {columns.map((col) => (
                       <td key={col.key} className="px-3 py-2 whitespace-nowrap">
                         {isEditing && !col.type.startsWith("readonly")
@@ -532,6 +555,100 @@ export function DataTable({
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="md:hidden flex flex-col gap-3">
+        {creating && (
+          <div className="rounded-lg border border-accent/40 bg-surface-alt/50 p-3 flex flex-col gap-3">
+            {columns
+              .filter((c) => !c.type.startsWith("readonly"))
+              .map((col) => (
+                <div key={col.key} className="flex flex-col gap-1">
+                  <span className="text-xs uppercase tracking-wide text-muted">{col.label}</span>
+                  <div className="[&_input]:!w-full [&_select]:!w-full">
+                    {renderInput(col, newValues, setNewValues)}
+                  </div>
+                </div>
+              ))}
+            <div className="flex items-center gap-3 pt-2 border-t border-border">
+              <button onClick={saveCreate} className="text-accent text-sm font-medium">
+                Guardar
+              </button>
+              <button onClick={() => setCreating(false)} className="text-muted text-sm">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <p className="text-center text-sm text-muted py-6">Cargando...</p>
+        ) : filteredRows.length === 0 ? (
+          <p className="text-center text-sm text-muted py-6">No hay datos todavía.</p>
+        ) : (
+          filteredRows.map((row) => {
+            const isEditing = editingId === row.id;
+            return (
+              <div
+                key={row.id}
+                className={`rounded-lg border-t border-r border-b border-t-border border-r-border border-b-border bg-surface p-3 flex flex-col gap-3 ${rowClassName?.(row) ?? ""}`}
+              >
+                {columns.map((col) => (
+                  <div key={col.key} className="flex flex-col gap-1">
+                    <span className="text-xs uppercase tracking-wide text-muted">{col.label}</span>
+                    {isEditing && !col.type.startsWith("readonly") ? (
+                      <div className="[&_input]:!w-full [&_select]:!w-full">
+                        {renderInput(col, editValues, setEditValues)}
+                      </div>
+                    ) : (
+                      <span className="text-sm">{renderReadValue(col, row)}</span>
+                    )}
+                  </div>
+                ))}
+                <div className="flex items-center gap-3 pt-2 border-t border-border flex-wrap">
+                  {viewingTrash ? (
+                    isAdmin ? (
+                      <button onClick={() => restoreRow(row.id)} className="text-accent-bright text-sm font-medium">
+                        Restaurar
+                      </button>
+                    ) : (
+                      <span className="text-muted text-xs">Solo un admin restaura</span>
+                    )
+                  ) : isEditing ? (
+                    <>
+                      <button onClick={() => saveEdit(row.id)} className="text-accent text-sm font-medium">
+                        Guardar
+                      </button>
+                      <button onClick={() => setEditingId(null)} className="text-muted text-sm">
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {detailBasePath && (
+                        <Link href={`${detailBasePath}/${row.id}`} className="text-accent text-sm font-medium">
+                          Ver
+                        </Link>
+                      )}
+                      {rowActions?.(row, () => {
+                        loadRows();
+                        onChange?.();
+                      })}
+                      <button onClick={() => startEdit(row)} className="text-foreground/80 text-sm">
+                        Editar
+                      </button>
+                      {isAdmin && (
+                        <button onClick={() => deleteRow(row.id)} className="text-danger text-sm">
+                          Eliminar
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );
