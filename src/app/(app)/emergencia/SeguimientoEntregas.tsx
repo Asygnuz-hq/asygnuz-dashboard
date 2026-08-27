@@ -33,6 +33,17 @@ function diasDesde(iso: string): number {
   return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24)));
 }
 
+// Degradado rojo (0% entregado) → amarillo (50%) → verde (100%), proporcional
+// a cuántos ítems del caso ya se entregaron. HSL interpola limpio entre los
+// tres colores sin tener que definir puntos intermedios a mano.
+function colorProgresoEntrega(fraccion: number): { backgroundColor: string; color: string } {
+  const hue = Math.max(0, Math.min(1, fraccion)) * 120; // 0=rojo, 60=amarillo, 120=verde
+  return {
+    backgroundColor: `hsl(${hue}, 70%, 92%)`,
+    color: `hsl(${hue}, 65%, 32%)`,
+  };
+}
+
 // Mismo criterio que la tabla de Casos: verde solo si ya está Cerrado, gris
 // si está Cancelado, y para el resto el color sube de temperatura con los
 // días sin resolver (naranja 0-2d, rojo 3-6d, rojo intenso 7d+).
@@ -177,15 +188,10 @@ export function SeguimientoEntregas({ casos }: { casos: CasoBase[] }) {
                 </p>
               </div>
               <span
-                className={`text-xs shrink-0 rounded-full px-2.5 py-1 ${
-                  itemsCaso.length === 0
-                    ? "bg-surface-alt"
-                    : entregados === itemsCaso.length
-                      ? "bg-success/10 text-success"
-                      : entregados === 0
-                        ? "bg-danger/10 text-danger"
-                        : "bg-warning/10 text-warning"
+                className={`text-xs shrink-0 rounded-full px-2.5 py-1 font-medium ${
+                  itemsCaso.length === 0 ? "bg-surface-alt" : ""
                 }`}
+                style={itemsCaso.length === 0 ? undefined : colorProgresoEntrega(entregados / itemsCaso.length)}
               >
                 {itemsCaso.length === 0 ? "Sin ítems" : `${entregados}/${itemsCaso.length} entregados`}
               </span>
