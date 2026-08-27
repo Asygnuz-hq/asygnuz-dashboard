@@ -39,12 +39,15 @@ function env(name: string): string {
 export function buildAuthUrl(state: string): string {
   const appId = env("META_APP_ID");
   const redirectUri = env("META_REDIRECT_URI");
+  // Meta renombró los permisos de Instagram — los antiguos "instagram_basic"
+  // e "instagram_manage_insights" quedaron obsoletos, ahora son estos con
+  // "business" en el nombre.
   const scopes = [
     "ads_read",
     "pages_show_list",
     "business_management",
-    "instagram_basic",
-    "instagram_manage_insights",
+    "instagram_business_basic",
+    "instagram_business_manage_insights",
   ].join(",");
   const params = new URLSearchParams({
     client_id: appId,
