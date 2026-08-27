@@ -162,6 +162,112 @@ function rendimientoPorTipo(media: InstagramMedia[]): RendimientoTipo[] {
     .sort((a, b) => b.tasaPromedio - a.tasaPromedio);
 }
 
+// -------- Hashtags --------
+
+type RendimientoHashtag = { hashtag: string; usos: number; tasaPromedio: number; alcancePromedio: number };
+
+function extraerHashtags(caption: string | null): string[] {
+  if (!caption) return [];
+  return Array.from(new Set((caption.match(/#[\p{L}0-9_]+/gu) ?? []).map((h) => h.toLowerCase())));
+}
+
+// Cuáles hashtags le funcionan mejor a esta cuenta — no cuáles son
+// "populares" en general, sino cuáles le traen mejor tasa de interacción
+// a ESTAS publicaciones específicamente.
+function rendimientoPorHashtag(media: InstagramMedia[]): RendimientoHashtag[] {
+  const grupos = new Map<string, { alcance: number[]; tasas: number[] }>();
+  for (const m of media) {
+    const tasa = tasaInteraccion(m);
+    for (const h of extraerHashtags(m.caption)) {
+      const actual = grupos.get(h) ?? { alcance: [], tasas: [] };
+      if (m.metricas.reach !== undefined) actual.alcance.push(m.metricas.reach);
+      if (tasa !== null) actual.tasas.push(tasa);
+      grupos.set(h, actual);
+    }
+  }
+  return Array.from(grupos.entries())
+    .map(([hashtag, { alcance, tasas }]) => ({
+      hashtag,
+      usos: Math.max(alcance.length, tasas.length),
+      alcancePromedio: alcance.length ? alcance.reduce((a, b) => a + b, 0) / alcance.length : 0,
+      tasaPromedio: tasas.length ? tasas.reduce((a, b) => a + b, 0) / tasas.length : 0,
+    }))
+    .filter((h) => h.usos >= 2)
+    .sort((a, b) => b.tasaPromedio - a.tasaPromedio);
+}
+
+// -------- Publicaciones atípicas --------
+
+// Publicaciones que se salen claramente del promedio de la cuenta (más de
+// 1.5 desviaciones estándar) — para notar de un vistazo qué se disparó o
+// qué se hundió, sin tener que revisar publicación por publicación.
+function publicacionesAtipicas(media: InstagramMedia[]): { positivas: InstagramMedia[]; negativas: InstagramMedia[] } {
+  const conTasa = media
+    .map((m) => ({ m, tasa: tasaInteraccion(m) }))
+    .filter((x): x is { m: InstagramMedia; tasa: number } => x.tasa !== null);
+  if (conTasa.length < 5) return { positivas: [], negativas: [] };
+  const promedio = conTasa.reduce((a, x) => a + x.tasa, 0) / conTasa.length;
+  const varianza = conTasa.reduce((a, x) => a + (x.tasa - promedio) ** 2, 0) / conTasa.length;
+  const desviacion = Math.sqrt(varianza);
+  if (desviacion === 0) return { positivas: [], negativas: [] };
+  return {
+    positivas: conTasa.filter((x) => x.tasa > promedio + 1.5 * desviacion).map((x) => x.m),
+    negativas: conTasa.filter((x) => x.tasa < promedio - 1.5 * desviacion).map((x) => x.m),
+  };
+}
+
+// -------- Racha de consistencia --------
+
+function calcularRacha(media: InstagramMedia[]): { racha: number; diasSinPublicar: number } {
+  const diasConPost = new Set(media.map((m) => new Date(m.timestamp).toDateString()));
+  let racha = 0;
+  const cursor = new Date();
+  // Si hoy todavía no se publicó, no rompe la racha de ayer hacia atrás —
+  // arranca a contar desde el primer día (hoy o ayer) que sí tenga post.
+  while (racha < 365) {
+    if (diasConPost.has(cursor.toDateString())) {
+      racha += 1;
+      cursor.setDate(cursor.getDate() - 1);
+    } else if (racha === 0) {
+      cursor.setDate(cursor.getDate() - 1);
+      if (new Date().getTime() - cursor.getTime() > 2 * 86400000) break; // no cuenta si ya se rompió desde antier
+    } else {
+      break;
+    }
+  }
+  const ultimaFecha = media.length
+    ? new Date(Math.max(...media.map((m) => new Date(m.timestamp).getTime())))
+    : null;
+  const diasSinPublicar = ultimaFecha ? Math.floor((Date.now() - ultimaFecha.getTime()) / 86400000) : 0;
+  return { racha, diasSinPublicar };
+}
+
+// -------- Longitud del caption --------
+
+type RendimientoLongitud = { bucket: string; publicaciones: number; tasaPromedio: number };
+
+function rendimientoPorLongitudCaption(media: InstagramMedia[]): RendimientoLongitud[] {
+  const buckets: Record<string, { tasas: number[] }> = {
+    "Corto (<100 caracteres)": { tasas: [] },
+    "Medio (100-300)": { tasas: [] },
+    "Largo (>300)": { tasas: [] },
+  };
+  for (const m of media) {
+    const tasa = tasaInteraccion(m);
+    if (tasa === null) continue;
+    const len = m.caption?.length ?? 0;
+    const bucket = len < 100 ? "Corto (<100 caracteres)" : len <= 300 ? "Medio (100-300)" : "Largo (>300)";
+    buckets[bucket].tasas.push(tasa);
+  }
+  return Object.entries(buckets)
+    .map(([bucket, { tasas }]) => ({
+      bucket,
+      publicaciones: tasas.length,
+      tasaPromedio: tasas.length ? tasas.reduce((a, b) => a + b, 0) / tasas.length : 0,
+    }))
+    .filter((b) => b.publicaciones > 0);
+}
+
 // Fechas YYYY-MM-DD para pedir el período de 30 días anterior al actual
 // (31 a 60 días atrás) — se usa para las comparaciones "vs. mes anterior".
 function rangoPeriodoAnterior(): { since: string; until: string } {
@@ -227,6 +333,8 @@ export default function MetricasClientesPage() {
   const [errorInstagram, setErrorInstagram] = useState<string | null>(null);
   const [cargandoInstagram, setCargandoInstagram] = useState(false);
   const [tendencia, setTendencia] = useState<Record<string, PuntoDiario[]> | null>(null);
+  const [notas, setNotas] = useState<Record<string, string>>({});
+  const [guardandoNota, setGuardandoNota] = useState<string | null>(null);
   const [desconectando, setDesconectando] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("resumen");
   const [vistaCliente, setVistaCliente] = useState(false);
@@ -266,6 +374,26 @@ export default function MetricasClientesPage() {
     }
   }
 
+  async function guardarNota(mediaId: string, etiqueta: string) {
+    if (!seleccionado) return;
+    setGuardandoNota(mediaId);
+    setNotas((prev) => {
+      const next = { ...prev };
+      if (etiqueta.trim()) next[mediaId] = etiqueta.trim();
+      else delete next[mediaId];
+      return next;
+    });
+    try {
+      await fetch("/api/meta/publicacion-notas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conexionId: seleccionado.id, mediaId, etiqueta }),
+      });
+    } finally {
+      setGuardandoNota(null);
+    }
+  }
+
   async function verMetricas(conexion: Conexion) {
     setSeleccionado(conexion);
     setTab("resumen");
@@ -277,6 +405,7 @@ export default function MetricasClientesPage() {
     setHistorias(null);
     setErrorInstagram(null);
     setTendencia(null);
+    setNotas({});
 
     const promesaAds = fetch(`/api/meta/insights?conexion_id=${conexion.id}`)
       .then((res) => res.json().then((data) => ({ res, data })))
@@ -316,7 +445,15 @@ export default function MetricasClientesPage() {
         .catch(() => {
           // La tendencia es un extra — si falla no debe tapar el resto del dashboard.
         });
-      await Promise.all([promesaAds, promesaAdsAnterior, promesaIg, promesaTendencia]);
+      const promesaNotas = fetch(`/api/meta/publicacion-notas?conexion_id=${conexion.id}`)
+        .then((res) => res.json().then((data) => ({ res, data })))
+        .then(({ res, data }) => {
+          if (res.ok) setNotas(data.notas);
+        })
+        .catch(() => {
+          // Las etiquetas de campaña son un extra.
+        });
+      await Promise.all([promesaAds, promesaAdsAnterior, promesaIg, promesaTendencia, promesaNotas]);
     } else {
       await Promise.all([promesaAds, promesaAdsAnterior]);
     }
@@ -362,6 +499,54 @@ export default function MetricasClientesPage() {
   // para que "peor" no sea simplemente repetir las mismas 5 de arriba.
   const peores5 = topPublicaciones.length > 8 ? [...topPublicaciones].reverse().slice(0, 5) : [];
   const porTipo = media ? rendimientoPorTipo(media) : [];
+  const porHashtag = media ? rendimientoPorHashtag(media) : [];
+  const { positivas: atipicasPositivas, negativas: atipicasNegativas } = media
+    ? publicacionesAtipicas(media)
+    : { positivas: [], negativas: [] };
+  const { racha, diasSinPublicar } = media ? calcularRacha(media) : { racha: 0, diasSinPublicar: 0 };
+  const porLongitud = media ? rendimientoPorLongitudCaption(media) : [];
+  const interaccionesAds =
+    insights?.reduce((acc, r) => acc + (r.actions?.reduce((a, b) => a + Number(b.value), 0) ?? 0), 0) ?? 0;
+  const interaccionesCombinadas = interaccionesAds + totalInteraccionesIG;
+  const costoPorInteraccion = interaccionesCombinadas > 0 ? totalGasto / interaccionesCombinadas : null;
+
+  // Campañas: agrupa publicaciones que comparten la misma etiqueta manual.
+  const campanas = new Map<string, InstagramMedia[]>();
+  for (const m of media ?? []) {
+    const etiqueta = notas[m.id];
+    if (!etiqueta) continue;
+    campanas.set(etiqueta, [...(campanas.get(etiqueta) ?? []), m]);
+  }
+  const rendimientoCampanas = Array.from(campanas.entries())
+    .map(([etiqueta, posts]) => {
+      const tasas = posts.map(tasaInteraccion).filter((t): t is number => t !== null);
+      return {
+        etiqueta,
+        publicaciones: posts.length,
+        alcanceTotal: posts.reduce((a, m) => a + (m.metricas.reach ?? 0), 0),
+        tasaPromedio: tasas.length ? tasas.reduce((a, b) => a + b, 0) / tasas.length : 0,
+      };
+    })
+    .sort((a, b) => b.tasaPromedio - a.tasaPromedio);
+
+  // Calendario del mes en curso — un vistazo a qué días sí y qué días no
+  // se publicó, para detectar huecos de consistencia.
+  const hoyReal = new Date();
+  const primerDiaMes = new Date(hoyReal.getFullYear(), hoyReal.getMonth(), 1);
+  const diasEnMes = new Date(hoyReal.getFullYear(), hoyReal.getMonth() + 1, 0).getDate();
+  const offsetInicial = primerDiaMes.getDay();
+  const postsPorDia = new Map<number, InstagramMedia[]>();
+  for (const m of media ?? []) {
+    const fecha = new Date(m.timestamp);
+    if (fecha.getFullYear() === hoyReal.getFullYear() && fecha.getMonth() === hoyReal.getMonth()) {
+      const dia = fecha.getDate();
+      postsPorDia.set(dia, [...(postsPorDia.get(dia) ?? []), m]);
+    }
+  }
+  const celdasCalendario: (number | null)[] = [
+    ...Array(offsetInicial).fill(null),
+    ...Array.from({ length: diasEnMes }, (_, i) => i + 1),
+  ];
 
   const tieneAds = Boolean(insights && insights.length > 0);
   const tieneIG = Boolean(seleccionado?.instagram_business_id);
@@ -574,6 +759,31 @@ export default function MetricasClientesPage() {
 
             {!tieneAds && !tieneIG && (
               <p className="text-sm text-muted">Conecta anuncios o Instagram para este cliente para ver su resumen.</p>
+            )}
+
+            {(costoPorInteraccion !== null || (media && media.length > 0)) && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {costoPorInteraccion !== null && (
+                  <KpiCard
+                    label="Costo por interacción (anuncios + orgánico)"
+                    value={moneda(String(costoPorInteraccion))}
+                    hint="Toda la inversión en anuncios sobre el total de interacciones, pagadas y orgánicas."
+                  />
+                )}
+                {media && media.length > 0 && (
+                  <KpiCard
+                    label="Consistencia"
+                    value={racha > 0 ? `🔥 ${racha} día${racha === 1 ? "" : "s"} seguidos` : `⚠️ ${diasSinPublicar} días sin publicar`}
+                    accentClassName={
+                      racha > 0
+                        ? "border-success/40 bg-success/10"
+                        : diasSinPublicar >= 3
+                          ? "border-danger/40 bg-danger/10"
+                          : undefined
+                    }
+                  />
+                )}
+              </div>
             )}
 
             {momentos.length > 0 && (
@@ -831,6 +1041,168 @@ export default function MetricasClientesPage() {
                 </div>
               )}
 
+              {(atipicasPositivas.length > 0 || atipicasNegativas.length > 0) && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {atipicasPositivas.length > 0 && (
+                    <div className="rounded-lg border border-success/40 bg-success/10 p-4">
+                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-2">
+                        🚀 Se dispararon vs. el promedio
+                      </h3>
+                      <ul className="text-sm flex flex-col gap-1">
+                        {atipicasPositivas.map((m) => (
+                          <li key={m.id}>
+                            <a href={m.permalink} target="_blank" rel="noreferrer" className="hover:underline">
+                              {tipoIcono(m)} {tasaInteraccion(m)?.toFixed(1)}% interacción · {fechaCorta(m.timestamp)}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {atipicasNegativas.length > 0 && (
+                    <div className="rounded-lg border border-danger/40 bg-danger/10 p-4">
+                      <h3 className="text-sm font-semibold uppercase tracking-wide mb-2">
+                        📉 Se hundieron vs. el promedio
+                      </h3>
+                      <ul className="text-sm flex flex-col gap-1">
+                        {atipicasNegativas.map((m) => (
+                          <li key={m.id}>
+                            <a href={m.permalink} target="_blank" rel="noreferrer" className="hover:underline">
+                              {tipoIcono(m)} {tasaInteraccion(m)?.toFixed(1)}% interacción · {fechaCorta(m.timestamp)}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {porHashtag.length > 0 && (
+                <div className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                    Hashtags que mejor le funcionan a esta cuenta
+                  </h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
+                          <th className="p-2">Hashtag</th>
+                          <th className="p-2 text-right">Usos</th>
+                          <th className="p-2 text-right">Alcance promedio</th>
+                          <th className="p-2 text-right">Interacción promedio</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {porHashtag.slice(0, 10).map((h, i) => (
+                          <tr key={h.hashtag} className="border-b border-border last:border-0">
+                            <td className="p-2 font-medium">
+                              {i === 0 && "🏆 "}
+                              {h.hashtag}
+                            </td>
+                            <td className="p-2 text-right">{h.usos}</td>
+                            <td className="p-2 text-right">{numero(String(Math.round(h.alcancePromedio)))}</td>
+                            <td className="p-2 text-right">{h.tasaPromedio.toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {porLongitud.length > 1 && (
+                <div className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                    Captions cortos vs. largos
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    {porLongitud.map((b) => (
+                      <div key={b.bucket} className="rounded-md bg-surface-alt p-3 text-sm">
+                        <p className="font-medium">{b.bucket}</p>
+                        <p className="text-muted text-xs mt-1">
+                          {b.tasaPromedio.toFixed(1)}% interacción promedio · {b.publicaciones} publicaciones
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {rendimientoCampanas.length > 0 && (
+                <div className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Rendimiento por campaña</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
+                          <th className="p-2">Campaña</th>
+                          <th className="p-2 text-right">Publicaciones</th>
+                          <th className="p-2 text-right">Alcance total</th>
+                          <th className="p-2 text-right">Interacción promedio</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rendimientoCampanas.map((c) => (
+                          <tr key={c.etiqueta} className="border-b border-border last:border-0">
+                            <td className="p-2 font-medium">{c.etiqueta}</td>
+                            <td className="p-2 text-right">{c.publicaciones}</td>
+                            <td className="p-2 text-right">{numero(String(c.alcanceTotal))}</td>
+                            <td className="p-2 text-right">{c.tasaPromedio.toFixed(1)}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="text-xs text-muted mt-2">
+                    Etiqueta publicaciones desde la tabla de abajo (columna "Campaña") para que aparezcan agrupadas aquí.
+                  </p>
+                </div>
+              )}
+
+              {celdasCalendario.length > 0 && (
+                <div className="rounded-lg border border-border bg-surface p-4 print:hidden">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                    Calendario de {hoyReal.toLocaleDateString("es-CO", { month: "long", year: "numeric" })}
+                  </h3>
+                  <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted mb-1">
+                    {["D", "L", "M", "M", "J", "V", "S"].map((d, i) => (
+                      <span key={i}>{d}</span>
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
+                    {celdasCalendario.map((dia, i) => {
+                      if (dia === null) return <span key={i} />;
+                      const posts = postsPorDia.get(dia) ?? [];
+                      const esFuturo = dia > hoyReal.getDate();
+                      const sinPublicar = posts.length === 0 && !esFuturo;
+                      return (
+                        <div
+                          key={i}
+                          className={`aspect-square rounded-md border overflow-hidden relative flex items-center justify-center text-xs ${
+                            sinPublicar ? "border-danger/40 bg-danger/5" : "border-border bg-surface-alt"
+                          } ${esFuturo ? "opacity-40" : ""}`}
+                          title={posts.length ? `${posts.length} publicación(es)` : undefined}
+                        >
+                          {posts[0]?.imagenUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={posts[0].imagenUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                          ) : (
+                            <span className={sinPublicar ? "text-danger" : "text-muted"}>{dia}</span>
+                          )}
+                          {posts.length > 0 && (
+                            <span className="absolute bottom-0.5 right-0.5 bg-surface/90 rounded px-1 text-[10px] font-medium">
+                              {dia}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted mt-2">Los días marcados en rojo son días ya pasados sin ninguna publicación.</p>
+                </div>
+              )}
+
               {historias && historias.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-2">
@@ -881,6 +1253,7 @@ export default function MetricasClientesPage() {
                         <th className="p-3 text-right">Compartidos</th>
                         <th className="p-3 text-right">Guardados</th>
                         <th className="p-3 text-right">Reproducciones</th>
+                        <th className="p-3 print:hidden">Campaña</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -927,6 +1300,17 @@ export default function MetricasClientesPage() {
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.shares)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.saved)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.views)}</td>
+                          <td className="p-3 print:hidden">
+                            <input
+                              defaultValue={notas[m.id] ?? ""}
+                              placeholder="Sin etiquetar"
+                              onBlur={(e) => {
+                                if (e.target.value !== (notas[m.id] ?? "")) guardarNota(m.id, e.target.value);
+                              }}
+                              disabled={guardandoNota === m.id}
+                              className="w-32 text-xs"
+                            />
+                          </td>
                         </tr>
                       ))}
                     </tbody>
