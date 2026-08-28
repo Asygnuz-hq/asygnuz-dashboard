@@ -455,6 +455,81 @@ export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Prom
   );
 }
 
+// -------- Página de Facebook: contenido orgánico --------
+
+export type FacebookPost = {
+  id: string;
+  message: string | null;
+  createdTime: string;
+  permalink: string;
+  imagenUrl: string | null;
+  metricas: Record<string, number>;
+};
+
+// Necesita un token de PÁGINA (distinto del token de usuario que se
+// guarda al conectar anuncios) — se obtiene al vuelo, nunca se guarda en
+// Supabase, para no acumular tokens de más.
+async function obtenerTokenDePagina(pageId: string, accessToken: string): Promise<string> {
+  const data = await graphFetch<{ access_token: string }>(`/${pageId}`, {
+    access_token: accessToken,
+    fields: "access_token",
+  });
+  return data.access_token;
+}
+
+// Metricas de post de Facebook con nombres vigentes al 2026 — varias de
+// las clásicas (post_impressions, post_engaged_users) quedaron obsoletas
+// (confirmado en vivo), igual que pasó con Instagram.
+const METRICAS_POST_FACEBOOK = ["post_clicks", "post_video_views", "post_reactions_by_type_total"];
+
+async function fetchInsightsDePostFacebook(postId: string, pageToken: string): Promise<Record<string, number>> {
+  const out: Record<string, number> = {};
+  await Promise.all(
+    METRICAS_POST_FACEBOOK.map(async (metric) => {
+      try {
+        const data = await graphFetch<{ data: { name: string; values: { value: number | Record<string, number> }[] }[] }>(
+          `/${postId}/insights`,
+          { access_token: pageToken, metric }
+        );
+        const valor = data.data?.[0]?.values?.[0]?.value;
+        if (typeof valor === "number") out[metric] = valor;
+        else if (valor && typeof valor === "object") {
+          // post_reactions_by_type_total viene desglosado por tipo (like, love, etc.) — se suma.
+          out[metric] = Object.values(valor).reduce((a, b) => a + b, 0);
+        }
+      } catch {
+        // Post muy viejo o sin datos para esa métrica todavía.
+      }
+    })
+  );
+  return out;
+}
+
+export async function fetchFacebookPagePosts(conexion: MetaConexion, limite = 25): Promise<FacebookPost[]> {
+  if (!conexion.page_id || !conexion.access_token) {
+    throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene Página de Facebook asociada.`);
+  }
+  const pageToken = await obtenerTokenDePagina(conexion.page_id, conexion.access_token);
+  const lista = await graphFetch<{
+    data: { id: string; message?: string; created_time: string; permalink_url: string; full_picture?: string }[];
+  }>(`/${conexion.page_id}/posts`, {
+    access_token: pageToken,
+    fields: "id,message,created_time,permalink_url,full_picture",
+    limit: String(limite),
+  });
+
+  return Promise.all(
+    lista.data.map(async (p) => ({
+      id: p.id,
+      message: p.message ?? null,
+      createdTime: p.created_time,
+      permalink: p.permalink_url,
+      imagenUrl: p.full_picture ?? null,
+      metricas: await fetchInsightsDePostFacebook(p.id, pageToken),
+    }))
+  );
+}
+
 // -------- Demografía de audiencia --------
 
 export type DemografiaResultado = { dimension: string[]; valor: number };

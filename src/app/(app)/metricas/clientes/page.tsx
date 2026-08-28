@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
-import type { MetaInsightRow, InstagramMedia, PuntoDiario, InstagramDemografia } from "@/lib/meta/client";
+import type { MetaInsightRow, InstagramMedia, PuntoDiario, InstagramDemografia, FacebookPost } from "@/lib/meta/client";
 
 type Conexion = {
   id: string;
@@ -358,6 +358,8 @@ export default function MetricasClientesPage() {
   const [cargandoInstagram, setCargandoInstagram] = useState(false);
   const [tendencia, setTendencia] = useState<Record<string, PuntoDiario[]> | null>(null);
   const [demografia, setDemografia] = useState<InstagramDemografia | null>(null);
+  const [postsFacebook, setPostsFacebook] = useState<FacebookPost[] | null>(null);
+  const [errorFacebook, setErrorFacebook] = useState<string | null>(null);
   const [sheetsCopiado, setSheetsCopiado] = useState(false);
   const [notas, setNotas] = useState<Record<string, string>>({});
   const [guardandoNota, setGuardandoNota] = useState<string | null>(null);
@@ -433,6 +435,8 @@ export default function MetricasClientesPage() {
     setErrorInstagram(null);
     setTendencia(null);
     setDemografia(null);
+    setPostsFacebook(null);
+    setErrorFacebook(null);
     setNotas({});
 
     const promesaAds = fetch(`/api/meta/insights?conexion_id=${conexion.id}`)
@@ -444,6 +448,16 @@ export default function MetricasClientesPage() {
       })
       .catch((err) => setErrorInsights(err instanceof Error ? err.message : "Error desconocido"))
       .finally(() => setCargandoInsights(false));
+
+    if (conexion.ad_account_id) {
+      fetch(`/api/meta/facebook-posts?conexion_id=${conexion.id}`)
+        .then((res) => res.json().then((data) => ({ res, data })))
+        .then(({ res, data }) => {
+          if (!res.ok) throw new Error(data.error);
+          setPostsFacebook(data.posts);
+        })
+        .catch((err) => setErrorFacebook(err instanceof Error ? err.message : "Error desconocido"));
+    }
 
     const { since, until } = rangoPeriodoAnterior();
     const promesaAdsAnterior = fetch(`/api/meta/insights?conexion_id=${conexion.id}&since=${since}&until=${until}`)
@@ -948,6 +962,43 @@ export default function MetricasClientesPage() {
                   </table>
                 </div>
               </>
+            )}
+
+            {errorFacebook && <p className="text-sm text-danger">No se pudo leer Facebook: {errorFacebook}</p>}
+
+            {postsFacebook && postsFacebook.length > 0 && (
+              <div className="pt-4 border-t border-border">
+                <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                  Página de Facebook — contenido orgánico
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {postsFacebook.map((p) => (
+                    <a
+                      key={p.id}
+                      href={p.permalink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                    >
+                      {p.imagenUrl && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={p.imagenUrl} alt="" className="w-full aspect-video object-cover bg-surface-alt" />
+                      )}
+                      <div className="p-3 flex flex-col gap-1">
+                        <p className="text-muted">{fechaCorta(p.createdTime)}</p>
+                        {p.message && <p className="line-clamp-2">{p.message}</p>}
+                        <p className="text-muted mt-1">
+                          👍 {numeroOMenos(p.metricas.post_reactions_by_type_total)} · 🖱️{" "}
+                          {numeroOMenos(p.metricas.post_clicks)} · ▶️ {numeroOMenos(p.metricas.post_video_views)}
+                        </p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+            {postsFacebook && postsFacebook.length === 0 && (
+              <p className="text-sm text-muted">Sin publicaciones recientes en la Página de Facebook.</p>
             )}
           </div>
 
