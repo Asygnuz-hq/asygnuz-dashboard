@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
-import type { MetaInsightRow, InstagramMedia, PuntoDiario } from "@/lib/meta/client";
+import type { MetaInsightRow, InstagramMedia, PuntoDiario, InstagramDemografia } from "@/lib/meta/client";
 
 type Conexion = {
   id: string;
@@ -24,6 +24,7 @@ type Conexion = {
   instagram_business_id: string | null;
   instagram_username: string | null;
   token_expira_en: string | null;
+  export_token: string | null;
 };
 
 const ACCION_LABEL: Record<string, string> = {
@@ -72,6 +73,12 @@ function fechaCorta(iso: string): string {
 // en vez de mezclar eso con un 0 real.
 function numeroOMenos(valor: number | undefined): string {
   return valor !== undefined ? numero(String(valor)) : "—";
+}
+
+// ig_reels_avg_watch_time viene en milisegundos — solo aplica a Reels.
+function tiempoVistoOMenos(valor: number | undefined): string {
+  if (valor === undefined) return "—";
+  return `${(valor / 1000).toFixed(1)}s`;
 }
 
 function interacciones(m: InstagramMedia): number {
@@ -333,6 +340,8 @@ export default function MetricasClientesPage() {
   const [errorInstagram, setErrorInstagram] = useState<string | null>(null);
   const [cargandoInstagram, setCargandoInstagram] = useState(false);
   const [tendencia, setTendencia] = useState<Record<string, PuntoDiario[]> | null>(null);
+  const [demografia, setDemografia] = useState<InstagramDemografia | null>(null);
+  const [sheetsCopiado, setSheetsCopiado] = useState(false);
   const [notas, setNotas] = useState<Record<string, string>>({});
   const [guardandoNota, setGuardandoNota] = useState<string | null>(null);
   const [desconectando, setDesconectando] = useState<string | null>(null);
@@ -405,6 +414,7 @@ export default function MetricasClientesPage() {
     setHistorias(null);
     setErrorInstagram(null);
     setTendencia(null);
+    setDemografia(null);
     setNotas({});
 
     const promesaAds = fetch(`/api/meta/insights?conexion_id=${conexion.id}`)
@@ -445,6 +455,14 @@ export default function MetricasClientesPage() {
         .catch(() => {
           // La tendencia es un extra — si falla no debe tapar el resto del dashboard.
         });
+      const promesaDemografia = fetch(`/api/meta/instagram-demografia?conexion_id=${conexion.id}`)
+        .then((res) => res.json().then((data) => ({ res, data })))
+        .then(({ res, data }) => {
+          if (res.ok) setDemografia(data.demografia);
+        })
+        .catch(() => {
+          // Demografía es un extra.
+        });
       const promesaNotas = fetch(`/api/meta/publicacion-notas?conexion_id=${conexion.id}`)
         .then((res) => res.json().then((data) => ({ res, data })))
         .then(({ res, data }) => {
@@ -453,7 +471,7 @@ export default function MetricasClientesPage() {
         .catch(() => {
           // Las etiquetas de campaña son un extra.
         });
-      await Promise.all([promesaAds, promesaAdsAnterior, promesaIg, promesaTendencia, promesaNotas]);
+      await Promise.all([promesaAds, promesaAdsAnterior, promesaIg, promesaTendencia, promesaDemografia, promesaNotas]);
     } else {
       await Promise.all([promesaAds, promesaAdsAnterior]);
     }
@@ -673,6 +691,19 @@ export default function MetricasClientesPage() {
               >
                 Descargar Excel
               </button>
+              {seleccionado.export_token && (
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/api/meta/exportar-publico?token=${seleccionado.export_token}`;
+                    navigator.clipboard.writeText(`=IMPORTDATA("${url}")`);
+                    setSheetsCopiado(true);
+                    setTimeout(() => setSheetsCopiado(false), 2000);
+                  }}
+                  className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt"
+                >
+                  {sheetsCopiado ? "¡Copiado!" : "Copiar para Sheets"}
+                </button>
+              )}
               <button
                 onClick={() => window.print()}
                 className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright"
@@ -1078,6 +1109,50 @@ export default function MetricasClientesPage() {
                 </div>
               )}
 
+              {demografia && (demografia.edadGenero || demografia.ciudad || demografia.pais) && (
+                <div className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Audiencia</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    {demografia.edadGenero && (
+                      <div>
+                        <p className="text-xs text-muted uppercase tracking-wide mb-1">Edad y género</p>
+                        {demografia.edadGenero.slice(0, 5).map((d, i) => (
+                          <p key={i}>
+                            {d.dimension.join(" · ")}: <span className="font-medium">{numero(String(d.valor))}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {demografia.ciudad && (
+                      <div>
+                        <p className="text-xs text-muted uppercase tracking-wide mb-1">Top ciudades</p>
+                        {demografia.ciudad.slice(0, 5).map((d, i) => (
+                          <p key={i}>
+                            {d.dimension.join(" · ")}: <span className="font-medium">{numero(String(d.valor))}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                    {demografia.pais && (
+                      <div>
+                        <p className="text-xs text-muted uppercase tracking-wide mb-1">Top países</p>
+                        {demografia.pais.slice(0, 5).map((d, i) => (
+                          <p key={i}>
+                            {d.dimension.join(" · ")}: <span className="font-medium">{numero(String(d.valor))}</span>
+                          </p>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {demografia && !demografia.edadGenero && !demografia.ciudad && !demografia.pais && (
+                <p className="text-xs text-muted">
+                  Meta todavía no muestra demografía de audiencia para esta cuenta — exige un mínimo de audiencia
+                  (~100 personas) por desglose. No es un error, es una cuenta chica todavía.
+                </p>
+              )}
+
               {porHashtag.length > 0 && (
                 <div className="rounded-lg border border-border bg-surface p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
@@ -1224,6 +1299,7 @@ export default function MetricasClientesPage() {
                         <div className="p-2">
                           <p className="font-medium">Alcance: {numeroOMenos(h.metricas.reach)}</p>
                           <p className="text-muted">Respuestas: {numeroOMenos(h.metricas.replies)}</p>
+                          <p className="text-muted">Navegación: {numeroOMenos(h.metricas.navigation)}</p>
                         </div>
                       </a>
                     ))}
@@ -1253,6 +1329,7 @@ export default function MetricasClientesPage() {
                         <th className="p-3 text-right">Compartidos</th>
                         <th className="p-3 text-right">Guardados</th>
                         <th className="p-3 text-right">Reproducciones</th>
+                        <th className="p-3 text-right">Tiempo viendo</th>
                         <th className="p-3 print:hidden">Campaña</th>
                       </tr>
                     </thead>
@@ -1300,6 +1377,7 @@ export default function MetricasClientesPage() {
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.shares)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.saved)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.views)}</td>
+                          <td className="p-3 text-right">{tiempoVistoOMenos(m.metricas.ig_reels_avg_watch_time)}</td>
                           <td className="p-3 print:hidden">
                             <input
                               defaultValue={notas[m.id] ?? ""}

@@ -270,17 +270,27 @@ function metricasParaTipo(mediaProductType: string): string[] {
     // junto con las demás en un solo llamado hacía fallar TODO el paquete
     // (la API rechaza la lista completa si una sola métrica no es válida),
     // lo que dejaba en blanco hasta el alcance. Confirmado contra la API en
-    // vivo: la lista vigente ya no incluye "plays".
-    return ["reach", "likes", "comments", "shares", "saved", "views", "total_interactions"];
+    // vivo: la lista vigente ya no incluye "plays". ig_reels_avg_watch_time
+    // y ig_reels_video_view_total_time sí están vigentes (confirmado en vivo).
+    return [
+      "reach",
+      "likes",
+      "comments",
+      "shares",
+      "saved",
+      "views",
+      "total_interactions",
+      "ig_reels_avg_watch_time",
+      "ig_reels_video_view_total_time",
+    ];
   }
   if (mediaProductType === "STORY") {
     // Las historias expiran a las 24h — solo se pueden leer mientras siguen
-    // activas. "exits"/"taps_forward"/"taps_back" también quedaron
-    // obsoletas (confirmado contra la API en vivo) — el reemplazo moderno
-    // es "navigation", pero devuelve un desglose en vez de un número
-    // simple, así que por ahora se deja fuera y solo se pide lo que sí
-    // encaja en el modelo actual (un valor por métrica).
-    return ["reach", "replies", "total_interactions"];
+    // activas. "exits"/"taps_forward"/"taps_back" quedaron obsoletas
+    // (confirmado en vivo) — "navigation" es el reemplazo vigente: no
+    // desglosa por tipo de acción, es un solo número (total de avances +
+    // retrocesos + salidas), confirmado en vivo.
+    return ["reach", "replies", "navigation", "total_interactions"];
   }
   // Publicaciones normales de feed: foto, video o carrusel. Se incluye
   // "views" también por si es un video de feed (no reel).
@@ -420,6 +430,64 @@ export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Prom
       metricas: await fetchInsightsDeMedia(m.id, "STORY", token),
     }))
   );
+}
+
+// -------- Demografía de audiencia --------
+
+export type DemografiaResultado = { dimension: string[]; valor: number };
+export type InstagramDemografia = {
+  edadGenero: DemografiaResultado[] | null;
+  ciudad: DemografiaResultado[] | null;
+  pais: DemografiaResultado[] | null;
+};
+
+async function pedirDemografia(
+  igId: string,
+  token: string,
+  breakdown: string
+): Promise<DemografiaResultado[] | null> {
+  try {
+    const data = await graphFetch<{
+      data: {
+        total_value?: {
+          breakdowns?: { dimension_keys: string[]; results: { dimension_values: string[]; value: number }[] }[];
+        };
+      }[];
+    }>(
+      `/${igId}/insights`,
+      {
+        access_token: token,
+        metric: "engaged_audience_demographics",
+        period: "lifetime",
+        metric_type: "total_value",
+        breakdown,
+      },
+      GRAPH_INSTAGRAM_URL
+    );
+    const resultados = data.data?.[0]?.total_value?.breakdowns?.[0]?.results ?? [];
+    if (resultados.length === 0) return null;
+    return resultados
+      .map((r) => ({ dimension: r.dimension_values, valor: r.value }))
+      .sort((a, b) => b.valor - a.valor);
+  } catch {
+    // Meta exige un mínimo de audiencia (~100 personas) por desglose —
+    // cuentas chicas simplemente no tienen este dato todavía, no es un bug.
+    return null;
+  }
+}
+
+export async function fetchInstagramDemografia(conexion: MetaConexion): Promise<InstagramDemografia> {
+  if (!conexion.instagram_business_id || !conexion.instagram_access_token) {
+    throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene Instagram conectado.`);
+  }
+  const token = conexion.instagram_access_token;
+  const igId = conexion.instagram_business_id;
+  const [edadGenero, ciudad, pais] = await Promise.all([
+    pedirDemografia(igId, token, "age,gender"),
+    pedirDemografia(igId, token, "city"),
+    pedirDemografia(igId, token, "country"),
+  ]);
+  return { edadGenero, ciudad, pais };
 }
 
 // -------- Tendencia de la cuenta (alcance / visitas al perfil / seguidores en el tiempo) --------
