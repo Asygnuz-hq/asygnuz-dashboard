@@ -53,7 +53,10 @@ export function buildAuthUrl(state: string): string {
   // instagram.com — no se pueden pedir aquí, Facebook los rechaza con
   // "Invalid Scopes". El contenido orgánico de Instagram se conecta con un
   // flujo aparte (ver /api/meta/instagram-connect).
-  const scopes = ["ads_read", "pages_show_list", "business_management"].join(",");
+  // pages_read_engagement se agregó para poder leer publicaciones de la
+  // Página de Facebook y usar la Business Discovery API (competencia
+  // pública) — sin este permiso, ambas fallan con "missing permission".
+  const scopes = ["ads_read", "pages_show_list", "business_management", "pages_read_engagement"].join(",");
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
