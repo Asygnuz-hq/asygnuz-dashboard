@@ -38,8 +38,11 @@ function numero(valor: string): string {
   return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(Number(valor));
 }
 
-function moneda(valor: string): string {
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(
+// Meta devuelve el gasto en la moneda REAL de la cuenta de anuncios — no
+// siempre USD. Sin el parámetro se asume USD solo como último recurso
+// (ej. antes de que cargue la moneda real de la cuenta).
+function moneda(valor: string, codigoMoneda: string = "USD"): string {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: codigoMoneda, maximumFractionDigits: 2 }).format(
     Number(valor)
   );
 }
@@ -285,11 +288,24 @@ function rangoPeriodoAnterior(): { since: string; until: string } {
   return { since: fmt(inicioAnterior), until: fmt(finAnterior) };
 }
 
-function descargarCSV(cliente: string, media: InstagramMedia[] | null, insights: MetaInsightRow[] | null) {
+function descargarCSV(
+  cliente: string,
+  media: InstagramMedia[] | null,
+  insights: MetaInsightRow[] | null,
+  monedaAds: string
+) {
   const filas: string[][] = [];
   if (insights && insights.length > 0) {
     filas.push(["Anuncios — últimos 30 días"]);
-    filas.push(["Campaña", "Gasto", "Impresiones", "Alcance", "CPC", "CPM", "CTR"]);
+    filas.push([
+      "Campaña",
+      `Gasto (${monedaAds})`,
+      "Impresiones",
+      "Alcance",
+      `CPC (${monedaAds})`,
+      `CPM (${monedaAds})`,
+      "CTR",
+    ]);
     insights.forEach((r) => {
       filas.push([r.campaign_name, r.spend, r.impressions, r.reach, r.cpc, r.cpm, r.ctr]);
     });
@@ -333,6 +349,7 @@ export default function MetricasClientesPage() {
   const [seleccionado, setSeleccionado] = useState<Conexion | null>(null);
   const [insights, setInsights] = useState<MetaInsightRow[] | null>(null);
   const [insightsAnterior, setInsightsAnterior] = useState<MetaInsightRow[] | null>(null);
+  const [monedaAds, setMonedaAds] = useState("USD");
   const [errorInsights, setErrorInsights] = useState<string | null>(null);
   const [cargandoInsights, setCargandoInsights] = useState(false);
   const [media, setMedia] = useState<InstagramMedia[] | null>(null);
@@ -408,6 +425,7 @@ export default function MetricasClientesPage() {
     setTab("resumen");
     setInsights(null);
     setInsightsAnterior(null);
+    setMonedaAds("USD");
     setErrorInsights(null);
     setCargandoInsights(true);
     setMedia(null);
@@ -422,6 +440,7 @@ export default function MetricasClientesPage() {
       .then(({ res, data }) => {
         if (!res.ok) throw new Error(data.error);
         setInsights(data.insights);
+        if (data.moneda) setMonedaAds(data.moneda);
       })
       .catch((err) => setErrorInsights(err instanceof Error ? err.message : "Error desconocido"))
       .finally(() => setCargandoInsights(false));
@@ -686,7 +705,7 @@ export default function MetricasClientesPage() {
                 {vistaCliente ? "Vista de trabajo" : "Vista para cliente"}
               </button>
               <button
-                onClick={() => descargarCSV(seleccionado.cliente_nombre, media, insights)}
+                onClick={() => descargarCSV(seleccionado.cliente_nombre, media, insights, monedaAds)}
                 className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt"
               >
                 Descargar Excel
@@ -746,7 +765,7 @@ export default function MetricasClientesPage() {
                 <>
                   <KpiCard
                     label="Inversión en anuncios (30d)"
-                    value={moneda(String(totalGasto))}
+                    value={moneda(String(totalGasto), monedaAds)}
                     delta={
                       pctDelta(totalGasto, gastoAnterior) !== null
                         ? { pct: pctDelta(totalGasto, gastoAnterior)! }
@@ -797,7 +816,7 @@ export default function MetricasClientesPage() {
                 {costoPorInteraccion !== null && (
                   <KpiCard
                     label="Costo por interacción (anuncios + orgánico)"
-                    value={moneda(String(costoPorInteraccion))}
+                    value={moneda(String(costoPorInteraccion), monedaAds)}
                     hint="Toda la inversión en anuncios sobre el total de interacciones, pagadas y orgánicas."
                   />
                 )}
@@ -879,7 +898,7 @@ export default function MetricasClientesPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <KpiCard
                     label="Inversión (30d)"
-                    value={moneda(String(totalGasto))}
+                    value={moneda(String(totalGasto), monedaAds)}
                     delta={
                       pctDelta(totalGasto, gastoAnterior) !== null
                         ? { pct: pctDelta(totalGasto, gastoAnterior)! }
@@ -888,7 +907,7 @@ export default function MetricasClientesPage() {
                   />
                   <KpiCard label="Impresiones" value={numero(String(totalImpresiones))} />
                   <KpiCard label="Alcance" value={numero(String(totalAlcanceAds))} />
-                  <KpiCard label="CPM ponderado" value={moneda(String(cpmPonderado))} />
+                  <KpiCard label="CPM ponderado" value={moneda(String(cpmPonderado), monedaAds)} />
                 </div>
 
                 <div className="overflow-x-auto rounded-lg border border-border bg-surface">
@@ -896,11 +915,11 @@ export default function MetricasClientesPage() {
                     <thead>
                       <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
                         <th className="p-3">Campaña</th>
-                        <th className="p-3 text-right">Gasto</th>
+                        <th className="p-3 text-right">Gasto ({monedaAds})</th>
                         <th className="p-3 text-right">Impresiones</th>
                         <th className="p-3 text-right">Alcance</th>
-                        <th className="p-3 text-right">CPC</th>
-                        <th className="p-3 text-right">CPM</th>
+                        <th className="p-3 text-right">CPC ({monedaAds})</th>
+                        <th className="p-3 text-right">CPM ({monedaAds})</th>
                         <th className="p-3 text-right">CTR</th>
                         <th className="p-3 text-right">Resultado principal</th>
                       </tr>
@@ -911,11 +930,11 @@ export default function MetricasClientesPage() {
                         return (
                           <tr key={i} className="border-b border-border last:border-0">
                             <td className="p-3">{r.campaign_name}</td>
-                            <td className="p-3 text-right">{moneda(r.spend)}</td>
+                            <td className="p-3 text-right">{moneda(r.spend, monedaAds)}</td>
                             <td className="p-3 text-right">{numero(r.impressions)}</td>
                             <td className="p-3 text-right">{numero(r.reach)}</td>
-                            <td className="p-3 text-right">{moneda(r.cpc)}</td>
-                            <td className="p-3 text-right">{moneda(r.cpm)}</td>
+                            <td className="p-3 text-right">{moneda(r.cpc, monedaAds)}</td>
+                            <td className="p-3 text-right">{moneda(r.cpm, monedaAds)}</td>
                             <td className="p-3 text-right">{Number(r.ctr).toFixed(2)}%</td>
                             <td className="p-3 text-right">
                               {accionPrincipal
@@ -1330,6 +1349,7 @@ export default function MetricasClientesPage() {
                         <th className="p-3 text-right">Guardados</th>
                         <th className="p-3 text-right">Reproducciones</th>
                         <th className="p-3 text-right">Tiempo viendo</th>
+                        <th className="p-3 text-right">% Omisión</th>
                         <th className="p-3 print:hidden">Campaña</th>
                       </tr>
                     </thead>
@@ -1378,6 +1398,9 @@ export default function MetricasClientesPage() {
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.saved)}</td>
                           <td className="p-3 text-right">{numeroOMenos(m.metricas.views)}</td>
                           <td className="p-3 text-right">{tiempoVistoOMenos(m.metricas.ig_reels_avg_watch_time)}</td>
+                          <td className="p-3 text-right">
+                            {m.metricas.reels_skip_rate !== undefined ? `${m.metricas.reels_skip_rate.toFixed(0)}%` : "—"}
+                          </td>
                           <td className="p-3 print:hidden">
                             <input
                               defaultValue={notas[m.id] ?? ""}

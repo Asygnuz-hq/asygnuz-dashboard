@@ -222,6 +222,23 @@ export async function fetchCuentasDisponibles(accessToken: string): Promise<Cuen
   }));
 }
 
+// La Graph API devuelve el gasto en la moneda REAL de la cuenta de
+// anuncios (puede ser COP, no siempre USD) — sin esto, el dashboard
+// mostraba pesos colombianos con el símbolo de dólar, un error grave de
+// interpretación, no solo de formato.
+export async function fetchMonedaCuentaAnuncios(conexion: MetaConexion): Promise<string> {
+  if (!conexion.ad_account_id) return "USD";
+  try {
+    const data = await graphFetch<{ currency: string }>(`/${conexion.ad_account_id}`, {
+      access_token: conexion.access_token ?? "",
+      fields: "currency",
+    });
+    return data.currency;
+  } catch {
+    return "USD";
+  }
+}
+
 // -------- Métricas: leer una cuenta ya conectada --------
 
 export async function fetchInsights(
@@ -275,6 +292,8 @@ function metricasParaTipo(mediaProductType: string): string[] {
     // lo que dejaba en blanco hasta el alcance. Confirmado contra la API en
     // vivo: la lista vigente ya no incluye "plays". ig_reels_avg_watch_time
     // y ig_reels_video_view_total_time sí están vigentes (confirmado en vivo).
+    // reels_skip_rate: % de reproducciones que se saltaron el reel en los
+    // primeros 3 segundos — confirmado en vivo, combina bien con el resto.
     return [
       "reach",
       "likes",
@@ -285,6 +304,7 @@ function metricasParaTipo(mediaProductType: string): string[] {
       "total_interactions",
       "ig_reels_avg_watch_time",
       "ig_reels_video_view_total_time",
+      "reels_skip_rate",
     ];
   }
   if (mediaProductType === "STORY") {

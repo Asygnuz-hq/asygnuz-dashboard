@@ -9,8 +9,12 @@ function numero(valor: number): string {
   return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(valor);
 }
 
-function moneda(valor: number): string {
-  return new Intl.NumberFormat("es-CO", { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(valor);
+// Cada cuenta de anuncios tiene su propia moneda real (Meta no siempre
+// usa USD) — se muestra la de cada cliente, no una fija.
+function moneda(valor: number, codigoMoneda: string): string {
+  return new Intl.NumberFormat("es-CO", { style: "currency", currency: codigoMoneda, maximumFractionDigits: 2 }).format(
+    valor
+  );
 }
 
 type Orden = "tasa" | "alcance" | "gasto";
@@ -75,6 +79,13 @@ export default function RankingClientesPage() {
         </p>
       )}
 
+      {ordenados.some((r) => r.tieneAnuncios && r.monedaAnuncios !== "USD") && orden === "gasto" && (
+        <p className="text-xs text-muted">
+          Ojo: algunos clientes manejan su cuenta de anuncios en una moneda distinta a otros (ej. pesos vs.
+          dólares) — este orden compara los números tal cual, sin convertir a una sola moneda.
+        </p>
+      )}
+
       {ordenados.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-border bg-surface">
           <table className="w-full text-sm">
@@ -100,7 +111,9 @@ export default function RankingClientesPage() {
                     </Link>
                     {r.error && <p className="text-xs text-danger mt-0.5">{r.error}</p>}
                   </td>
-                  <td className="p-3 text-right">{r.tieneAnuncios ? moneda(r.gastoAnuncios) : "—"}</td>
+                  <td className="p-3 text-right">
+                    {r.tieneAnuncios ? moneda(r.gastoAnuncios, r.monedaAnuncios) : "—"}
+                  </td>
                   <td className="p-3 text-right">{r.tieneAnuncios ? numero(r.alcanceAnuncios) : "—"}</td>
                   <td className="p-3 text-right">{r.tieneInstagram ? numero(r.publicaciones) : "—"}</td>
                   <td className="p-3 text-right">{r.tieneInstagram ? numero(r.alcanceInstagram) : "—"}</td>

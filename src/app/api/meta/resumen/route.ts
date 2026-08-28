@@ -1,11 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import { fetchInsights, fetchInstagramMedia, type MetaConexion } from "@/lib/meta/client";
+import { fetchInsights, fetchInstagramMedia, fetchMonedaCuentaAnuncios, type MetaConexion } from "@/lib/meta/client";
 
 export type ResumenCliente = {
   id: string;
   cliente_nombre: string;
   tieneAnuncios: boolean;
   tieneInstagram: boolean;
+  monedaAnuncios: string;
   gastoAnuncios: number;
   alcanceAnuncios: number;
   alcanceInstagram: number;
@@ -44,6 +45,7 @@ export async function GET() {
         cliente_nombre: c.cliente_nombre,
         tieneAnuncios: Boolean(c.ad_account_id),
         tieneInstagram: Boolean(c.instagram_business_id && c.instagram_access_token),
+        monedaAnuncios: "USD",
         gastoAnuncios: 0,
         alcanceAnuncios: 0,
         alcanceInstagram: 0,
@@ -55,9 +57,10 @@ export async function GET() {
 
       try {
         if (base.tieneAnuncios) {
-          const insights = await fetchInsights(c);
+          const [insights, moneda] = await Promise.all([fetchInsights(c), fetchMonedaCuentaAnuncios(c)]);
           base.gastoAnuncios = insights.reduce((acc, r) => acc + Number(r.spend), 0);
           base.alcanceAnuncios = insights.reduce((acc, r) => acc + Number(r.reach), 0);
+          base.monedaAnuncios = moneda;
         }
         if (base.tieneInstagram) {
           const media = await fetchInstagramMedia(c);

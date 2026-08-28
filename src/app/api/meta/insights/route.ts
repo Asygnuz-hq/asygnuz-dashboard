@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { fetchInsights, type MetaConexion } from "@/lib/meta/client";
+import { fetchInsights, fetchMonedaCuentaAnuncios, type MetaConexion } from "@/lib/meta/client";
 
 // Devuelve las métricas de campañas (últimos 30 días) de un cliente ya
 // conectado. ?conexion_id=<id de meta_conexiones>
@@ -31,8 +31,11 @@ export async function GET(request: Request) {
   }
 
   try {
-    const insights = await fetchInsights(conexion, since && until ? { since, until } : {});
-    return Response.json({ cliente: conexion.cliente_nombre, insights });
+    const [insights, moneda] = await Promise.all([
+      fetchInsights(conexion, since && until ? { since, until } : {}),
+      fetchMonedaCuentaAnuncios(conexion),
+    ]);
+    return Response.json({ cliente: conexion.cliente_nombre, insights, moneda });
   } catch (err) {
     return Response.json(
       { error: err instanceof Error ? err.message : "Error desconocido consultando Meta" },
