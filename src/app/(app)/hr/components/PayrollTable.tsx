@@ -243,7 +243,7 @@ export default function PayrollTable({ month, year }: { month: number; year: num
         </table>
       </div>
       <div className="p-4 bg-muted/30 text-xs text-muted-foreground border-t">
-        <p><strong>Nota contable:</strong> La exoneración de la Ley 1607 exime al empleador del pago de Salud (8.5%), SENA (2%) e ICBF (2% / 3% legal). El aporte de Caja de Compensación (4%) y Pensión (12%) sigue aplicando. El IBC respeta los límites de 1 a 25 SMMLV proporcional a los días laborados.</p>
+        <p><strong>Nota contable:</strong> La exoneración de la Ley 1607 exime al empleador del pago de Salud (8.5%), SENA (2%) e ICBF (3%). El aporte de Caja de Compensación (4%) y Pensión (12%) sigue aplicando. El IBC respeta los límites de 1 a 25 SMMLV proporcional a los días laborados.</p>
       </div>
     </div>
   );
