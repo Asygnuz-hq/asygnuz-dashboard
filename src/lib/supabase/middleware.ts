@@ -2,6 +2,12 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
+  // /agenda es la landing pública de Cal.com para pautar — no requiere
+  // sesión ni pasa por ninguna lógica de auth/MFA/emergencia de abajo.
+  if (request.nextUrl.pathname.startsWith("/agenda")) {
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(

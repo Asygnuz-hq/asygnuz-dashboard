@@ -38,6 +38,45 @@ function numero(valor: string): string {
   return new Intl.NumberFormat("es-CO", { maximumFractionDigits: 0 }).format(Number(valor));
 }
 
+// Detecta errores de token vencido/revocado o App bloqueada por Meta (visto
+// en vivo el 2026-09-04 con la conexión "Juanma": "API access blocked" tras
+// una alerta de seguridad en la cuenta de desarrollador) — en vez de mostrar
+// el texto crudo de la Graph API, se ofrece reconectar directamente.
+function esErrorDeConexion(mensaje: string): boolean {
+  return /access token|oauthexception|api access blocked|session has expired|token.*expir/i.test(mensaje);
+}
+
+function AvisoReconectar({
+  cliente,
+  mensaje,
+  tipo,
+}: {
+  cliente: string;
+  mensaje: string;
+  tipo: "anuncios" | "instagram";
+}) {
+  const href =
+    tipo === "anuncios"
+      ? `/api/meta/connect?cliente=${encodeURIComponent(cliente)}`
+      : `/api/meta/instagram-connect?cliente=${encodeURIComponent(cliente)}`;
+  return (
+    <div className="print:hidden flex items-center justify-between gap-3 rounded-md border border-danger/40 bg-danger/10 p-3 text-sm">
+      <div>
+        <p className="text-danger font-medium">
+          La conexión de {tipo === "anuncios" ? "anuncios" : "Instagram"} de &quot;{cliente}&quot; dejó de funcionar
+        </p>
+        <p className="text-muted text-xs mt-0.5">{mensaje}</p>
+      </div>
+      <a
+        href={href}
+        className="shrink-0 text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 font-medium hover:bg-accent-bright"
+      >
+        Reconectar
+      </a>
+    </div>
+  );
+}
+
 // Meta devuelve el gasto en la moneda REAL de la cuenta de anuncios — no
 // siempre USD. Sin el parámetro se asume USD solo como último recurso
 // (ej. antes de que cargue la moneda real de la cuenta).
@@ -770,7 +809,12 @@ export default function MetricasClientesPage() {
           </div>
 
           {cargandoInsights && <p className="text-sm text-muted print:hidden">Consultando Meta…</p>}
-          {errorInsights && <p className="text-sm text-danger print:hidden">No se pudo leer Meta: {errorInsights}</p>}
+          {errorInsights &&
+            (esErrorDeConexion(errorInsights) ? (
+              <AvisoReconectar cliente={seleccionado.cliente_nombre} mensaje={errorInsights} tipo="anuncios" />
+            ) : (
+              <p className="text-sm text-danger print:hidden">No se pudo leer Meta: {errorInsights}</p>
+            ))}
 
           {/* -------- RESUMEN -------- */}
           <div className={`${tab === "resumen" ? "flex" : "hidden"} print:flex flex-col gap-4`}>
@@ -964,7 +1008,12 @@ export default function MetricasClientesPage() {
               </>
             )}
 
-            {errorFacebook && <p className="text-sm text-danger">No se pudo leer Facebook: {errorFacebook}</p>}
+            {errorFacebook &&
+              (esErrorDeConexion(errorFacebook) ? (
+                <AvisoReconectar cliente={seleccionado.cliente_nombre} mensaje={errorFacebook} tipo="anuncios" />
+              ) : (
+                <p className="text-sm text-danger">No se pudo leer Facebook: {errorFacebook}</p>
+              ))}
 
             {postsFacebook && postsFacebook.length > 0 && (
               <div className="pt-4 border-t border-border">
@@ -1006,7 +1055,12 @@ export default function MetricasClientesPage() {
           {tieneIG && (
             <div className={`${tab === "instagram" ? "flex" : "hidden"} print:flex flex-col gap-4`}>
               {cargandoInstagram && <p className="text-sm text-muted print:hidden">Consultando Instagram…</p>}
-              {errorInstagram && <p className="text-sm text-danger print:hidden">No se pudo leer Instagram: {errorInstagram}</p>}
+              {errorInstagram &&
+                (esErrorDeConexion(errorInstagram) ? (
+                  <AvisoReconectar cliente={seleccionado.cliente_nombre} mensaje={errorInstagram} tipo="instagram" />
+                ) : (
+                  <p className="text-sm text-danger print:hidden">No se pudo leer Instagram: {errorInstagram}</p>
+                ))}
 
               {media && media.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useIsEmergencia } from "@/lib/useIsEmergencia";
+import { useModuloActivo, type Modulo } from "@/lib/ModuloActivoContext";
 
 type NavItem = { href: string; label: string };
-type NavSection = { title: string; items: NavItem[] };
+// modulo: undefined = "Común", siempre visible sin importar el módulo activo.
+type NavSection = { title: string; modulo?: Modulo; items: NavItem[] };
 
 const sections: NavSection[] = [
   { title: "", items: [{ href: "/", label: "Dashboard" }] },
   {
     title: "Clientes",
+    modulo: "financiero",
     items: [
       { href: "/clientes", label: "Clientes" },
       { href: "/clientes/rentabilidad", label: "Rentabilidad por Cliente" },
@@ -18,6 +21,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Finanzas",
+    modulo: "financiero",
     items: [
       { href: "/cuentas", label: "Cuentas / Caja" },
       { href: "/finanzas/ingresos", label: "Ingresos" },
@@ -31,6 +35,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Diseñadores",
+    modulo: "marketing_pauta",
     items: [
       { href: "/disenadores/control-mensual", label: "Control Mensual" },
       { href: "/disenadores/resumen", label: "Resumen por Diseñador" },
@@ -39,26 +44,39 @@ const sections: NavSection[] = [
     ],
   },
   {
-    title: "Equipo",
+    title: "Marketing",
+    modulo: "marketing_pauta",
     items: [
-      { href: "/equipo", label: "Equipo / RRHH" },
       { href: "/marketing", label: "Marketing" },
+      { href: "/metricas/clientes", label: "Meta Ads por Cliente" },
+      { href: "/metricas/clientes/ranking", label: "Ranking entre Clientes" },
     ],
   },
   {
-    title: "Métricas",
+    title: "CRM",
+    modulo: "crm",
+    items: [{ href: "/crm", label: "Leads y Pipeline" }],
+  },
+  {
+    title: "Operación",
+    modulo: "operacion",
     items: [
       { href: "/metricas", label: "Vista Ejecutiva" },
       { href: "/metricas/carga", label: "Carga por Persona" },
       { href: "/metricas/reporte", label: "Reporte para Junta" },
-      { href: "/metricas/clientes", label: "Meta Ads por Cliente" },
-      { href: "/metricas/clientes/ranking", label: "Ranking entre Clientes" },
       { href: "/metricas/permisos", label: "Permisos" },
     ],
   },
   {
+    // Nómina/RRHH real vive aparte (otra sesión la está construyendo) —
+    // por ahora este link se queda en Común para no perder acceso.
+    title: "Equipo",
+    items: [{ href: "/equipo", label: "Equipo / RRHH" }],
+  },
+  {
     title: "",
     items: [
+      { href: "/analitica", label: "Analítica de Uso" },
       { href: "/deudas-personales", label: "Deudas Personales" },
       { href: "/configuracion", label: "Configuración" },
     ],
@@ -73,10 +91,12 @@ const seccionEmergencia: NavSection = {
 export function Sidebar() {
   const pathname = usePathname();
   const isEmergencia = useIsEmergencia();
+  const { moduloActivo } = useModuloActivo();
 
   // El usuario externo del caso del terremoto solo ve su propia sección —
   // el resto del negocio de ASYGNUZ no le pertenece ni le interesa.
-  const visibleSections = isEmergencia ? [seccionEmergencia] : [...sections, seccionEmergencia];
+  const sectionsFiltradas = sections.filter((s) => !s.modulo || s.modulo === moduloActivo);
+  const visibleSections = isEmergencia ? [seccionEmergencia] : [...sectionsFiltradas, seccionEmergencia];
 
   return (
     <nav className="print:hidden w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">

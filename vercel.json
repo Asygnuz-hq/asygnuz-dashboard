@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/actualizar-trm",
       "schedule": "0 13 * * *"
+    },
+    {
+      "path": "/api/cron/refrescar-tokens-meta",
+      "schedule": "0 14 * * *"
     }
   ]
 }

@@ -68,6 +68,19 @@ export async function fetchProjects(workspaceId: string): Promise<KaneoProject[]
   return kaneoFetch<KaneoProject[]>(`/api/project?workspaceId=${workspaceId}`);
 }
 
+// ASYGNUZ: desde 2026-09-01 volvimos a un solo workspace (antes había uno
+// separado por frente, con su propio KANEO_WORKSPACE_ID_GROWTH/SOFTWARE).
+// Ahora el frente se distingue por el nombre del proyecto: prefijo
+// "[Growth] "/"[Software] " para los proyectos de cliente, o el nombre
+// exacto de los proyectos internos de seguimiento de cada unidad. Lo que no
+// matchea (p. ej. "Proyectos Asygnuz", el catch-all general) no pertenece a
+// ningún frente y se excluye de los reportes por frente.
+export function frenteDeProyecto(nombre: string): "Growth" | "Software" | null {
+  if (nombre.startsWith("[Growth] ") || nombre === "ASYGNUZ Growth") return "Growth";
+  if (nombre.startsWith("[Software] ") || nombre === "ASYGNUZ Software") return "Software";
+  return null;
+}
+
 export async function fetchProjectTasks(projectId: string): Promise<KaneoTask[]> {
   const resp = await kaneoFetch<{ data: { columns: { tasks: KaneoTask[] }[] } }>(
     `/api/task/tasks/${projectId}`
@@ -103,8 +116,8 @@ export async function fetchWorkspaceMembers(workspaceId: string): Promise<KaneoW
   return kaneoFetch<KaneoWorkspaceMember[]>(`/api/workspace/${workspaceId}/members`);
 }
 
-// Los siguientes 3 requieren el endpoint /api/project-member del fork
-// (Asygnuz-hq/kaneo, PR #1) — no existe aún en el Kaneo de producción.
+// Los siguientes 3 usan el endpoint /api/project-member del fork
+// (Asygnuz-hq/kaneo, PR #1) — en producción desde 2026-08-14.
 export type KaneoProjectMember = {
   id: string;
   userId: string;

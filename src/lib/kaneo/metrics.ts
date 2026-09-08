@@ -1,8 +1,15 @@
-import { fetchProjects, fetchProjectTasks, fetchTaskRelations, type KaneoTask } from "./client";
+import {
+  fetchProjects,
+  fetchProjectTasks,
+  fetchTaskRelations,
+  frenteDeProyecto,
+  type KaneoTask,
+} from "./client";
 
-// Los 2 workspaces reales tras la separación (2026-08-13). Cada uno ya trae
-// sus propios proyectos — no hace falta clasificar por slug como antes de
-// dividir el workspace único.
+// Un solo workspace ASYGNUZ (vuelto a unificar el 2026-09-01; antes hubo
+// un breve período — 2026-08-13 a 2026-09-01 — con un workspace separado
+// por frente). El frente de cada proyecto se distingue por su nombre, ver
+// frenteDeProyecto().
 function env(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Falta la variable de entorno ${name}.`);
@@ -90,13 +97,23 @@ function inicioDeSemana(iso: string): string {
   return lunes.toISOString().slice(0, 10);
 }
 
-async function tareasConFrente(workspaceId: string, frente: "Growth" | "Software") {
+async function tareasDelWorkspace(workspaceId: string) {
   const proyectos = await fetchProjects(workspaceId);
-  const activos = proyectos.filter((p) => !p.archivedAt);
+  const clasificados = proyectos
+    .filter((p) => !p.archivedAt)
+    .map((p) => ({ proyecto: p, frente: frenteDeProyecto(p.name) }))
+    .filter(
+      (x): x is { proyecto: (typeof proyectos)[number]; frente: "Growth" | "Software" } =>
+        x.frente !== null
+    );
   const porProyecto = await Promise.all(
-    activos.map(async (p) => ({ proyecto: p, tareas: await fetchProjectTasks(p.id) }))
+    clasificados.map(async ({ proyecto, frente }) => ({
+      proyecto,
+      frente,
+      tareas: await fetchProjectTasks(proyecto.id),
+    }))
   );
-  return porProyecto.map(({ proyecto, tareas }) => ({ proyecto, tareas, frente }));
+  return porProyecto;
 }
 
 async function construirEpics(tareas: KaneoTask[]): Promise<EpicResumen[]> {
@@ -127,14 +144,8 @@ async function construirEpics(tareas: KaneoTask[]): Promise<EpicResumen[]> {
 }
 
 export async function calcularMetricas(): Promise<MetricasKaneo> {
-  const wsGrowth = env("KANEO_WORKSPACE_ID_GROWTH");
-  const wsSoftware = env("KANEO_WORKSPACE_ID_SOFTWARE");
-
-  const [growthData, softwareData] = await Promise.all([
-    tareasConFrente(wsGrowth, "Growth"),
-    tareasConFrente(wsSoftware, "Software"),
-  ]);
-  const porProyectoData = [...growthData, ...softwareData];
+  const workspaceId = env("KANEO_WORKSPACE_ID");
+  const porProyectoData = await tareasDelWorkspace(workspaceId);
 
   const porProyecto: ProyectoMetrica[] = await Promise.all(
     porProyectoData.map(async ({ proyecto, tareas, frente }) => {

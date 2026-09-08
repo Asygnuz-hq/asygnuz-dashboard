@@ -235,15 +235,21 @@ create table if not exists deudas_personales (
 -- =========================================================================
 
 create or replace view v_historico_mensual as
+-- Ingresos por caja, no por fecha de registro: solo cuenta lo 'Cobrado',
+-- agrupado por el mes de fecha_pago_real (no por `mes`, el campo que se
+-- escribe al crear el registro). Ver schema-fix-ingresos-cash-basis.sql.
 with meses as (
-  select mes from ingresos
+  select date_trunc('month', fecha_pago_real)::date as mes
+  from ingresos
+  where estado = 'Cobrado' and fecha_pago_real is not null
   union
   select mes from gastos_variables
 ),
 ing as (
-  select mes, sum(monto_cop) as ingresos_cop
+  select date_trunc('month', fecha_pago_real)::date as mes, sum(monto_cop) as ingresos_cop
   from ingresos
-  group by mes
+  where estado = 'Cobrado' and fecha_pago_real is not null
+  group by 1
 ),
 gv as (
   select mes, sum(monto_cop) as gastos_variables_cop

@@ -3,7 +3,7 @@ import {
   fetchProjects,
   fetchProjectMembers,
   fetchWorkspaceMembers,
-  type KaneoProject,
+  frenteDeProyecto,
   type KaneoProjectMember,
   type KaneoWorkspaceMember,
 } from "@/lib/kaneo/client";
@@ -15,43 +15,37 @@ function env(name: string): string {
   return value;
 }
 
-async function cargarFrente(
-  workspaceId: string,
-  frente: "Growth" | "Software"
-): Promise<{ proyectos: ProyectoConMiembros[]; miembrosWorkspace: KaneoWorkspaceMember[]; endpointDisponible: boolean }> {
-  const [proyectos, miembrosWorkspace] = await Promise.all([
+export default async function PermisosPage() {
+  const workspaceId = env("KANEO_WORKSPACE_ID");
+
+  const [todosLosProyectos, miembrosWorkspace] = await Promise.all([
     fetchProjects(workspaceId),
     fetchWorkspaceMembers(workspaceId),
   ]);
-  const activos = proyectos.filter((p: KaneoProject) => !p.archivedAt);
+
+  const clasificados = todosLosProyectos
+    .filter((p) => !p.archivedAt)
+    .map((p) => ({ proyecto: p, frente: frenteDeProyecto(p.name) }))
+    .filter(
+      (x): x is { proyecto: (typeof todosLosProyectos)[number]; frente: "Growth" | "Software" } =>
+        x.frente !== null
+    );
 
   let endpointDisponible = true;
-  const proyectosConMiembros = await Promise.all(
-    activos.map(async (p) => {
+  const proyectos: ProyectoConMiembros[] = await Promise.all(
+    clasificados.map(async ({ proyecto, frente }) => {
       let miembros: KaneoProjectMember[] = [];
       try {
-        miembros = await fetchProjectMembers(p.id);
+        miembros = await fetchProjectMembers(proyecto.id);
       } catch {
         endpointDisponible = false;
       }
-      return { proyecto: p, frente, workspaceId, miembros };
+      return { proyecto, frente, workspaceId, miembros };
     })
   );
 
-  return { proyectos: proyectosConMiembros, miembrosWorkspace, endpointDisponible };
-}
-
-export default async function PermisosPage() {
-  const [growth, software] = await Promise.all([
-    cargarFrente(env("KANEO_WORKSPACE_ID_GROWTH"), "Growth"),
-    cargarFrente(env("KANEO_WORKSPACE_ID_SOFTWARE"), "Software"),
-  ]);
-
-  const endpointDisponible = growth.endpointDisponible && software.endpointDisponible;
-  const proyectos = [...growth.proyectos, ...software.proyectos];
   const miembrosPorWorkspace: Record<string, KaneoWorkspaceMember[]> = {
-    [growth.proyectos[0]?.workspaceId ?? "growth"]: growth.miembrosWorkspace,
-    [software.proyectos[0]?.workspaceId ?? "software"]: software.miembrosWorkspace,
+    [workspaceId]: miembrosWorkspace,
   };
 
   return (
@@ -63,21 +57,11 @@ export default async function PermisosPage() {
 
       {!endpointDisponible && (
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
-          <p className="font-medium">Todavía no disponible en producción.</p>
+          <p className="font-medium">No se pudo consultar los miembros de uno o más proyectos.</p>
           <p className="text-muted mt-1">
-            Esta pantalla ya está lista, pero el backend que la soporta (tabla y endpoints de
-            miembros por proyecto) está en un fork de Kaneo pendiente de revisión de un developer
-            antes de desplegarse — es código de autenticación, así que no se activa sin que alguien
-            más lo revise primero. Ver{" "}
-            <a
-              href="https://github.com/Asygnuz-hq/kaneo/pull/1"
-              target="_blank"
-              rel="noreferrer"
-              className="underline"
-            >
-              PR #1
-            </a>
-            . En cuanto esté desplegado, esta pantalla funciona sin cambios.
+            El endpoint de Kaneo respondió con error para al menos un proyecto — puede ser un
+            problema temporal del servidor. Recarga en unos minutos; si persiste, revisa los logs
+            de la VPS.
           </p>
         </div>
       )}
