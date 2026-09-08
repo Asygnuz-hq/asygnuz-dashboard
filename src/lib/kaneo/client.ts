@@ -18,6 +18,7 @@ export type KaneoTask = {
   id: string;
   title: string;
   number: number;
+  position: number | null;
   description: string | null;
   status: string;
   priority: "no-priority" | "low" | "medium" | "high" | "urgent";
@@ -204,4 +205,22 @@ export async function getTaskComments(taskId: string): Promise<KaneoComment[]> {
 
 export async function createTaskComment(taskId: string, content: string): Promise<void> {
   await kaneoFetch(`/api/comment/${taskId}`, { method: "POST", body: { content } });
+}
+
+export type KaneoColumn = {
+  id: string;
+  projectId: string;
+  name: string;
+  slug: string;
+  position: number;
+  icon: string | null;
+  color: string | null;
+  isFinal: boolean;
+};
+
+// Ordenadas por posición del tablero real de Kaneo -- así el tablero nativo
+// del dashboard muestra las mismas columnas que Kaneo, en el mismo orden,
+// en vez de asumir los 4 slugs por defecto (proyectos pueden personalizarlos).
+export async function getColumns(projectId: string): Promise<KaneoColumn[]> {
+  return kaneoFetch<KaneoColumn[]>(`/api/column/${projectId}`);
 }

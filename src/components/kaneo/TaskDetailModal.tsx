@@ -3,14 +3,7 @@
 import { useEffect, useState } from "react";
 import { ActionModal } from "@/components/ActionModal";
 import type { KaneoComment, KaneoTask } from "@/lib/kaneo/client";
-
-const PRIORIDAD_LABEL: Record<string, string> = {
-  urgent: "Urgente",
-  high: "Alta",
-  medium: "Media",
-  low: "Baja",
-  "no-priority": "Sin prioridad",
-};
+import { PRIORIDAD_LABEL } from "@/lib/kaneo/labels";
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {

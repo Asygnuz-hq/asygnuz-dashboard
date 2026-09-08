@@ -27,21 +27,9 @@ import type { ProyectoMetrica } from "@/lib/kaneo/metrics";
 import { QuickAddTask } from "@/components/kaneo/QuickAddTask";
 import { MarkTaskDone } from "@/components/kaneo/MarkTaskDone";
 import { TaskDetailModal } from "@/components/kaneo/TaskDetailModal";
+import { ESTADO_COLOR, PRIORIDAD_LABEL } from "@/lib/kaneo/labels";
 
 const PALETTE = { activas: "#3c5e99", completadas: "#5c8a72", atrasadas: "#d9534f" };
-const ESTADO_COLOR: Record<string, string> = {
-  "to-do": "#8b93a6",
-  "in-progress": "#3c5e99",
-  "in-review": "#c9a227",
-  done: "#5c8a72",
-};
-const PRIORIDAD_LABEL: Record<string, string> = {
-  urgent: "Urgente",
-  high: "Alta",
-  medium: "Media",
-  low: "Baja",
-  "no-priority": "Sin prioridad",
-};
 
 function nivelProyecto(p: ProyectoMetrica): "verde" | "amarillo" | "rojo" {
   if (p.totalTareas === 0) return "verde";
