@@ -23,6 +23,8 @@ import { Semaforo } from "@/components/Semaforo";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
 import { useMetricas } from "@/lib/kaneo/useMetricas";
 import type { ProyectoMetrica } from "@/lib/kaneo/metrics";
+import { QuickAddTask } from "@/components/kaneo/QuickAddTask";
+import { MarkTaskDone } from "@/components/kaneo/MarkTaskDone";
 
 const PALETTE = { activas: "#3c5e99", completadas: "#5c8a72", atrasadas: "#d9534f" };
 const ESTADO_COLOR: Record<string, string> = {
@@ -215,6 +217,7 @@ export default function MetricasPage() {
                       target={p.totalTareas}
                       formatValue={(n) => String(n)}
                     />
+                    <QuickAddTask projectId={p.id} onDone={recargar} />
                   </div>
                 ))}
               </div>
@@ -244,6 +247,7 @@ export default function MetricasPage() {
                     <span className="text-xs text-muted shrink-0">
                       {t.creadaHace === 0 ? "hoy" : `hace ${t.creadaHace}d`}
                     </span>
+                    {t.estado !== "done" && <MarkTaskDone taskId={t.id} onDone={recargar} />}
                   </div>
                 ))}
               </div>

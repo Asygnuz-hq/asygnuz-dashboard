@@ -42,7 +42,7 @@ function env(name: string): string {
 
 async function kaneoFetch<T>(
   path: string,
-  init?: { method?: "GET" | "POST" | "DELETE"; body?: unknown }
+  init?: { method?: "GET" | "POST" | "PUT" | "DELETE"; body?: unknown }
 ): Promise<T> {
   const baseUrl = env("KANEO_API_URL");
   const apiKey = env("KANEO_API_KEY");
@@ -136,4 +136,30 @@ export async function addProjectMember(projectId: string, userId: string): Promi
 
 export async function removeProjectMember(projectId: string, userId: string): Promise<void> {
   await kaneoFetch(`/api/project-member/${projectId}/${userId}`, { method: "DELETE" });
+}
+
+// Escritura de tareas -- la llave de Kaneo que usa este cliente está acotada
+// a task:[read,create,update] (ver apps/api/src/user/controllers en el fork),
+// nunca puede hacer más que eso aunque el resto de la cuenta tenga más acceso.
+
+export async function createTask(
+  projectId: string,
+  input: { title: string; description?: string; status: string; priority?: string }
+): Promise<KaneoTask> {
+  return kaneoFetch<KaneoTask>(`/api/task/${projectId}`, {
+    method: "POST",
+    body: {
+      title: input.title,
+      description: input.description ?? "",
+      status: input.status,
+      priority: input.priority ?? "no-priority",
+    },
+  });
+}
+
+export async function updateTaskStatus(taskId: string, status: string): Promise<KaneoTask> {
+  return kaneoFetch<KaneoTask>(`/api/task/status/${taskId}`, {
+    method: "PUT",
+    body: { status },
+  });
 }
