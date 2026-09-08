@@ -18,7 +18,7 @@ create table if not exists tenants (
   slug text not null unique,
   -- jsonb en vez de tabla aparte: agregar un módulo nuevo (nomina, soporte,
   -- analitica...) es cambiar el default/una fila, no una migración.
-  modulos_habilitados jsonb not null default '{"financiero": true, "marketing_pauta": true, "crm": true, "operacion": true}',
+  modulos_habilitados jsonb not null default '{"financiero": true, "marketing_pauta": true, "crm": true, "operacion": true, "nomina": true}',
   creado_en timestamptz not null default now()
 );
 
