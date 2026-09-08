@@ -1,15 +1,7 @@
 import { updateTaskStatus } from "@/lib/kaneo/client";
-import { createClient } from "@/lib/supabase/server";
+import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   const { id } = await params;
   const body = await request.json().catch(() => null);
   const status = body?.status;
@@ -18,12 +10,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 
   try {
-    const task = await updateTaskStatus(id, status);
+    const { config } = await getKaneoConfigForCurrentUser();
+    const task = await updateTaskStatus(config, id, status);
     return Response.json(task);
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : "Error actualizando la tarea en Kaneo" },
-      { status: 502 }
-    );
+    return kaneoErrorResponse(err, "Error actualizando la tarea en Kaneo");
   }
 }

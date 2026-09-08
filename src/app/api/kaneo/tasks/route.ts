@@ -1,15 +1,7 @@
 import { createTask } from "@/lib/kaneo/client";
-import { createClient } from "@/lib/supabase/server";
+import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   const body = await request.json().catch(() => null);
   const projectId = body?.projectId;
   const title = body?.title?.trim();
@@ -18,7 +10,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const task = await createTask(projectId, {
+    const { config } = await getKaneoConfigForCurrentUser();
+    const task = await createTask(config, projectId, {
       title,
       status: body?.status || "to-do",
       priority: body?.priority,
@@ -26,9 +19,6 @@ export async function POST(request: Request) {
     });
     return Response.json(task);
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : "Error creando la tarea en Kaneo" },
-      { status: 502 }
-    );
+    return kaneoErrorResponse(err, "Error creando la tarea en Kaneo");
   }
 }

@@ -1,36 +1,18 @@
 import { createTaskComment, getTaskComments } from "@/lib/kaneo/client";
-import { createClient } from "@/lib/supabase/server";
+import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   const { id } = await params;
   try {
-    const comments = await getTaskComments(id);
+    const { config } = await getKaneoConfigForCurrentUser();
+    const comments = await getTaskComments(config, id);
     return Response.json(comments);
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : "Error leyendo comentarios en Kaneo" },
-      { status: 502 }
-    );
+    return kaneoErrorResponse(err, "Error leyendo comentarios en Kaneo");
   }
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   const { id } = await params;
   const body = await request.json().catch(() => null);
   const content = typeof body?.content === "string" ? body.content.trim() : "";
@@ -39,12 +21,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   try {
-    await createTaskComment(id, content);
+    const { config } = await getKaneoConfigForCurrentUser();
+    await createTaskComment(config, id, content);
     return Response.json({ ok: true });
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : "Error creando el comentario en Kaneo" },
-      { status: 502 }
-    );
+    return kaneoErrorResponse(err, "Error creando el comentario en Kaneo");
   }
 }

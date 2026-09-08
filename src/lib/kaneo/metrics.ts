@@ -3,18 +3,15 @@ import {
   fetchProjectTasks,
   fetchTaskRelations,
   frenteDeProyecto,
+  type KaneoConfig,
   type KaneoTask,
 } from "./client";
 
-// Un solo workspace ASYGNUZ (vuelto a unificar el 2026-09-01; antes hubo
-// un breve período — 2026-08-13 a 2026-09-01 — con un workspace separado
-// por frente). El frente de cada proyecto se distingue por su nombre, ver
-// frenteDeProyecto().
-function env(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Falta la variable de entorno ${name}.`);
-  return value;
-}
+// Un solo workspace por tenant (para ASYGNUZ, vuelto a unificar el
+// 2026-09-01; antes hubo un breve período — 2026-08-13 a 2026-09-01 — con
+// un workspace separado por frente). El frente de cada proyecto se
+// distingue por su nombre, ver frenteDeProyecto() -- convención propia de
+// ASYGNUZ, no algo que se le pida a otros tenants del SaaS.
 
 const DONE_STATUS_SLUGS = new Set(["done"]);
 
@@ -97,8 +94,8 @@ function inicioDeSemana(iso: string): string {
   return lunes.toISOString().slice(0, 10);
 }
 
-async function tareasDelWorkspace(workspaceId: string) {
-  const proyectos = await fetchProjects(workspaceId);
+async function tareasDelWorkspace(config: KaneoConfig, workspaceId: string) {
+  const proyectos = await fetchProjects(config, workspaceId);
   const clasificados = proyectos
     .filter((p) => !p.archivedAt)
     .map((p) => ({ proyecto: p, frente: frenteDeProyecto(p.name) }))
@@ -110,17 +107,17 @@ async function tareasDelWorkspace(workspaceId: string) {
     clasificados.map(async ({ proyecto, frente }) => ({
       proyecto,
       frente,
-      tareas: await fetchProjectTasks(proyecto.id),
+      tareas: await fetchProjectTasks(config, proyecto.id),
     }))
   );
   return porProyecto;
 }
 
-async function construirEpics(tareas: KaneoTask[]): Promise<EpicResumen[]> {
+async function construirEpics(config: KaneoConfig, tareas: KaneoTask[]): Promise<EpicResumen[]> {
   // Una tarea es "epic" para efectos del reporte si tiene al menos una
   // relación de subtarea donde ella es el origen (padre).
   const porTarea = await Promise.all(
-    tareas.map(async (t) => ({ tarea: t, relaciones: await fetchTaskRelations(t.id) }))
+    tareas.map(async (t) => ({ tarea: t, relaciones: await fetchTaskRelations(config, t.id) }))
   );
   const tareaPorId = new Map(tareas.map((t) => [t.id, t]));
 
@@ -143,15 +140,14 @@ async function construirEpics(tareas: KaneoTask[]): Promise<EpicResumen[]> {
   return epics;
 }
 
-export async function calcularMetricas(): Promise<MetricasKaneo> {
-  const workspaceId = env("KANEO_WORKSPACE_ID");
-  const porProyectoData = await tareasDelWorkspace(workspaceId);
+export async function calcularMetricas(config: KaneoConfig, workspaceId: string): Promise<MetricasKaneo> {
+  const porProyectoData = await tareasDelWorkspace(config, workspaceId);
 
   const porProyecto: ProyectoMetrica[] = await Promise.all(
     porProyectoData.map(async ({ proyecto, tareas, frente }) => {
       const completadas = tareas.filter((t) => DONE_STATUS_SLUGS.has(t.status)).length;
       const atrasadas = tareas.filter(esAtrasada).length;
-      const epics = await construirEpics(tareas);
+      const epics = await construirEpics(config, tareas);
       return {
         id: proyecto.id,
         nombre: proyecto.name,

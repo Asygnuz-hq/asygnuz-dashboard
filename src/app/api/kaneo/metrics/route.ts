@@ -1,22 +1,12 @@
 import { calcularMetricas } from "@/lib/kaneo/metrics";
-import { createClient } from "@/lib/supabase/server";
+import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
 
 export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: "No autorizado" }, { status: 401 });
-  }
-
   try {
-    const metricas = await calcularMetricas();
+    const { config, workspaceId } = await getKaneoConfigForCurrentUser();
+    const metricas = await calcularMetricas(config, workspaceId);
     return Response.json(metricas);
   } catch (err) {
-    return Response.json(
-      { error: err instanceof Error ? err.message : "Error desconocido consultando Kaneo" },
-      { status: 502 }
-    );
+    return kaneoErrorResponse(err, "Error desconocido consultando Kaneo");
   }
 }

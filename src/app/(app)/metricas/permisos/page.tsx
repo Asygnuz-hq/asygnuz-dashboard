@@ -7,20 +7,15 @@ import {
   type KaneoProjectMember,
   type KaneoWorkspaceMember,
 } from "@/lib/kaneo/client";
+import { getKaneoConfigForCurrentUser } from "@/lib/kaneo/tenant-config";
 import { PermisosClient, type ProyectoConMiembros } from "./PermisosClient";
 
-function env(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Falta la variable de entorno ${name}.`);
-  return value;
-}
-
 export default async function PermisosPage() {
-  const workspaceId = env("KANEO_WORKSPACE_ID");
+  const { config, workspaceId } = await getKaneoConfigForCurrentUser();
 
   const [todosLosProyectos, miembrosWorkspace] = await Promise.all([
-    fetchProjects(workspaceId),
-    fetchWorkspaceMembers(workspaceId),
+    fetchProjects(config, workspaceId),
+    fetchWorkspaceMembers(config, workspaceId),
   ]);
 
   const clasificados = todosLosProyectos
@@ -36,7 +31,7 @@ export default async function PermisosPage() {
     clasificados.map(async ({ proyecto, frente }) => {
       let miembros: KaneoProjectMember[] = [];
       try {
-        miembros = await fetchProjectMembers(proyecto.id);
+        miembros = await fetchProjectMembers(config, proyecto.id);
       } catch {
         endpointDisponible = false;
       }
