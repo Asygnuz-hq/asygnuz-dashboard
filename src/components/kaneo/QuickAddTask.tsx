@@ -1,20 +1,16 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { useState } from "react";
 
 export function QuickAddTask({
   projectId,
   status,
   onDone,
-  compact = false,
 }: {
   projectId: string;
   /** Columna destino (slug); por defecto la crea en "to-do" como hace Kaneo. */
   status?: string;
   onDone: () => void;
-  /** Botón "+" icono-solo (encabezado de columna del tablero) en vez del link de texto. */
-  compact?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -45,15 +41,7 @@ export function QuickAddTask({
   }
 
   if (!open) {
-    return compact ? (
-      <button
-        onClick={() => setOpen(true)}
-        title="Nueva tarea"
-        className="flex items-center rounded-md p-1 text-muted transition-colors hover:bg-surface-alt hover:text-foreground"
-      >
-        <Plus className="h-4 w-4" />
-      </button>
-    ) : (
+    return (
       <button
         onClick={() => setOpen(true)}
         className="text-xs text-accent-bright font-medium self-start"

@@ -29,7 +29,6 @@ export type KaneoTask = {
   id: string;
   title: string;
   number: number;
-  position: number | null;
   description: string | null;
   status: string;
   priority: "no-priority" | "low" | "medium" | "high" | "urgent";
@@ -40,9 +39,6 @@ export type KaneoTask = {
   assigneeName: string | null;
   assigneeId: string | null;
   projectId: string;
-  // Solo viene en /api/task/tasks/{projectId} (tablero); /api/task/{id} (detalle)
-  // no lo trae -- usar getTaskLabels() ahí.
-  labels?: KaneoTaskLabel[];
 };
 
 async function kaneoFetch<T>(
@@ -229,24 +225,6 @@ export async function getTaskComments(config: KaneoConfig, taskId: string): Prom
 
 export async function createTaskComment(config: KaneoConfig, taskId: string, content: string): Promise<void> {
   await kaneoFetch(config, `/api/comment/${taskId}`, { method: "POST", body: { content } });
-}
-
-export type KaneoColumn = {
-  id: string;
-  projectId: string;
-  name: string;
-  slug: string;
-  position: number;
-  icon: string | null;
-  color: string | null;
-  isFinal: boolean;
-};
-
-// Ordenadas por posición del tablero real de Kaneo -- así el tablero nativo
-// del dashboard muestra las mismas columnas que Kaneo, en el mismo orden,
-// en vez de asumir los 4 slugs por defecto (proyectos pueden personalizarlos).
-export async function getColumns(config: KaneoConfig, projectId: string): Promise<KaneoColumn[]> {
-  return kaneoFetch<KaneoColumn[]>(config, `/api/column/${projectId}`);
 }
 
 // /api/task/{id} (getTask) no trae labels -- solo el tablero las embebe.
