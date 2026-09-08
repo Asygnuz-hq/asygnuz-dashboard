@@ -9,6 +9,7 @@ const MODULOS: { key: Modulo; label: string }[] = [
   { key: "marketing_pauta", label: "Marketing y Pauta" },
   { key: "crm", label: "CRM" },
   { key: "operacion", label: "Operación" },
+  { key: "nomina", label: "Nómina" },
 ];
 
 export function ModuloSwitcher() {

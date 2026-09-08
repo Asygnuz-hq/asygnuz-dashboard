@@ -69,6 +69,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Equipo",
+    modulo: "nomina",
     items: [
       { href: "/equipo", label: "Equipo / RRHH" },
       { href: "/hr", label: "Nómina (PILA)" },

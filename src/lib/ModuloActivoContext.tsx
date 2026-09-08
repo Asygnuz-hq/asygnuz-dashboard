@@ -2,10 +2,16 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 
-export type Modulo = "financiero" | "marketing_pauta" | "crm" | "operacion";
+export type Modulo = "financiero" | "marketing_pauta" | "crm" | "operacion" | "nomina";
 
 const STORAGE_KEY = "asygnuz-modulo-activo";
-const MODULOS_VALIDOS: Modulo[] = ["financiero", "marketing_pauta", "crm", "operacion"];
+const MODULOS_VALIDOS: Modulo[] = [
+  "financiero",
+  "marketing_pauta",
+  "crm",
+  "operacion",
+  "nomina",
+];
 
 type ModuloActivoContextValue = {
   moduloActivo: Modulo;
