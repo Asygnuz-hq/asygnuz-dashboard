@@ -6,11 +6,15 @@ import { useIsEmergencia } from "@/lib/useIsEmergencia";
 import { useModuloActivo, type Modulo } from "@/lib/ModuloActivoContext";
 
 type NavItem = { href: string; label: string };
-// modulo: undefined = "Común", siempre visible sin importar el módulo activo.
-type NavSection = { title: string; modulo?: Modulo; items: NavItem[] };
+type NavSection = { title: string; modulo: Modulo; items: NavItem[] };
 
+// Cada sección pertenece a un solo módulo — nada queda "para todos". Deudas
+// Personales y Casos del Terremoto salieron de aquí a propósito (pedido de
+// JM, 2026-09-08): son casos puntuales que no necesitan ocupar espacio
+// permanente en el menú de todo el equipo; siguen funcionando si alguien
+// entra directo a /deudas-personales o /emergencia.
 const sections: NavSection[] = [
-  { title: "", items: [{ href: "/", label: "Dashboard" }] },
+  { title: "", modulo: "financiero", items: [{ href: "/", label: "Dashboard" }] },
   {
     title: "Clientes",
     modulo: "financiero",
@@ -34,11 +38,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    title: "Diseñadores",
-    modulo: "marketing_pauta",
+    // Antes vivía dentro de "Diseñadores" en Marketing — es plata que deben
+    // los clientes, no contenido de pauta, así que es Financiero.
+    title: "Cobros",
+    modulo: "financiero",
     items: [
-      { href: "/disenadores/control-mensual", label: "Control Mensual" },
-      { href: "/disenadores/resumen", label: "Resumen por Diseñador" },
       { href: "/disenadores/cobros-clientes", label: "Cobros a Clientes" },
       { href: "/disenadores/resumen-cobros", label: "Resumen de Cobros" },
     ],
@@ -69,18 +73,22 @@ const sections: NavSection[] = [
     ],
   },
   {
+    // Control Mensual y Resumen por Diseñador son la base para pagarle a
+    // cada diseñador — van con Nómina, no con Marketing.
     title: "Equipo",
     modulo: "nomina",
     items: [
       { href: "/equipo", label: "Equipo / RRHH" },
       { href: "/hr", label: "Nómina (PILA)" },
+      { href: "/disenadores/control-mensual", label: "Control Mensual" },
+      { href: "/disenadores/resumen", label: "Resumen por Diseñador" },
     ],
   },
   {
     title: "",
+    modulo: "financiero",
     items: [
       { href: "/analitica", label: "Analítica de Uso" },
-      { href: "/deudas-personales", label: "Deudas Personales" },
       { href: "/configuracion", label: "Configuración" },
     ],
   },
@@ -88,6 +96,7 @@ const sections: NavSection[] = [
 
 const seccionEmergencia: NavSection = {
   title: "Emergencia",
+  modulo: "financiero",
   items: [{ href: "/emergencia", label: "Casos del Terremoto" }],
 };
 
@@ -97,9 +106,11 @@ export function Sidebar() {
   const { moduloActivo } = useModuloActivo();
 
   // El usuario externo del caso del terremoto solo ve su propia sección —
-  // el resto del negocio de ASYGNUZ no le pertenece ni le interesa.
-  const sectionsFiltradas = sections.filter((s) => !s.modulo || s.modulo === moduloActivo);
-  const visibleSections = isEmergencia ? [seccionEmergencia] : [...sectionsFiltradas, seccionEmergencia];
+  // el resto del negocio de ASYGNUZ no le pertenece ni le interesa. Para
+  // el equipo normal, esa sección ya no aparece en el menú (ver comentario
+  // arriba de `sections`).
+  const sectionsFiltradas = sections.filter((s) => s.modulo === moduloActivo);
+  const visibleSections = isEmergencia ? [seccionEmergencia] : sectionsFiltradas;
 
   return (
     <nav className="print:hidden w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">

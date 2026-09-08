@@ -34,12 +34,7 @@ export function SeccionCrecimiento({
   chartColors: (typeof CHART_COLORS)[keyof typeof CHART_COLORS];
 }) {
   return (
-    <div className="flex flex-col gap-6 pt-4 border-t border-border">
-      <div>
-        <h2 className="text-lg font-semibold">Crecimiento — Leads y Pipeline</h2>
-        <p className="text-sm text-muted">Leído directo de EspoCRM (bot de leads de Google Places + trabajo manual del equipo).</p>
-      </div>
-
+    <div className="flex flex-col gap-6">
       {loading && <p className="text-sm text-muted">Cargando datos de EspoCRM…</p>}
       {error && (
         <p className="text-sm text-danger">

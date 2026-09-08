@@ -1,17 +1,10 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { derivarModulo, MODULO_HOME, type Modulo } from "@/lib/moduloDeRuta";
 
-export type Modulo = "financiero" | "marketing_pauta" | "crm" | "operacion" | "nomina";
-
-const STORAGE_KEY = "asygnuz-modulo-activo";
-const MODULOS_VALIDOS: Modulo[] = [
-  "financiero",
-  "marketing_pauta",
-  "crm",
-  "operacion",
-  "nomina",
-];
+export type { Modulo };
 
 type ModuloActivoContextValue = {
   moduloActivo: Modulo;
@@ -21,26 +14,15 @@ type ModuloActivoContextValue = {
 const ModuloActivoContext = createContext<ModuloActivoContextValue | null>(null);
 
 export function ModuloActivoProvider({ children }: { children: React.ReactNode }) {
-  const [moduloActivo, setModuloActivoState] = useState<Modulo>("financiero");
+  const pathname = usePathname();
+  const router = useRouter();
+  const moduloActivo = derivarModulo(pathname);
 
-  useEffect(() => {
-    try {
-      const guardado = localStorage.getItem(STORAGE_KEY);
-      if (guardado && MODULOS_VALIDOS.includes(guardado as Modulo)) {
-        setModuloActivoState(guardado as Modulo);
-      }
-    } catch {
-      // localStorage puede fallar (navegación privada) — se queda en "financiero".
-    }
-  }, []);
-
+  // "Cambiar de módulo" es navegar a su página principal — antes solo
+  // cambiaba qué se veía en el sidebar y te dejaba en la página en la que
+  // ya estabas, aunque no tuviera nada que ver con el módulo elegido.
   function setModuloActivo(modulo: Modulo) {
-    setModuloActivoState(modulo);
-    try {
-      localStorage.setItem(STORAGE_KEY, modulo);
-    } catch {
-      // no pasa nada si no se puede persistir, solo dura la sesión de pestaña.
-    }
+    router.push(MODULO_HOME[modulo]);
   }
 
   return (

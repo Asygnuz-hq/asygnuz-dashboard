@@ -164,66 +164,66 @@ export default function PayrollTable({ month, year }: { month: number; year: num
     setIsSaving(false);
   };
 
-  if (isLoading) return <div className="p-4 text-center text-muted-foreground">Calculando nómina desde base de datos...</div>;
+  if (isLoading) return <div className="p-4 text-center text-muted">Calculando nómina desde base de datos...</div>;
 
   return (
-    <div className="rounded-md border bg-white dark:bg-zinc-950">
-      <div className="p-4 flex flex-col md:flex-row md:items-center justify-between border-b gap-4">
+    <div className="rounded-md border border-border bg-surface">
+      <div className="p-4 flex flex-col md:flex-row md:items-center justify-between border-b border-border gap-4">
         <div>
           <h2 className="text-lg font-semibold">Nómina (Cálculo Detallado PILA)</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted">
             Período: {month}/{year} | SMMLV Base: {formatter.format(SMMLV_2026)}
           </p>
         </div>
         <div className="space-x-3 flex">
-          <button 
+          <button
             onClick={fetchActiveContracts}
-            className="bg-secondary text-secondary-foreground px-4 py-2 rounded-md text-sm font-medium border hover:bg-secondary/80"
+            className="border border-border px-4 py-2 rounded-md text-sm font-medium hover:bg-surface-alt"
           >
             Recalcular Nómina
           </button>
-          <button 
+          <button
             onClick={handleApprovePayroll}
             disabled={isSaving || calculatedDetails.length === 0}
-            className="bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
+            className="bg-accent text-accent-foreground px-4 py-2 rounded-md text-sm font-medium hover:bg-accent-bright disabled:opacity-50"
           >
             {isSaving ? "Guardando..." : "Aprobar y Guardar BD"}
           </button>
         </div>
       </div>
-      
+
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-          <thead className="bg-muted text-muted-foreground whitespace-nowrap">
+          <thead className="bg-surface-alt text-muted whitespace-nowrap">
             <tr>
               <th className="px-4 py-3 font-medium">Empleado</th>
               <th className="px-4 py-3 font-medium text-center">Días</th>
               <th className="px-4 py-3 font-medium text-right">Devengado (Salario + Aux)</th>
               <th className="px-4 py-3 font-medium text-right" title="Salud + Pensión + FSP (si aplica)">Deducciones (Trabajador)</th>
               <th className="px-4 py-3 font-medium text-right" title="Salud + Pensión + ARL + Parafiscales">Aportes (Empleador)</th>
-              <th className="px-4 py-3 font-medium text-right bg-muted/80">Neto a Pagar</th>
+              <th className="px-4 py-3 font-medium text-right bg-surface">Neto a Pagar</th>
               <th className="px-4 py-3 font-medium text-right">Costo Total Empresa</th>
             </tr>
           </thead>
-          <tbody className="divide-y">
+          <tbody className="divide-y divide-border">
             {calculatedDetails.map((row) => (
-              <tr key={row.id} className="hover:bg-muted/50 transition-colors">
+              <tr key={row.id} className="hover:bg-surface-alt transition-colors">
                 <td className="px-4 py-3 font-medium">
                   {row.empleado_nombre}
-                  {row.exoneradoLey1607 && <span className="ml-2 inline-block text-[10px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded dark:bg-blue-900/30 dark:text-blue-400">Exonerado 1607</span>}
+                  {row.exoneradoLey1607 && <span className="ml-2 inline-block text-[10px] bg-accent/15 text-accent px-1.5 py-0.5 rounded">Exonerado 1607</span>}
                 </td>
                 <td className="px-4 py-3 text-center">{row.diasTrabajados}</td>
-                <td className="px-4 py-3 text-right text-green-600 dark:text-green-500">
+                <td className="px-4 py-3 text-right text-success">
                   {formatter.format(row.devengado.total)}
                 </td>
-                <td className="px-4 py-3 text-right text-red-600 dark:text-red-500">
+                <td className="px-4 py-3 text-right text-danger">
                   {formatter.format(row.deduccionesEmpleado.total)}
-                  {row.deduccionesEmpleado.fondoSolidaridad > 0 && <span className="block text-[10px] text-muted-foreground">Incluye 1% FSP</span>}
+                  {row.deduccionesEmpleado.fondoSolidaridad > 0 && <span className="block text-[10px] text-muted">Incluye 1% FSP</span>}
                 </td>
-                <td className="px-4 py-3 text-right text-orange-600 dark:text-orange-500">
+                <td className="px-4 py-3 text-right text-accent-bright">
                   {formatter.format(row.aportesEmpleador.total)}
                 </td>
-                <td className="px-4 py-3 text-right font-bold bg-muted/10">
+                <td className="px-4 py-3 text-right font-bold bg-surface-alt">
                   {formatter.format(row.netoAPagarEmpleado)}
                 </td>
                 <td className="px-4 py-3 text-right font-semibold">
@@ -231,10 +231,10 @@ export default function PayrollTable({ month, year }: { month: number; year: num
                 </td>
               </tr>
             ))}
-            
+
             {calculatedDetails.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
+                <td colSpan={7} className="px-4 py-8 text-center text-muted">
                   No hay contratos de empleados registrados o activos para generar nómina.
                 </td>
               </tr>
@@ -242,7 +242,7 @@ export default function PayrollTable({ month, year }: { month: number; year: num
           </tbody>
         </table>
       </div>
-      <div className="p-4 bg-muted/30 text-xs text-muted-foreground border-t">
+      <div className="p-4 bg-surface-alt text-xs text-muted border-t border-border">
         <p><strong>Nota contable:</strong> La exoneración de la Ley 1607 exime al empleador del pago de Salud (8.5%), SENA (2%) e ICBF (3%). El aporte de Caja de Compensación (4%) y Pensión (12%) sigue aplicando. El IBC respeta los límites de 1 a 25 SMMLV proporcional a los días laborados.</p>
       </div>
     </div>
