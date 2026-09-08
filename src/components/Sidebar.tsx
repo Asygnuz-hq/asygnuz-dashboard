@@ -68,10 +68,11 @@ const sections: NavSection[] = [
     ],
   },
   {
-    // Nómina/RRHH real vive aparte (otra sesión la está construyendo) —
-    // por ahora este link se queda en Común para no perder acceso.
     title: "Equipo",
-    items: [{ href: "/equipo", label: "Equipo / RRHH" }],
+    items: [
+      { href: "/equipo", label: "Equipo / RRHH" },
+      { href: "/hr", label: "Nómina (PILA)" },
+    ],
   },
   {
     title: "",
