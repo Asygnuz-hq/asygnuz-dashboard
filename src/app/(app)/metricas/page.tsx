@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import {
   Area,
   AreaChart,
@@ -25,6 +26,7 @@ import { useMetricas } from "@/lib/kaneo/useMetricas";
 import type { ProyectoMetrica } from "@/lib/kaneo/metrics";
 import { QuickAddTask } from "@/components/kaneo/QuickAddTask";
 import { MarkTaskDone } from "@/components/kaneo/MarkTaskDone";
+import { TaskDetailModal } from "@/components/kaneo/TaskDetailModal";
 
 const PALETTE = { activas: "#3c5e99", completadas: "#5c8a72", atrasadas: "#d9534f" };
 const ESTADO_COLOR: Record<string, string> = {
@@ -62,6 +64,7 @@ export default function MetricasPage() {
   const theme = useTheme();
   const chartColors = CHART_COLORS[theme];
   const { metricas, error, loading, actualizando, recargar } = useMetricas();
+  const [tareaAbierta, setTareaAbierta] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col gap-8">
@@ -234,8 +237,12 @@ export default function MetricasPage() {
                       className="h-2 w-2 rounded-full shrink-0"
                       style={{ backgroundColor: ESTADO_COLOR[t.estado] ?? "#8b93a6" }}
                     />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm truncate">{t.titulo}</p>
+                    <button
+                      onClick={() => setTareaAbierta(t.id)}
+                      className="min-w-0 flex-1 text-left"
+                      title="Ver detalle de la tarea"
+                    >
+                      <p className="text-sm truncate hover:underline">{t.titulo}</p>
                       <p className="text-xs text-muted truncate">
                         {t.proyecto} · {t.frente}
                         {t.asignado && ` · ${t.asignado}`}
@@ -243,7 +250,7 @@ export default function MetricasPage() {
                           <span className="text-danger"> · {PRIORIDAD_LABEL[t.prioridad]}</span>
                         )}
                       </p>
-                    </div>
+                    </button>
                     <span className="text-xs text-muted shrink-0">
                       {t.creadaHace === 0 ? "hoy" : `hace ${t.creadaHace}d`}
                     </span>
@@ -254,6 +261,14 @@ export default function MetricasPage() {
             </div>
           </div>
         </>
+      )}
+
+      {tareaAbierta && (
+        <TaskDetailModal
+          taskId={tareaAbierta}
+          onClose={() => setTareaAbierta(null)}
+          onChanged={recargar}
+        />
       )}
     </div>
   );

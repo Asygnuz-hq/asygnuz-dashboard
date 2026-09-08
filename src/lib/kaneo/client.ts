@@ -163,3 +163,45 @@ export async function updateTaskStatus(taskId: string, status: string): Promise<
     body: { status },
   });
 }
+
+export async function getTask(taskId: string): Promise<KaneoTask> {
+  return kaneoFetch<KaneoTask>(`/api/task/${taskId}`);
+}
+
+export async function updateTaskTitle(taskId: string, title: string): Promise<KaneoTask> {
+  return kaneoFetch<KaneoTask>(`/api/task/title/${taskId}`, { method: "PUT", body: { title } });
+}
+
+export async function updateTaskDescription(taskId: string, description: string): Promise<KaneoTask> {
+  return kaneoFetch<KaneoTask>(`/api/task/description/${taskId}`, {
+    method: "PUT",
+    body: { description },
+  });
+}
+
+export async function updateTaskPriority(
+  taskId: string,
+  priority: KaneoTask["priority"]
+): Promise<KaneoTask> {
+  return kaneoFetch<KaneoTask>(`/api/task/priority/${taskId}`, { method: "PUT", body: { priority } });
+}
+
+export type KaneoComment = {
+  id: string;
+  taskId: string;
+  userId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  user: { name: string; image: string | null };
+};
+
+// GET /api/comment/{taskId} no exige task:update (solo membresía del
+// workspace), pero crear sí -- ambas ya cubiertas por la llave acotada.
+export async function getTaskComments(taskId: string): Promise<KaneoComment[]> {
+  return kaneoFetch<KaneoComment[]>(`/api/comment/${taskId}`);
+}
+
+export async function createTaskComment(taskId: string, content: string): Promise<void> {
+  await kaneoFetch(`/api/comment/${taskId}`, { method: "POST", body: { content } });
+}
