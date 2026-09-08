@@ -7,6 +7,7 @@ import { ColumnIcon } from "@/components/kaneo/ColumnIcon";
 import { PriorityIcon } from "@/components/kaneo/PriorityIcon";
 import { QuickAddTask } from "@/components/kaneo/QuickAddTask";
 import { TaskDetailModal } from "@/components/kaneo/TaskDetailModal";
+import { TaskLabels } from "@/components/kaneo/TaskLabels";
 import type { KaneoColumn, KaneoTask } from "@/lib/kaneo/client";
 import { dueDateStatusColors, getDueDateStatus } from "@/lib/kaneo/due-date-status";
 import { getInitials } from "@/lib/kaneo/get-initials";
@@ -69,6 +70,12 @@ function TarjetaTarea({
           {tarea.title}
         </p>
       </div>
+
+      {tarea.labels && tarea.labels.length > 0 && (
+        <div className="mb-2.5">
+          <TaskLabels labels={tarea.labels} />
+        </div>
+      )}
 
       <div className="flex items-center gap-1.5 flex-wrap">
         {tarea.priority !== "no-priority" && (

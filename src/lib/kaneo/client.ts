@@ -14,6 +14,8 @@ export type KaneoProject = {
   lastTaskNumber: number;
 };
 
+export type KaneoTaskLabel = { id: string; name: string; color: string };
+
 export type KaneoTask = {
   id: string;
   title: string;
@@ -29,6 +31,9 @@ export type KaneoTask = {
   assigneeName: string | null;
   assigneeId: string | null;
   projectId: string;
+  // Solo viene en /api/task/tasks/{projectId} (tablero); /api/task/{id} (detalle)
+  // no lo trae -- usar getTaskLabels() ahí.
+  labels?: KaneoTaskLabel[];
 };
 
 function env(name: string): string {
@@ -223,4 +228,9 @@ export type KaneoColumn = {
 // en vez de asumir los 4 slugs por defecto (proyectos pueden personalizarlos).
 export async function getColumns(projectId: string): Promise<KaneoColumn[]> {
   return kaneoFetch<KaneoColumn[]>(`/api/column/${projectId}`);
+}
+
+// /api/task/{id} (getTask) no trae labels -- solo el tablero las embebe.
+export async function getTaskLabels(taskId: string): Promise<KaneoTaskLabel[]> {
+  return kaneoFetch<KaneoTaskLabel[]>(`/api/label/task/${taskId}`);
 }

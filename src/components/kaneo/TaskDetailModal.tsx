@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { ActionModal } from "@/components/ActionModal";
-import type { KaneoComment, KaneoTask } from "@/lib/kaneo/client";
+import { TaskLabels } from "@/components/kaneo/TaskLabels";
+import type { KaneoComment, KaneoTask, KaneoTaskLabel } from "@/lib/kaneo/client";
 import { PRIORIDAD_LABEL } from "@/lib/kaneo/labels";
 
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
@@ -26,6 +27,7 @@ export function TaskDetailModal({
 }) {
   const [task, setTask] = useState<KaneoTask | null>(null);
   const [comments, setComments] = useState<KaneoComment[]>([]);
+  const [labels, setLabels] = useState<KaneoTaskLabel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,15 +44,17 @@ export function TaskDetailModal({
       setLoading(true);
       setError(null);
       try {
-        const [t, c] = await Promise.all([
+        const [t, c, l] = await Promise.all([
           api<KaneoTask>(`/api/kaneo/tasks/${taskId}`),
           api<KaneoComment[]>(`/api/kaneo/tasks/${taskId}/comments`),
+          api<KaneoTaskLabel[]>(`/api/kaneo/tasks/${taskId}/labels`),
         ]);
         if (cancelado) return;
         setTask(t);
         setTitle(t.title);
         setDescription(t.description ?? "");
         setComments(c);
+        setLabels(l);
       } catch (err) {
         if (!cancelado) setError(err instanceof Error ? err.message : "Error cargando la tarea");
       } finally {
@@ -173,6 +177,13 @@ export function TaskDetailModal({
                 ))}
               </select>
             </div>
+
+            {labels.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted">Etiquetas</span>
+                <TaskLabels labels={labels} />
+              </div>
+            )}
 
             <div className="flex flex-col gap-1">
               <label className="text-xs text-muted" htmlFor="td-description">
