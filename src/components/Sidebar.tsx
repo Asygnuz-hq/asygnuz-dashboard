@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useIsEmergencia } from "@/lib/useIsEmergencia";
 import { useModuloActivo, type Modulo } from "@/lib/ModuloActivoContext";
+import { useTenantActual } from "@/lib/useTenantActual";
 
 type NavItem = { href: string; label: string };
 type NavSection = { title: string; modulo: Modulo; items: NavItem[] };
@@ -103,6 +104,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const isEmergencia = useIsEmergencia();
   const { moduloActivo } = useModuloActivo();
+  const tenant = useTenantActual();
 
   // El usuario externo del caso del terremoto solo ve su propia sección —
   // el resto del negocio de ASYGNUZ no le pertenece ni le interesa. Para
@@ -116,12 +118,12 @@ export function Sidebar() {
       <div className="px-2 py-1">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logo.png"
-          alt="Asygnuz"
+          src={tenant?.logoUrl || "/logo.png"}
+          alt={tenant?.nombre ?? "Asygnuz"}
           className="h-7 w-auto"
-          style={{ filter: "var(--logo-filter)" }}
+          style={tenant?.logoUrl ? undefined : { filter: "var(--logo-filter)" }}
         />
-        <p className="text-xs text-muted mt-1">Dashboard</p>
+        <p className="text-xs text-muted mt-1">{tenant?.nombre ?? "Dashboard"}</p>
       </div>
 
       {visibleSections.map((section, i) => (

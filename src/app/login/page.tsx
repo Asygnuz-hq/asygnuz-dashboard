@@ -67,7 +67,19 @@ export default function LoginPage() {
     });
     if (error) {
       setLoading(false);
-      setError("Correo o contraseña incorrectos.");
+      // Antes esto SIEMPRE mostraba "correo o contraseña incorrectos", sin
+      // importar la causa real — así se nos escapó un bug donde el CAPTCHA
+      // fallaba (dominio no autorizado, token vencido) y la pantalla decía
+      // que la contraseña estaba mal, aunque fuera correcta.
+      const codigo = (error as { code?: string; error_code?: string }).code ??
+        (error as { code?: string; error_code?: string }).error_code;
+      if (codigo === "captcha_failed" || /captcha/i.test(error.message)) {
+        setError("No se pudo verificar el CAPTCHA. Recarga la página e intenta de nuevo.");
+      } else if (codigo === "invalid_credentials" || /invalid login credentials/i.test(error.message)) {
+        setError("Correo o contraseña incorrectos.");
+      } else {
+        setError(error.message);
+      }
       setCaptchaToken(null);
       renderTurnstile();
       return;

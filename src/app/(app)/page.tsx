@@ -204,6 +204,34 @@ export default function DashboardPage() {
 
   if (loading) return <p className="text-muted">Cargando dashboard...</p>;
 
+  // Tenant recién creado, todavía sin nada configurado — mostrar 10
+  // tarjetas en cero no ayuda a nadie a arrancar. `mes_activo` vacío es la
+  // señal más confiable: sin eso, casi todo lo demás de esta página
+  // tampoco tiene con qué calcularse.
+  if (!mesActivo && historico.length === 0) {
+    return (
+      <div className="flex flex-col gap-6 max-w-lg">
+        <PageHeader title="Bienvenido a tu dashboard" subtitle="Todavía no hay nada configurado — empecemos." />
+        <div className="rounded-lg border border-border bg-surface p-6 flex flex-col gap-4">
+          <p className="text-sm text-muted">
+            Para ver tus números aquí, primero necesitas:
+          </p>
+          <ol className="text-sm flex flex-col gap-2 list-decimal list-inside">
+            <li>
+              Ir a <a href="/configuracion" className="text-accent-bright hover:underline">Configuración</a> y definir el mes activo y tus metas de ingresos/margen.
+            </li>
+            <li>
+              Registrar tus cuentas en <a href="/cuentas" className="text-accent-bright hover:underline">Cuentas / Caja</a>.
+            </li>
+            <li>
+              Empezar a cargar <a href="/finanzas/ingresos" className="text-accent-bright hover:underline">Ingresos</a> y <a href="/finanzas/gastos-fijos" className="text-accent-bright hover:underline">Gastos</a>.
+            </li>
+          </ol>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center justify-between flex-wrap gap-3">

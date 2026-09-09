@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export type TenantActual = { id: string; nombre: string };
+export type TenantActual = { id: string; nombre: string; logoUrl: string | null };
 
 export function useTenantActual() {
   const [tenant, setTenant] = useState<TenantActual | null>(null);
@@ -14,7 +14,9 @@ export function useTenantActual() {
       const supabase = createClient();
       const { data } = await supabase.rpc("tenant_actual");
       const fila = Array.isArray(data) ? data[0] : data;
-      if (!cancelado && fila) setTenant({ id: fila.id, nombre: fila.nombre });
+      if (!cancelado && fila) {
+        setTenant({ id: fila.id, nombre: fila.nombre, logoUrl: fila.logo_url ?? null });
+      }
     }
     load();
     return () => {
