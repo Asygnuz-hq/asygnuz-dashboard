@@ -122,6 +122,7 @@ export type KaneoRequirement = {
   dueDate: string | null;
   createdAt: string;
   spec: {
+    context?: string;
     traceabilityStatus?: string;
     plannedPct?: number;
     implementationPhase?: string;
