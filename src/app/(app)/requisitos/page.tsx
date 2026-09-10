@@ -200,6 +200,41 @@ export default function RequisitosPage() {
                     formatValue={(n) => String(n)}
                   />
                 )}
+
+                {r.historias.length > 0 && (
+                  <details className="group">
+                    <summary className="cursor-pointer text-xs text-muted hover:text-foreground list-none flex items-center gap-1">
+                      <span className="transition-transform group-open:rotate-90">▸</span>
+                      Ver {r.historias.length} historias de usuario
+                    </summary>
+                    <ul className="mt-2 flex flex-col gap-1 border-l border-border pl-3">
+                      {r.historias.map((h) => (
+                        <li
+                          key={h.id}
+                          className="text-xs flex items-center gap-2"
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full shrink-0 ${
+                              h.hecha ? "bg-emerald-500" : "bg-surface-alt border border-border"
+                            }`}
+                          />
+                          {h.numero != null && (
+                            <span className="font-mono text-muted shrink-0">
+                              #{h.numero}
+                            </span>
+                          )}
+                          <span
+                            className={
+                              h.hecha ? "text-muted line-through" : ""
+                            }
+                          >
+                            {h.titulo}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
               </div>
             ))}
           </div>

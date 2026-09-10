@@ -31,6 +31,7 @@ export type RequisitoMetrica = {
   atrasado: boolean;
   totalHistorias: number;
   historiasHechas: number;
+  historias: { id: string; numero: number | null; titulo: string; hecha: boolean }[];
 };
 
 export type RequisitosMetrics = {
@@ -72,6 +73,12 @@ export async function calcularRequisitos(
         (r.executedPct ?? 0) < 100,
       totalHistorias: r.totalStories,
       historiasHechas: r.doneStories,
+      historias: (r.stories ?? []).map((s) => ({
+        id: s.id,
+        numero: s.number,
+        titulo: s.title,
+        hecha: s.done,
+      })),
     };
   });
 

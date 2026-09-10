@@ -135,6 +135,13 @@ export type KaneoRequirement = {
   totalStories: number;
   doneStories: number;
   executedPct: number | null;
+  stories: {
+    id: string;
+    number: number | null;
+    title: string;
+    status: string;
+    done: boolean;
+  }[];
 };
 
 export async function fetchWorkspaceRequirements(

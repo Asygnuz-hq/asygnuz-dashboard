@@ -17,6 +17,7 @@ export const MODULO_HOME: Record<Modulo, string> = {
 const RUTA_A_MODULO: { prefix: string; modulo: Modulo }[] = [
   { prefix: "/metricas/clientes", modulo: "marketing_pauta" },
   { prefix: "/metricas", modulo: "operacion" },
+  { prefix: "/requisitos", modulo: "operacion" },
   { prefix: "/tablero", modulo: "operacion" },
   { prefix: "/disenadores/cobros-clientes", modulo: "financiero" },
   { prefix: "/disenadores/resumen-cobros", modulo: "financiero" },
