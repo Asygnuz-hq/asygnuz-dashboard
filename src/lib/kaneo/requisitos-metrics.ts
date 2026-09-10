@@ -1,15 +1,9 @@
-import {
-  fetchProjects,
-  fetchProjectTasks,
-  fetchTaskRelations,
-  getTask,
-  type KaneoConfig,
-} from "./client";
+import { fetchWorkspaceRequirements, type KaneoConfig } from "./client";
 
-// Lee los Requisitos de Negocio (issueType "requirement") de todos los
-// proyectos del workspace y arma las métricas para el dashboard. El board
-// no devuelve el spec ni el % ejecutado, así que por cada requisito se
-// hace un GET /api/task/{id} (son pocos: N proyectos * pocos requisitos).
+// Lee los Requisitos de Negocio (issueType "requirement") del workspace y arma
+// las métricas para el dashboard. El fork expone GET /api/task/requirements que
+// ya trae el spec y el avance de historias calculado, así que es una sola
+// llamada (antes: un recorrido tablero-por-tablero + un getTask por requisito).
 
 export const TRAZABILIDAD_LABEL: Record<string, string> = {
   inicio: "Inicio",
@@ -49,69 +43,35 @@ export type RequisitosMetrics = {
   requisitos: RequisitoMetrica[];
 };
 
-type Spec = {
-  traceabilityStatus?: string;
-  plannedPct?: number;
-  implementationPhase?: string;
-  platform?: string;
-  changeType?: string;
-};
-
-const DONE_SLUGS = new Set(["done", "finalizado", "archived"]);
-
 export async function calcularRequisitos(
   config: KaneoConfig,
   workspaceId: string,
 ): Promise<RequisitosMetrics> {
-  const proyectos = (await fetchProjects(config, workspaceId)).filter((p) => !p.archivedAt);
+  const crudos = await fetchWorkspaceRequirements(config, workspaceId);
 
-  const requisitos: RequisitoMetrica[] = [];
-
-  for (const proyecto of proyectos) {
-    const tareas = await fetchProjectTasks(config, proyecto.id);
-    const reqTasks = tareas.filter((t) => t.issueType === "requirement");
-    if (reqTasks.length === 0) continue;
-
-    const tareaPorId = new Map(tareas.map((t) => [t.id, t]));
-
-    for (const rt of reqTasks) {
-      const [full, relaciones] = await Promise.all([
-        getTask(config, rt.id) as Promise<
-          typeof rt & { spec?: Spec | null; executedPct?: number | null }
-        >,
-        fetchTaskRelations(config, rt.id),
-      ]);
-      const spec = full.spec ?? {};
-      const hijosIds = relaciones
-        .filter((r) => r.relationType === "subtask" && r.sourceTaskId === rt.id)
-        .map((r) => r.targetTaskId);
-      const historias = hijosIds
-        .map((id) => tareaPorId.get(id))
-        .filter((h): h is (typeof tareas)[number] => Boolean(h));
-      const hechas = historias.filter((h) => DONE_SLUGS.has(h.status)).length;
-
-      requisitos.push({
-        id: rt.id,
-        numero: rt.number,
-        titulo: rt.title,
-        proyecto: proyecto.name,
-        trazabilidad: spec.traceabilityStatus ?? "inicio",
-        plannedPct: spec.plannedPct ?? 0,
-        executedPct: full.executedPct ?? null,
-        fase: spec.implementationPhase ?? "",
-        plataforma: spec.platform ?? "",
-        tipoCambio: spec.changeType ?? "",
-        fechaInicio: rt.startDate,
-        fechaFin: rt.dueDate,
-        atrasado:
-          !!rt.dueDate &&
-          new Date(rt.dueDate).getTime() < Date.now() &&
-          (full.executedPct ?? 0) < 100,
-        totalHistorias: historias.length,
-        historiasHechas: hechas,
-      });
-    }
-  }
+  const requisitos: RequisitoMetrica[] = crudos.map((r) => {
+    const spec = r.spec ?? {};
+    return {
+      id: r.id,
+      numero: r.number,
+      titulo: r.title,
+      proyecto: r.projectName,
+      trazabilidad: spec.traceabilityStatus ?? "inicio",
+      plannedPct: spec.plannedPct ?? 0,
+      executedPct: r.executedPct,
+      fase: spec.implementationPhase ?? "",
+      plataforma: spec.platform ?? "",
+      tipoCambio: spec.changeType ?? "",
+      fechaInicio: r.startDate,
+      fechaFin: r.dueDate,
+      atrasado:
+        !!r.dueDate &&
+        new Date(r.dueDate).getTime() < Date.now() &&
+        (r.executedPct ?? 0) < 100,
+      totalHistorias: r.totalStories,
+      historiasHechas: r.doneStories,
+    };
+  });
 
   const trazMap = new Map<string, number>();
   for (const r of requisitos) {

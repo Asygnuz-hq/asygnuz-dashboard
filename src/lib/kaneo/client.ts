@@ -108,6 +108,44 @@ export async function fetchTaskRelations(config: KaneoConfig, taskId: string): P
   }
 }
 
+// Fork ASYGNUZ: GET /api/task/requirements?workspaceId= — todos los
+// Requisitos de Negocio del workspace con su spec y el avance de historias
+// ya calculado. Reemplaza el recorrido tablero-por-tablero + getTask por
+// requisito.
+export type KaneoRequirement = {
+  id: string;
+  number: number | null;
+  title: string;
+  status: string;
+  priority: KaneoTask["priority"];
+  startDate: string | null;
+  dueDate: string | null;
+  createdAt: string;
+  spec: {
+    traceabilityStatus?: string;
+    plannedPct?: number;
+    implementationPhase?: string;
+    platform?: string;
+    changeType?: string;
+  } | null;
+  projectId: string;
+  projectName: string;
+  projectSlug: string;
+  totalStories: number;
+  doneStories: number;
+  executedPct: number | null;
+};
+
+export async function fetchWorkspaceRequirements(
+  config: KaneoConfig,
+  workspaceId: string
+): Promise<KaneoRequirement[]> {
+  return kaneoFetch<KaneoRequirement[]>(
+    config,
+    `/api/task/requirements?workspaceId=${workspaceId}`
+  );
+}
+
 export type KaneoWorkspaceMember = {
   id: string;
   name: string;
