@@ -163,6 +163,11 @@ export default function RequisitosPage() {
 
                 <div>
                   <p className="text-sm font-medium">{r.titulo}</p>
+                  {r.contexto && (
+                    <p className="text-xs text-muted mt-1 line-clamp-2 whitespace-pre-line">
+                      {r.contexto}
+                    </p>
+                  )}
                   <p className="text-xs text-muted mt-0.5">
                     {r.historiasHechas}/{r.totalHistorias} historias entregadas
                     {r.fechaFin &&

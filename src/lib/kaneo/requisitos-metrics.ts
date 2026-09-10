@@ -18,6 +18,7 @@ export type RequisitoMetrica = {
   id: string;
   numero: number | null;
   titulo: string;
+  contexto: string;
   proyecto: string;
   trazabilidad: string;
   plannedPct: number;
@@ -55,6 +56,7 @@ export async function calcularRequisitos(
       id: r.id,
       numero: r.number,
       titulo: r.title,
+      contexto: spec.context ?? "",
       proyecto: r.projectName,
       trazabilidad: spec.traceabilityStatus ?? "inicio",
       plannedPct: spec.plannedPct ?? 0,
