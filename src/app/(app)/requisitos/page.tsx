@@ -1,334 +1,210 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { PageHeader } from "@/components/PageHeader";
 import {
-  borrarRequisito,
-  cargarCatalogos,
-  cargarHistorias,
-  cargarRequisitos,
-  ESTADO_TRAZABILIDAD_COLOR,
-  ESTADOS_TRAZABILIDAD,
-  type Historia,
-  type OpcionSimple,
-  type Requisito,
-  siguienteCodigoHistoria,
-} from "@/lib/requisitos";
-import { HistoriaForm } from "./HistoriaForm";
-import { RequisitoForm } from "./RequisitoForm";
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { KpiCard } from "@/components/KpiCard";
+import { PageHeader } from "@/components/PageHeader";
+import { ProgressBar } from "@/components/ProgressBar";
+import { useRequisitos } from "@/lib/kaneo/useRequisitos";
+import { CHART_COLORS, useTheme } from "@/lib/useTheme";
 
-const ESTADO_HISTORIA_COLOR: Record<string, string> = {
-  Borrador: "#8b93a6",
-  "En Revisión": "#c9a227",
-  Aprobada: "#3c5e99",
-  "En Desarrollo": "#7c5cbf",
-  Lista: "#1d9e75",
+const TRAZ_COLOR: Record<string, string> = {
+  inicio: "#8b93a6",
+  cotizacion: "#c9a227",
+  desarrollo: "#3c5e99",
+  pruebas: "#7c5cbf",
+  finalizado: "#1d9e75",
+  bloqueado: "#d9534f",
 };
 
-function labelTrazabilidad(v: string) {
-  return ESTADOS_TRAZABILIDAD.find((e) => e.value === v)?.label ?? v;
-}
-
-function HistoriasDeRequisito({
-  requisitoId,
-  equipoVacio,
-  refreshKey,
-}: {
-  requisitoId: string;
-  equipoVacio: boolean;
-  refreshKey: number;
-}) {
-  const [historias, setHistorias] = useState<Historia[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [editando, setEditando] = useState<Historia | null>(null);
-  const [creando, setCreando] = useState(false);
-  const [localKey, setLocalKey] = useState(0);
-
-  const recargar = useCallback(async () => {
-    setLoading(true);
-    setHistorias(await cargarHistorias(requisitoId));
-    setLoading(false);
-  }, [requisitoId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    recargar();
-  }, [recargar, refreshKey, localKey]);
-
+function IndicadorEnVivo({ actualizando }: { actualizando: boolean }) {
   return (
-    <div className="flex flex-col gap-2 pl-4 border-l-2 border-border ml-1 mt-2">
-      {loading && <p className="text-xs text-muted">Cargando historias…</p>}
-      {!loading && historias.length === 0 && (
-        <p className="text-xs text-muted">Sin historias de usuario todavía.</p>
-      )}
-      {historias.map((h) => (
-        <button
-          key={h.id}
-          onClick={() => setEditando(h)}
-          className="text-left rounded-md border border-border bg-background p-2.5 hover:border-accent-bright/50 transition-colors"
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-muted">{h.codigo}</span>
-            <span
-              className="text-[10px] px-1.5 py-0.5 rounded"
-              style={{
-                backgroundColor: `${ESTADO_HISTORIA_COLOR[h.estado] ?? "#8b93a6"}22`,
-                color: ESTADO_HISTORIA_COLOR[h.estado] ?? "#8b93a6",
-              }}
-            >
-              {h.estado}
-            </span>
-          </div>
-          {(h.quiero || h.como) && (
-            <p className="text-xs text-foreground/80 mt-1 line-clamp-2">
-              <span className="text-muted">Como</span> {h.como} —{" "}
-              <span className="text-muted">quiero</span> {h.quiero}
-            </p>
-          )}
-        </button>
-      ))}
-
-      <button
-        onClick={() => setCreando(true)}
-        className="text-xs text-accent-bright font-medium self-start mt-1"
-      >
-        + Nueva Historia de Usuario
-      </button>
-
-      {equipoVacio && historias.length === 0 && (
-        <p className="text-[10px] text-muted">
-          Tip: agrega personas en Equipo para poder asignar responsables.
-        </p>
-      )}
-
-      {creando && (
-        <HistoriaForm
-          requisitoId={requisitoId}
-          historia={null}
-          codigoSugerido={siguienteCodigoHistoria(historias)}
-          onClose={() => setCreando(false)}
-          onSaved={() => {
-            setCreando(false);
-            setLocalKey((k) => k + 1);
-          }}
-        />
-      )}
-      {editando && (
-        <HistoriaForm
-          requisitoId={requisitoId}
-          historia={editando}
-          codigoSugerido={editando.codigo}
-          onClose={() => setEditando(null)}
-          onSaved={() => {
-            setEditando(null);
-            setLocalKey((k) => k + 1);
-          }}
-        />
-      )}
+    <div className="flex items-center gap-1.5 text-xs text-muted">
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${
+          actualizando ? "bg-accent-bright animate-pulse" : "bg-emerald-500"
+        }`}
+      />
+      {actualizando ? "Actualizando…" : "En vivo · se refresca solo cada 2 min"}
     </div>
   );
 }
 
 export default function RequisitosPage() {
-  const [clientes, setClientes] = useState<OpcionSimple[]>([]);
-  const [equipo, setEquipo] = useState<OpcionSimple[]>([]);
-  const [clienteId, setClienteId] = useState<string>("");
-  const [requisitos, setRequisitos] = useState<Requisito[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [expandido, setExpandido] = useState<string | null>(null);
-  const [creandoReq, setCreandoReq] = useState(false);
-  const [editandoReq, setEditandoReq] = useState<Requisito | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  useEffect(() => {
-    cargarCatalogos().then(({ clientes, equipo }) => {
-      setClientes(clientes);
-      setEquipo(equipo);
-      if (clientes.length > 0) setClienteId(clientes[0].id);
-    });
-  }, []);
-
-  const recargar = useCallback(async () => {
-    if (!clienteId) {
-      setRequisitos([]);
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    setRequisitos(await cargarRequisitos(clienteId));
-    setLoading(false);
-  }, [clienteId]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    recargar();
-  }, [recargar]);
-
-  async function eliminarReq(r: Requisito) {
-    if (!confirm(`¿Eliminar el Requisito #${r.numero} y todas sus historias?`)) return;
-    await borrarRequisito(r.id);
-    recargar();
-  }
-
-  const responsableNombre = (id: string | null) =>
-    id ? (equipo.find((p) => p.id === id)?.nombre ?? "—") : "(Sin asignar)";
+  const theme = useTheme();
+  const chartColors = CHART_COLORS[theme];
+  const { data, error, loading, actualizando, recargar } = useRequisitos();
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <PageHeader
           title="Requisitos de Negocio"
-          subtitle="Levantamiento de requisitos e historias de usuario por cliente — el insumo que se pasa al equipo técnico."
+          subtitle="Avance y trazabilidad de los Requisitos de Negocio, leído directo de Kaneo. Se crean y editan dentro de Kaneo (tipo de tarea “Requisito de Negocio”), acá solo se miden."
         />
-        <div className="flex items-center gap-2">
-          {clientes.length > 0 && (
-            <select
-              value={clienteId}
-              onChange={(e) => setClienteId(e.target.value)}
-              className="text-sm rounded-md border border-border bg-surface px-3 py-1.5"
-            >
-              {clientes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre}
-                </option>
-              ))}
-            </select>
-          )}
+        <div className="flex flex-col items-end gap-1">
+          <IndicadorEnVivo actualizando={actualizando} />
           <button
-            onClick={() => setCreandoReq(true)}
-            disabled={!clienteId}
-            className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 disabled:opacity-50"
+            type="button"
+            onClick={recargar}
+            disabled={loading || actualizando}
+            className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt disabled:opacity-50"
           >
-            + Nuevo Requisito
+            Actualizar ahora
           </button>
         </div>
       </div>
 
-      {clientes.length === 0 && (
-        <p className="text-sm text-muted">
-          No hay clientes todavía. Crea uno en la sección Clientes para empezar a levantar requisitos.
+      {loading && <p className="text-sm text-muted">Cargando Requisitos de Negocio de Kaneo…</p>}
+      {error && (
+        <p className="text-sm text-danger">
+          {error}. Revisá que Kaneo esté arriba.
         </p>
       )}
 
-      {loading && clienteId && <p className="text-sm text-muted">Cargando requisitos…</p>}
+      {data && (
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <KpiCard label="Requisitos" value={String(data.totalRequisitos)} />
+            <KpiCard label="Historias de usuario" value={String(data.totalHistorias)} />
+            <KpiCard
+              label="Avance real (prom.)"
+              value={`${data.avanceGlobalReal}%`}
+              hint={`Planificado ${data.avanceGlobalPlan}%`}
+            />
+            <KpiCard
+              label="Atrasados"
+              value={String(data.atrasados)}
+              hint="Vencidos y por debajo del 100%"
+              accentClassName={
+                data.atrasados > 0 ? "bg-danger/10 border-danger/40" : undefined
+              }
+            />
+          </div>
 
-      {!loading && clienteId && requisitos.length === 0 && (
-        <p className="text-sm text-muted">
-          Este cliente no tiene requisitos todavía. Dale a “+ Nuevo Requisito”.
-        </p>
-      )}
+          {data.totalRequisitos > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
+                Requisitos por estado de trazabilidad
+              </h2>
+              <div className="h-56 rounded-lg border border-border bg-surface p-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.porTrazabilidad}>
+                    <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
+                    <XAxis dataKey="label" stroke={chartColors.axis} fontSize={11} />
+                    <YAxis
+                      stroke={chartColors.axis}
+                      fontSize={12}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: chartColors.tooltipBg,
+                        border: `1px solid ${chartColors.tooltipBorder}`,
+                        color: chartColors.tooltipText,
+                      }}
+                    />
+                    <Bar dataKey="total" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                      {data.porTrazabilidad.map((s) => (
+                        <Cell key={s.estado} fill={TRAZ_COLOR[s.estado] ?? "#8b93a6"} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
-      <div className="flex flex-col gap-3">
-        {requisitos.map((r) => {
-          const abierto = expandido === r.id;
-          return (
-            <div key={r.id} className="rounded-lg border border-border bg-surface overflow-hidden">
-              <div className="p-4 flex flex-col gap-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-mono text-muted">REQ-{r.numero}</span>
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded font-medium"
-                        style={{
-                          backgroundColor: `${ESTADO_TRAZABILIDAD_COLOR[r.estado_trazabilidad]}22`,
-                          color: ESTADO_TRAZABILIDAD_COLOR[r.estado_trazabilidad],
-                        }}
-                      >
-                        {labelTrazabilidad(r.estado_trazabilidad)}
-                      </span>
-                      <span className="text-[10px] text-muted">Prioridad {r.prioridad}</span>
-                      {r.fase_implementacion && (
-                        <span className="text-[10px] text-muted">· {r.fase_implementacion}</span>
-                      )}
-                      {r.plataforma_software && (
-                        <span className="text-[10px] text-muted">· {r.plataforma_software}</span>
-                      )}
-                    </div>
-                    <p className="text-sm mt-1.5">{r.descripcion}</p>
-                    <p className="text-xs text-muted mt-1">
-                      Responsable: {responsableNombre(r.responsable_id)}
-                      {r.fecha_inicio && ` · ${r.fecha_inicio}`}
-                      {r.fecha_fin && ` → ${r.fecha_fin}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() => setEditandoReq(r)}
-                      className="text-xs text-muted hover:text-foreground"
-                    >
-                      Editar
-                    </button>
-                    <button
-                      onClick={() => eliminarReq(r)}
-                      className="text-xs text-danger/70 hover:text-danger"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
+          <div className="flex flex-col gap-3">
+            <h2 className="text-sm font-semibold text-muted uppercase tracking-wide">
+              Detalle por requisito
+            </h2>
+            {data.requisitos.length === 0 && (
+              <p className="text-sm text-muted">
+                No hay Requisitos de Negocio en Kaneo todavía. Creá uno en Kaneo eligiendo el
+                tipo “Requisito de Negocio” y agregá las historias de usuario como subtareas.
+              </p>
+            )}
+            {data.requisitos.map((r) => (
+              <div
+                key={r.id}
+                className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-3"
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  {r.numero != null && (
+                    <span className="text-xs font-mono text-muted">#{r.numero}</span>
+                  )}
+                  <span
+                    className="text-[10px] px-1.5 py-0.5 rounded font-medium capitalize"
+                    style={{
+                      backgroundColor: `${TRAZ_COLOR[r.trazabilidad] ?? "#8b93a6"}22`,
+                      color: TRAZ_COLOR[r.trazabilidad] ?? "#8b93a6",
+                    }}
+                  >
+                    {r.trazabilidad}
+                  </span>
+                  <span className="text-[10px] text-muted">{r.proyecto}</span>
+                  {r.fase && <span className="text-[10px] text-muted">· {r.fase}</span>}
+                  {r.plataforma && (
+                    <span className="text-[10px] text-muted">· {r.plataforma}</span>
+                  )}
+                  {r.atrasado && (
+                    <span className="text-[10px] font-medium text-danger">· atrasado</span>
+                  )}
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium">{r.titulo}</p>
+                  <p className="text-xs text-muted mt-0.5">
+                    {r.historiasHechas}/{r.totalHistorias} historias entregadas
+                    {r.fechaFin &&
+                      ` · vence ${new Date(r.fechaFin).toLocaleDateString("es-CO")}`}
+                  </p>
                 </div>
 
                 <div className="flex flex-col gap-1">
                   <div className="flex justify-between text-[10px] text-muted">
-                    <span>Meta {r.pct_planificado}%</span>
-                    <span>Real {r.pct_ejecutado}%</span>
+                    <span>Planificado {r.plannedPct}%</span>
+                    <span>Ejecutado {r.executedPct ?? 0}%</span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-background overflow-hidden relative">
+                  <div className="h-2 rounded-full bg-surface-alt overflow-hidden relative">
                     <div
-                      className="absolute inset-y-0 left-0 bg-accent-bright/30"
-                      style={{ width: `${Math.min(100, r.pct_planificado)}%` }}
+                      className="absolute inset-y-0 left-0 bg-accent-bright/25"
+                      style={{ width: `${Math.min(100, r.plannedPct)}%` }}
                     />
                     <div
-                      className="absolute inset-y-0 left-0 bg-success"
-                      style={{ width: `${Math.min(100, r.pct_ejecutado)}%` }}
+                      className="absolute inset-y-0 left-0 bg-emerald-500"
+                      style={{ width: `${Math.min(100, r.executedPct ?? 0)}%` }}
                     />
                   </div>
                 </div>
 
-                <button
-                  onClick={() => setExpandido(abierto ? null : r.id)}
-                  className="text-xs text-accent-bright font-medium self-start"
-                >
-                  {abierto ? "▾ Ocultar historias de usuario" : "▸ Ver historias de usuario"}
-                </button>
-
-                {abierto && (
-                  <HistoriasDeRequisito
-                    requisitoId={r.id}
-                    equipoVacio={equipo.length === 0}
-                    refreshKey={refreshKey}
+                {r.totalHistorias > 0 && (
+                  <ProgressBar
+                    label="Historias"
+                    value={r.historiasHechas}
+                    target={r.totalHistorias}
+                    formatValue={(n) => String(n)}
                   />
                 )}
               </div>
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
 
-      {creandoReq && clienteId && (
-        <RequisitoForm
-          clienteId={clienteId}
-          requisito={null}
-          equipo={equipo}
-          onClose={() => setCreandoReq(false)}
-          onSaved={() => {
-            setCreandoReq(false);
-            recargar();
-          }}
-        />
-      )}
-      {editandoReq && clienteId && (
-        <RequisitoForm
-          clienteId={clienteId}
-          requisito={editandoReq}
-          equipo={equipo}
-          onClose={() => setEditandoReq(null)}
-          onSaved={() => {
-            setEditandoReq(null);
-            recargar();
-            setRefreshKey((k) => k + 1);
-          }}
-        />
+          {data.generadoEn && (
+            <p className="text-[10px] text-muted">
+              Generado {new Date(data.generadoEn).toLocaleString("es-CO")}
+            </p>
+          )}
+        </>
       )}
     </div>
   );
