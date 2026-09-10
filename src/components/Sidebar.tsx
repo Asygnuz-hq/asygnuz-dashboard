@@ -66,6 +66,7 @@ const sections: NavSection[] = [
     title: "Operación",
     modulo: "operacion",
     items: [
+      { href: "/requisitos", label: "Requisitos de Negocio" },
       { href: "/metricas", label: "Vista Ejecutiva" },
       { href: "/metricas/carga", label: "Carga por Persona" },
       { href: "/metricas/reporte", label: "Reporte para Junta" },
