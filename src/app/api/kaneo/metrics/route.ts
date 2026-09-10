@@ -1,9 +1,15 @@
 import { calcularMetricas } from "@/lib/kaneo/metrics";
-import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
+import {
+  fuenteDeRequest,
+  getKaneoConfigForCurrentUser,
+  kaneoErrorResponse,
+} from "@/lib/kaneo/tenant-config";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const { config, workspaceId } = await getKaneoConfigForCurrentUser();
+    const { config, workspaceId } = await getKaneoConfigForCurrentUser(
+      fuenteDeRequest(req),
+    );
     const metricas = await calcularMetricas(config, workspaceId);
     return Response.json(metricas);
   } catch (err) {

@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FUENTE_PRINCIPAL } from "./fuentes";
 import type { MetricasKaneo } from "./metrics";
 
 // La API tarda unos segundos (recorre relaciones tarea por tarea) — refrescar
 // cada 2 minutos da sensación de "en vivo" sin recargar la API sin necesidad.
 const INTERVALO_MS = 2 * 60 * 1000;
 
-export function useMetricas() {
+export function useMetricas(fuenteId: string = FUENTE_PRINCIPAL) {
   const [metricas, setMetricas] = useState<MetricasKaneo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,11 @@ export function useMetricas() {
     if (primeraCarga.current) setLoading(true);
     else setActualizando(true);
     try {
-      const res = await fetch("/api/kaneo/metrics", { cache: "no-store" });
+      const qs =
+        fuenteId && fuenteId !== FUENTE_PRINCIPAL
+          ? `?fuente=${encodeURIComponent(fuenteId)}`
+          : "";
+      const res = await fetch(`/api/kaneo/metrics${qs}`, { cache: "no-store" });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Error consultando métricas");
       setMetricas(body as MetricasKaneo);
@@ -30,9 +35,10 @@ export function useMetricas() {
       setActualizando(false);
       primeraCarga.current = false;
     }
-  }, []);
+  }, [fuenteId]);
 
   useEffect(() => {
+    primeraCarga.current = true;
     cargar();
     const id = setInterval(cargar, INTERVALO_MS);
     return () => clearInterval(id);

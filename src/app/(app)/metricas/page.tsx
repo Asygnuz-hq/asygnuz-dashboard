@@ -22,6 +22,8 @@ import { KpiCard } from "@/components/KpiCard";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Semaforo } from "@/components/Semaforo";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
+import { FuenteSelector } from "@/components/kaneo/FuenteSelector";
+import { useKaneoFuentes } from "@/lib/kaneo/useKaneoFuentes";
 import { useMetricas } from "@/lib/kaneo/useMetricas";
 import type { ProyectoMetrica } from "@/lib/kaneo/metrics";
 import { QuickAddTask } from "@/components/kaneo/QuickAddTask";
@@ -51,7 +53,9 @@ function IndicadorEnVivo({ actualizando }: { actualizando: boolean }) {
 export default function MetricasPage() {
   const theme = useTheme();
   const chartColors = CHART_COLORS[theme];
-  const { metricas, error, loading, actualizando, recargar } = useMetricas();
+  const { fuentes, fuenteId, setFuenteId } = useKaneoFuentes();
+  const { metricas, error, loading, actualizando, recargar } =
+    useMetricas(fuenteId);
   const [tareaAbierta, setTareaAbierta] = useState<string | null>(null);
 
   return (
@@ -64,7 +68,12 @@ export default function MetricasPage() {
           />
           {metricas && <IndicadorEnVivo actualizando={actualizando} />}
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <FuenteSelector
+            fuentes={fuentes}
+            fuenteId={fuenteId}
+            onChange={setFuenteId}
+          />
           <button
             onClick={() => recargar()}
             disabled={loading || actualizando}

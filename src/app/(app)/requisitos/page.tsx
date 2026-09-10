@@ -10,9 +10,11 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { FuenteSelector } from "@/components/kaneo/FuenteSelector";
 import { KpiCard } from "@/components/KpiCard";
 import { PageHeader } from "@/components/PageHeader";
 import { ProgressBar } from "@/components/ProgressBar";
+import { useKaneoFuentes } from "@/lib/kaneo/useKaneoFuentes";
 import { useRequisitos } from "@/lib/kaneo/useRequisitos";
 import { CHART_COLORS, useTheme } from "@/lib/useTheme";
 
@@ -41,7 +43,9 @@ function IndicadorEnVivo({ actualizando }: { actualizando: boolean }) {
 export default function RequisitosPage() {
   const theme = useTheme();
   const chartColors = CHART_COLORS[theme];
-  const { data, error, loading, actualizando, recargar } = useRequisitos();
+  const { fuentes, fuenteId, setFuenteId } = useKaneoFuentes();
+  const { data, error, loading, actualizando, recargar } =
+    useRequisitos(fuenteId);
 
   return (
     <div className="flex flex-col gap-8">
@@ -51,6 +55,11 @@ export default function RequisitosPage() {
           subtitle="Avance y trazabilidad de los Requisitos de Negocio, leído directo de Kaneo. Se crean y editan dentro de Kaneo (tipo de tarea “Requisito de Negocio”), acá solo se miden."
         />
         <div className="flex flex-col items-end gap-1">
+          <FuenteSelector
+            fuentes={fuentes}
+            fuenteId={fuenteId}
+            onChange={setFuenteId}
+          />
           <IndicadorEnVivo actualizando={actualizando} />
           <button
             type="button"

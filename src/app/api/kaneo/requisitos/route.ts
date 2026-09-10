@@ -1,9 +1,15 @@
 import { calcularRequisitos } from "@/lib/kaneo/requisitos-metrics";
-import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
+import {
+  fuenteDeRequest,
+  getKaneoConfigForCurrentUser,
+  kaneoErrorResponse,
+} from "@/lib/kaneo/tenant-config";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const { config, workspaceId } = await getKaneoConfigForCurrentUser();
+    const { config, workspaceId } = await getKaneoConfigForCurrentUser(
+      fuenteDeRequest(req),
+    );
     const metrics = await calcularRequisitos(config, workspaceId);
     return Response.json(metrics);
   } catch (err) {

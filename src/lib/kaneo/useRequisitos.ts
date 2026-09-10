@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FUENTE_PRINCIPAL } from "./fuentes";
 import type { RequisitosMetrics } from "./requisitos-metrics";
 
 // Igual que useMetricas: la API recorre relaciones tarea por tarea, así que
 // refrescamos cada 2 min en vez de cada render.
 const INTERVALO_MS = 2 * 60 * 1000;
 
-export function useRequisitos() {
+export function useRequisitos(fuenteId: string = FUENTE_PRINCIPAL) {
   const [data, setData] = useState<RequisitosMetrics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +19,13 @@ export function useRequisitos() {
     if (primeraCarga.current) setLoading(true);
     else setActualizando(true);
     try {
-      const res = await fetch("/api/kaneo/requisitos", { cache: "no-store" });
+      const qs =
+        fuenteId && fuenteId !== FUENTE_PRINCIPAL
+          ? `?fuente=${encodeURIComponent(fuenteId)}`
+          : "";
+      const res = await fetch(`/api/kaneo/requisitos${qs}`, {
+        cache: "no-store",
+      });
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Error consultando requisitos");
       setData(body as RequisitosMetrics);
@@ -30,9 +37,10 @@ export function useRequisitos() {
       setActualizando(false);
       primeraCarga.current = false;
     }
-  }, []);
+  }, [fuenteId]);
 
   useEffect(() => {
+    primeraCarga.current = true;
     cargar();
     const id = setInterval(cargar, INTERVALO_MS);
     return () => clearInterval(id);
