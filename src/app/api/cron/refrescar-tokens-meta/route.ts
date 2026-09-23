@@ -1,3 +1,4 @@
+import { cronAutorizado } from "@/lib/cronAuth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { exchangeForLongLivedToken, exchangeInstagramLongLivedToken } from "@/lib/meta/client";
 
@@ -12,8 +13,7 @@ import { exchangeForLongLivedToken, exchangeInstagramLongLivedToken } from "@/li
 // — por eso corre todos los días buscando lo que vence pronto, en vez de
 // esperar a que ya haya vencido.
 export async function GET(request: Request) {
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronAutorizado(request)) {
     return new Response("No autorizado", { status: 401 });
   }
 

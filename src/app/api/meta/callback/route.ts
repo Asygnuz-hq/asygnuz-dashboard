@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { validarState } from "@/lib/metaState";
 import {
   exchangeCodeForToken,
   exchangeForLongLivedToken,
@@ -36,12 +37,11 @@ export async function GET(request: Request) {
     return Response.json({ error: "Falta el código o el state de Meta." }, { status: 400 });
   }
 
-  let clienteNombre: string;
-  try {
-    clienteNombre = JSON.parse(Buffer.from(state, "base64url").toString()).clienteNombre;
-  } catch {
-    return Response.json({ error: "State inválido." }, { status: 400 });
+  const estadoValido = await validarState(state);
+  if (!estadoValido) {
+    return Response.json({ error: "State inválido o vencido. Vuelve a iniciar la conexión." }, { status: 400 });
   }
+  const { clienteNombre } = estadoValido;
 
   try {
     const shortLivedToken = await exchangeCodeForToken(code);

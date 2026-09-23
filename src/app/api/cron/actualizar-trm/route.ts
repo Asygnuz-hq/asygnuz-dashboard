@@ -1,11 +1,11 @@
+import { cronAutorizado } from "@/lib/cronAuth";
 import { fetchTrmOficial } from "@/lib/trmOficial";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 // Vercel llama esta ruta una vez al día (ver vercel.json) con el header
 // Authorization: Bearer $CRON_SECRET. Cualquier otra llamada se rechaza.
 export async function GET(request: Request) {
-  const auth = request.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!cronAutorizado(request)) {
     return new Response("No autorizado", { status: 401 });
   }
 

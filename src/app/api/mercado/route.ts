@@ -1,3 +1,5 @@
+import { createClient } from "@/lib/supabase/server";
+
 type PriceResult = { price: number | null; changePct: number | null };
 
 async function fetchYahoo(symbol: string): Promise<PriceResult> {
@@ -41,10 +43,25 @@ async function fetchCoinbase(symbol: string): Promise<PriceResult> {
   }
 }
 
+// Tope por request: sin esto la ruta era un proxy abierto a Yahoo/Coinbase
+// (miles de símbolos por llamada = abuso de cuota y ban de la IP de Vercel).
+const MAX_SIMBOLOS = 20;
+
 export async function GET(request: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return Response.json({ error: "No autorizado" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const yahooSymbols = (searchParams.get("yahoo") ?? "").split(",").filter(Boolean);
   const coinbaseSymbols = (searchParams.get("coinbase") ?? "").split(",").filter(Boolean);
+  if (yahooSymbols.length + coinbaseSymbols.length > MAX_SIMBOLOS) {
+    return Response.json({ error: `Máximo ${MAX_SIMBOLOS} símbolos por consulta.` }, { status: 400 });
+  }
 
   const [yahooResults, coinbaseResults] = await Promise.all([
     Promise.all(yahooSymbols.map((s) => fetchYahoo(s))),

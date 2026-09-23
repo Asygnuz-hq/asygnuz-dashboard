@@ -66,11 +66,22 @@ export async function GET(request: Request) {
     }
   }
 
-  const csv = filas.map((fila) => fila.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+  // Los nombres de campaña los controla quien administra la cuenta de
+  // anuncios: una celda que empiece por = + - @ se ejecutaría como fórmula
+  // en Google Sheets (=IMPORTDATA puede exfiltrar datos). Se antepone una
+  // comilla simple para que se lea como texto.
+  const neutralizar = (c: unknown) => {
+    const t = String(c);
+    return /^[=+\-@\t\r]/.test(t) ? `'${t}` : t;
+  };
+  const csv = filas
+    .map((fila) => fila.map((c) => `"${neutralizar(c).replace(/"/g, '""')}"`).join(","))
+    .join("\n");
   return new Response("﻿" + csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

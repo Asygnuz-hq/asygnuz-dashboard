@@ -1,4 +1,6 @@
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { NONCE_COOKIE, NONCE_COOKIE_OPCIONES, crearState } from "@/lib/metaState";
 import { buildInstagramAuthUrl } from "@/lib/meta/client";
 
 // Arranca el login de INSTAGRAM (no el de Facebook) para traer contenido
@@ -19,6 +21,8 @@ export async function GET(request: Request) {
     return Response.json({ error: "Falta el nombre del cliente a conectar." }, { status: 400 });
   }
 
-  const state = Buffer.from(JSON.stringify({ clienteNombre })).toString("base64url");
-  return Response.redirect(buildInstagramAuthUrl(state), 302);
+  const { state, nonce } = crearState(clienteNombre);
+  const respuesta = NextResponse.redirect(buildInstagramAuthUrl(state), 302);
+  respuesta.cookies.set(NONCE_COOKIE, nonce, NONCE_COOKIE_OPCIONES);
+  return respuesta;
 }
