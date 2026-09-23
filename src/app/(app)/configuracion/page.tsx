@@ -37,7 +37,7 @@ export default function ConfiguracionPage() {
   useEffect(() => {
     async function load() {
       const supabase = createClient();
-      const { data } = await supabase.from("configuracion").select("*").eq("id", 1).single();
+      const { data } = await supabase.from("configuracion").select("*").maybeSingle();
       if (data) {
         setTrm(String(data.trm_actual ?? ""));
         setMesActivo(data.mes_activo ?? "");
@@ -54,15 +54,17 @@ export default function ConfiguracionPage() {
     setSaving(true);
     setMessage(null);
     const supabase = createClient();
-    const { error } = await supabase
-      .from("configuracion")
-      .update({
+    // upsert por tenant: un tenant nuevo todavía no tiene fila; el tenant_id
+    // lo pone la base (default = tenant de la sesión) y RLS impide tocar otra.
+    const { error } = await supabase.from("configuracion").upsert(
+      {
         trm_actual: Number(trm),
         mes_activo: mesActivo,
         meta_ingresos_cop: Number(metaIngresos) || 0,
         meta_margen_pct: (Number(metaMargen) || 0) / 100,
-      })
-      .eq("id", 1);
+      },
+      { onConflict: "tenant_id" }
+    );
     setSaving(false);
     setMessage(error ? error.message : "Guardado.");
   }

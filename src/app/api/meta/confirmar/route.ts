@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { leerPendienteConToken } from "@/lib/meta/conexion";
 import type { CuentaDisponible } from "@/lib/meta/client";
 
 // Guarda en firme la cuenta que el usuario eligió de la lista de
@@ -18,13 +19,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Falta pendienteId o indice." }, { status: 400 });
   }
 
-  const { data: pendiente, error: errorPendiente } = await supabase
-    .from("meta_conexiones_pendientes")
-    .select("cliente_nombre, access_token, token_expira_en, cuentas")
-    .eq("id", pendienteId)
-    .single();
+  const pendiente = await leerPendienteConToken(supabase, pendienteId);
 
-  if (errorPendiente || !pendiente) {
+  if (!pendiente) {
     return Response.json(
       { error: "Esa conexión pendiente ya no existe o expiró. Vuelve a darle 'Conectar cliente'." },
       { status: 404 }
@@ -37,21 +34,38 @@ export async function POST(request: Request) {
     return Response.json({ error: "Esa cuenta ya no está en la lista." }, { status: 400 });
   }
 
-  const { error: dbError } = await supabase.from("meta_conexiones").upsert(
-    {
-      cliente_nombre: pendiente.cliente_nombre,
-      ad_account_id: cuenta.ad_account_id,
-      page_id: cuenta.page_id,
-      instagram_business_id: cuenta.instagram_business_id,
-      access_token: pendiente.access_token,
-      token_expira_en: pendiente.token_expira_en,
-      conectado_por: user.id,
-      actualizado_en: new Date().toISOString(),
-    },
-    { onConflict: "ad_account_id" }
-  );
+  const registro = {
+    cliente_nombre: pendiente.cliente_nombre,
+    ad_account_id: cuenta.ad_account_id,
+    page_id: cuenta.page_id,
+    instagram_business_id: cuenta.instagram_business_id,
+    access_token: pendiente.access_token,
+    token_expira_en: pendiente.token_expira_en,
+    conectado_por: user.id,
+    actualizado_en: new Date().toISOString(),
+  };
+
+  // Ya no es un upsert: ON CONFLICT DO UPDATE necesita leer las columnas del
+  // token (SELECT revocado). Además así, si esa cuenta de anuncios ya la
+  // conectó OTRA organización, RLS no la deja ver ni pisar: el insert falla
+  // por unicidad en vez de sobrescribir el token ajeno.
+  const { data: existente } = await supabase
+    .from("meta_conexiones")
+    .select("id")
+    .eq("ad_account_id", cuenta.ad_account_id)
+    .maybeSingle();
+
+  const { error: dbError } = existente
+    ? await supabase.from("meta_conexiones").update(registro).eq("id", existente.id)
+    : await supabase.from("meta_conexiones").insert(registro);
 
   if (dbError) {
+    if (dbError.code === "23505") {
+      return Response.json(
+        { error: "Esa cuenta de anuncios ya está conectada en otra organización." },
+        { status: 409 }
+      );
+    }
     return Response.json({ error: dbError.message }, { status: 500 });
   }
 

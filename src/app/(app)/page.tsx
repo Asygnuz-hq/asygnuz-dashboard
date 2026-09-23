@@ -68,7 +68,7 @@ export default function DashboardPage() {
     async function load() {
       const supabase = createClient();
 
-      const { data: config } = await supabase.from("configuracion").select("*").eq("id", 1).single();
+      const { data: config } = await supabase.from("configuracion").select("*").maybeSingle();
       const activeMes = config?.mes_activo ?? "";
       setTrm(config?.trm_actual ?? 0);
       setMesActivo(activeMes);

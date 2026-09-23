@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { listarConexionesConTokens } from "@/lib/meta/conexion";
 import { fetchInsights, fetchInstagramMedia, fetchMonedaCuentaAnuncios, type MetaConexion } from "@/lib/meta/client";
 
 export type ResumenCliente = {
@@ -29,14 +30,7 @@ export async function GET() {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { data: conexiones, error } = await supabase
-    .from("meta_conexiones")
-    .select("*")
-    .order("cliente_nombre");
-
-  if (error) {
-    return Response.json({ error: error.message }, { status: 500 });
-  }
+  const conexiones = await listarConexionesConTokens(supabase);
 
   const resumenes: ResumenCliente[] = await Promise.all(
     (conexiones as MetaConexion[]).map(async (c) => {

@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { leerConexionConTokens } from "@/lib/meta/conexion";
 import { fetchFacebookPagePosts, type MetaConexion } from "@/lib/meta/client";
 
 // Publicaciones orgánicas de la Página de Facebook (no Instagram) — usa el
@@ -19,13 +20,9 @@ export async function GET(request: Request) {
     return Response.json({ error: "Falta conexion_id." }, { status: 400 });
   }
 
-  const { data: conexion, error } = await supabase
-    .from("meta_conexiones")
-    .select("*")
-    .eq("id", conexionId)
-    .single<MetaConexion>();
+  const conexion = await leerConexionConTokens(supabase, conexionId);
 
-  if (error || !conexion) {
+  if (!conexion) {
     return Response.json({ error: "Conexión no encontrada." }, { status: 404 });
   }
 

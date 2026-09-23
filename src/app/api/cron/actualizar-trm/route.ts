@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient();
 
-  await supabase.from("configuracion").update({ trm_actual: trm }).eq("id", 1);
+  await supabase.from("configuracion").update({ trm_actual: trm }).gte("id", 0); // todos los tenants: la TRM oficial es una sola
 
   const { error: updateError } = await supabase
     .from("ingresos")
