@@ -1,5 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { derivarModulo, MODULO_HOME } from "@/lib/moduloDeRuta";
+import { modulosDelTenant, primerModuloHabilitado } from "@/lib/modulosServidor";
 
 export async function updateSession(request: NextRequest) {
   // /agenda es la landing pública de Cal.com para pautar — no requiere
@@ -76,6 +78,22 @@ export async function updateSession(request: NextRequest) {
         const url = request.nextUrl.clone();
         url.pathname = "/emergencia";
         return NextResponse.redirect(url);
+      }
+
+      // Módulos contratados: se exigen aquí, en el servidor. Antes solo el
+      // switcher escondía los botones y cualquier URL directa abría el
+      // módulo. Si no se pueden resolver los módulos, se trata como sin
+      // acceso (nunca como "todo permitido").
+      const pathname = request.nextUrl.pathname;
+      if (!esEmergencia && !pathname.startsWith("/sin-acceso")) {
+        const modulos = await modulosDelTenant(supabase);
+        if (!modulos || modulos[derivarModulo(pathname)] !== true) {
+          const destino = modulos ? primerModuloHabilitado(modulos) : null;
+          const url = request.nextUrl.clone();
+          url.pathname = destino ? MODULO_HOME[destino] : "/sin-acceso";
+          url.search = "";
+          if (url.pathname !== pathname) return NextResponse.redirect(url);
+        }
       }
     }
   }

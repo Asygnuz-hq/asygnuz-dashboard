@@ -19,7 +19,7 @@ export function ModuloSwitcher() {
   // Mientras carga o si el tenant solo tiene un módulo contratado, no hay
   // nada que "switchear" — evita parpadeo y ruido visual innecesario.
   if (!modulosHabilitados) return null;
-  const visibles = MODULOS.filter((m) => modulosHabilitados[m.key] !== false);
+  const visibles = MODULOS.filter((m) => modulosHabilitados[m.key] === true);
   if (visibles.length <= 1) return null;
 
   return (
