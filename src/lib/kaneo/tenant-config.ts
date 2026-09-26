@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { KaneoConfig } from "./client";
+import { KaneoHttpError } from "./errores";
 import { FUENTE_PRINCIPAL, type KaneoFuente } from "./fuentes";
 
 export { FUENTE_PRINCIPAL, type KaneoFuente };
@@ -156,8 +157,20 @@ export function kaneoErrorResponse(err: unknown, fallback: string): Response {
   if (err instanceof KaneoConfigError) {
     return Response.json({ error: err.message }, { status: err.status });
   }
-  return Response.json(
-    { error: err instanceof Error ? err.message : fallback },
-    { status: 502 },
-  );
+  // Antes se devolvía err.message tal cual: incluía la ruta interna de Kaneo y
+  // el cuerpo de su respuesta. Ahora el detalle queda en los logs (lo escribe
+  // kaneoFetch) y al navegador solo llega un mensaje genérico.
+  if (err instanceof KaneoHttpError) {
+    const mapa: Record<number, [number, string]> = {
+      400: [400, "Solicitud inválida."],
+      422: [400, "Solicitud inválida."],
+      404: [404, "No encontrado en Kaneo."],
+      401: [502, "Kaneo rechazó la credencial de este cliente."],
+      403: [502, "Kaneo no permite esta operación con la credencial de este cliente."],
+    };
+    const [status, mensaje] = mapa[err.status] ?? [502, fallback];
+    return Response.json({ error: mensaje }, { status });
+  }
+  console.error("[kaneo]", err);
+  return Response.json({ error: fallback }, { status: 502 });
 }

@@ -94,6 +94,16 @@ export async function updateSession(request: NextRequest) {
           url.search = "";
           if (url.pathname !== pathname) return NextResponse.redirect(url);
         }
+
+        // /analitica embebe un dashboard de PostHog con el uso de TODOS los
+        // tenants: es una herramienta interna de ASYGNUZ, no un módulo que se
+        // le venda a un cliente. Exige un flag propio, aparte de "financiero".
+        if (modulos && pathname.startsWith("/analitica") && modulos.analitica !== true) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/";
+          url.search = "";
+          return NextResponse.redirect(url);
+        }
       }
     }
   }

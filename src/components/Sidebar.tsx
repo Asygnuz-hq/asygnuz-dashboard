@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useIsEmergencia } from "@/lib/useIsEmergencia";
 import { useModuloActivo, type Modulo } from "@/lib/ModuloActivoContext";
 import { useTenantActual } from "@/lib/useTenantActual";
+import { useTenantModulos } from "@/lib/useTenantModulos";
 
 type NavItem = { href: string; label: string };
 type NavSection = { title: string; modulo: Modulo; items: NavItem[] };
@@ -106,6 +107,7 @@ export function Sidebar() {
   const isEmergencia = useIsEmergencia();
   const { moduloActivo } = useModuloActivo();
   const tenant = useTenantActual();
+  const modulos = useTenantModulos();
 
   // El usuario externo del caso del terremoto solo ve su propia sección —
   // el resto del negocio de ASYGNUZ no le pertenece ni le interesa. Para
@@ -134,7 +136,10 @@ export function Sidebar() {
               {section.title}
             </p>
           )}
-          {section.items.map((item) => {
+          {section.items
+            // /analitica es interna de ASYGNUZ: solo con el flag "analitica"
+            .filter((item) => item.href !== "/analitica" || modulos?.analitica === true)
+            .map((item) => {
             const active = pathname === item.href;
             return (
               <Link

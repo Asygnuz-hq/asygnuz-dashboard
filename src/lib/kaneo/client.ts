@@ -1,3 +1,4 @@
+import { KaneoHttpError, idSeguro } from "./errores";
 // Cliente de solo lectura contra la API de Kaneo. Corre siempre en servidor
 // (route handlers / server components) — la API key nunca debe llegar al navegador.
 //
@@ -60,14 +61,56 @@ async function kaneoFetch<T>(
   });
   if (!res.ok) {
     const detalle = await res.text().catch(() => "");
-    throw new Error(`Kaneo API ${path} -> HTTP ${res.status}${detalle ? `: ${detalle}` : ""}`);
+    // El cuerpo de Kaneo solo va al log del servidor, no al navegador.
+    console.error(`[kaneo] ${init?.method ?? "GET"} ${path} -> HTTP ${res.status}${detalle ? `: ${detalle.slice(0, 300)}` : ""}`);
+    throw new KaneoHttpError(res.status, `Kaneo API -> HTTP ${res.status}`);
   }
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
 
+// Pronóstico de capacidad: lo calcula Kaneo (project-metrics/.../forecast); el
+// dashboard solo lo lee, nunca lo recalcula ni escribe nada.
+export type KaneoForecastEstado = "idle" | "ok" | "tight" | "overloaded" | "no-history";
+
+export type KaneoForecastProyeccion = {
+  closedInHistory: number;
+  velocityPerWeek: number;
+  capacity: number;
+  upcoming: number;
+  overdue: number;
+  demand: number;
+  utilization: number | null;
+  status: KaneoForecastEstado;
+  atRisk: number;
+  confidence: "low" | "medium" | "high";
+};
+
+export type KaneoForecast = {
+  windowDays: number;
+  historyDays: number;
+  team: KaneoForecastProyeccion;
+  people: Array<
+    KaneoForecastProyeccion & { userId: string; userName: string | null; userImage: string | null }
+  >;
+  unassigned: { upcoming: number; overdue: number };
+  scheduleReliability: { onTimePercentage: number | null; averageDeviationDays: number | null };
+};
+
+export async function fetchForecast(
+  config: KaneoConfig,
+  workspaceId: string,
+  days?: number
+): Promise<KaneoForecast> {
+  const qs = days ? `?days=${days}` : "";
+  return kaneoFetch<KaneoForecast>(
+    config,
+    `/api/project-metrics/workspace/${idSeguro(workspaceId)}/forecast${qs}`
+  );
+}
+
 export async function fetchProjects(config: KaneoConfig, workspaceId: string): Promise<KaneoProject[]> {
-  return kaneoFetch<KaneoProject[]>(config, `/api/project?workspaceId=${workspaceId}`);
+  return kaneoFetch<KaneoProject[]>(config, `/api/project?workspaceId=${idSeguro(workspaceId)}`);
 }
 
 // ASYGNUZ: desde 2026-09-01 volvimos a un solo workspace (antes había uno
@@ -87,7 +130,7 @@ export function frenteDeProyecto(nombre: string): "Growth" | "Software" | null {
 export async function fetchProjectTasks(config: KaneoConfig, projectId: string): Promise<KaneoTask[]> {
   const resp = await kaneoFetch<{ data: { columns: { tasks: KaneoTask[] }[] } }>(
     config,
-    `/api/task/tasks/${projectId}`
+    `/api/task/tasks/${idSeguro(projectId)}`
   );
   return resp.data.columns.flatMap((c) => c.tasks);
 }
@@ -102,7 +145,7 @@ export type KaneoTaskRelation = {
 // No hay endpoint masivo de relaciones: se consulta tarea por tarea.
 export async function fetchTaskRelations(config: KaneoConfig, taskId: string): Promise<KaneoTaskRelation[]> {
   try {
-    return await kaneoFetch<KaneoTaskRelation[]>(config, `/api/task-relation/${taskId}`);
+    return await kaneoFetch<KaneoTaskRelation[]>(config, `/api/task-relation/${idSeguro(taskId)}`);
   } catch {
     return [];
   }
@@ -150,7 +193,7 @@ export async function fetchWorkspaceRequirements(
 ): Promise<KaneoRequirement[]> {
   return kaneoFetch<KaneoRequirement[]>(
     config,
-    `/api/task/requirements?workspaceId=${workspaceId}`
+    `/api/task/requirements?workspaceId=${idSeguro(workspaceId)}`
   );
 }
 
@@ -166,7 +209,7 @@ export async function fetchWorkspaceMembers(
   config: KaneoConfig,
   workspaceId: string
 ): Promise<KaneoWorkspaceMember[]> {
-  return kaneoFetch<KaneoWorkspaceMember[]>(config, `/api/workspace/${workspaceId}/members`);
+  return kaneoFetch<KaneoWorkspaceMember[]>(config, `/api/workspace/${idSeguro(workspaceId)}/members`);
 }
 
 // Los siguientes 3 usan el endpoint /api/project-member del fork
@@ -183,11 +226,11 @@ export async function fetchProjectMembers(
   config: KaneoConfig,
   projectId: string
 ): Promise<KaneoProjectMember[]> {
-  return kaneoFetch<KaneoProjectMember[]>(config, `/api/project-member/${projectId}`);
+  return kaneoFetch<KaneoProjectMember[]>(config, `/api/project-member/${idSeguro(projectId)}`);
 }
 
 export async function addProjectMember(config: KaneoConfig, projectId: string, userId: string): Promise<void> {
-  await kaneoFetch(config, `/api/project-member/${projectId}`, { method: "POST", body: { userId } });
+  await kaneoFetch(config, `/api/project-member/${idSeguro(projectId)}`, { method: "POST", body: { userId } });
 }
 
 export async function removeProjectMember(
@@ -195,7 +238,7 @@ export async function removeProjectMember(
   projectId: string,
   userId: string
 ): Promise<void> {
-  await kaneoFetch(config, `/api/project-member/${projectId}/${userId}`, { method: "DELETE" });
+  await kaneoFetch(config, `/api/project-member/${idSeguro(projectId)}/${idSeguro(userId)}`, { method: "DELETE" });
 }
 
 // Escritura de tareas -- la llave de Kaneo que usa este cliente está acotada
@@ -207,7 +250,7 @@ export async function createTask(
   projectId: string,
   input: { title: string; description?: string; status: string; priority?: string }
 ): Promise<KaneoTask> {
-  return kaneoFetch<KaneoTask>(config, `/api/task/${projectId}`, {
+  return kaneoFetch<KaneoTask>(config, `/api/task/${idSeguro(projectId)}`, {
     method: "POST",
     body: {
       title: input.title,
@@ -219,18 +262,18 @@ export async function createTask(
 }
 
 export async function updateTaskStatus(config: KaneoConfig, taskId: string, status: string): Promise<KaneoTask> {
-  return kaneoFetch<KaneoTask>(config, `/api/task/status/${taskId}`, {
+  return kaneoFetch<KaneoTask>(config, `/api/task/status/${idSeguro(taskId)}`, {
     method: "PUT",
     body: { status },
   });
 }
 
 export async function getTask(config: KaneoConfig, taskId: string): Promise<KaneoTask> {
-  return kaneoFetch<KaneoTask>(config, `/api/task/${taskId}`);
+  return kaneoFetch<KaneoTask>(config, `/api/task/${idSeguro(taskId)}`);
 }
 
 export async function updateTaskTitle(config: KaneoConfig, taskId: string, title: string): Promise<KaneoTask> {
-  return kaneoFetch<KaneoTask>(config, `/api/task/title/${taskId}`, { method: "PUT", body: { title } });
+  return kaneoFetch<KaneoTask>(config, `/api/task/title/${idSeguro(taskId)}`, { method: "PUT", body: { title } });
 }
 
 export async function updateTaskDescription(
@@ -238,7 +281,7 @@ export async function updateTaskDescription(
   taskId: string,
   description: string
 ): Promise<KaneoTask> {
-  return kaneoFetch<KaneoTask>(config, `/api/task/description/${taskId}`, {
+  return kaneoFetch<KaneoTask>(config, `/api/task/description/${idSeguro(taskId)}`, {
     method: "PUT",
     body: { description },
   });
@@ -249,7 +292,7 @@ export async function updateTaskPriority(
   taskId: string,
   priority: KaneoTask["priority"]
 ): Promise<KaneoTask> {
-  return kaneoFetch<KaneoTask>(config, `/api/task/priority/${taskId}`, {
+  return kaneoFetch<KaneoTask>(config, `/api/task/priority/${idSeguro(taskId)}`, {
     method: "PUT",
     body: { priority },
   });
@@ -268,14 +311,14 @@ export type KaneoComment = {
 // GET /api/comment/{taskId} no exige task:update (solo membresía del
 // workspace), pero crear sí -- ambas ya cubiertas por la llave acotada.
 export async function getTaskComments(config: KaneoConfig, taskId: string): Promise<KaneoComment[]> {
-  return kaneoFetch<KaneoComment[]>(config, `/api/comment/${taskId}`);
+  return kaneoFetch<KaneoComment[]>(config, `/api/comment/${idSeguro(taskId)}`);
 }
 
 export async function createTaskComment(config: KaneoConfig, taskId: string, content: string): Promise<void> {
-  await kaneoFetch(config, `/api/comment/${taskId}`, { method: "POST", body: { content } });
+  await kaneoFetch(config, `/api/comment/${idSeguro(taskId)}`, { method: "POST", body: { content } });
 }
 
 // /api/task/{id} (getTask) no trae labels -- solo el tablero las embebe.
 export async function getTaskLabels(config: KaneoConfig, taskId: string): Promise<KaneoTaskLabel[]> {
-  return kaneoFetch<KaneoTaskLabel[]>(config, `/api/label/task/${taskId}`);
+  return kaneoFetch<KaneoTaskLabel[]>(config, `/api/label/task/${idSeguro(taskId)}`);
 }

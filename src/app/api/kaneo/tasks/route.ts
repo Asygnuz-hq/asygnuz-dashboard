@@ -1,4 +1,4 @@
-import { createTask } from "@/lib/kaneo/client";
+import { createTask, fetchProjects } from "@/lib/kaneo/client";
 import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
 
 export async function POST(request: Request) {
@@ -10,7 +10,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { config } = await getKaneoConfigForCurrentUser();
+    const { config, workspaceId } = await getKaneoConfigForCurrentUser();
+    // El projectId viene del navegador: se comprueba que sea un proyecto del
+    // workspace de ESTE tenant antes de crear nada (no se confía en el id).
+    const proyectos = await fetchProjects(config, workspaceId);
+    if (!proyectos.some((p) => p.id === projectId)) {
+      return Response.json({ error: "Proyecto no encontrado." }, { status: 404 });
+    }
     const task = await createTask(config, projectId, {
       title,
       status: body?.status || "to-do",

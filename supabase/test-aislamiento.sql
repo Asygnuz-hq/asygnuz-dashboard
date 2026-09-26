@@ -47,6 +47,17 @@ begin
   select public.modulos_habilitados_tenant() into mods;
   rep := rep || format('  módulos que ve: %s  %s', mods, case when mods = '{"financiero": true}'::jsonb then 'OK' else '*** FALLA ***' end) || E'\n';
 
+  -- Vistas: con security_invoker un tenant sin datos ve 0 filas en todas
+  foreach t in array array['v_historico_mensual','v_saldo_cuentas','v_rentabilidad_cliente',
+                           'v_roi_campanas','v_costo_equipo_mes'] loop
+    begin
+      execute format('select count(*) from %I', t) into n;
+      rep := rep || format('  vista %-24s %s filas  %s', t, n, case when n = 0 then 'OK' else '*** FALLA (fuga por la vista) ***' end) || E'\n';
+    exception when undefined_table then
+      rep := rep || format('  vista %-24s no existe (omitida)', t) || E'\n';
+    end;
+  end loop;
+
   update ingresos set concepto = 'hack';
   get diagnostics n = row_count;
   rep := rep || format('  UPDATE sobre ingresos de ASYGNUZ: %s filas  %s', n, case when n = 0 then 'OK' else '*** FALLA ***' end) || E'\n';
