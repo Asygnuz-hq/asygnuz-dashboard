@@ -51,8 +51,14 @@ begin
   foreach t in array array['v_historico_mensual','v_saldo_cuentas','v_rentabilidad_cliente',
                            'v_roi_campanas','v_costo_equipo_mes'] loop
     begin
-      execute format('select count(*) from %I', t) into n;
-      rep := rep || format('  vista %-24s %s filas  %s', t, n, case when n = 0 then 'OK' else '*** FALLA (fuga por la vista) ***' end) || E'\n';
+      -- v_costo_equipo_mes no tiene FROM: siempre devuelve 1 fila de totales;
+      -- lo que importa es que los totales de un tenant vacío sean 0.
+      if t = 'v_costo_equipo_mes' then
+        execute 'select count(*) from v_costo_equipo_mes where costo_total_cop <> 0' into n;
+      else
+        execute format('select count(*) from %I', t) into n;
+      end if;
+      rep := rep || format('  vista %-24s %s filas con datos  %s', t, n, case when n = 0 then 'OK' else '*** FALLA (fuga por la vista) ***' end) || E'\n';
     exception when undefined_table then
       rep := rep || format('  vista %-24s no existe (omitida)', t) || E'\n';
     end;
