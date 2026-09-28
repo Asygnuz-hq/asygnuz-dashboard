@@ -19,6 +19,7 @@ const RUTA_A_MODULO: { prefix: string; modulo: Modulo }[] = [
   { prefix: "/metricas", modulo: "operacion" },
   { prefix: "/requisitos", modulo: "operacion" },
   { prefix: "/tablero", modulo: "operacion" },
+  { prefix: "/kaneo", modulo: "operacion" },
   { prefix: "/disenadores/cobros-clientes", modulo: "financiero" },
   { prefix: "/disenadores/resumen-cobros", modulo: "financiero" },
   { prefix: "/disenadores/control-mensual", modulo: "nomina" },

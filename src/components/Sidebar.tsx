@@ -72,6 +72,7 @@ const sections: NavSection[] = [
       { href: "/metricas/carga", label: "Carga por Persona" },
       { href: "/metricas/reporte", label: "Reporte para Junta" },
       { href: "/metricas/permisos", label: "Permisos" },
+      { href: "/kaneo", label: "Gestor de Proyectos (Kaneo)" },
     ],
   },
   {

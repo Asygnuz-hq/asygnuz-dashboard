@@ -36,9 +36,14 @@ begin
 
   rep := rep || E'== Usuario del tenant B ==\n';
   foreach t in array array['ingresos','clientes','cuentas','gastos_fijos','gastos_variables','leads',
-                           'meta_conexiones','disenadores','equipo','empleados','nominas'] loop
-    execute format('select count(*) from %I', t) into n;
-    rep := rep || format('  ve %-18s %s filas  %s', t, n, case when n = 0 then 'OK' else '*** FALLA ***' end) || E'\n';
+                           'meta_conexiones','disenadores','equipo','empleados','nominas',
+                           'casos_emergencia','inventario_emergencia','items_caso_emergencia'] loop
+    begin
+      execute format('select count(*) from %I', t) into n;
+      rep := rep || format('  ve %-18s %s filas  %s', t, n, case when n = 0 then 'OK' else '*** FALLA ***' end) || E'\n';
+    exception when undefined_table then
+      rep := rep || format('  %-18s no existe (omitida)', t) || E'\n';
+    end;
   end loop;
 
   select count(*) into n from configuracion;
