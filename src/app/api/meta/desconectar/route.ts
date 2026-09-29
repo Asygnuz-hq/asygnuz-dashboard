@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { bodyValido } from "@/lib/api/validarBody";
+import { desconectarConexionSchema } from "@/lib/meta/schemas";
 
 // Borra una conexión guardada (ej. se conectó la cuenta equivocada).
 // body: { id: string }
@@ -11,10 +13,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { id } = await request.json();
-  if (!id) {
-    return Response.json({ error: "Falta el id de la conexión." }, { status: 400 });
-  }
+  const validado = await bodyValido(request, desconectarConexionSchema);
+  if (validado instanceof Response) return validado;
+  const { id } = validado.data;
 
   const { error } = await supabase.from("meta_conexiones").delete().eq("id", id);
   if (error) {

@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { bodyValido } from "@/lib/api/validarBody";
+import { publicacionNotaSchema } from "@/lib/meta/schemas";
 
 // Etiquetas de campaña por publicación — para agrupar el rendimiento de
 // varias publicaciones bajo un mismo nombre (ej. "Lanzamiento agosto").
@@ -42,10 +44,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { conexionId, mediaId, etiqueta } = await request.json();
-  if (!conexionId || !mediaId) {
-    return Response.json({ error: "Falta conexionId o mediaId." }, { status: 400 });
-  }
+  const validado = await bodyValido(request, publicacionNotaSchema);
+  if (validado instanceof Response) return validado;
+  const { conexionId, mediaId, etiqueta } = validado.data;
 
   if (!etiqueta || !etiqueta.trim()) {
     const { error } = await supabase

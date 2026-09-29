@@ -1,13 +1,13 @@
 import { updateTaskDescription } from "@/lib/kaneo/client";
 import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
+import { bodyValido } from "@/lib/api/validarBody";
+import { actualizarDescripcionSchema } from "@/lib/kaneo/schemas";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const body = await request.json().catch(() => null);
-  const description = typeof body?.description === "string" ? body.description : null;
-  if (description === null) {
-    return Response.json({ error: "Falta description" }, { status: 400 });
-  }
+  const validado = await bodyValido(request, actualizarDescripcionSchema);
+  if (validado instanceof Response) return validado;
+  const { description } = validado.data;
 
   try {
     const { config } = await getKaneoConfigForCurrentUser();

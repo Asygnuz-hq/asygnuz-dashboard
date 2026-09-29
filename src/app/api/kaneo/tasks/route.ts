@@ -1,13 +1,12 @@
 import { createTask, fetchProjects } from "@/lib/kaneo/client";
 import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
+import { bodyValido } from "@/lib/api/validarBody";
+import { crearTareaSchema } from "@/lib/kaneo/schemas";
 
 export async function POST(request: Request) {
-  const body = await request.json().catch(() => null);
-  const projectId = body?.projectId;
-  const title = body?.title?.trim();
-  if (!projectId || !title) {
-    return Response.json({ error: "Faltan projectId o title" }, { status: 400 });
-  }
+  const validado = await bodyValido(request, crearTareaSchema);
+  if (validado instanceof Response) return validado;
+  const { projectId, title, status, priority, description } = validado.data;
 
   try {
     const { config, workspaceId } = await getKaneoConfigForCurrentUser();
@@ -19,9 +18,9 @@ export async function POST(request: Request) {
     }
     const task = await createTask(config, projectId, {
       title,
-      status: body?.status || "to-do",
-      priority: body?.priority,
-      description: body?.description,
+      status,
+      priority,
+      description,
     });
     return Response.json(task);
   } catch (err) {

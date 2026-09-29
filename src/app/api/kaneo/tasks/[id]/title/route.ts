@@ -1,13 +1,13 @@
 import { updateTaskTitle } from "@/lib/kaneo/client";
 import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
+import { bodyValido } from "@/lib/api/validarBody";
+import { actualizarTituloSchema } from "@/lib/kaneo/schemas";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const body = await request.json().catch(() => null);
-  const title = typeof body?.title === "string" ? body.title.trim() : "";
-  if (!title) {
-    return Response.json({ error: "Falta title" }, { status: 400 });
-  }
+  const validado = await bodyValido(request, actualizarTituloSchema);
+  if (validado instanceof Response) return validado;
+  const { title } = validado.data;
 
   try {
     const { config } = await getKaneoConfigForCurrentUser();

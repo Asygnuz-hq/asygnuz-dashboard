@@ -1,5 +1,7 @@
 import { createTaskComment, getTaskComments } from "@/lib/kaneo/client";
 import { getKaneoConfigForCurrentUser, kaneoErrorResponse } from "@/lib/kaneo/tenant-config";
+import { bodyValido } from "@/lib/api/validarBody";
+import { crearComentarioSchema } from "@/lib/kaneo/schemas";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,11 +16,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const body = await request.json().catch(() => null);
-  const content = typeof body?.content === "string" ? body.content.trim() : "";
-  if (!content) {
-    return Response.json({ error: "Falta content" }, { status: 400 });
-  }
+  const validado = await bodyValido(request, crearComentarioSchema);
+  if (validado instanceof Response) return validado;
+  const { content } = validado.data;
 
   try {
     const { config } = await getKaneoConfigForCurrentUser();

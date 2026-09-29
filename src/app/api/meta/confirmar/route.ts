@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { leerPendienteConToken } from "@/lib/meta/conexion";
 import type { CuentaDisponible } from "@/lib/meta/client";
+import { bodyValido } from "@/lib/api/validarBody";
+import { confirmarConexionSchema } from "@/lib/meta/schemas";
 
 // Guarda en firme la cuenta que el usuario eligió de la lista de
 // pendientes, y borra el registro temporal.
@@ -14,10 +16,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
 
-  const { pendienteId, indice } = await request.json();
-  if (!pendienteId || typeof indice !== "number") {
-    return Response.json({ error: "Falta pendienteId o indice." }, { status: 400 });
-  }
+  const validado = await bodyValido(request, confirmarConexionSchema);
+  if (validado instanceof Response) return validado;
+  const { pendienteId, indice } = validado.data;
 
   const pendiente = await leerPendienteConToken(supabase, pendienteId);
 
