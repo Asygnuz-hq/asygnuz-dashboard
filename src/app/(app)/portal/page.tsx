@@ -4,14 +4,13 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useTenantActual } from "@/lib/useTenantActual";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
+import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 
 type Proyecto = {
   fecha_inicio: string | null;
   fecha_fin: string | null;
   tipo_proyecto: string | null;
   descripcion: string | null;
-  contacto_nombre: string | null;
-  contacto_email: string | null;
   responsable_nombre: string | null;
   responsable_email: string | null;
 };
@@ -28,36 +27,9 @@ type Contenido = {
   link: string | null;
 };
 
-const ESTADO_LABEL: Record<string, string> = {
-  grabacion: "Grabación",
-  revision: "Revisión",
-  edicion: "Edición",
-  publicado: "Publicado",
-};
-// Mismo criterio de color que el resto del dashboard (labels.ts de Kaneo):
-// gris = por hacer, ámbar = en revisión, azul = en curso, verde = terminado.
-const ESTADO_COLOR: Record<string, string> = {
-  grabacion: "var(--muted)",
-  revision: "var(--warning)",
-  edicion: "var(--accent-bright)",
-  publicado: "var(--success)",
-};
-
 function formatearFecha(f: string | null) {
   if (!f) return null;
   return new Date(`${f}T00:00:00`).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" });
-}
-
-function Seccion({ icono, titulo, children }: { icono: string; titulo: string; children: React.ReactNode }) {
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="flex items-center gap-2 text-sm font-semibold">
-        <span aria-hidden>{icono}</span>
-        {titulo}
-      </h2>
-      {children}
-    </section>
-  );
 }
 
 export default function PortalClientePage() {
@@ -108,11 +80,11 @@ export default function PortalClientePage() {
     : null;
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
-      {/* Banner de bienvenida, mismo tono que la ficha de un proyecto en Notion */}
-      <div className="rounded-lg border border-border bg-surface-alt p-5">
+    <div className="flex flex-col gap-6 pb-10">
+      {/* Callout de bienvenida — mismo patrón que el banner verde de Notion */}
+      <div className="rounded-xl p-5" style={{ backgroundColor: "color-mix(in srgb, var(--success) 14%, var(--surface))" }}>
         <p className="text-lg font-semibold">👋 Bienvenido a tu portal con ASYGNUZ</p>
-        <p className="text-sm text-muted mt-1">
+        <p className="text-sm text-muted mt-1 max-w-2xl">
           Este es tu espacio: el avance de tu proyecto, la parrilla de contenido, los enlaces y archivos que te
           compartimos, y las notas de nuestras reuniones — todo en un solo lugar.
           {proyecto?.responsable_email && (
@@ -121,41 +93,39 @@ export default function PortalClientePage() {
         </p>
       </div>
 
+      {tenant?.nombre && <h1 className="text-2xl font-bold">{tenant.nombre}</h1>}
+
       {proyecto && (proyecto.tipo_proyecto || duracion || proyecto.responsable_nombre || proyecto.descripcion) && (
-        <div className="rounded-lg border border-border bg-surface p-5 grid gap-4 sm:grid-cols-3">
-          {tenant?.nombre && (
-            <div className="sm:col-span-3">
-              <p className="text-xl font-bold">{tenant.nombre}</p>
-            </div>
-          )}
-          {proyecto.tipo_proyecto && (
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted">🏷️ Tipo de proyecto</p>
-              <p className="mt-0.5">{proyecto.tipo_proyecto}</p>
-            </div>
-          )}
-          {duracion && (
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted">📅 Duración</p>
-              <p className="mt-0.5">{duracion}</p>
-            </div>
-          )}
-          {proyecto.responsable_nombre && (
-            <div>
-              <p className="text-xs uppercase tracking-wide text-muted">👤 Responsable ASYGNUZ</p>
-              <p className="mt-0.5">{proyecto.responsable_nombre}</p>
-            </div>
-          )}
+        <TarjetaSeccion icono="📌" titulo="Tu proyecto">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {proyecto.tipo_proyecto && (
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted">🏷️ Tipo de proyecto</p>
+                <p className="mt-0.5 text-sm">{proyecto.tipo_proyecto}</p>
+              </div>
+            )}
+            {duracion && (
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted">📅 Duración</p>
+                <p className="mt-0.5 text-sm">{duracion}</p>
+              </div>
+            )}
+            {proyecto.responsable_nombre && (
+              <div>
+                <p className="text-xs uppercase tracking-wide text-muted">👤 Responsable ASYGNUZ</p>
+                <p className="mt-0.5 text-sm">{proyecto.responsable_nombre}</p>
+              </div>
+            )}
+          </div>
           {proyecto.descripcion && (
-            <div className="sm:col-span-3 pt-2 border-t border-border">
-              <p className="text-xs uppercase tracking-wide text-muted mb-1">Descripción del proyecto</p>
+            <div className="pt-3 border-t border-border">
               <p className="whitespace-pre-wrap text-sm">{proyecto.descripcion}</p>
             </div>
           )}
-        </div>
+        </TarjetaSeccion>
       )}
 
-      <Seccion icono="🚀" titulo="Parrilla de contenido">
+      <TarjetaSeccion icono="🚀" titulo="Parrilla de contenido">
         {contenido.length === 0 ? (
           <p className="text-sm text-muted">Todavía no hay contenido cargado.</p>
         ) : (
@@ -163,15 +133,10 @@ export default function PortalClientePage() {
             {ESTADOS_CONTENIDO.map((estado) => {
               const items = contenido.filter((c) => c.estado === estado);
               return (
-                <div key={estado} className="flex flex-col gap-2 rounded-lg border border-border bg-surface p-2">
-                  <p
-                    className="text-xs font-medium uppercase tracking-wide px-2 py-1 rounded w-fit"
-                    style={{ backgroundColor: `color-mix(in srgb, ${ESTADO_COLOR[estado]} 20%, transparent)`, color: ESTADO_COLOR[estado] }}
-                  >
-                    {ESTADO_LABEL[estado]} · {items.length}
-                  </p>
+                <div key={estado} className="flex flex-col gap-2 rounded-lg bg-surface-alt p-2">
+                  <Chip label={`${ESTADO_LABEL[estado]} · ${items.length}`} color={ESTADO_COLOR[estado]} />
                   {items.map((c) => (
-                    <div key={c.id} className="rounded-md border border-border bg-surface-alt p-3 text-sm">
+                    <div key={c.id} className="rounded-md border border-border bg-surface p-3 text-sm">
                       <p className="font-medium">{c.titulo}</p>
                       {c.tipo && <p className="text-xs text-muted">{c.tipo}</p>}
                       {c.fecha_publicacion && (
@@ -190,55 +155,55 @@ export default function PortalClientePage() {
             })}
           </div>
         )}
-      </Seccion>
+      </TarjetaSeccion>
 
-      <div className="grid gap-8 sm:grid-cols-2">
-        <Seccion icono="🔗" titulo="Enlaces">
+      <div className="grid gap-6 sm:grid-cols-2">
+        <TarjetaSeccion icono="🔗" titulo="Enlaces">
           {enlaces.length === 0 ? (
             <p className="text-sm text-muted">Sin enlaces todavía.</p>
           ) : (
-            <div className="rounded-lg border border-border bg-surface divide-y divide-border">
+            <div className="rounded-lg bg-surface-alt divide-y divide-border overflow-hidden -m-1">
               {enlaces.map((e) => (
                 <a
                   key={e.id}
                   href={e.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-surface-alt"
+                  className="flex items-center justify-between gap-2 px-3 py-2 text-sm hover:bg-surface"
                 >
                   {e.titulo} <span className="text-muted">→</span>
                 </a>
               ))}
             </div>
           )}
-        </Seccion>
+        </TarjetaSeccion>
 
-        <Seccion icono="📁" titulo="Archivos">
+        <TarjetaSeccion icono="📁" titulo="Archivos">
           {archivos.length === 0 ? (
             <p className="text-sm text-muted">Sin archivos todavía.</p>
           ) : (
-            <div className="rounded-lg border border-border bg-surface divide-y divide-border">
+            <div className="rounded-lg bg-surface-alt divide-y divide-border overflow-hidden -m-1">
               {archivos.map((a) => (
                 <button
                   key={a.id}
                   onClick={() => descargar(a)}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-surface-alt"
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-sm text-left hover:bg-surface"
                 >
-                  {a.nombre} <span className="text-muted">⬇</span>
+                  📄 {a.nombre} <span className="text-muted">⬇</span>
                 </button>
               ))}
             </div>
           )}
-        </Seccion>
+        </TarjetaSeccion>
       </div>
 
-      <Seccion icono="📝" titulo="Reuniones">
+      <TarjetaSeccion icono="📝" titulo="Reuniones">
         {reuniones.length === 0 ? (
           <p className="text-sm text-muted">Sin reuniones registradas todavía.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {reuniones.map((r) => (
-              <div key={r.id} className="rounded-lg border border-border bg-surface p-3 text-sm">
+              <div key={r.id} className="rounded-lg bg-surface-alt p-3 text-sm">
                 <p className="font-medium">
                   {r.titulo} <span className="text-xs text-muted font-normal">— {formatearFecha(r.fecha)}</span>
                 </p>
@@ -247,7 +212,7 @@ export default function PortalClientePage() {
             ))}
           </div>
         )}
-      </Seccion>
+      </TarjetaSeccion>
     </div>
   );
 }

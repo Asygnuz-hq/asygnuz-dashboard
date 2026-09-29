@@ -2,6 +2,30 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
 import { tenantIdValido } from "@/lib/portal/tenantId";
 
+// URL firmada para ver/descargar el archivo — el bucket es privado, así
+// que ni el admin (sin esto) podía abrirlo, solo borrarlo.
+export async function GET(_request: Request, { params }: { params: Promise<{ tenantId: string; id: string }> }) {
+  const { tenantId, id } = await params;
+  if (!tenantIdValido(tenantId) || !tenantIdValido(id)) {
+    return Response.json({ error: "id inválido" }, { status: 400 });
+  }
+  const auth = await requireAsygnuzAdmin();
+  if (auth instanceof Response) return auth;
+
+  const admin = createAdminClient();
+  const { data: archivo } = await admin
+    .from("portal_archivos")
+    .select("storage_path")
+    .eq("id", id)
+    .eq("tenant_id", tenantId)
+    .maybeSingle();
+  if (!archivo) return Response.json({ error: "No encontrado." }, { status: 404 });
+
+  const { data, error } = await admin.storage.from("portal-archivos").createSignedUrl(archivo.storage_path, 60);
+  if (error || !data) return Response.json({ error: error?.message || "No se pudo generar el link." }, { status: 500 });
+  return Response.json({ url: data.signedUrl });
+}
+
 export async function DELETE(_request: Request, { params }: { params: Promise<{ tenantId: string; id: string }> }) {
   const { tenantId, id } = await params;
   if (!tenantIdValido(tenantId) || !tenantIdValido(id)) {

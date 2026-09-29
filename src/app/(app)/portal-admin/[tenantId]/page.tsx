@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
+import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 
 type Cliente = { id: string; nombre: string; slug: string };
 type Proyecto = {
@@ -26,13 +27,6 @@ type Contenido = {
   estado: (typeof ESTADOS_CONTENIDO)[number];
   notas: string | null;
   link: string | null;
-};
-
-const ESTADO_LABEL: Record<string, string> = {
-  grabacion: "Grabación",
-  revision: "Revisión",
-  edicion: "Edición",
-  publicado: "Publicado",
 };
 
 const PROYECTO_VACIO: Proyecto = {
@@ -158,49 +152,70 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
     const data = await api(`/api/portal-admin/clientes/${tenantId}/archivos`, { method: "POST", body: form });
     setArchivos((prev) => [data.archivo, ...prev]);
   }
+  async function verArchivo(id: string) {
+    const data = await api(`/api/portal-admin/clientes/${tenantId}/archivos/${id}`);
+    window.open(data.url, "_blank");
+  }
   async function borrarArchivo(id: string) {
     await api(`/api/portal-admin/clientes/${tenantId}/archivos/${id}`, { method: "DELETE" });
     setArchivos((prev) => prev.filter((a) => a.id !== id));
   }
 
-  if (loading) return <p className="text-muted">Cargando...</p>;
-  if (!cliente) return <p className="text-muted">{message || "Cliente no encontrado."}</p>;
+  if (loading) return <p className="text-muted p-6">Cargando...</p>;
+  if (!cliente) return <p className="text-muted p-6">{message || "Cliente no encontrado."}</p>;
 
   return (
-    <div className="flex flex-col gap-8 max-w-3xl">
+    <div className="flex flex-col gap-6 max-w-3xl pb-10">
       <PageHeader title={cliente.nombre} subtitle={`Portal del cliente — ${cliente.slug}`} />
-      {message && <p className="text-sm text-muted">{message}</p>}
 
-      <VincularUsuario onVincular={vincular} />
+      {message && (
+        <div className="rounded-lg border border-border bg-surface-alt px-4 py-2 text-sm text-muted">{message}</div>
+      )}
 
-      <form onSubmit={guardarProyecto} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-        <p className="text-xs uppercase tracking-wide text-muted">📌 Ficha del proyecto</p>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Campo label="Tipo de proyecto" value={proyecto.tipo_proyecto} onChange={(v) => setProyecto({ ...proyecto, tipo_proyecto: v })} />
-          <Campo label="Fecha de inicio" type="date" value={proyecto.fecha_inicio} onChange={(v) => setProyecto({ ...proyecto, fecha_inicio: v })} />
-          <Campo label="Fecha de finalización" type="date" value={proyecto.fecha_fin} onChange={(v) => setProyecto({ ...proyecto, fecha_fin: v })} />
-          <Campo label="Contacto (nombre)" value={proyecto.contacto_nombre} onChange={(v) => setProyecto({ ...proyecto, contacto_nombre: v })} />
-          <Campo label="Contacto (correo)" type="email" value={proyecto.contacto_email} onChange={(v) => setProyecto({ ...proyecto, contacto_email: v })} />
-          <Campo label="Responsable ASYGNUZ" value={proyecto.responsable_nombre} onChange={(v) => setProyecto({ ...proyecto, responsable_nombre: v })} />
-          <Campo label="Correo del responsable" type="email" value={proyecto.responsable_email} onChange={(v) => setProyecto({ ...proyecto, responsable_email: v })} />
-        </div>
-        <label className="flex flex-col gap-1 text-sm">
-          Descripción del proyecto
-          <textarea
-            value={proyecto.descripcion ?? ""}
-            onChange={(e) => setProyecto({ ...proyecto, descripcion: e.target.value })}
-            rows={3}
-          />
-        </label>
-        <button type="submit" className="rounded-md bg-accent text-accent-foreground font-medium py-2 w-fit px-4">
-          Guardar ficha
-        </button>
-      </form>
+      <TarjetaSeccion icono="🔑" titulo="Acceso del cliente">
+        <VincularUsuario onVincular={vincular} />
+      </TarjetaSeccion>
 
-      <ListaContenido contenido={contenido} onAgregar={agregarContenido} onCambiarEstado={cambiarEstadoContenido} onBorrar={borrarContenido} />
-      <ListaEnlaces enlaces={enlaces} onAgregar={agregarEnlace} onBorrar={borrarEnlace} />
-      <ListaArchivos archivos={archivos} onSubir={subirArchivo} onBorrar={borrarArchivo} />
-      <ListaReuniones reuniones={reuniones} onAgregar={agregarReunion} onBorrar={borrarReunion} />
+      <TarjetaSeccion icono="📌" titulo="Ficha del proyecto">
+        <form onSubmit={guardarProyecto} className="flex flex-col gap-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Campo label="Tipo de proyecto" value={proyecto.tipo_proyecto} onChange={(v) => setProyecto({ ...proyecto, tipo_proyecto: v })} />
+            <Campo label="Fecha de inicio" type="date" value={proyecto.fecha_inicio} onChange={(v) => setProyecto({ ...proyecto, fecha_inicio: v })} />
+            <Campo label="Fecha de finalización" type="date" value={proyecto.fecha_fin} onChange={(v) => setProyecto({ ...proyecto, fecha_fin: v })} />
+            <Campo label="Contacto (nombre)" value={proyecto.contacto_nombre} onChange={(v) => setProyecto({ ...proyecto, contacto_nombre: v })} />
+            <Campo label="Contacto (correo)" type="email" value={proyecto.contacto_email} onChange={(v) => setProyecto({ ...proyecto, contacto_email: v })} />
+            <Campo label="Responsable ASYGNUZ" value={proyecto.responsable_nombre} onChange={(v) => setProyecto({ ...proyecto, responsable_nombre: v })} />
+            <Campo label="Correo del responsable" type="email" value={proyecto.responsable_email} onChange={(v) => setProyecto({ ...proyecto, responsable_email: v })} />
+          </div>
+          <label className="flex flex-col gap-1 text-sm">
+            Descripción del proyecto
+            <textarea
+              value={proyecto.descripcion ?? ""}
+              onChange={(e) => setProyecto({ ...proyecto, descripcion: e.target.value })}
+              rows={4}
+            />
+          </label>
+          <button type="submit" className="rounded-md bg-accent text-accent-foreground font-medium py-2 w-fit px-4">
+            Guardar ficha
+          </button>
+        </form>
+      </TarjetaSeccion>
+
+      <TarjetaSeccion icono="🚀" titulo="Parrilla de contenido">
+        <ListaContenido contenido={contenido} onAgregar={agregarContenido} onCambiarEstado={cambiarEstadoContenido} onBorrar={borrarContenido} />
+      </TarjetaSeccion>
+
+      <TarjetaSeccion icono="🔗" titulo="Enlaces">
+        <ListaEnlaces enlaces={enlaces} onAgregar={agregarEnlace} onBorrar={borrarEnlace} />
+      </TarjetaSeccion>
+
+      <TarjetaSeccion icono="📁" titulo="Archivos">
+        <ListaArchivos archivos={archivos} onSubir={subirArchivo} onVer={verArchivo} onBorrar={borrarArchivo} />
+      </TarjetaSeccion>
+
+      <TarjetaSeccion icono="📝" titulo="Reuniones">
+        <ListaReuniones reuniones={reuniones} onAgregar={agregarReunion} onBorrar={borrarReunion} />
+      </TarjetaSeccion>
     </div>
   );
 }
@@ -236,13 +251,13 @@ function VincularUsuario({ onVincular }: { onVincular: (email: string) => Promis
         setEnviando(false);
         setEmail("");
       }}
-      className="flex flex-wrap items-end gap-2 rounded-lg border border-border bg-surface p-4"
+      className="flex flex-wrap items-end gap-2"
     >
       <label className="flex flex-col gap-1 text-sm flex-1 min-w-[200px]">
-        Vincular usuario (ya creado en Authentication → Users)
+        Correo (ya creado en Authentication → Users)
         <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="cliente@correo.com" />
       </label>
-      <button type="submit" disabled={enviando} className="rounded-md border border-border bg-surface-alt px-3 py-2 text-sm disabled:opacity-60">
+      <button type="submit" disabled={enviando} className="rounded-md bg-accent text-accent-foreground px-4 py-2 text-sm font-medium disabled:opacity-60">
         {enviando ? "Vinculando..." : "Vincular"}
       </button>
     </form>
@@ -264,26 +279,43 @@ function ListaContenido({
   const [tipo, setTipo] = useState("");
   const [fecha, setFecha] = useState("");
   return (
-    <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">🚀 Parrilla de contenido</p>
-      <div className="flex flex-col gap-2">
-        {contenido.map((c) => (
-          <div key={c.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2 text-sm">
-            <span className="font-medium flex-1 min-w-[140px]">{c.titulo}</span>
-            {c.tipo && <span className="text-xs text-muted">{c.tipo}</span>}
-            <select value={c.estado} onChange={(e) => onCambiarEstado(c.id, e.target.value)} className="text-xs">
-              {ESTADOS_CONTENIDO.map((estado) => (
-                <option key={estado} value={estado}>
-                  {ESTADO_LABEL[estado]}
-                </option>
-              ))}
-            </select>
-            <button onClick={() => onBorrar(c.id)} className="text-xs text-muted hover:text-foreground">
-              Borrar
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-col gap-4">
+      {contenido.length === 0 ? (
+        <p className="text-sm text-muted">Todavía no hay contenido cargado.</p>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {ESTADOS_CONTENIDO.map((estado) => {
+            const items = contenido.filter((c) => c.estado === estado);
+            return (
+              <div key={estado} className="flex flex-col gap-2 rounded-lg bg-surface-alt p-3">
+                <Chip label={`${ESTADO_LABEL[estado]} · ${items.length}`} color={ESTADO_COLOR[estado]} />
+                {items.map((c) => (
+                  <div key={c.id} className="rounded-md border border-border bg-surface p-2 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="font-medium">{c.titulo}</span>
+                      <button onClick={() => onBorrar(c.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+                        Borrar
+                      </button>
+                    </div>
+                    {c.tipo && <p className="text-xs text-muted">{c.tipo}</p>}
+                    <select
+                      value={c.estado}
+                      onChange={(e) => onCambiarEstado(c.id, e.target.value)}
+                      className="mt-1 text-xs"
+                    >
+                      {ESTADOS_CONTENIDO.map((e) => (
+                        <option key={e} value={e}>
+                          {ESTADO_LABEL[e]}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+        </div>
+      )}
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -292,16 +324,16 @@ function ListaContenido({
           setTipo("");
           setFecha("");
         }}
-        className="flex flex-wrap gap-2 items-end"
+        className="flex flex-wrap gap-2 items-end pt-2 border-t border-border"
       >
         <input placeholder="Título" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1 min-w-[140px]" />
         <input placeholder="Tipo (reel, post...)" value={tipo} onChange={(e) => setTipo(e.target.value)} className="w-32" />
         <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        <button type="submit" className="rounded-md border border-border bg-surface-alt px-3 py-2 text-sm">
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium">
           Agregar
         </button>
       </form>
-    </section>
+    </div>
   );
 }
 
@@ -317,20 +349,23 @@ function ListaEnlaces({
   const [titulo, setTitulo] = useState("");
   const [url, setUrl] = useState("");
   return (
-    <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">🔗 Enlaces</p>
-      <div className="flex flex-col gap-1">
-        {enlaces.map((e) => (
-          <div key={e.id} className="flex items-center gap-2 text-sm">
-            <a href={e.url} target="_blank" rel="noreferrer" className="underline flex-1">
-              {e.titulo}
-            </a>
-            <button onClick={() => onBorrar(e.id)} className="text-xs text-muted hover:text-foreground">
-              Borrar
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-col gap-3">
+      {enlaces.length === 0 ? (
+        <p className="text-sm text-muted">Sin enlaces todavía.</p>
+      ) : (
+        <div className="rounded-lg bg-surface-alt divide-y divide-border overflow-hidden">
+          {enlaces.map((e) => (
+            <div key={e.id} className="flex items-center gap-2 px-3 py-2 text-sm">
+              <a href={e.url} target="_blank" rel="noreferrer" className="underline flex-1 truncate">
+                {e.titulo}
+              </a>
+              <button onClick={() => onBorrar(e.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+                Borrar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <form
         onSubmit={async (ev) => {
           ev.preventDefault();
@@ -338,45 +373,53 @@ function ListaEnlaces({
           setTitulo("");
           setUrl("");
         }}
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-2 pt-2 border-t border-border"
       >
         <input placeholder="Título" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1 min-w-[140px]" />
         <input placeholder="https://..." required value={url} onChange={(e) => setUrl(e.target.value)} className="flex-1 min-w-[180px]" />
-        <button type="submit" className="rounded-md border border-border bg-surface-alt px-3 py-2 text-sm">
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium">
           Agregar
         </button>
       </form>
-    </section>
+    </div>
   );
 }
 
 function ListaArchivos({
   archivos,
   onSubir,
+  onVer,
   onBorrar,
 }: {
   archivos: Archivo[];
   onSubir: (file: File) => Promise<void>;
+  onVer: (id: string) => Promise<void>;
   onBorrar: (id: string) => Promise<void>;
 }) {
   const [subiendo, setSubiendo] = useState(false);
   return (
-    <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">📁 Archivos</p>
-      <div className="flex flex-col gap-1">
-        {archivos.map((a) => (
-          <div key={a.id} className="flex items-center gap-2 text-sm">
-            <span className="flex-1">{a.nombre}</span>
-            <button onClick={() => onBorrar(a.id)} className="text-xs text-muted hover:text-foreground">
-              Borrar
-            </button>
-          </div>
-        ))}
-      </div>
+    <div className="flex flex-col gap-3">
+      {archivos.length === 0 ? (
+        <p className="text-sm text-muted">Sin archivos todavía.</p>
+      ) : (
+        <div className="rounded-lg bg-surface-alt divide-y divide-border overflow-hidden">
+          {archivos.map((a) => (
+            <div key={a.id} className="flex items-center gap-2 px-3 py-2 text-sm">
+              <button onClick={() => onVer(a.id)} className="flex-1 truncate text-left underline decoration-dotted">
+                📄 {a.nombre}
+              </button>
+              <button onClick={() => onBorrar(a.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+                Borrar
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
       <input
         type="file"
         multiple
         disabled={subiendo}
+        className="pt-2 border-t border-border text-sm"
         onChange={async (e) => {
           const files = e.target.files ? Array.from(e.target.files) : [];
           if (files.length === 0) return;
@@ -391,7 +434,7 @@ function ListaArchivos({
           }
         }}
       />
-    </section>
+    </div>
   );
 }
 
@@ -408,22 +451,25 @@ function ListaReuniones({
   const [fecha, setFecha] = useState("");
   const [notas, setNotas] = useState("");
   return (
-    <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">📝 Reuniones</p>
-      <div className="flex flex-col gap-2">
-        {reuniones.map((r) => (
-          <div key={r.id} className="rounded-md border border-border bg-surface p-2 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="font-medium flex-1">{r.titulo}</span>
-              <span className="text-xs text-muted">{r.fecha}</span>
-              <button onClick={() => onBorrar(r.id)} className="text-xs text-muted hover:text-foreground">
-                Borrar
-              </button>
+    <div className="flex flex-col gap-3">
+      {reuniones.length === 0 ? (
+        <p className="text-sm text-muted">Sin reuniones registradas todavía.</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {reuniones.map((r) => (
+            <div key={r.id} className="rounded-lg bg-surface-alt p-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="font-medium flex-1">{r.titulo}</span>
+                <span className="text-xs text-muted">{r.fecha}</span>
+                <button onClick={() => onBorrar(r.id)} className="text-xs text-muted hover:text-foreground">
+                  Borrar
+                </button>
+              </div>
+              {r.notas && <p className="text-xs mt-1 whitespace-pre-wrap text-muted">{r.notas}</p>}
             </div>
-            {r.notas && <p className="text-xs mt-1 whitespace-pre-wrap">{r.notas}</p>}
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -432,17 +478,17 @@ function ListaReuniones({
           setFecha("");
           setNotas("");
         }}
-        className="flex flex-col gap-2"
+        className="flex flex-col gap-2 pt-2 border-t border-border"
       >
         <div className="flex flex-wrap gap-2">
           <input placeholder="Título" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1 min-w-[140px]" />
           <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
         <textarea placeholder="Notas de la reunión" value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} />
-        <button type="submit" className="rounded-md border border-border bg-surface-alt px-3 py-2 text-sm w-fit">
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium w-fit">
           Agregar
         </button>
       </form>
-    </section>
+    </div>
   );
 }
