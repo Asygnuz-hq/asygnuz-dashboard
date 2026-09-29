@@ -104,6 +104,15 @@ export async function updateSession(request: NextRequest) {
           url.search = "";
           return NextResponse.redirect(url);
         }
+
+        // /portal-admin es la gestión de portales de clientes de Growth —
+        // solo el equipo de ASYGNUZ (flag "portal_admin"), nunca un cliente.
+        if (modulos && pathname.startsWith("/portal-admin") && modulos.portal_admin !== true) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/";
+          url.search = "";
+          return NextResponse.redirect(url);
+        }
       }
     }
   }

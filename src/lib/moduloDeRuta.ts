@@ -1,4 +1,4 @@
-export type Modulo = "financiero" | "marketing_pauta" | "crm" | "operacion" | "nomina";
+export type Modulo = "financiero" | "marketing_pauta" | "crm" | "operacion" | "nomina" | "portal_cliente";
 
 // Página a la que te lleva cada botón del switcher — "home" de ese módulo.
 export const MODULO_HOME: Record<Modulo, string> = {
@@ -7,6 +7,7 @@ export const MODULO_HOME: Record<Modulo, string> = {
   crm: "/crm",
   operacion: "/metricas",
   nomina: "/equipo",
+  portal_cliente: "/portal",
 };
 
 // Del más específico al más general — gana el primer prefijo que matchee.
@@ -20,6 +21,11 @@ const RUTA_A_MODULO: { prefix: string; modulo: Modulo }[] = [
   { prefix: "/requisitos", modulo: "operacion" },
   { prefix: "/tablero", modulo: "operacion" },
   { prefix: "/kaneo", modulo: "operacion" },
+  // /portal-admin es interna de ASYGNUZ (gestión de portales de clientes de
+  // Growth) — mapea a Operación para pasar el filtro base; el flag propio
+  // "portal_admin" (como analitica) se exige aparte en el middleware.
+  { prefix: "/portal-admin", modulo: "operacion" },
+  { prefix: "/portal", modulo: "portal_cliente" },
   { prefix: "/disenadores/cobros-clientes", modulo: "financiero" },
   { prefix: "/disenadores/resumen-cobros", modulo: "financiero" },
   { prefix: "/disenadores/control-mensual", modulo: "nomina" },

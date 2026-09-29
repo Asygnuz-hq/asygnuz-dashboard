@@ -73,6 +73,7 @@ const sections: NavSection[] = [
       { href: "/metricas/reporte", label: "Reporte para Junta" },
       { href: "/metricas/permisos", label: "Permisos" },
       { href: "/kaneo", label: "Gestor de Proyectos (Kaneo)" },
+      { href: "/portal-admin", label: "Portales de Clientes (Growth)" },
     ],
   },
   {
@@ -94,6 +95,13 @@ const sections: NavSection[] = [
       { href: "/analitica", label: "Analítica de Uso" },
       { href: "/configuracion", label: "Configuración" },
     ],
+  },
+  {
+    // Módulo de un solo link: clientes de Growth (Mayra, Santi, Claudia...)
+    // no tienen ningún otro módulo prendido en su tenant.
+    title: "",
+    modulo: "portal_cliente",
+    items: [{ href: "/portal", label: "Mi Portal" }],
   },
 ];
 
@@ -138,8 +146,10 @@ export function Sidebar() {
             </p>
           )}
           {section.items
-            // /analitica es interna de ASYGNUZ: solo con el flag "analitica"
+            // /analitica y /portal-admin son internas de ASYGNUZ: exigen su
+            // propio flag además del módulo (igual que /analitica).
             .filter((item) => item.href !== "/analitica" || modulos?.analitica === true)
+            .filter((item) => item.href !== "/portal-admin" || modulos?.portal_admin === true)
             .map((item) => {
             const active = pathname === item.href;
             return (

@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Modulo } from "@/lib/moduloDeRuta";
 
-const ORDEN: Modulo[] = ["financiero", "marketing_pauta", "crm", "operacion", "nomina"];
+const ORDEN: Modulo[] = ["financiero", "marketing_pauta", "crm", "operacion", "nomina", "portal_cliente"];
 
 // Módulos que tiene contratados el tenant de la sesión, resueltos EN EL
 // SERVIDOR. Antes la única barrera era esconder botones en el switcher:
