@@ -43,9 +43,13 @@ export const ESTADOS_CONTENIDO = ["grabacion", "revision", "edicion", "publicado
 export const crearContenidoSchema = z.object({
   titulo: texto(160),
   tipo: textoOpcional(60),
+  plataforma: textoOpcional(40),
   fechaPublicacion: fecha.optional().or(z.literal("")),
   estado: z.enum(ESTADOS_CONTENIDO).default("grabacion"),
   notas: textoOpcional(4000),
+  // Referencia: el video/imagen que se va a imitar/grabar. link: la
+  // publicación ya hecha. Son cosas distintas, con su propio campo cada una.
+  linkReferencia: z.string().trim().url("URL inválida").optional().or(z.literal("")),
   link: z.string().trim().url("URL inválida").optional().or(z.literal("")),
 });
 

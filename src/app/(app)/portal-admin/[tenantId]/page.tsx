@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
@@ -127,24 +128,8 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
     setReuniones((prev) => prev.filter((r) => r.id !== id));
   }
 
-  async function agregarContenido(titulo: string, tipo: string, fechaPublicacion: string) {
-    const data = await api(`/api/portal-admin/clientes/${tenantId}/contenido`, {
-      method: "POST",
-      body: JSON.stringify({ titulo, tipo, fechaPublicacion }),
-    });
-    setContenido((prev) => [...prev, data.contenido]);
-  }
-  async function cambiarEstadoContenido(id: string, estado: string) {
-    const data = await api(`/api/portal-admin/clientes/${tenantId}/contenido/${id}`, {
-      method: "PUT",
-      body: JSON.stringify({ estado }),
-    });
-    setContenido((prev) => prev.map((c) => (c.id === id ? data.contenido : c)));
-  }
-  async function borrarContenido(id: string) {
-    await api(`/api/portal-admin/clientes/${tenantId}/contenido/${id}`, { method: "DELETE" });
-    setContenido((prev) => prev.filter((c) => c.id !== id));
-  }
+  // Agregar/editar/borrar contenido ahora vive en /portal-admin/[tenantId]/parrilla
+  // (pantalla propia, con filtros) — acá solo se necesitan los conteos.
 
   async function subirArchivo(file: File) {
     const form = new FormData();
@@ -202,7 +187,22 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
       </TarjetaSeccion>
 
       <TarjetaSeccion icono="🚀" titulo="Parrilla de contenido">
-        <ListaContenido contenido={contenido} onAgregar={agregarContenido} onCambiarEstado={cambiarEstadoContenido} onBorrar={borrarContenido} />
+        {contenido.length === 0 ? (
+          <p className="text-sm text-muted">Todavía no hay contenido cargado.</p>
+        ) : (
+          <div className="flex flex-wrap gap-4">
+            {ESTADOS_CONTENIDO.map((estado) => (
+              <Chip
+                key={estado}
+                label={`${ESTADO_LABEL[estado]} · ${contenido.filter((c) => c.estado === estado).length}`}
+                color={ESTADO_COLOR[estado]}
+              />
+            ))}
+          </div>
+        )}
+        <Link href={`/portal-admin/${tenantId}/parrilla`} className="text-sm underline w-fit">
+          Gestionar parrilla completa →
+        </Link>
       </TarjetaSeccion>
 
       <TarjetaSeccion icono="🔗" titulo="Enlaces">
@@ -261,79 +261,6 @@ function VincularUsuario({ onVincular }: { onVincular: (email: string) => Promis
         {enviando ? "Vinculando..." : "Vincular"}
       </button>
     </form>
-  );
-}
-
-function ListaContenido({
-  contenido,
-  onAgregar,
-  onCambiarEstado,
-  onBorrar,
-}: {
-  contenido: Contenido[];
-  onAgregar: (titulo: string, tipo: string, fecha: string) => Promise<void>;
-  onCambiarEstado: (id: string, estado: string) => Promise<void>;
-  onBorrar: (id: string) => Promise<void>;
-}) {
-  const [titulo, setTitulo] = useState("");
-  const [tipo, setTipo] = useState("");
-  const [fecha, setFecha] = useState("");
-  return (
-    <div className="flex flex-col gap-4">
-      {contenido.length === 0 ? (
-        <p className="text-sm text-muted">Todavía no hay contenido cargado.</p>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {ESTADOS_CONTENIDO.map((estado) => {
-            const items = contenido.filter((c) => c.estado === estado);
-            return (
-              <div key={estado} className="flex flex-col gap-2 rounded-lg bg-surface-alt p-3">
-                <Chip label={`${ESTADO_LABEL[estado]} · ${items.length}`} color={ESTADO_COLOR[estado]} />
-                {items.map((c) => (
-                  <div key={c.id} className="rounded-md border border-border bg-surface p-2 text-sm">
-                    <div className="flex items-start justify-between gap-2">
-                      <span className="font-medium">{c.titulo}</span>
-                      <button onClick={() => onBorrar(c.id)} className="text-xs text-muted hover:text-foreground shrink-0">
-                        Borrar
-                      </button>
-                    </div>
-                    {c.tipo && <p className="text-xs text-muted">{c.tipo}</p>}
-                    <select
-                      value={c.estado}
-                      onChange={(e) => onCambiarEstado(c.id, e.target.value)}
-                      className="mt-1 text-xs"
-                    >
-                      {ESTADOS_CONTENIDO.map((e) => (
-                        <option key={e} value={e}>
-                          {ESTADO_LABEL[e]}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
-              </div>
-            );
-          })}
-        </div>
-      )}
-      <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          await onAgregar(titulo, tipo, fecha);
-          setTitulo("");
-          setTipo("");
-          setFecha("");
-        }}
-        className="flex flex-wrap gap-2 items-end pt-2 border-t border-border"
-      >
-        <input placeholder="Título" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1 min-w-[140px]" />
-        <input placeholder="Tipo (reel, post...)" value={tipo} onChange={(e) => setTipo(e.target.value)} className="w-32" />
-        <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium">
-          Agregar
-        </button>
-      </form>
-    </div>
   );
 }
 

@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useTenantActual } from "@/lib/useTenantActual";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
+import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
 
 type Proyecto = {
   fecha_inicio: string | null;
@@ -93,7 +95,7 @@ export default function PortalClientePage() {
         </p>
       </div>
 
-      {tenant?.nombre && <h1 className="text-2xl font-bold">{tenant.nombre}</h1>}
+      {tenant?.nombre && <h1 className="text-2xl font-bold" style={{ fontFamily: FUENTE_DISPLAY }}>{tenant.nombre}</h1>}
 
       {proyecto && (proyecto.tipo_proyecto || duracion || proyecto.responsable_nombre || proyecto.descripcion) && (
         <TarjetaSeccion icono="📌" titulo="Tu proyecto">
@@ -129,32 +131,19 @@ export default function PortalClientePage() {
         {contenido.length === 0 ? (
           <p className="text-sm text-muted">Todavía no hay contenido cargado.</p>
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {ESTADOS_CONTENIDO.map((estado) => {
-              const items = contenido.filter((c) => c.estado === estado);
-              return (
-                <div key={estado} className="flex flex-col gap-2 rounded-lg bg-surface-alt p-2">
-                  <Chip label={`${ESTADO_LABEL[estado]} · ${items.length}`} color={ESTADO_COLOR[estado]} />
-                  {items.map((c) => (
-                    <div key={c.id} className="rounded-md border border-border bg-surface p-3 text-sm">
-                      <p className="font-medium">{c.titulo}</p>
-                      {c.tipo && <p className="text-xs text-muted">{c.tipo}</p>}
-                      {c.fecha_publicacion && (
-                        <p className="text-xs text-muted">Publica: {formatearFecha(c.fecha_publicacion)}</p>
-                      )}
-                      {c.notas && <p className="mt-1 text-xs whitespace-pre-wrap">{c.notas}</p>}
-                      {c.link && (
-                        <a href={c.link} target="_blank" rel="noreferrer" className="text-xs underline block mt-1">
-                          Ver publicación →
-                        </a>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              );
-            })}
+          <div className="flex flex-wrap gap-4">
+            {ESTADOS_CONTENIDO.map((estado) => (
+              <Chip
+                key={estado}
+                label={`${ESTADO_LABEL[estado]} · ${contenido.filter((c) => c.estado === estado).length}`}
+                color={ESTADO_COLOR[estado]}
+              />
+            ))}
           </div>
         )}
+        <Link href="/portal/parrilla" className="text-sm underline w-fit">
+          Ver parrilla completa →
+        </Link>
       </TarjetaSeccion>
 
       <div className="grid gap-6 sm:grid-cols-2">

@@ -12,7 +12,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ten
 
   const validado = await bodyValido(request, crearContenidoSchema);
   if (validado instanceof Response) return validado;
-  const { titulo, tipo, fechaPublicacion, estado, notas, link } = validado.data;
+  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link } = validado.data;
 
   const admin = createAdminClient();
   const { count } = await admin
@@ -26,9 +26,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ ten
       tenant_id: tenantId,
       titulo,
       tipo: tipo || null,
+      plataforma: plataforma || null,
       fecha_publicacion: fechaPublicacion || null,
       estado,
       notas: notas || null,
+      link_referencia: linkReferencia || null,
       link: link || null,
       orden: count ?? 0,
     })
