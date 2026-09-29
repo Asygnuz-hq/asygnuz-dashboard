@@ -6,6 +6,7 @@ import { useIsEmergencia } from "@/lib/useIsEmergencia";
 import { useModuloActivo, type Modulo } from "@/lib/ModuloActivoContext";
 import { useTenantActual } from "@/lib/useTenantActual";
 import { useTenantModulos } from "@/lib/useTenantModulos";
+import { useGestionaPortales } from "@/lib/useGestionaPortales";
 
 type NavItem = { href: string; label: string };
 type NavSection = { title: string; modulo: Modulo; items: NavItem[] };
@@ -117,6 +118,7 @@ export function Sidebar() {
   const { moduloActivo } = useModuloActivo();
   const tenant = useTenantActual();
   const modulos = useTenantModulos();
+  const gestionaPortales = useGestionaPortales();
 
   // El usuario externo del caso del terremoto solo ve su propia sección —
   // el resto del negocio de ASYGNUZ no le pertenece ni le interesa. Para
@@ -146,10 +148,10 @@ export function Sidebar() {
             </p>
           )}
           {section.items
-            // /analitica y /portal-admin son internas de ASYGNUZ: exigen su
-            // propio flag además del módulo (igual que /analitica).
+            // /analitica exige el flag del tenant; /portal-admin exige un
+            // permiso de la PERSONA (gestiona_portales), no del tenant entero.
             .filter((item) => item.href !== "/analitica" || modulos?.analitica === true)
-            .filter((item) => item.href !== "/portal-admin" || modulos?.portal_admin === true)
+            .filter((item) => item.href !== "/portal-admin" || gestionaPortales)
             .map((item) => {
             const active = pathname === item.href;
             return (
