@@ -11,7 +11,9 @@ export const crearClienteSchema = z.object({
   fechaInicio: fecha.optional().or(z.literal("")),
   fechaFin: fecha.optional().or(z.literal("")),
   tipoProyecto: textoOpcional(80),
-  descripcion: textoOpcional(2000),
+  // Algunos proyectos traen un brief largo (viabilidad, mercado...) — 2000
+  // se quedaba corto y bloqueaba guardar desde la pantalla de gestión.
+  descripcion: textoOpcional(20000),
   contactoNombre: textoOpcional(120),
   contactoEmail: z.string().trim().toLowerCase().email("correo inválido").optional().or(z.literal("")),
   responsableNombre: textoOpcional(120),

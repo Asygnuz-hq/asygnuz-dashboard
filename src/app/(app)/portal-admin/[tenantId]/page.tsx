@@ -375,13 +375,16 @@ function ListaArchivos({
       </div>
       <input
         type="file"
+        multiple
         disabled={subiendo}
         onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
+          const files = e.target.files ? Array.from(e.target.files) : [];
+          if (files.length === 0) return;
           setSubiendo(true);
           try {
-            await onSubir(file);
+            // Uno por uno (no en paralelo): si uno falla, se sabe cuál y
+            // los de antes ya quedaron subidos.
+            for (const file of files) await onSubir(file);
           } finally {
             setSubiendo(false);
             e.target.value = "";
