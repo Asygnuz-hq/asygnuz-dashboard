@@ -174,7 +174,7 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
       <VincularUsuario onVincular={vincular} />
 
       <form onSubmit={guardarProyecto} className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4">
-        <p className="text-xs uppercase tracking-wide text-muted">Ficha del proyecto</p>
+        <p className="text-xs uppercase tracking-wide text-muted">📌 Ficha del proyecto</p>
         <div className="grid gap-3 sm:grid-cols-2">
           <Campo label="Tipo de proyecto" value={proyecto.tipo_proyecto} onChange={(v) => setProyecto({ ...proyecto, tipo_proyecto: v })} />
           <Campo label="Fecha de inicio" type="date" value={proyecto.fecha_inicio} onChange={(v) => setProyecto({ ...proyecto, fecha_inicio: v })} />
@@ -265,7 +265,7 @@ function ListaContenido({
   const [fecha, setFecha] = useState("");
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">Parrilla de contenido</p>
+      <p className="text-xs uppercase tracking-wide text-muted">🚀 Parrilla de contenido</p>
       <div className="flex flex-col gap-2">
         {contenido.map((c) => (
           <div key={c.id} className="flex flex-wrap items-center gap-2 rounded-md border border-border bg-surface p-2 text-sm">
@@ -318,7 +318,7 @@ function ListaEnlaces({
   const [url, setUrl] = useState("");
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">Enlaces</p>
+      <p className="text-xs uppercase tracking-wide text-muted">🔗 Enlaces</p>
       <div className="flex flex-col gap-1">
         {enlaces.map((e) => (
           <div key={e.id} className="flex items-center gap-2 text-sm">
@@ -362,7 +362,7 @@ function ListaArchivos({
   const [subiendo, setSubiendo] = useState(false);
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">Archivos</p>
+      <p className="text-xs uppercase tracking-wide text-muted">📁 Archivos</p>
       <div className="flex flex-col gap-1">
         {archivos.map((a) => (
           <div key={a.id} className="flex items-center gap-2 text-sm">
@@ -406,7 +406,7 @@ function ListaReuniones({
   const [notas, setNotas] = useState("");
   return (
     <section className="flex flex-col gap-3">
-      <p className="text-xs uppercase tracking-wide text-muted">Reuniones</p>
+      <p className="text-xs uppercase tracking-wide text-muted">📝 Reuniones</p>
       <div className="flex flex-col gap-2">
         {reuniones.map((r) => (
           <div key={r.id} className="rounded-md border border-border bg-surface p-2 text-sm">
