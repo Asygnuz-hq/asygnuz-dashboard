@@ -17,9 +17,9 @@ export function KpiCard({
   const isGood = delta ? (delta.invertColor ? !isUp : isUp) : true;
 
   return (
-    <div className={`rounded-lg border p-4 flex flex-col gap-1 ${accentClassName ?? "border-border bg-surface"}`}>
+    <div className={`rounded-2xl border p-4 flex flex-col gap-1 ${accentClassName ?? "glass glass-hover"}`}>
       <p className="text-xs uppercase tracking-wide text-muted">{label}</p>
-      <p className="text-2xl font-bold text-foreground">{value}</p>
+      <p className="font-display text-2xl font-semibold text-foreground">{value}</p>
       {delta && Number.isFinite(delta.pct) && (
         <p className={`text-xs ${isGood ? "text-accent-bright" : "text-danger"}`}>
           {isUp ? "▲" : "▼"} {Math.abs(delta.pct * 100).toFixed(1)}% vs. mes anterior

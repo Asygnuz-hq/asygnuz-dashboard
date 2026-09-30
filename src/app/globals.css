@@ -78,6 +78,43 @@ textarea:focus {
   outline: 1px solid var(--accent);
 }
 
+/* Rediseño 2026-09-30 (aprobado por JM: glassmorfismo + azul marino de
+   marca #183057, sin verde/dorado — ver manual de marca). Usa los mismos
+   tokens de --surface/--border/--accent-bright de siempre: se adapta solo a
+   Día/Noche, no hay un set de colores aparte para cada tema. */
+.glass {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.16), inset 0 1px 0 color-mix(in srgb, var(--foreground) 5%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.glass-hover:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--accent-bright) 50%, transparent);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 0 28px color-mix(in srgb, var(--accent-bright) 30%, transparent);
+}
+
+.nav-item {
+  position: relative;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.nav-item:hover {
+  background: color-mix(in srgb, var(--accent-bright) 12%, transparent);
+  border-color: color-mix(in srgb, var(--accent-bright) 28%, transparent) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent-bright) 25%, transparent);
+}
+.nav-item-active {
+  background: color-mix(in srgb, var(--accent-bright) 14%, transparent) !important;
+  border-color: color-mix(in srgb, var(--accent-bright) 32%, transparent) !important;
+  box-shadow: inset 3px 0 0 var(--accent-bright);
+}
+
+.font-display {
+  font-family: "Bodoni Moda", serif;
+}
+
 /* Reportes en PDF (window.print desde /metricas/reporte y
    /metricas/clientes): sin esto, el navegador imprime en carta vertical y
    las tablas anchas (muchas columnas de métricas) quedan cortadas al borde
@@ -106,5 +143,18 @@ textarea:focus {
   /* Que una fila de la tabla no se parta entre dos hojas. */
   tr {
     break-inside: avoid;
+  }
+  /* El blur y la transparencia del glassmorfismo no imprimen bien — en PDF
+     las tarjetas quedan sólidas y planas, como antes del rediseño. */
+  .glass {
+    background: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border-color: #ccc !important;
+  }
+  .glass-hover:hover {
+    transform: none !important;
+    box-shadow: none !important;
   }
 }

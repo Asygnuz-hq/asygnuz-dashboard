@@ -9,7 +9,7 @@ import { useTenantModulos } from "@/lib/useTenantModulos";
 import { useGestionaPortales } from "@/lib/useGestionaPortales";
 
 type NavItem = { href: string; label: string };
-type NavSection = { title: string; modulo: Modulo; items: NavItem[] };
+type NavSection = { title: string; icono?: string; modulo: Modulo; items: NavItem[] };
 
 // Cada sección pertenece a un solo módulo — nada queda "para todos". Deudas
 // Personales y Casos del Terremoto salieron de aquí a propósito (pedido de
@@ -20,6 +20,7 @@ const sections: NavSection[] = [
   { title: "", modulo: "financiero", items: [{ href: "/", label: "Dashboard" }] },
   {
     title: "Clientes",
+    icono: "👥",
     modulo: "financiero",
     items: [
       { href: "/clientes", label: "Clientes" },
@@ -28,6 +29,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Finanzas",
+    icono: "💰",
     modulo: "financiero",
     items: [
       { href: "/cuentas", label: "Cuentas / Caja" },
@@ -44,6 +46,7 @@ const sections: NavSection[] = [
     // Antes vivía dentro de "Diseñadores" en Marketing — es plata que deben
     // los clientes, no contenido de pauta, así que es Financiero.
     title: "Cobros",
+    icono: "🧾",
     modulo: "financiero",
     items: [
       { href: "/disenadores/cobros-clientes", label: "Cobros a Clientes" },
@@ -52,6 +55,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Marketing",
+    icono: "📣",
     modulo: "marketing_pauta",
     items: [
       { href: "/marketing", label: "Marketing" },
@@ -61,11 +65,13 @@ const sections: NavSection[] = [
   },
   {
     title: "CRM",
+    icono: "🔗",
     modulo: "crm",
     items: [{ href: "/crm", label: "Leads y Pipeline" }],
   },
   {
     title: "Operación",
+    icono: "📊",
     modulo: "operacion",
     items: [
       { href: "/requisitos", label: "Requisitos de Negocio" },
@@ -81,6 +87,7 @@ const sections: NavSection[] = [
     // Control Mensual y Resumen por Diseñador son la base para pagarle a
     // cada diseñador — van con Nómina, no con Marketing.
     title: "Equipo",
+    icono: "🧑‍🤝‍🧑",
     modulo: "nomina",
     items: [
       { href: "/equipo", label: "Equipo / RRHH" },
@@ -108,6 +115,7 @@ const sections: NavSection[] = [
 
 const seccionEmergencia: NavSection = {
   title: "Emergencia",
+  icono: "🚨",
   modulo: "financiero",
   items: [{ href: "/emergencia", label: "Casos del Terremoto" }],
 };
@@ -128,7 +136,7 @@ export function Sidebar() {
   const visibleSections = isEmergencia ? [seccionEmergencia] : sectionsFiltradas;
 
   return (
-    <nav className="print:hidden w-64 shrink-0 border-r border-border bg-surface p-4 flex flex-col gap-6 overflow-y-auto">
+    <nav className="print:hidden glass w-64 shrink-0 m-4 rounded-2xl p-4 flex flex-col gap-6 overflow-y-auto">
       <div className="px-2 py-1">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -143,7 +151,8 @@ export function Sidebar() {
       {visibleSections.map((section, i) => (
         <div key={i} className="flex flex-col gap-1">
           {section.title && (
-            <p className="px-2 text-xs uppercase tracking-wide text-muted mb-1">
+            <p className="px-2 text-xs uppercase tracking-wide text-muted mb-1 flex items-center gap-1.5">
+              {section.icono && <span aria-hidden>{section.icono}</span>}
               {section.title}
             </p>
           )}
@@ -158,10 +167,10 @@ export function Sidebar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`rounded-md px-2 py-1.5 text-sm transition-colors ${
+                className={`nav-item rounded-lg border border-transparent px-2.5 py-1.5 text-sm ${
                   active
-                    ? "bg-accent text-accent-foreground font-medium"
-                    : "text-foreground/80 hover:bg-surface-alt"
+                    ? "nav-item-active text-foreground font-medium"
+                    : "text-foreground/80"
                 }`}
               >
                 {item.label}

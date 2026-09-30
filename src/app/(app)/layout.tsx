@@ -21,6 +21,16 @@ export default async function AppLayout({
   return (
     <PosthogProvider>
       <ModuloActivoProvider>
+        {/* Fuente de los títulos (.font-display en globals.css) — rediseño
+            2026-09-30. Un solo <link>, no next/font: en esta versión de
+            Next/Turbopack falla al compartirlo entre varios client
+            components (ver src/lib/portal/fuente.ts). */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,500;6..96,600;6..96,700&display=swap"
+          rel="stylesheet"
+        />
         <div className="flex flex-1 min-h-screen">
           <IdleLogout />
           <Sidebar />

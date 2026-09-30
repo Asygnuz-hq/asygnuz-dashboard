@@ -212,7 +212,7 @@ export default function DashboardPage() {
     return (
       <div className="flex flex-col gap-6 max-w-lg">
         <PageHeader title="Bienvenido a tu dashboard" subtitle="Todavía no hay nada configurado — empecemos." />
-        <div className="rounded-lg border border-border bg-surface p-6 flex flex-col gap-4">
+        <div className="glass glass-hover rounded-2xl p-6 flex flex-col gap-4">
           <p className="text-sm text-muted">
             Para ver tus números aquí, primero necesitas:
           </p>
@@ -272,7 +272,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-4 justify-center">
+        <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-4 justify-center">
           <p className="text-sm font-medium">Metas del mes activo</p>
           <ProgressBar label="Ingresos" value={mesKpis?.ingresos_cop ?? 0} target={metaIngresos} formatValue={formatCOP} />
           <ProgressBar
@@ -288,7 +288,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-2 justify-center">
+        <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2 justify-center">
           <p className="text-sm font-medium mb-1">Proyección de caja</p>
           <div className="flex justify-between text-sm">
             <span className="text-muted">Por cobrar (pendiente)</span>
@@ -337,7 +337,7 @@ export default function DashboardPage() {
             value={topCliente ? formatPercent(topCliente.pct) : "-"}
             hint={topCliente ? `${topCliente.nombre} de tus ingresos vinculados` : "Vincula ingresos a clientes"}
           />
-          <div className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-2">
+          <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2">
             <p className="text-xs uppercase tracking-wide text-muted">Cartera vencida</p>
             {carteraVencida.length === 0 ? (
               <p className="text-sm text-accent-bright">Sin cobros vencidos.</p>
@@ -358,7 +358,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="rounded-lg border border-border bg-surface p-4">
+        <div className="glass glass-hover rounded-2xl p-4">
           <p className="text-sm font-medium mb-3">Ingresos vs. Gastos por mes</p>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData}>
@@ -375,7 +375,7 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-lg border border-border bg-surface p-4">
+        <div className="glass glass-hover rounded-2xl p-4">
           <p className="text-sm font-medium mb-3">Utilidad neta histórica</p>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
@@ -391,7 +391,7 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
 
-        <div className="rounded-lg border border-border bg-surface p-4 lg:col-span-2">
+        <div className="glass glass-hover rounded-2xl p-4 lg:col-span-2">
           <p className="text-sm font-medium mb-3">Gastos del mes activo por categoría</p>
           {gastosPorCategoria.length === 0 ? (
             <p className="text-sm text-muted">No hay gastos registrados para este mes.</p>
