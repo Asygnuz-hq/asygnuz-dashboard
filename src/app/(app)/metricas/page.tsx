@@ -21,6 +21,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Semaforo } from "@/components/Semaforo";
+import { Reveal } from "@/components/Reveal";
+import { Skeleton } from "@/components/Skeleton";
 import { useTheme, CHART_COLORS } from "@/lib/useTheme";
 import { FuenteSelector } from "@/components/kaneo/FuenteSelector";
 import { useKaneoFuentes } from "@/lib/kaneo/useKaneoFuentes";
@@ -90,7 +92,7 @@ export default function MetricasPage() {
         </div>
       </div>
 
-      {loading && <p className="text-sm text-muted">Cargando datos de Kaneo…</p>}
+      {loading && <MetricasSkeleton />}
       {error && (
         <p className="text-sm text-danger">
           No se pudo leer Kaneo: {error}. Revisa que Kaneo esté corriendo y las variables KANEO_* en .env.local.
@@ -100,20 +102,22 @@ export default function MetricasPage() {
       {metricas && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KpiCard label="Tareas activas" value={String(metricas.totalActivas)} />
+            <KpiCard label="Tareas activas" value={String(metricas.totalActivas)} count={metricas.totalActivas} />
             <KpiCard
               label="Avance global"
               value={`${((metricas.totalCompletadas / Math.max(metricas.totalTareas, 1)) * 100).toFixed(0)}%`}
+              count={Math.round((metricas.totalCompletadas / Math.max(metricas.totalTareas, 1)) * 100)}
+              formatCount={(n) => `${Math.round(n)}%`}
               hint={`${metricas.totalCompletadas} de ${metricas.totalTareas} tareas`}
             />
-            <KpiCard label="Atrasadas" value={String(metricas.totalAtrasadas)} hint="Con fecha de vencimiento pasada" />
-            <KpiCard label="Sin asignar" value={String(metricas.sinAsignar)} hint="Nadie las tiene en su lista" />
+            <KpiCard label="Atrasadas" value={String(metricas.totalAtrasadas)} count={metricas.totalAtrasadas} hint="Con fecha de vencimiento pasada" />
+            <KpiCard label="Sin asignar" value={String(metricas.sinAsignar)} count={metricas.sinAsignar} hint="Nadie las tiene en su lista" />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div className="lg:col-span-2">
+            <Reveal className="lg:col-span-2" indice={0}>
               <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Growth vs Software</h2>
-              <div className="h-64 rounded-lg border border-border bg-surface p-4">
+              <div className="h-64 glass glass-hover rounded-2xl p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={metricas.porFrente}>
                     <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
@@ -123,17 +127,17 @@ export default function MetricasPage() {
                       contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                     />
                     <Legend />
-                    <Bar dataKey="activas" name="Activas" fill={PALETTE.activas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                    <Bar dataKey="completadas" name="Completadas" fill={PALETTE.completadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
-                    <Bar dataKey="atrasadas" name="Atrasadas" fill={PALETTE.atrasadas} radius={[4, 4, 0, 0]} isAnimationActive={false} />
+                    <Bar dataKey="activas" name="Activas" fill={PALETTE.activas} radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out" />
+                    <Bar dataKey="completadas" name="Completadas" fill={PALETTE.completadas} radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out" />
+                    <Bar dataKey="atrasadas" name="Atrasadas" fill={PALETTE.atrasadas} radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            </Reveal>
 
-            <div>
+            <Reveal indice={1}>
               <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Por estado</h2>
-              <div className="h-64 rounded-lg border border-border bg-surface p-4">
+              <div className="h-64 glass glass-hover rounded-2xl p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
@@ -143,7 +147,8 @@ export default function MetricasPage() {
                       innerRadius="55%"
                       outerRadius="85%"
                       paddingAngle={2}
-                      isAnimationActive={false}
+                      animationDuration={1400}
+                      animationEasing="ease-out"
                     >
                       {metricas.porEstado.map((e) => (
                         <Cell key={e.estado} fill={ESTADO_COLOR[e.estado] ?? "#8b93a6"} />
@@ -156,15 +161,15 @@ export default function MetricasPage() {
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            </Reveal>
           </div>
 
           {metricas.tendenciaCreacion.length > 1 && (
-            <div>
+            <Reveal indice={2}>
               <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                 Tendencia — tareas creadas por semana
               </h2>
-              <div className="h-64 rounded-lg border border-border bg-surface p-4">
+              <div className="h-64 glass glass-hover pulso-vivo rounded-2xl p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={metricas.tendenciaCreacion}>
                     <defs>
@@ -184,23 +189,23 @@ export default function MetricasPage() {
                       contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                     />
                     <Legend />
-                    <Area type="monotone" dataKey="Growth" stroke="#5c8a72" fill="url(#gGrowth)" strokeWidth={2} isAnimationActive={false} />
-                    <Area type="monotone" dataKey="Software" stroke="#3c5e99" fill="url(#gSoftware)" strokeWidth={2} isAnimationActive={false} />
+                    <Area type="monotone" dataKey="Growth" stroke="#5c8a72" fill="url(#gGrowth)" strokeWidth={2} animationDuration={1600} animationEasing="ease-out" />
+                    <Area type="monotone" dataKey="Software" stroke="#3c5e99" fill="url(#gSoftware)" strokeWidth={2} animationDuration={1600} animationEasing="ease-out" />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
               <p className="text-xs text-muted mt-2">
                 Se calcula desde la fecha de creación de cada tarea — va a ganar más sentido semana a semana a medida que se acumula historial.
               </p>
-            </div>
+            </Reveal>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
+            <Reveal indice={3}>
               <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Proyectos</h2>
               <div className="flex flex-col gap-3">
                 {metricas.porProyecto.map((p) => (
-                  <div key={p.id} className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-3">
+                  <div key={p.id} className="glass glass-hover rounded-2xl p-4 flex flex-col gap-3">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{p.nombre}</p>
@@ -221,15 +226,15 @@ export default function MetricasPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </Reveal>
 
-            <div>
+            <Reveal indice={4}>
               <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                 Tareas más recientes
               </h2>
               <div className="flex flex-col gap-2">
                 {metricas.tareasRecientes.map((t) => (
-                  <div key={t.id} className="rounded-lg border border-border bg-surface p-3 flex items-center gap-3">
+                  <div key={t.id} className="glass glass-hover rounded-2xl p-3 flex items-center gap-3">
                     <span
                       className="h-2 w-2 rounded-full shrink-0"
                       style={{ backgroundColor: ESTADO_COLOR[t.estado] ?? "#8b93a6" }}
@@ -255,7 +260,7 @@ export default function MetricasPage() {
                   </div>
                 ))}
               </div>
-            </div>
+            </Reveal>
           </div>
         </>
       )}
@@ -267,6 +272,38 @@ export default function MetricasPage() {
           onChanged={recargar}
         />
       )}
+    </div>
+  );
+}
+
+function MetricasSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="glass rounded-2xl p-4 flex flex-col gap-2">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-7 w-16" />
+            <Skeleton className="h-3 w-24" />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2 flex flex-col gap-3">
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
     </div>
   );
 }
