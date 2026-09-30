@@ -172,7 +172,15 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
 
   return (
     <div className="flex flex-col gap-6 max-w-3xl pb-10">
-      <PageHeader title={cliente.nombre} subtitle={`Portal del cliente — ${cliente.slug}`} />
+      <div className="flex items-start justify-between gap-4">
+        <PageHeader title={cliente.nombre} subtitle={`Portal del cliente — ${cliente.slug}`} />
+        <Link
+          href={`/portal-admin/${tenantId}/vista-previa`}
+          className="shrink-0 rounded-md bg-accent text-accent-foreground px-4 py-2 text-sm font-medium"
+        >
+          👁️ Ver como lo ve el cliente
+        </Link>
+      </div>
 
       {message && (
         <div className="rounded-lg border border-border bg-surface-alt px-4 py-2 text-sm text-muted">{message}</div>

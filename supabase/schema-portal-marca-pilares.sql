@@ -7,6 +7,7 @@
 
 alter table tenants add column if not exists color_acento text;
 
+drop function if exists public.tenant_actual();
 create or replace function public.tenant_actual()
 returns table(id uuid, nombre text, logo_url text, color_acento text)
 language sql
