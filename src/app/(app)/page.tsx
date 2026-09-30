@@ -19,6 +19,7 @@ import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { Reveal } from "@/components/Reveal";
+import { Skeleton } from "@/components/Skeleton";
 import { ProgressBar } from "@/components/ProgressBar";
 import { Semaforo, calcularSemaforo } from "@/components/Semaforo";
 import { formatCOP, formatUSD, formatEUR, formatMonth, formatPercent } from "@/lib/format";
@@ -169,8 +170,14 @@ export default function DashboardPage() {
           .sort((a, b) => b.monto_cop - a.monto_cop)
       );
 
+      // La consulta a Supabase casi siempre resuelve en milisegundos — sin
+      // esto la pantalla de carga solo parpadea y JM sentía que "carga muy
+      // rápido". Se garantiza un mínimo visible antes de mostrar los datos.
+      const faltante = 900 - (Date.now() - inicio);
+      if (faltante > 0) await new Promise((r) => setTimeout(r, faltante));
       setLoading(false);
     }
+    const inicio = Date.now();
     load();
   }, []);
 
@@ -203,7 +210,7 @@ export default function DashboardPage() {
     [gastosPorCategoria]
   );
 
-  if (loading) return <p className="text-muted">Cargando dashboard...</p>;
+  if (loading) return <DashboardSkeleton />;
 
   // Tenant recién creado, todavía sin nada configurado — mostrar 10
   // tarjetas en cero no ayuda a nadie a arrancar. `mes_activo` vacío es la
@@ -470,6 +477,55 @@ export default function DashboardPage() {
             </div>
           )}
         </Reveal>
+      </div>
+    </div>
+  );
+}
+
+// Se ve la forma real de la página (tarjetas, gráficas) con un brillo
+// cruzando, en vez de un texto plano "Cargando..." que casi no se
+// alcanzaba a ver de lo rápido que resuelve Supabase.
+function DashboardSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-7 w-56" />
+          <Skeleton className="h-4 w-40" />
+        </div>
+        <Skeleton className="h-8 w-32 rounded-full" />
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={i} className="glass rounded-2xl p-4 flex flex-col gap-2">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="h-7 w-24" />
+            <Skeleton className="h-3 w-28" />
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="glass rounded-2xl p-4 flex flex-col gap-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-2 w-full" />
+          <Skeleton className="h-2 w-full" />
+        </div>
+        <div className="glass rounded-2xl p-4 flex flex-col gap-3">
+          <Skeleton className="h-4 w-32" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-full" />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="glass rounded-2xl p-4 flex flex-col gap-3">
+            <Skeleton className="h-4 w-40" />
+            <Skeleton className="h-[220px] w-full" />
+          </div>
+        ))}
       </div>
     </div>
   );

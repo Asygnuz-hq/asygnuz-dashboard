@@ -156,6 +156,35 @@ textarea:focus {
   }
 }
 
+/* Pantalla de carga real — antes era un texto plano "Cargando..." que casi
+   ni se veía (la consulta a Supabase es muy rápida): ahora se ve la forma
+   de la página (tarjetas, gráficas) con este brillo cruzando, y se
+   garantiza un mínimo de tiempo visible (ver el setTimeout en page.tsx)
+   para que no sea solo un parpadeo. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--surface-alt) 25%,
+    color-mix(in srgb, var(--accent-bright) 22%, var(--surface-alt)) 50%,
+    var(--surface-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
 /* Movimiento que nunca para — pedido de JM ("que siempre se mueva, como
    una gráfica que siempre se mueva"). Un brillo que viaja de lado a lado
    sobre el panel, en loop, sugiriendo datos en vivo sin tocar la gráfica
