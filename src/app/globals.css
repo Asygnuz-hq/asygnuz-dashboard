@@ -15,6 +15,12 @@
   --warning: #d97706;
   --success: #1d9e75;
   --logo-filter: brightness(0) invert(1);
+  /* Intensidad del brillo de fondo (glassmorfismo) — el mismo azul se nota
+     mucho más fuerte sobre blanco que sobre negro, así que cada tema tiene
+     su propia intensidad (ver [data-theme="light"] más abajo). */
+  --glow-1: 55%;
+  --glow-2: 42%;
+  --glow-3: 34%;
 }
 
 [data-theme="light"] {
@@ -32,6 +38,9 @@
   --warning: #b45309;
   --success: #178a63;
   --logo-filter: none;
+  --glow-1: 16%;
+  --glow-2: 12%;
+  --glow-3: 10%;
 }
 
 @theme inline {
@@ -52,6 +61,15 @@
 
 body {
   background: var(--background);
+  /* El glassmorfismo (.glass, abajo) desenfoca lo que tiene detrás — sin
+     esto el fondo es negro/blanco plano y el vidrio no se nota: se ve como
+     una caja gris cualquiera. Son manchas de color suaves y fijas (no se
+     mueven al hacer scroll), muy tenues para no estorbar tablas de datos. */
+  background-image:
+    radial-gradient(650px circle at 6% 10%, color-mix(in srgb, var(--accent-bright) var(--glow-1), transparent), transparent 70%),
+    radial-gradient(550px circle at 92% 8%, color-mix(in srgb, var(--accent-bright) var(--glow-2), transparent), transparent 70%),
+    radial-gradient(700px circle at 35% 105%, color-mix(in srgb, var(--accent-bright) var(--glow-3), transparent), transparent 72%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -127,6 +145,7 @@ textarea:focus {
   html,
   body {
     background: #ffffff !important;
+    background-image: none !important;
   }
   table {
     font-size: 9px;
