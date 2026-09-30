@@ -20,7 +20,17 @@ export const crearClienteSchema = z.object({
   responsableEmail: z.string().trim().toLowerCase().email("correo inválido").optional().or(z.literal("")),
 });
 
-export const actualizarProyectoSchema = crearClienteSchema.omit({ nombre: true, slug: true });
+export const actualizarProyectoSchema = crearClienteSchema.omit({ nombre: true, slug: true }).extend({
+  // Vive en tenants (marca del cliente), no en portal_proyecto — se maneja
+  // junto con la ficha por simplicidad de la pantalla, no por el modelo de
+  // datos. "" borra el color (vuelve al verde genérico de ASYGNUZ).
+  colorAcento: z
+    .string()
+    .trim()
+    .regex(/^#[0-9a-fA-F]{6}$/, "color inválido (ej. #16233D)")
+    .optional()
+    .or(z.literal("")),
+});
 
 export const vincularUsuarioSchema = z.object({
   email: z.string().trim().toLowerCase().email("correo inválido"),
@@ -54,3 +64,9 @@ export const crearContenidoSchema = z.object({
 });
 
 export const actualizarContenidoSchema = crearContenidoSchema.partial();
+
+export const crearPilarSchema = z.object({
+  icono: z.string().trim().min(1).max(8).default("🎯"),
+  titulo: texto(80),
+  texto: texto(600),
+});

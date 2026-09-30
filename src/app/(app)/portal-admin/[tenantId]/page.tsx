@@ -6,7 +6,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 
-type Cliente = { id: string; nombre: string; slug: string };
+type Cliente = { id: string; nombre: string; slug: string; color_acento: string | null };
+type Pilar = { id: string; icono: string; titulo: string; texto: string };
 type Proyecto = {
   fecha_inicio: string | null;
   fecha_fin: string | null;
@@ -55,6 +56,8 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
   const { tenantId } = use(params);
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [proyecto, setProyecto] = useState<Proyecto>(PROYECTO_VACIO);
+  const [colorAcento, setColorAcento] = useState("");
+  const [pilares, setPilares] = useState<Pilar[]>([]);
   const [enlaces, setEnlaces] = useState<Enlace[]>([]);
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
   const [archivos, setArchivos] = useState<Archivo[]>([]);
@@ -67,6 +70,8 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
       const data = await api(`/api/portal-admin/clientes/${tenantId}`);
       setCliente(data.cliente);
       setProyecto(data.proyecto ?? PROYECTO_VACIO);
+      setColorAcento(data.cliente?.color_acento ?? "");
+      setPilares(data.pilares ?? []);
       setEnlaces(data.enlaces);
       setReuniones(data.reuniones);
       setArchivos(data.archivos);
@@ -85,11 +90,27 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
   async function guardarProyecto(e: React.FormEvent) {
     e.preventDefault();
     try {
-      await api(`/api/portal-admin/clientes/${tenantId}`, { method: "PUT", body: JSON.stringify(proyecto) });
+      await api(`/api/portal-admin/clientes/${tenantId}`, {
+        method: "PUT",
+        body: JSON.stringify({ ...proyecto, colorAcento }),
+      });
+      setCliente((prev) => (prev ? { ...prev, color_acento: colorAcento || null } : prev));
       setMessage("Ficha del proyecto guardada.");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Error guardando.");
     }
+  }
+
+  async function agregarPilar(icono: string, titulo: string, texto: string) {
+    const data = await api(`/api/portal-admin/clientes/${tenantId}/pilares`, {
+      method: "POST",
+      body: JSON.stringify({ icono, titulo, texto }),
+    });
+    setPilares((prev) => [...prev, data.pilar]);
+  }
+  async function borrarPilar(id: string) {
+    await api(`/api/portal-admin/clientes/${tenantId}/pilares/${id}`, { method: "DELETE" });
+    setPilares((prev) => prev.filter((p) => p.id !== id));
   }
 
   async function vincular(email: string) {
@@ -172,8 +193,22 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
             <Campo label="Responsable ASYGNUZ" value={proyecto.responsable_nombre} onChange={(v) => setProyecto({ ...proyecto, responsable_nombre: v })} />
             <Campo label="Correo del responsable" type="email" value={proyecto.responsable_email} onChange={(v) => setProyecto({ ...proyecto, responsable_email: v })} />
           </div>
+          <label className="flex items-center gap-3 text-sm">
+            Color de marca (el portal de este cliente usa este color en vez del verde de ASYGNUZ)
+            <input
+              type="color"
+              value={colorAcento || "#1d9e75"}
+              onChange={(e) => setColorAcento(e.target.value)}
+              className="h-9 w-14 shrink-0 cursor-pointer p-0.5"
+            />
+            {colorAcento && (
+              <button type="button" onClick={() => setColorAcento("")} className="text-xs text-muted hover:text-foreground">
+                Quitar
+              </button>
+            )}
+          </label>
           <label className="flex flex-col gap-1 text-sm">
-            Descripción del proyecto
+            Descripción del proyecto (resumen corto — el detalle largo va en Pilares, abajo)
             <textarea
               value={proyecto.descripcion ?? ""}
               onChange={(e) => setProyecto({ ...proyecto, descripcion: e.target.value })}
@@ -184,6 +219,10 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
             Guardar ficha
           </button>
         </form>
+      </TarjetaSeccion>
+
+      <TarjetaSeccion icono="🎯" titulo="Pilares estratégicos">
+        <ListaPilares pilares={pilares} onAgregar={agregarPilar} onBorrar={borrarPilar} />
       </TarjetaSeccion>
 
       <TarjetaSeccion icono="🚀" titulo="Parrilla de contenido">
@@ -306,6 +345,66 @@ function ListaEnlaces({
         <input placeholder="https://..." required value={url} onChange={(e) => setUrl(e.target.value)} className="flex-1 min-w-[180px]" />
         <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium">
           Agregar
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function ListaPilares({
+  pilares,
+  onAgregar,
+  onBorrar,
+}: {
+  pilares: Pilar[];
+  onAgregar: (icono: string, titulo: string, texto: string) => Promise<void>;
+  onBorrar: (id: string) => Promise<void>;
+}) {
+  const [icono, setIcono] = useState("🎯");
+  const [titulo, setTitulo] = useState("");
+  const [texto, setTexto] = useState("");
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-xs text-muted">
+        Bloques cortos para explicar la estrategia (posicionamiento, mercado, pauta, blindaje legal...) en vez de un
+        solo párrafo largo.
+      </p>
+      {pilares.length === 0 ? (
+        <p className="text-sm text-muted">Sin pilares todavía.</p>
+      ) : (
+        <div className="grid gap-2 sm:grid-cols-2">
+          {pilares.map((p) => (
+            <div key={p.id} className="rounded-lg bg-surface-alt p-3 text-sm">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-medium">
+                  {p.icono} {p.titulo}
+                </span>
+                <button onClick={() => onBorrar(p.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+                  Borrar
+                </button>
+              </div>
+              <p className="text-xs mt-1 text-muted">{p.texto}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          await onAgregar(icono, titulo, texto);
+          setIcono("🎯");
+          setTitulo("");
+          setTexto("");
+        }}
+        className="flex flex-col gap-2 pt-2 border-t border-border"
+      >
+        <div className="flex gap-2">
+          <input value={icono} onChange={(e) => setIcono(e.target.value)} className="w-14 text-center" maxLength={4} />
+          <input placeholder="Título (ej. Posicionamiento)" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1" />
+        </div>
+        <textarea placeholder="Texto del pilar" required value={texto} onChange={(e) => setTexto(e.target.value)} rows={2} />
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium w-fit">
+          Agregar pilar
         </button>
       </form>
     </div>
