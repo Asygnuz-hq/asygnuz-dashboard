@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { useCountUp } from "@/lib/useCountUp";
 
 export function KpiCard({
@@ -23,7 +24,34 @@ export function KpiCard({
   /** Cómo formatear `count` en cada cuadro de la animación — por defecto un entero con separador de miles. */
   formatCount?: (n: number) => string;
 }) {
-  const animado = useCountUp(count ?? 0, 900);
+  // La tarjeta solo aparece y cuenta cuando entra en pantalla al hacer
+  // scroll (no todas de una vez al cargar) — pedido de JM: "que vaya
+  // cargando a medida que baje". Una sola vez, no se repite al volver a
+  // pasar por ahí.
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setVisible(true);
+      return;
+    }
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -60px 0px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  const animado = useCountUp(visible && count !== undefined ? count : 0, 1500);
   const mostrar =
     count !== undefined
       ? (formatCount ?? ((n: number) => Math.round(n).toLocaleString("es-CO")))(animado)
@@ -33,7 +61,10 @@ export function KpiCard({
   const isGood = delta ? (delta.invertColor ? !isUp : isUp) : true;
 
   return (
-    <div className={`rounded-2xl border p-4 flex flex-col gap-1 ${accentClassName ?? "glass glass-hover"}`}>
+    <div
+      ref={ref}
+      className={`rounded-2xl border p-4 flex flex-col gap-1 ${visible ? "rise-in" : "opacity-0"} ${accentClassName ?? "glass glass-hover"}`}
+    >
       <p className="text-xs uppercase tracking-wide text-muted">{label}</p>
       <p className="font-display text-2xl font-semibold text-foreground tabular-nums">{mostrar}</p>
       {delta && Number.isFinite(delta.pct) && (
