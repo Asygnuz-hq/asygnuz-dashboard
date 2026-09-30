@@ -240,39 +240,60 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <KpiCard label="TRM del día" value={trm ? trm.toLocaleString("es-CO") : "-"} hint="COP/USD" />
-        <KpiCard
-          label="Ingresos del mes"
-          value={formatCOP(mesKpis?.ingresos_cop ?? 0)}
-          delta={
-            delta(mesKpis?.ingresos_cop, mesAnterior?.ingresos_cop) !== undefined
-              ? { pct: delta(mesKpis?.ingresos_cop, mesAnterior?.ingresos_cop)! }
-              : undefined
-          }
-        />
-        <KpiCard
-          label="Gastos del mes"
-          value={formatCOP(mesKpis?.gastos_cop ?? 0)}
-          delta={
-            delta(mesKpis?.gastos_cop, mesAnterior?.gastos_cop) !== undefined
-              ? { pct: delta(mesKpis?.gastos_cop, mesAnterior?.gastos_cop)!, invertColor: true }
-              : undefined
-          }
-        />
-        <KpiCard
-          label="Utilidad neta"
-          value={formatCOP(mesKpis?.utilidad_neta_cop ?? 0)}
-          delta={
-            delta(mesKpis?.utilidad_neta_cop, mesAnterior?.utilidad_neta_cop) !== undefined
-              ? { pct: delta(mesKpis?.utilidad_neta_cop, mesAnterior?.utilidad_neta_cop)! }
-              : undefined
-          }
-        />
-        <KpiCard label="Margen" value={formatPercent(mesKpis?.margen_pct ?? 0)} />
+        <div className="rise-in" style={{ "--i": 0 } as React.CSSProperties}>
+          <KpiCard label="TRM del día" count={trm} formatCount={(n) => n.toLocaleString("es-CO")} value="-" hint="COP/USD" />
+        </div>
+        <div className="rise-in" style={{ "--i": 1 } as React.CSSProperties}>
+          <KpiCard
+            label="Ingresos del mes"
+            count={mesKpis?.ingresos_cop ?? 0}
+            formatCount={formatCOP}
+            value={formatCOP(mesKpis?.ingresos_cop ?? 0)}
+            delta={
+              delta(mesKpis?.ingresos_cop, mesAnterior?.ingresos_cop) !== undefined
+                ? { pct: delta(mesKpis?.ingresos_cop, mesAnterior?.ingresos_cop)! }
+                : undefined
+            }
+          />
+        </div>
+        <div className="rise-in" style={{ "--i": 2 } as React.CSSProperties}>
+          <KpiCard
+            label="Gastos del mes"
+            count={mesKpis?.gastos_cop ?? 0}
+            formatCount={formatCOP}
+            value={formatCOP(mesKpis?.gastos_cop ?? 0)}
+            delta={
+              delta(mesKpis?.gastos_cop, mesAnterior?.gastos_cop) !== undefined
+                ? { pct: delta(mesKpis?.gastos_cop, mesAnterior?.gastos_cop)!, invertColor: true }
+                : undefined
+            }
+          />
+        </div>
+        <div className="rise-in" style={{ "--i": 3 } as React.CSSProperties}>
+          <KpiCard
+            label="Utilidad neta"
+            count={mesKpis?.utilidad_neta_cop ?? 0}
+            formatCount={formatCOP}
+            value={formatCOP(mesKpis?.utilidad_neta_cop ?? 0)}
+            delta={
+              delta(mesKpis?.utilidad_neta_cop, mesAnterior?.utilidad_neta_cop) !== undefined
+                ? { pct: delta(mesKpis?.utilidad_neta_cop, mesAnterior?.utilidad_neta_cop)! }
+                : undefined
+            }
+          />
+        </div>
+        <div className="rise-in" style={{ "--i": 4 } as React.CSSProperties}>
+          <KpiCard
+            label="Margen"
+            count={mesKpis?.margen_pct ?? 0}
+            formatCount={formatPercent}
+            value={formatPercent(mesKpis?.margen_pct ?? 0)}
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-4 justify-center">
+        <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-4 justify-center rise-in" style={{ "--i": 5 } as React.CSSProperties}>
           <p className="text-sm font-medium">Metas del mes activo</p>
           <ProgressBar label="Ingresos" value={mesKpis?.ingresos_cop ?? 0} target={metaIngresos} formatValue={formatCOP} />
           <ProgressBar
@@ -288,7 +309,7 @@ export default function DashboardPage() {
           )}
         </div>
 
-        <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2 justify-center">
+        <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2 justify-center rise-in" style={{ "--i": 6 } as React.CSSProperties}>
           <p className="text-sm font-medium mb-1">Proyección de caja</p>
           <div className="flex justify-between text-sm">
             <span className="text-muted">Por cobrar (pendiente)</span>
@@ -312,32 +333,43 @@ export default function DashboardPage() {
         <p className="text-sm font-medium mb-3">Salud del negocio</p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-          {["COP", "USD", "EUR"].map((moneda) => (
-            <KpiCard
-              key={moneda}
-              label={`Caja en ${moneda}`}
-              value={FORMATTERS_MONEDA[moneda](cajaPorMoneda[moneda] ?? 0)}
-              hint={moneda === "COP" ? "Lo que puedes gastar hoy sin vender divisas" : undefined}
-            />
+          {["COP", "USD", "EUR"].map((moneda, i) => (
+            <div className="rise-in" style={{ "--i": i } as React.CSSProperties} key={moneda}>
+              <KpiCard
+                label={`Caja en ${moneda}`}
+                count={cajaPorMoneda[moneda] ?? 0}
+                formatCount={FORMATTERS_MONEDA[moneda]}
+                value={FORMATTERS_MONEDA[moneda](cajaPorMoneda[moneda] ?? 0)}
+                hint={moneda === "COP" ? "Lo que puedes gastar hoy sin vender divisas" : undefined}
+              />
+            </div>
           ))}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <KpiCard
-            label="Caja total (COP)"
-            value={formatCOP(cajaTotalCop)}
-            hint={
-              runwayMeses !== null
-                ? `Runway: ${runwayMeses.toFixed(1)} meses de gastos fijos`
-                : "Registra tus cuentas en Cuentas / Caja"
-            }
-          />
-          <KpiCard
-            label="Concentración de cliente"
-            value={topCliente ? formatPercent(topCliente.pct) : "-"}
-            hint={topCliente ? `${topCliente.nombre} de tus ingresos vinculados` : "Vincula ingresos a clientes"}
-          />
-          <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2">
+          <div className="rise-in" style={{ "--i": 0 } as React.CSSProperties}>
+            <KpiCard
+              label="Caja total (COP)"
+              count={cajaTotalCop}
+              formatCount={formatCOP}
+              value={formatCOP(cajaTotalCop)}
+              hint={
+                runwayMeses !== null
+                  ? `Runway: ${runwayMeses.toFixed(1)} meses de gastos fijos`
+                  : "Registra tus cuentas en Cuentas / Caja"
+              }
+            />
+          </div>
+          <div className="rise-in" style={{ "--i": 1 } as React.CSSProperties}>
+            <KpiCard
+              label="Concentración de cliente"
+              count={topCliente ? topCliente.pct : undefined}
+              formatCount={formatPercent}
+              value={topCliente ? formatPercent(topCliente.pct) : "-"}
+              hint={topCliente ? `${topCliente.nombre} de tus ingresos vinculados` : "Vincula ingresos a clientes"}
+            />
+          </div>
+          <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2 rise-in" style={{ "--i": 2 } as React.CSSProperties}>
             <p className="text-xs uppercase tracking-wide text-muted">Cartera vencida</p>
             {carteraVencida.length === 0 ? (
               <p className="text-sm text-accent-bright">Sin cobros vencidos.</p>
@@ -358,7 +390,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass glass-hover rounded-2xl p-4">
+        <div className="glass glass-hover rounded-2xl p-4 rise-in" style={{ "--i": 0 } as React.CSSProperties}>
           <p className="text-sm font-medium mb-3">Ingresos vs. Gastos por mes</p>
           <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData}>
@@ -369,13 +401,13 @@ export default function DashboardPage() {
                 contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                 formatter={(value) => formatCOP(Number(value))}
               />
-              <Bar dataKey="Ingresos" fill="#3c5e99" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="Gastos" fill="#d9534f" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Ingresos" fill="#3c5e99" radius={[4, 4, 0, 0]} animationDuration={900} animationEasing="ease-out" />
+              <Bar dataKey="Gastos" fill="#d9534f" radius={[4, 4, 0, 0]} animationDuration={900} animationEasing="ease-out" />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="glass glass-hover rounded-2xl p-4">
+        <div className="glass glass-hover rounded-2xl p-4 rise-in" style={{ "--i": 1 } as React.CSSProperties}>
           <p className="text-sm font-medium mb-3">Utilidad neta histórica</p>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
@@ -386,12 +418,20 @@ export default function DashboardPage() {
                 contentStyle={{ background: chartColors.tooltipBg, border: `1px solid ${chartColors.tooltipBorder}`, color: chartColors.tooltipText }}
                 formatter={(value) => formatCOP(Number(value))}
               />
-              <Line type="monotone" dataKey="Utilidad" stroke="#3c5e99" strokeWidth={2} dot={false} />
+              <Line
+                type="monotone"
+                dataKey="Utilidad"
+                stroke="#3c5e99"
+                strokeWidth={2}
+                dot={false}
+                animationDuration={1100}
+                animationEasing="ease-out"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="glass glass-hover rounded-2xl p-4 lg:col-span-2">
+        <div className="glass glass-hover rounded-2xl p-4 lg:col-span-2 rise-in" style={{ "--i": 2 } as React.CSSProperties}>
           <p className="text-sm font-medium mb-3">Gastos del mes activo por categoría</p>
           {gastosPorCategoria.length === 0 ? (
             <p className="text-sm text-muted">No hay gastos registrados para este mes.</p>
@@ -408,6 +448,8 @@ export default function DashboardPage() {
                     paddingAngle={2}
                     stroke={chartColors.tooltipBg}
                     strokeWidth={2}
+                    animationDuration={900}
+                    animationEasing="ease-out"
                   >
                     {gastosPorCategoria.map((_, i) => (
                       <Cell key={i} fill={PALETTE[i % PALETTE.length]} />

@@ -7,9 +7,19 @@ import { useModuloActivo, type Modulo } from "@/lib/ModuloActivoContext";
 import { useTenantActual } from "@/lib/useTenantActual";
 import { useTenantModulos } from "@/lib/useTenantModulos";
 import { useGestionaPortales } from "@/lib/useGestionaPortales";
+import {
+  IconoClientes,
+  IconoFinanzas,
+  IconoCobros,
+  IconoMarketing,
+  IconoCrm,
+  IconoOperacion,
+  IconoEquipo,
+  IconoEmergencia,
+} from "@/components/IconosSidebar";
 
 type NavItem = { href: string; label: string };
-type NavSection = { title: string; icono?: string; modulo: Modulo; items: NavItem[] };
+type NavSection = { title: string; icono?: React.ReactNode; modulo: Modulo; items: NavItem[] };
 
 // Cada sección pertenece a un solo módulo — nada queda "para todos". Deudas
 // Personales y Casos del Terremoto salieron de aquí a propósito (pedido de
@@ -20,7 +30,7 @@ const sections: NavSection[] = [
   { title: "", modulo: "financiero", items: [{ href: "/", label: "Dashboard" }] },
   {
     title: "Clientes",
-    icono: "👥",
+    icono: <IconoClientes />,
     modulo: "financiero",
     items: [
       { href: "/clientes", label: "Clientes" },
@@ -29,7 +39,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Finanzas",
-    icono: "💰",
+    icono: <IconoFinanzas />,
     modulo: "financiero",
     items: [
       { href: "/cuentas", label: "Cuentas / Caja" },
@@ -46,7 +56,7 @@ const sections: NavSection[] = [
     // Antes vivía dentro de "Diseñadores" en Marketing — es plata que deben
     // los clientes, no contenido de pauta, así que es Financiero.
     title: "Cobros",
-    icono: "🧾",
+    icono: <IconoCobros />,
     modulo: "financiero",
     items: [
       { href: "/disenadores/cobros-clientes", label: "Cobros a Clientes" },
@@ -55,7 +65,7 @@ const sections: NavSection[] = [
   },
   {
     title: "Marketing",
-    icono: "📣",
+    icono: <IconoMarketing />,
     modulo: "marketing_pauta",
     items: [
       { href: "/marketing", label: "Marketing" },
@@ -65,13 +75,13 @@ const sections: NavSection[] = [
   },
   {
     title: "CRM",
-    icono: "🔗",
+    icono: <IconoCrm />,
     modulo: "crm",
     items: [{ href: "/crm", label: "Leads y Pipeline" }],
   },
   {
     title: "Operación",
-    icono: "📊",
+    icono: <IconoOperacion />,
     modulo: "operacion",
     items: [
       { href: "/requisitos", label: "Requisitos de Negocio" },
@@ -87,7 +97,7 @@ const sections: NavSection[] = [
     // Control Mensual y Resumen por Diseñador son la base para pagarle a
     // cada diseñador — van con Nómina, no con Marketing.
     title: "Equipo",
-    icono: "🧑‍🤝‍🧑",
+    icono: <IconoEquipo />,
     modulo: "nomina",
     items: [
       { href: "/equipo", label: "Equipo / RRHH" },
@@ -115,7 +125,7 @@ const sections: NavSection[] = [
 
 const seccionEmergencia: NavSection = {
   title: "Emergencia",
-  icono: "🚨",
+  icono: <IconoEmergencia />,
   modulo: "financiero",
   items: [{ href: "/emergencia", label: "Casos del Terremoto" }],
 };
@@ -149,10 +159,10 @@ export function Sidebar() {
       </div>
 
       {visibleSections.map((section, i) => (
-        <div key={i} className="flex flex-col gap-1">
+        <div key={i} className="flex flex-col gap-1 rise-in" style={{ "--i": i } as React.CSSProperties}>
           {section.title && (
             <p className="px-2 text-xs uppercase tracking-wide text-muted mb-1 flex items-center gap-1.5">
-              {section.icono && <span aria-hidden>{section.icono}</span>}
+              {section.icono}
               {section.title}
             </p>
           )}
