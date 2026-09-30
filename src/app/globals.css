@@ -156,6 +156,38 @@ textarea:focus {
   }
 }
 
+/* Movimiento que nunca para — pedido de JM ("que siempre se mueva, como
+   una gráfica que siempre se mueva"). Un brillo que viaja de lado a lado
+   sobre el panel, en loop, sugiriendo datos en vivo sin tocar la gráfica
+   real de Recharts (evita pelearse con su propia animación de entrada). */
+@keyframes pulso-viaja {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+.pulso-vivo {
+  position: relative;
+  overflow: hidden;
+}
+.pulso-vivo::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-bright) 35%, transparent), transparent);
+  animation: pulso-viaja 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pulso-vivo::after {
+    display: none;
+  }
+}
+
 /* Reportes en PDF (window.print desde /metricas/reporte y
    /metricas/clientes): sin esto, el navegador imprime en carta vertical y
    las tablas anchas (muchas columnas de métricas) quedan cortadas al borde
@@ -204,5 +236,8 @@ textarea:focus {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+  .pulso-vivo::after {
+    display: none !important;
   }
 }

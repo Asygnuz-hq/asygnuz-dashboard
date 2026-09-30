@@ -393,7 +393,7 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </Reveal>
 
-        <Reveal className="glass glass-hover rounded-2xl p-4" indice={1}>
+        <Reveal className="glass glass-hover pulso-vivo rounded-2xl p-4" indice={1}>
           <p className="text-sm font-medium mb-3">Utilidad neta histórica</p>
           <ResponsiveContainer width="100%" height={280}>
             <LineChart data={chartData}>
