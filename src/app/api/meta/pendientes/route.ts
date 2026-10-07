@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 
 // Devuelve la lista de cuentas/portafolios disponibles para una conexión
 // pendiente (justo después del login de Facebook, antes de confirmar cuál
@@ -12,6 +13,8 @@ export async function GET(request: Request) {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");

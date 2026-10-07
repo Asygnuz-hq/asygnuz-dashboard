@@ -24,19 +24,14 @@ export type EspoOpportunity = {
   closeDate: string | null;
 };
 
-function env(name: string): string {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(`Falta la variable de entorno ${name} (configuración de EspoCRM). Revisa .env.local.`);
-  }
-  return value;
-}
+// Credenciales del EspoCRM del tenant de la sesión — las resuelve
+// getEspoConfigForCurrentUser() (tabla tenant_espocrm), nunca variables de
+// entorno globales (Kaneo #34).
+export type EspoConfig = { apiUrl: string; apiKey: string };
 
-async function espoFetch<T>(path: string): Promise<T> {
-  const baseUrl = env("ESPOCRM_API_URL");
-  const apiKey = env("ESPOCRM_API_KEY");
-  const res = await fetch(`${baseUrl}${path}`, {
-    headers: { "X-Api-Key": apiKey },
+async function espoFetch<T>(config: EspoConfig, path: string): Promise<T> {
+  const res = await fetch(`${config.apiUrl}${path}`, {
+    headers: { "X-Api-Key": config.apiKey },
     // Datos operativos: no cachear entre requests.
     cache: "no-store",
   });
@@ -50,12 +45,13 @@ async function espoFetch<T>(path: string): Promise<T> {
 // EspoCRM pagina de a 200 por defecto; los volúmenes actuales (decenas/cientos
 // de leads) caben en un par de vueltas. Se trae todo para agregar en memoria,
 // igual que el cliente de Kaneo.
-async function fetchAll<T>(entity: string, select: string): Promise<T[]> {
+async function fetchAll<T>(config: EspoConfig, entity: string, select: string): Promise<T[]> {
   const pageSize = 200;
   let offset = 0;
   const out: T[] = [];
   for (;;) {
     const resp = await espoFetch<{ total: number; list: T[] }>(
+      config,
       `/api/v1/${entity}?maxSize=${pageSize}&offset=${offset}&select=${select}&orderBy=createdAt&order=desc`
     );
     out.push(...resp.list);
@@ -65,15 +61,17 @@ async function fetchAll<T>(entity: string, select: string): Promise<T[]> {
   return out;
 }
 
-export async function fetchLeads(): Promise<EspoLead[]> {
+export async function fetchLeads(config: EspoConfig): Promise<EspoLead[]> {
   return fetchAll<EspoLead>(
+    config,
     "Lead",
     "id,name,accountName,status,source,phoneNumber,website,description,createdAt,modifiedAt"
   );
 }
 
-export async function fetchOpportunities(): Promise<EspoOpportunity[]> {
+export async function fetchOpportunities(config: EspoConfig): Promise<EspoOpportunity[]> {
   return fetchAll<EspoOpportunity>(
+    config,
     "Opportunity",
     "id,name,stage,amount,amountCurrency,createdAt,closeDate"
   );

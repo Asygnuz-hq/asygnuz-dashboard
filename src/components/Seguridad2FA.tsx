@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export function Seguridad2FA() {
+// onActivado: lo usa /activar-2fa (alta obligatoria) para seguir al
+// dashboard en cuanto el factor queda verificado.
+export function Seguridad2FA({ onActivado }: { onActivado?: () => void } = {}) {
   const [loading, setLoading] = useState(true);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [enrolling, setEnrolling] = useState(false);
@@ -69,6 +71,10 @@ export function Seguridad2FA() {
     setPendingFactorId(null);
     setCode("");
     setMessage("2FA activado correctamente.");
+    if (onActivado) {
+      onActivado();
+      return;
+    }
     loadFactors();
   }
 

@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { estadoMfa } from "@/lib/api/mfa";
 import type { KaneoConfig } from "./client";
 import { KaneoHttpError } from "./errores";
 import { FUENTE_PRINCIPAL, type KaneoFuente } from "./fuentes";
@@ -40,6 +41,11 @@ async function tenantDeLaSesion() {
   } = await supabase.auth.getUser();
   if (!user) {
     throw new KaneoConfigError("No autorizado", 401);
+  }
+  // Estas rutas usan service_role contra Kaneo: exigir 2FA completo antes
+  // de resolver credenciales (Kaneo #37).
+  if ((await estadoMfa(supabase)) !== "ok") {
+    throw new KaneoConfigError("Completa la verificación en dos pasos.", 401);
   }
 
   const { data: tenantRows } = await supabase.rpc("tenant_actual");

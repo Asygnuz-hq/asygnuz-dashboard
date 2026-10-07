@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 
 type PriceResult = { price: number | null; changePct: number | null };
 
@@ -55,6 +56,8 @@ export async function GET(request: Request) {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const { searchParams } = new URL(request.url);
   const yahooSymbols = (searchParams.get("yahoo") ?? "").split(",").filter(Boolean);

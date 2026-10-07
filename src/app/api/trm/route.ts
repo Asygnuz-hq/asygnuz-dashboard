@@ -1,5 +1,6 @@
 import { fetchTrmOficial } from "@/lib/trmOficial";
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 
 export async function GET(request: Request) {
   const supabase = await createClient();
@@ -9,6 +10,8 @@ export async function GET(request: Request) {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const { searchParams } = new URL(request.url);
   const fecha = searchParams.get("fecha") ?? new Date().toISOString().slice(0, 10);

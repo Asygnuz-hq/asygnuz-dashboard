@@ -38,7 +38,7 @@ export function SeccionCrecimiento({
       {loading && <p className="text-sm text-muted">Cargando datos de EspoCRM…</p>}
       {error && (
         <p className="text-sm text-danger">
-          No se pudo leer EspoCRM: {error}. Revisa que EspoCRM esté corriendo y las variables ESPOCRM_* en .env.local.
+          No se pudo leer EspoCRM: {error}. Revisa que EspoCRM esté corriendo y que tu organización tenga sus credenciales en tenant_espocrm.
         </p>
       )}
 

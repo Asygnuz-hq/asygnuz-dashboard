@@ -1,7 +1,10 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
-export async function middleware(request: NextRequest) {
+// Next 16 renombró la convención "middleware" a "proxy" (corre en Node, no
+// en Edge). Es la pieza que exige sesión, 2FA y módulos contratados: la
+// lógica vive en updateSession, este archivo solo la engancha.
+export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 
