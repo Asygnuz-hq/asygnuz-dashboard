@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { derivarModulo, MODULO_HOME } from "@/lib/moduloDeRuta";
 import { modulosDelTenant, primerModuloHabilitado } from "@/lib/modulosServidor";
+import { estadoMfa } from "@/lib/api/mfa";
 
 export async function updateSession(request: NextRequest) {
   // /agenda es la landing pública de Cal.com para pautar — no requiere
@@ -46,28 +47,28 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user) {
-    // Sesión creada con contraseña pero sin completar el segundo factor
-    // todavía (ej. cerró la pestaña a mitad del login) — no dejar pasar
-    // a rutas protegidas hasta que termine la verificación en /login.
-    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    const requiereSegundoFactor = aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2";
-
-    if (requiereSegundoFactor && !isLoginPage) {
+    // 2FA (ver src/lib/api/mfa.ts):
+    // - "verificar": entró con contraseña pero no completó el segundo
+    //   factor (ej. cerró la pestaña a mitad del login) -> /login.
+    // - "enrolar": no tiene factor y el alta es obligatoria -> /activar-2fa.
+    // Ninguna ruta protegida se abre hasta que el estado sea "ok".
+    const estado = await estadoMfa(supabase);
+    const enActivar2fa = request.nextUrl.pathname.startsWith("/activar-2fa");
+    const redirigirA = (destino: string) => {
       const url = request.nextUrl.clone();
-      url.pathname = "/login";
+      url.pathname = destino;
+      url.search = "";
       return NextResponse.redirect(url);
-    }
+    };
 
-    if (isLoginPage && !requiereSegundoFactor) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/";
-      return NextResponse.redirect(url);
-    }
+    if (estado === "verificar" && !isLoginPage) return redirigirA("/login");
+    if (estado === "enrolar" && !enActivar2fa) return redirigirA("/activar-2fa");
+    if (estado === "ok" && (isLoginPage || enActivar2fa)) return redirigirA("/");
 
     // Usuario externo del caso del terremoto — solo puede ver /emergencia,
     // sin importar qué otra ruta pida. Aislamiento de UI; el aislamiento
     // real de datos vive en las políticas RLS (schema-emergencia-terremoto.sql).
-    if (!requiereSegundoFactor && !isLoginPage) {
+    if (estado === "ok") {
       // RPC en vez de leer la tabla directo: es_emergencia() es
       // security definer y no queda bloqueada por su propia política RLS
       // (que le niega a este mismo usuario leer profiles).

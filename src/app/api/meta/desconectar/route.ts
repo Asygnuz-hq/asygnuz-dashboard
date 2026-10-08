@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 import { bodyValido } from "@/lib/api/validarBody";
 import { desconectarConexionSchema } from "@/lib/meta/schemas";
 
@@ -12,6 +13,8 @@ export async function POST(request: Request) {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const validado = await bodyValido(request, desconectarConexionSchema);
   if (validado instanceof Response) return validado;

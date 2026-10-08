@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 
-// Lista los clientes ya conectados a Meta — nunca devuelve el access_token,
+// Lista los clientes ya conectados a Meta — nunca devuelve el access_token
+// ni el export_token (ese lo pide un admin en /api/meta/conexiones/[id]/export-token),
 // solo lo necesario para mostrar la lista y elegir uno.
 export async function GET() {
   const supabase = await createClient();
@@ -10,11 +12,13 @@ export async function GET() {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const { data, error } = await supabase
     .from("meta_conexiones")
     .select(
-      "id, cliente_nombre, ad_account_id, instagram_business_id, instagram_username, token_expira_en, export_token, actualizado_en"
+      "id, cliente_nombre, ad_account_id, instagram_business_id, instagram_username, token_expira_en, actualizado_en"
     )
     .order("cliente_nombre");
 

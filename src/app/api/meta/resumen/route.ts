@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 import { listarConexionesConTokens } from "@/lib/meta/conexion";
 import { fetchInsights, fetchInstagramMedia, fetchMonedaCuentaAnuncios, type MetaConexion } from "@/lib/meta/client";
 
@@ -29,6 +30,8 @@ export async function GET() {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const conexiones = await listarConexionesConTokens(supabase);
 

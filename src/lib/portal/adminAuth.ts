@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 
 // Todas las rutas /api/portal-admin/* gestionan datos de OTROS tenants
 // (los clientes de Growth), así que usan el cliente de servicio
@@ -16,6 +17,8 @@ export async function requireAsygnuzAdmin(): Promise<{ userId: string } | Respon
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const { data: puede } = await supabase.rpc("gestiona_portales");
   if (puede !== true) {

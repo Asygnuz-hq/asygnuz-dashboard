@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
+import { useIsAdmin } from "@/lib/useIsAdmin";
 import type { MetaInsightRow, InstagramMedia, PuntoDiario, InstagramDemografia, FacebookPost } from "@/lib/meta/client";
 
 type Conexion = {
@@ -24,7 +25,6 @@ type Conexion = {
   instagram_business_id: string | null;
   instagram_username: string | null;
   token_expira_en: string | null;
-  export_token: string | null;
 };
 
 const ACCION_LABEL: Record<string, string> = {
@@ -400,6 +400,23 @@ export default function MetricasClientesPage() {
   const [postsFacebook, setPostsFacebook] = useState<FacebookPost[] | null>(null);
   const [errorFacebook, setErrorFacebook] = useState<string | null>(null);
   const [sheetsCopiado, setSheetsCopiado] = useState(false);
+  const esAdmin = useIsAdmin();
+
+  // El export_token ya no viene en la lista de conexiones (Kaneo #40): un
+  // admin lo pide (GET) o lo rota (POST) al momento de copiarlo.
+  async function copiarParaSheets(conexionId: string, rotar: boolean) {
+    if (rotar && !confirm("Se genera un enlace nuevo y el que ya está pegado en Google Sheets deja de funcionar. ¿Continuar?")) return;
+    const res = await fetch(`/api/meta/conexiones/${conexionId}/export-token`, { method: rotar ? "POST" : "GET" });
+    const json = await res.json().catch(() => null);
+    if (!res.ok || !json?.token) {
+      alert(json?.error ?? "No se pudo obtener el enlace para Sheets.");
+      return;
+    }
+    const url = `${window.location.origin}/api/meta/exportar-publico?token=${json.token}`;
+    await navigator.clipboard.writeText(`=IMPORTDATA("${url}")`);
+    setSheetsCopiado(true);
+    setTimeout(() => setSheetsCopiado(false), 2000);
+  }
   const [notas, setNotas] = useState<Record<string, string>>({});
   const [guardandoNota, setGuardandoNota] = useState<string | null>(null);
   const [desconectando, setDesconectando] = useState<string | null>(null);
@@ -763,18 +780,22 @@ export default function MetricasClientesPage() {
               >
                 Descargar Excel
               </button>
-              {seleccionado.export_token && (
-                <button
-                  onClick={() => {
-                    const url = `${window.location.origin}/api/meta/exportar-publico?token=${seleccionado.export_token}`;
-                    navigator.clipboard.writeText(`=IMPORTDATA("${url}")`);
-                    setSheetsCopiado(true);
-                    setTimeout(() => setSheetsCopiado(false), 2000);
-                  }}
-                  className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt"
-                >
-                  {sheetsCopiado ? "¡Copiado!" : "Copiar para Sheets"}
-                </button>
+              {esAdmin && (
+                <>
+                  <button
+                    onClick={() => copiarParaSheets(seleccionado.id, false)}
+                    className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt"
+                  >
+                    {sheetsCopiado ? "¡Copiado!" : "Copiar para Sheets"}
+                  </button>
+                  <button
+                    onClick={() => copiarParaSheets(seleccionado.id, true)}
+                    title="Genera un enlace nuevo; el anterior deja de funcionar"
+                    className="text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt"
+                  >
+                    Rotar enlace
+                  </button>
+                </>
               )}
               <button
                 onClick={() => window.print()}

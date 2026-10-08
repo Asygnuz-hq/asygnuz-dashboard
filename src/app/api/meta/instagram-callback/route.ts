@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { bloqueoMfa } from "@/lib/api/mfa";
 import { validarState } from "@/lib/metaState";
 import {
   exchangeInstagramCode,
@@ -18,6 +19,8 @@ export async function GET(request: Request) {
   if (!user) {
     return Response.json({ error: "No autorizado" }, { status: 401 });
   }
+  const bloqueo = await bloqueoMfa(supabase);
+  if (bloqueo) return bloqueo;
 
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");

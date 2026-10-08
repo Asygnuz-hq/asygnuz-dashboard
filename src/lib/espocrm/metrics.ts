@@ -1,4 +1,4 @@
-import { fetchLeads, fetchOpportunities } from "./client";
+import { fetchLeads, fetchOpportunities, type EspoConfig } from "./client";
 
 // Únicas etapas reales del pipeline hoy (ver Opportunity.stage en EspoCRM,
 // reetiquetado manualmente 2026-08-17 sobre los valores internos de fábrica
@@ -52,8 +52,8 @@ function extraerCategoria(descripcion: string | null): string | null {
   return m ? m[1] : null;
 }
 
-export async function calcularMetricasCrecimiento(): Promise<MetricasCrecimiento> {
-  const [leads, opportunities] = await Promise.all([fetchLeads(), fetchOpportunities()]);
+export async function calcularMetricasCrecimiento(config: EspoConfig): Promise<MetricasCrecimiento> {
+  const [leads, opportunities] = await Promise.all([fetchLeads(config), fetchOpportunities(config)]);
 
   const inicioSemana = inicioDeSemana().getTime();
   const inicioMes = inicioDeMes().getTime();
