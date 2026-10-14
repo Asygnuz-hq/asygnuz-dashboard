@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
+import { KpiCard } from "@/components/KpiCard";
+import { Reveal } from "@/components/Reveal";
 import { DataTable } from "@/components/data-table/DataTable";
 import { CambioDivisa } from "@/components/CambioDivisa";
 import type { ColumnDef } from "@/components/data-table/types";
@@ -183,17 +185,14 @@ export default function CuentasPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl">
         {totalesPorMoneda.map(({ moneda, total }) => (
-          <div key={moneda} className="rounded-lg border border-border bg-surface p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Caja total {moneda}</p>
-            <p className="text-2xl font-bold">{FORMATTERS[moneda](total)}</p>
-          </div>
+          <KpiCard key={moneda} label={`Caja total ${moneda}`} value={FORMATTERS[moneda](total)} count={total} formatCount={FORMATTERS[moneda]} />
         ))}
       </div>
 
       <CambioDivisa onDone={refreshAll} />
 
       {hayRendimientos && (
-        <div className="rounded-lg border border-border bg-surface p-4 max-w-xl">
+        <Reveal className="glass glass-hover rounded-2xl p-4 max-w-xl">
           <p className="text-sm font-medium mb-3">Rendimientos acumulados</p>
           <div className="grid grid-cols-3 gap-4 text-sm">
             {MONEDAS_CUENTA.map((moneda) => (
@@ -203,13 +202,13 @@ export default function CuentasPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Reveal>
       )}
 
       {fx.length > 0 && (
         <div className="flex flex-col gap-4">
-          {fx.map((r) => (
-            <div key={r.moneda} className="rounded-lg border border-border bg-surface p-4 max-w-2xl">
+          {fx.map((r, i) => (
+            <Reveal key={r.moneda} className="glass glass-hover rounded-2xl p-4 max-w-2xl" indice={i}>
               <p className="text-sm font-medium mb-3">Rentabilidad de cambio de divisa ({r.moneda})</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div>
@@ -284,13 +283,13 @@ export default function CuentasPage() {
                     </div>
                   );
                 })()}
-            </div>
+            </Reveal>
           ))}
         </div>
       )}
 
       {!loading && saldos.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-border">
+        <div className="overflow-x-auto glass rounded-2xl">
           <table className="min-w-full text-sm">
             <thead>
               <tr className="bg-surface-alt text-left text-xs uppercase tracking-wide text-muted">

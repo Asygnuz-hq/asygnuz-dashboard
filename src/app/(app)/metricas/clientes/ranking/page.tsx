@@ -87,7 +87,7 @@ export default function RankingClientesPage() {
       )}
 
       {ordenados.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+        <div className="overflow-x-auto glass rounded-2xl">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">

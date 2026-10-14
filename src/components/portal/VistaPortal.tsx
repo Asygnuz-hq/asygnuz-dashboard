@@ -88,19 +88,19 @@ export function VistaPortal({
         {(proyecto?.tipo_proyecto || duracion || proyecto?.responsable_nombre) && (
           <div className="grid gap-4 sm:grid-cols-3">
             {proyecto?.tipo_proyecto && (
-              <div className="rounded bg-surface p-5" style={{ borderTop: `3px solid ${acento}` }}>
+              <div className="glass glass-hover rounded-2xl p-5" style={{ borderTop: `3px solid ${acento}` }}>
                 <p className="text-xs uppercase tracking-wide text-muted">Alcance</p>
                 <p className="mt-1.5 text-base font-semibold">{proyecto.tipo_proyecto}</p>
               </div>
             )}
             {duracion && (
-              <div className="rounded bg-surface p-5" style={{ borderTop: `3px solid ${acento}` }}>
+              <div className="glass glass-hover rounded-2xl p-5" style={{ borderTop: `3px solid ${acento}` }}>
                 <p className="text-xs uppercase tracking-wide text-muted">Duración</p>
                 <p className="mt-1.5 text-base font-semibold">{duracion}</p>
               </div>
             )}
             {proyecto?.responsable_nombre && (
-              <div className="rounded bg-surface p-5" style={{ borderTop: `3px solid ${acento}` }}>
+              <div className="glass glass-hover rounded-2xl p-5" style={{ borderTop: `3px solid ${acento}` }}>
                 <p className="text-xs uppercase tracking-wide text-muted">Responsable ASYGNUZ</p>
                 <p className="mt-1.5 text-base font-semibold">{proyecto.responsable_nombre}</p>
               </div>
@@ -115,7 +115,7 @@ export function VistaPortal({
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {pilares.map((pl) => (
-                <div key={pl.id} className="rounded bg-surface p-5 flex flex-col gap-2">
+                <div key={pl.id} className="glass glass-hover rounded-2xl p-5 flex flex-col gap-2">
                   <div className="flex items-center gap-2.5">
                     <span
                       className="flex h-7 w-7 items-center justify-center rounded-full text-sm"

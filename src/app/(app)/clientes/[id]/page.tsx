@@ -80,9 +80,9 @@ export default function ClienteDetailPage() {
       />
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <KpiCard label="Ingresos totales" value={formatCOP(rentabilidad?.ingresos_cop ?? 0)} />
-        <KpiCard label="Costo diseñador" value={formatCOP(rentabilidad?.costo_disenador_cop ?? 0)} />
-        <KpiCard label="Margen" value={formatCOP(rentabilidad?.margen_cop ?? 0)} />
+        <KpiCard label="Ingresos totales" value={formatCOP(rentabilidad?.ingresos_cop ?? 0)} count={rentabilidad?.ingresos_cop ?? 0} formatCount={formatCOP} />
+        <KpiCard label="Costo diseñador" value={formatCOP(rentabilidad?.costo_disenador_cop ?? 0)} count={rentabilidad?.costo_disenador_cop ?? 0} formatCount={formatCOP} />
+        <KpiCard label="Margen" value={formatCOP(rentabilidad?.margen_cop ?? 0)} count={rentabilidad?.margen_cop ?? 0} formatCount={formatCOP} />
       </div>
 
       <div>

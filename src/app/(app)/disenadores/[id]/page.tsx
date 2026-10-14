@@ -82,10 +82,20 @@ export default function DisenadorDetailPage() {
       <PageHeader title={disenador.nombre} subtitle={disenador.activo ? "Activo" : "Inactivo"} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard label="Total histórico pagado" value={formatCOP(totalPagado)} />
-        <KpiCard label="Piezas entregadas" value={String(totalPiezas)} />
-        <KpiCard label="Calificación promedio" value={calificacionProm !== null ? calificacionProm.toFixed(1) : "-"} />
-        <KpiCard label="% Aprobadas" value={pctAprobadas !== null ? `${(pctAprobadas * 100).toFixed(0)}%` : "-"} />
+        <KpiCard label="Total histórico pagado" value={formatCOP(totalPagado)} count={totalPagado} formatCount={formatCOP} />
+        <KpiCard label="Piezas entregadas" value={String(totalPiezas)} count={totalPiezas} />
+        <KpiCard
+          label="Calificación promedio"
+          value={calificacionProm !== null ? calificacionProm.toFixed(1) : "-"}
+          count={calificacionProm ?? 0}
+          formatCount={(n) => (calificacionProm !== null ? n.toFixed(1) : "-")}
+        />
+        <KpiCard
+          label="% Aprobadas"
+          value={pctAprobadas !== null ? `${(pctAprobadas * 100).toFixed(0)}%` : "-"}
+          count={(pctAprobadas ?? 0) * 100}
+          formatCount={(n) => (pctAprobadas !== null ? `${n.toFixed(0)}%` : "-")}
+        />
       </div>
 
       <div>

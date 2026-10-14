@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
+import { Reveal } from "@/components/Reveal";
 import { DataTable } from "@/components/data-table/DataTable";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP } from "@/lib/format";
@@ -85,13 +86,13 @@ export default function ClientesPage() {
       {!loading && clientes.length > 0 && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl">
-            <KpiCard label="Clientes totales" value={String(clientes.length)} />
-            <KpiCard label="Clientes activos" value={String(activos)} />
-            <KpiCard label="Ingresos vinculados" value={formatCOP(totalIngresos)} />
+            <KpiCard label="Clientes totales" value={String(clientes.length)} count={clientes.length} />
+            <KpiCard label="Clientes activos" value={String(activos)} count={activos} />
+            <KpiCard label="Ingresos vinculados" value={formatCOP(totalIngresos)} count={totalIngresos} formatCount={formatCOP} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-lg border border-border bg-surface p-4">
+            <Reveal className="glass glass-hover rounded-2xl p-4" indice={0}>
               <p className="text-sm font-medium mb-3">Ranking de clientes por ingresos</p>
               {ranking.length === 0 ? (
                 <p className="text-sm text-muted">Vincula ingresos a un cliente para ver el ranking.</p>
@@ -109,17 +110,17 @@ export default function ClientesPage() {
                       }}
                       formatter={(value) => formatCOP(Number(value))}
                     />
-                    <Bar dataKey="Ingresos" fill="#3c5e99" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="Ingresos" fill="#3c5e99" radius={[0, 4, 4, 0]} animationDuration={1400} animationEasing="ease-out" />
                   </BarChart>
                 </ResponsiveContainer>
               )}
-            </div>
+            </Reveal>
 
-            <div className="rounded-lg border border-border bg-surface p-4">
+            <Reveal className="glass glass-hover rounded-2xl p-4" indice={1}>
               <p className="text-sm font-medium mb-3">Clientes por estado</p>
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={estadoCounts} dataKey="cantidad" nameKey="estado" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                  <Pie data={estadoCounts} dataKey="cantidad" nameKey="estado" innerRadius={50} outerRadius={90} paddingAngle={2} animationDuration={1400} animationEasing="ease-out">
                     {estadoCounts.map((e, i) => (
                       <Cell key={i} fill={ESTADO_COLOR[e.estado] ?? "#8fa8c7"} />
                     ))}
@@ -142,7 +143,7 @@ export default function ClientesPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Reveal>
           </div>
         </>
       )}

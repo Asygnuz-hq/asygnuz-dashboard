@@ -107,7 +107,7 @@ export function Seguridad2FA({ onActivado }: { onActivado?: () => void } = {}) {
   if (loading) return null;
 
   return (
-    <div className="rounded-lg border border-border bg-surface p-4 max-w-sm flex flex-col gap-3">
+    <div className="glass rounded-2xl p-4 max-w-sm flex flex-col gap-3">
       <p className="text-sm font-medium">Verificación en dos pasos (2FA)</p>
 
       {factorId && !enrolling && (

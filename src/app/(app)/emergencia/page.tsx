@@ -259,34 +259,42 @@ export default function EmergenciaPage() {
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <KpiCard label="Casos totales" value={String(total)} accentClassName="bg-[#F0EAD6]/60 border-[#C9BFA0]/60" />
+            <KpiCard label="Casos totales" value={String(total)} count={total} accentClassName="bg-[#F0EAD6]/60 border-[#C9BFA0]/60" />
             <KpiCard
               label="Activos"
               value={String(pendientes.length)}
+              count={pendientes.length}
               hint="Sin cerrar todavía"
               accentClassName="bg-[#BFDBFE]/30 border-[#60A5FA]/50"
             />
             <KpiCard
               label="Urgentes activos"
               value={String(urgentes.length)}
+              count={urgentes.length}
               hint="Prioridad Urgente"
               accentClassName="bg-[#FED7AA]/35 border-[#F0975A]/50"
             />
             <KpiCard
               label="Cerrados"
               value={`${(pctCerrado * 100).toFixed(0)}%`}
+              count={pctCerrado * 100}
+              formatCount={(n) => `${n.toFixed(0)}%`}
               hint={`${cerrados.length} de ${total}`}
               accentClassName="bg-[#BBF7D0]/30 border-[#4ADE80]/50"
             />
             <KpiCard
               label="Tiempo sin cerrar"
               value={promedioSinAtender < 1 ? "< 1 día" : `${promedioSinAtender.toFixed(1)} días`}
+              count={promedioSinAtender}
+              formatCount={(n) => (n < 1 ? "< 1 día" : `${n.toFixed(1)} días`)}
               hint={masAntiguoSinAtender > 0 ? `el más antiguo lleva ${masAntiguoSinAtender}d` : undefined}
               accentClassName="bg-[#FDE68A]/30 border-[#F5C542]/50"
             />
             <KpiCard
               label="Ítems entregados"
               value={itemsTotal > 0 ? `${((itemsEntregados / itemsTotal) * 100).toFixed(0)}%` : "—"}
+              count={itemsTotal > 0 ? (itemsEntregados / itemsTotal) * 100 : 0}
+              formatCount={(n) => (itemsTotal > 0 ? `${n.toFixed(0)}%` : "—")}
               hint={itemsTotal > 0 ? `${itemsEntregados} de ${itemsTotal}` : "sin ítems todavía"}
               accentClassName="bg-[#DDD6FE]/35 border-[#A78BFA]/50"
             />

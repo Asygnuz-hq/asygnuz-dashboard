@@ -63,7 +63,7 @@ export default function PortalAdminPage() {
         subtitle="Crea el portal de un cliente y gestiona su parrilla de contenido, enlaces, reuniones y archivos."
       />
 
-      <form onSubmit={handleCrear} className="flex flex-col gap-3 max-w-sm rounded-lg border border-border bg-surface p-4">
+      <form onSubmit={handleCrear} className="flex flex-col gap-3 max-w-sm glass rounded-2xl p-4">
         <p className="text-xs uppercase tracking-wide text-muted">Nuevo cliente</p>
         <label className="flex flex-col gap-1 text-sm">
           Nombre
@@ -117,7 +117,7 @@ export default function PortalAdminPage() {
               <Link
                 key={c.id}
                 href={`/portal-admin/${c.id}`}
-                className="rounded-md border border-border bg-surface p-3 text-sm hover:bg-surface-alt"
+                className="glass glass-hover rounded-2xl p-3 text-sm block"
               >
                 <span className="font-medium">{c.nombre}</span>{" "}
                 <span className="text-muted">({c.slug})</span>

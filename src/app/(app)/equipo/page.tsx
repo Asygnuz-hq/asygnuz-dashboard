@@ -54,9 +54,9 @@ export default function EquipoPage() {
       {!loading && costo && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <KpiCard label="Mes activo" value={formatMonth(costo.mes)} />
-          <KpiCard label="Costo fijo (equipo)" value={formatCOP(costo.costo_fijo_cop)} />
-          <KpiCard label="Costo diseñadores (por pieza)" value={formatCOP(costo.costo_disenadores_cop)} />
-          <KpiCard label="Costo total de equipo" value={formatCOP(costo.costo_total_cop)} />
+          <KpiCard label="Costo fijo (equipo)" value={formatCOP(costo.costo_fijo_cop)} count={costo.costo_fijo_cop} formatCount={formatCOP} />
+          <KpiCard label="Costo diseñadores (por pieza)" value={formatCOP(costo.costo_disenadores_cop)} count={costo.costo_disenadores_cop} formatCount={formatCOP} />
+          <KpiCard label="Costo total de equipo" value={formatCOP(costo.costo_total_cop)} count={costo.costo_total_cop} formatCount={formatCOP} />
         </div>
       )}
 

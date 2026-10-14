@@ -86,7 +86,7 @@ export default function ParrillaClientePage() {
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {filtrado.map((c) => (
-            <div key={c.id} className="rounded-xl border border-border bg-surface p-4 flex flex-col gap-2">
+            <div key={c.id} className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2">
               <Chip label={ESTADO_LABEL[c.estado]} color={ESTADO_COLOR[c.estado]} />
               <p className="font-medium text-sm">{c.titulo}</p>
               <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted">

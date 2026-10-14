@@ -167,7 +167,7 @@ export default function PayrollTable({ month, year }: { month: number; year: num
   if (isLoading) return <div className="p-4 text-center text-muted">Calculando nómina desde base de datos...</div>;
 
   return (
-    <div className="rounded-md border border-border bg-surface">
+    <div className="glass rounded-2xl">
       <div className="p-4 flex flex-col md:flex-row md:items-center justify-between border-b border-border gap-4">
         <div>
           <h2 className="text-lg font-semibold">Nómina (Cálculo Detallado PILA)</h2>

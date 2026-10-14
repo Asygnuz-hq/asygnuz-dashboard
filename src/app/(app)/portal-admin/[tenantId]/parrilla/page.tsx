@@ -126,7 +126,7 @@ export default function ParrillaAdminPage({ params }: { params: Promise<{ tenant
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {filtrado.map((c) => (
-            <div key={c.id} className="rounded-xl border border-border bg-surface p-4 flex flex-col gap-2">
+            <div key={c.id} className="glass glass-hover rounded-2xl p-4 flex flex-col gap-2">
               <div className="flex items-start justify-between gap-2">
                 <Chip label={ESTADO_LABEL[c.estado]} color={ESTADO_COLOR[c.estado]} />
                 <button onClick={() => borrar(c.id)} className="text-xs text-muted hover:text-foreground shrink-0">
@@ -195,7 +195,7 @@ function FormularioContenido({ onAgregar }: { onAgregar: (payload: Record<string
           setEnviando(false);
         }
       }}
-      className="rounded-xl border border-border bg-surface p-4 grid gap-3 sm:grid-cols-2"
+      className="glass rounded-2xl p-4 grid gap-3 sm:grid-cols-2"
     >
       <input placeholder="Título" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="sm:col-span-2" />
       <input placeholder="Tipo (reel, carrusel, story...)" value={tipo} onChange={(e) => setTipo(e.target.value)} />

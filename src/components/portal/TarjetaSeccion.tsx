@@ -16,8 +16,8 @@ export function TarjetaSeccion({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border bg-surface overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-surface-alt">
+    <section className="glass glass-hover rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-surface-alt/60">
         <span className="text-lg leading-none" aria-hidden>
           {icono}
         </span>
