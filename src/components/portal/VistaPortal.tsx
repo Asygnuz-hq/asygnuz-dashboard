@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
+import { SeccionAvance, type EstadoAvance } from "./SeccionAvance";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
 
@@ -39,6 +40,7 @@ export function VistaPortal({
   reuniones,
   hrefParrilla,
   onDescargarArchivo,
+  avance,
 }: {
   nombreTenant: string | null;
   colorAcento: string | null;
@@ -50,6 +52,9 @@ export function VistaPortal({
   reuniones: ReunionVista[];
   hrefParrilla: string;
   onDescargarArchivo: (archivo: ArchivoVista) => void;
+  // Panel de Avance (Kaneo + Meta + parrilla). Opcional: si no se pasa, el
+  // portal se ve como antes.
+  avance?: EstadoAvance;
 }) {
   const acento = colorAcento || "var(--success)";
   const duracion = proyecto && (proyecto.fecha_inicio || proyecto.fecha_fin)
@@ -107,6 +112,8 @@ export function VistaPortal({
             )}
           </div>
         )}
+
+        {avance && <SeccionAvance estado={avance} acento={acento} />}
 
         {pilares.length > 0 && (
           <section className="flex flex-col gap-4">
