@@ -48,7 +48,9 @@ export const crearReunionSchema = z.object({
   notas: textoOpcional(4000),
 });
 
-export const ESTADOS_CONTENIDO = ["grabacion", "revision", "edicion", "publicado"] as const;
+// Orden = flujo real de una pieza: idea → grabación → edición → revisión del
+// cliente → programada en la red → publicada.
+export const ESTADOS_CONTENIDO = ["idea", "grabacion", "edicion", "revision", "programado", "publicado"] as const;
 
 export const crearContenidoSchema = z.object({
   titulo: texto(160),
@@ -61,6 +63,12 @@ export const crearContenidoSchema = z.object({
   // publicación ya hecha. Son cosas distintas, con su propio campo cada una.
   linkReferencia: z.string().trim().url("URL inválida").optional().or(z.literal("")),
   link: z.string().trim().url("URL inválida").optional().or(z.literal("")),
+  hora: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "hora inválida (HH:MM)").optional().or(z.literal("")),
+  pilar: textoOpcional(60),
+  copy: textoOpcional(4000),
+  // Carpeta/archivo de Drive con las piezas listas para publicar — el
+  // portal no guarda los archivos pesados (reels > 20 MB), solo el enlace.
+  linkDrive: z.string().trim().url("URL inválida").optional().or(z.literal("")),
 });
 
 export const actualizarContenidoSchema = crearContenidoSchema.partial();

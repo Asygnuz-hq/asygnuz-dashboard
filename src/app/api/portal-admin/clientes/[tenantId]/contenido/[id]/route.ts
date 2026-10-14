@@ -14,7 +14,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ tena
 
   const validado = await bodyValido(request, actualizarContenidoSchema);
   if (validado instanceof Response) return validado;
-  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link } = validado.data;
+  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link, hora, pilar, copy, linkDrive } =
+    validado.data;
 
   const cambios: Record<string, unknown> = { actualizado_en: new Date().toISOString() };
   if (titulo !== undefined) cambios.titulo = titulo;
@@ -25,6 +26,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ tena
   if (notas !== undefined) cambios.notas = notas || null;
   if (linkReferencia !== undefined) cambios.link_referencia = linkReferencia || null;
   if (link !== undefined) cambios.link = link || null;
+  if (hora !== undefined) cambios.hora = hora || null;
+  if (pilar !== undefined) cambios.pilar = pilar || null;
+  if (copy !== undefined) cambios.copy = copy || null;
+  if (linkDrive !== undefined) cambios.link_drive = linkDrive || null;
 
   const admin = createAdminClient();
   const { data, error } = await admin

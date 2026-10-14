@@ -42,16 +42,20 @@ export function Chip({ label, color }: { label: string; color: string }) {
 }
 
 export const ESTADO_LABEL: Record<string, string> = {
+  idea: "Idea",
   grabacion: "Grabación",
-  revision: "Revisión",
   edicion: "Edición",
+  revision: "Revisión",
+  programado: "Programado",
   publicado: "Publicado",
 };
 // Mismo criterio de color que labels.ts de Kaneo: gris = por hacer, ámbar =
 // en revisión, azul = en curso, verde = terminado.
 export const ESTADO_COLOR: Record<string, string> = {
+  idea: "var(--muted)",
   grabacion: "var(--muted)",
-  revision: "var(--warning)",
   edicion: "var(--accent-bright)",
+  revision: "var(--warning)",
+  programado: "#a78bfa",
   publicado: "var(--success)",
 };

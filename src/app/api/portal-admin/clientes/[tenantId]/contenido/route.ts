@@ -12,7 +12,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ ten
 
   const validado = await bodyValido(request, crearContenidoSchema);
   if (validado instanceof Response) return validado;
-  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link } = validado.data;
+  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link, hora, pilar, copy, linkDrive } =
+    validado.data;
 
   const admin = createAdminClient();
   const { count } = await admin
@@ -32,6 +33,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ ten
       notas: notas || null,
       link_referencia: linkReferencia || null,
       link: link || null,
+      hora: hora || null,
+      pilar: pilar || null,
+      copy: copy || null,
+      link_drive: linkDrive || null,
       orden: count ?? 0,
     })
     .select()
