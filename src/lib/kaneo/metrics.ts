@@ -94,10 +94,10 @@ function inicioDeSemana(iso: string): string {
   return lunes.toISOString().slice(0, 10);
 }
 
-async function tareasDelWorkspace(config: KaneoConfig, workspaceId: string) {
+async function tareasDelWorkspace(config: KaneoConfig, workspaceId: string, excluir: Set<string>) {
   const proyectos = await fetchProjects(config, workspaceId);
   const clasificados = proyectos
-    .filter((p) => !p.archivedAt)
+    .filter((p) => !p.archivedAt && !excluir.has(p.id))
     .map((p) => ({ proyecto: p, frente: frenteDeProyecto(p.name) }))
     .filter(
       (x): x is { proyecto: (typeof proyectos)[number]; frente: "Growth" | "Software" } =>
@@ -140,8 +140,14 @@ async function construirEpics(config: KaneoConfig, tareas: KaneoTask[]): Promise
   return epics;
 }
 
-export async function calcularMetricas(config: KaneoConfig, workspaceId: string): Promise<MetricasKaneo> {
-  const porProyectoData = await tareasDelWorkspace(config, workspaceId);
+// excluir: ids de proyectos que quien consulta no debe ver (los amarrados
+// a un Portal de Cliente, para quien no gestiona portales).
+export async function calcularMetricas(
+  config: KaneoConfig,
+  workspaceId: string,
+  excluir: Set<string> = new Set()
+): Promise<MetricasKaneo> {
+  const porProyectoData = await tareasDelWorkspace(config, workspaceId, excluir);
 
   const porProyecto: ProyectoMetrica[] = await Promise.all(
     porProyectoData.map(async ({ proyecto, tareas, frente }) => {
