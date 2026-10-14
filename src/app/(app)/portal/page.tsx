@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useTenantActual } from "@/lib/useTenantActual";
+import { useAvance } from "@/lib/portal/useAvance";
 import {
   VistaPortal,
   type ProyectoVista,
@@ -17,6 +18,7 @@ type ArchivoConRuta = ArchivoVista & { storage_path: string };
 
 export default function PortalClientePage() {
   const tenant = useTenantActual();
+  const avance = useAvance("/api/portal/avance");
   const [loading, setLoading] = useState(true);
   const [proyecto, setProyecto] = useState<ProyectoVista | null>(null);
   const [pilares, setPilares] = useState<PilarVista[]>([]);
@@ -75,6 +77,7 @@ export default function PortalClientePage() {
       reuniones={reuniones}
       hrefParrilla="/portal/parrilla"
       onDescargarArchivo={descargar}
+      avance={avance}
     />
   );
 }

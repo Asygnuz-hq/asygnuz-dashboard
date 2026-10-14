@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { useAvance } from "@/lib/portal/useAvance";
 import {
   VistaPortal,
   type ProyectoVista,
@@ -24,6 +25,7 @@ async function api(url: string) {
 // crearse (o pedir prestada) una sesión con el login de ese cliente.
 export default function VistaPreviaPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = use(params);
+  const avance = useAvance(`/api/portal-admin/clientes/${tenantId}/avance`);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [nombreTenant, setNombreTenant] = useState<string | null>(null);
@@ -88,6 +90,7 @@ export default function VistaPreviaPage({ params }: { params: Promise<{ tenantId
         reuniones={reuniones}
         hrefParrilla={`/portal-admin/${tenantId}/parrilla`}
         onDescargarArchivo={descargar}
+        avance={avance}
       />
     </div>
   );

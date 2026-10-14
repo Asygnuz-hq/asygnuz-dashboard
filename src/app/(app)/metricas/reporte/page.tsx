@@ -88,7 +88,7 @@ export default function ReportePage() {
               ["Atrasadas", metricas.totalAtrasadas],
               ["Sin asignar", metricas.sinAsignar],
             ].map(([label, value]) => (
-              <div key={label as string} className="rounded-lg border border-border p-3 print:border-black/20">
+              <div key={label as string} className="glass glass-hover rounded-2xl p-3 print:border-black/20">
                 <p className="text-xs uppercase tracking-wide text-muted">{label}</p>
                 <p className="text-xl font-bold">{value}</p>
               </div>
@@ -156,7 +156,7 @@ export default function ReportePage() {
                 {metricas.porProyecto
                   .filter((p) => p.epics.length > 0)
                   .map((p) => (
-                    <div key={p.id} className="break-inside-avoid rounded-lg border border-border p-3 print:border-black/20">
+                    <div key={p.id} className="break-inside-avoid glass glass-hover rounded-2xl p-3 print:border-black/20">
                       <p className="font-medium mb-2">
                         {p.nombre} <span className="text-muted font-normal">({p.frente})</span>
                       </p>

@@ -104,7 +104,7 @@ export function CambioDivisa({ onDone }: { onDone: () => void }) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-3 max-w-md"
+      className="glass rounded-2xl p-4 flex flex-col gap-3 max-w-md"
     >
       <p className="text-sm font-medium">Cambio de Divisa</p>
       <p className="text-xs text-muted">

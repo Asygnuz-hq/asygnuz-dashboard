@@ -134,10 +134,10 @@ export default function LoginPage() {
 
   if (factorId) {
     return (
-      <div className="flex flex-1 items-center justify-center min-h-screen bg-background px-4">
+      <div className="flex flex-1 items-center justify-center min-h-screen px-4">
         <form
           onSubmit={handleVerify}
-          className="w-full max-w-sm rounded-lg border border-border bg-surface p-8 flex flex-col gap-4"
+          className="w-full max-w-sm glass rounded-2xl p-8 flex flex-col gap-4"
         >
           <div className="mb-2">
             <p className="text-sm font-medium">Verificación en dos pasos</p>
@@ -171,10 +171,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center min-h-screen bg-background px-4">
+    <div className="flex flex-1 items-center justify-center min-h-screen px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-lg border border-border bg-surface p-8 flex flex-col gap-4"
+        className="w-full max-w-sm glass rounded-2xl p-8 flex flex-col gap-4"
       >
         <div className="mb-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}

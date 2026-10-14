@@ -98,7 +98,7 @@ export default function EmployeesTable() {
   if (isLoading) return <div className="p-4 text-center text-muted">Cargando empleados...</div>;
 
   return (
-    <div className="rounded-md border border-border bg-surface">
+    <div className="glass rounded-2xl">
       <div className="p-4 flex items-center justify-between border-b border-border">
         <h2 className="text-lg font-semibold">Directorio de Empleados</h2>
         <button

@@ -15,7 +15,7 @@ export default function AnaliticaPage() {
       {DASHBOARD_URL ? (
         <iframe
           src={DASHBOARD_URL}
-          className="w-full flex-1 min-h-[70vh] rounded-lg border border-border"
+          className="w-full flex-1 min-h-[70vh] glass rounded-2xl"
           title="Dashboard de PostHog"
         />
       ) : (

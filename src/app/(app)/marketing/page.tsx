@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
+import { Reveal } from "@/components/Reveal";
 import { DataTable } from "@/components/data-table/DataTable";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP, formatPercent } from "@/lib/format";
@@ -86,13 +87,18 @@ export default function MarketingPage() {
       {!loading && resumen.length > 0 && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-2xl">
-            <KpiCard label="Total invertido" value={formatCOP(totalInvertido)} />
-            <KpiCard label="Campañas registradas" value={String(resumen.length)} />
-            <KpiCard label="ROI promedio" value={roiPromedio !== null ? formatPercent(roiPromedio) : "-"} />
+            <KpiCard label="Total invertido" value={formatCOP(totalInvertido)} count={totalInvertido} formatCount={formatCOP} />
+            <KpiCard label="Campañas registradas" value={String(resumen.length)} count={resumen.length} />
+            <KpiCard
+              label="ROI promedio"
+              value={roiPromedio !== null ? formatPercent(roiPromedio) : "-"}
+              count={(roiPromedio ?? 0) * 100}
+              formatCount={(n) => (roiPromedio !== null ? formatPercent(n / 100) : "-")}
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-lg border border-border bg-surface p-4">
+            <Reveal className="glass glass-hover rounded-2xl p-4" indice={0}>
               <p className="text-sm font-medium mb-3">Inversión por plataforma</p>
               {inversionPorPlataforma.length === 0 ? (
                 <p className="text-sm text-muted">Sin inversión registrada aún.</p>
@@ -100,7 +106,7 @@ export default function MarketingPage() {
                 <>
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
-                      <Pie data={inversionPorPlataforma} dataKey="valor" nameKey="plataforma" innerRadius={50} outerRadius={90} paddingAngle={2}>
+                      <Pie data={inversionPorPlataforma} dataKey="valor" nameKey="plataforma" innerRadius={50} outerRadius={90} paddingAngle={2} animationDuration={1400} animationEasing="ease-out">
                         {inversionPorPlataforma.map((_, i) => (
                           <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
                         ))}
@@ -126,9 +132,9 @@ export default function MarketingPage() {
                   </ul>
                 </>
               )}
-            </div>
+            </Reveal>
 
-            <div className="rounded-lg border border-border bg-surface p-4">
+            <Reveal className="glass glass-hover rounded-2xl p-4" indice={1}>
               <p className="text-sm font-medium mb-3">ROI promedio por plataforma</p>
               {roiPorPlataforma.length === 0 ? (
                 <p className="text-sm text-muted">Registra ingresos generados en una campaña para ver el ROI.</p>
@@ -146,11 +152,11 @@ export default function MarketingPage() {
                       }}
                       formatter={(value) => `${Number(value).toFixed(1)}%`}
                     />
-                    <Bar dataKey="ROI promedio" fill="#3c5e99" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="ROI promedio" fill="#3c5e99" radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out" />
                   </BarChart>
                 </ResponsiveContainer>
               )}
-            </div>
+            </Reveal>
           </div>
         </>
       )}

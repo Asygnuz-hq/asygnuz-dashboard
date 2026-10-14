@@ -14,6 +14,7 @@ import { FuenteSelector } from "@/components/kaneo/FuenteSelector";
 import { KpiCard } from "@/components/KpiCard";
 import { PageHeader } from "@/components/PageHeader";
 import { ProgressBar } from "@/components/ProgressBar";
+import { Reveal } from "@/components/Reveal";
 import { useKaneoFuentes } from "@/lib/kaneo/useKaneoFuentes";
 import { useRequisitos } from "@/lib/kaneo/useRequisitos";
 import { CHART_COLORS, useTheme } from "@/lib/useTheme";
@@ -82,16 +83,19 @@ export default function RequisitosPage() {
       {data && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KpiCard label="Requisitos" value={String(data.totalRequisitos)} />
-            <KpiCard label="Historias de usuario" value={String(data.totalHistorias)} />
+            <KpiCard label="Requisitos" value={String(data.totalRequisitos)} count={data.totalRequisitos} />
+            <KpiCard label="Historias de usuario" value={String(data.totalHistorias)} count={data.totalHistorias} />
             <KpiCard
               label="Avance real (prom.)"
               value={`${data.avanceGlobalReal}%`}
+              count={data.avanceGlobalReal}
+              formatCount={(n) => `${n.toFixed(0)}%`}
               hint={`Planificado ${data.avanceGlobalPlan}%`}
             />
             <KpiCard
               label="Atrasados"
               value={String(data.atrasados)}
+              count={data.atrasados}
               hint="Vencidos y por debajo del 100%"
               accentClassName={
                 data.atrasados > 0 ? "bg-danger/10 border-danger/40" : undefined
@@ -100,11 +104,11 @@ export default function RequisitosPage() {
           </div>
 
           {data.totalRequisitos > 0 && (
-            <div>
+            <Reveal>
               <h2 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                 Requisitos por estado de trazabilidad
               </h2>
-              <div className="h-56 rounded-lg border border-border bg-surface p-4">
+              <div className="h-56 glass glass-hover pulso-vivo rounded-2xl p-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={data.porTrazabilidad}>
                     <CartesianGrid strokeDasharray="3 3" stroke={chartColors.grid} />
@@ -121,7 +125,7 @@ export default function RequisitosPage() {
                         color: chartColors.tooltipText,
                       }}
                     />
-                    <Bar dataKey="total" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+                    <Bar dataKey="total" radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out">
                       {data.porTrazabilidad.map((s) => (
                         <Cell key={s.estado} fill={TRAZ_COLOR[s.estado] ?? "#8b93a6"} />
                       ))}
@@ -129,7 +133,7 @@ export default function RequisitosPage() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
+            </Reveal>
           )}
 
           <div className="flex flex-col gap-3">
@@ -145,7 +149,7 @@ export default function RequisitosPage() {
             {data.requisitos.map((r) => (
               <div
                 key={r.id}
-                className="rounded-lg border border-border bg-surface p-4 flex flex-col gap-3"
+                className="glass glass-hover rounded-2xl p-4 flex flex-col gap-3"
               >
                 <div className="flex items-center gap-2 flex-wrap">
                   {r.numero != null && (

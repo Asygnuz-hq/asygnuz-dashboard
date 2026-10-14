@@ -37,7 +37,10 @@ export default async function AppLayout({
           <IdleLogout />
           <Sidebar />
           <div className="flex-1 flex flex-col min-w-0">
-            <header className="print:hidden flex items-center justify-between border-b border-border bg-surface px-6 py-3 gap-4">
+            {/* Barra superior translúcida estilo Instagram (pedido de JM): sin
+                línea ni fondo sólido, flota sobre el contenido con un blur
+                suave y se queda fija arriba al hacer scroll. */}
+            <header className="print:hidden sticky top-0 z-30 flex items-center justify-between bg-background/40 backdrop-blur-md px-6 py-3 gap-4">
               <span className="text-sm text-muted shrink-0">
                 {user?.user_metadata?.full_name ?? user?.email}
               </span>

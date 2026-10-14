@@ -129,6 +129,150 @@ textarea:focus {
   box-shadow: inset 3px 0 0 var(--accent-bright);
 }
 
+/* Riel colapsado (pedido de JM, 2026-10): panel de vidrio angosto con solo
+   íconos. La sección donde estás parado tiene un HUECO real recortado en el
+   panel (mask), abierto hacia el contenido con bordes redondeados, por donde
+   se ve el fondo — no es un color pegado encima. El hueco se desliza entre
+   íconos animando --notch-y. Los íconos viven en una capa aparte (no dentro
+   del elemento enmascarado) para que no se recorten junto con el panel. */
+@property --notch-y {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 0px;
+}
+.riel {
+  position: relative;
+  width: 76px;
+  flex-shrink: 0;
+  transition: --notch-y 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.riel-fondo {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  -webkit-mask-image: linear-gradient(#000, #000),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 88'%3E%3Cpath fill-rule='evenodd' d='M0 0H76V88H0Z M76 8A14 14 0 0 1 62 22L30 22A22 22 0 0 0 30 66L62 66A14 14 0 0 1 76 80L78 80L78 8Z'/%3E%3C/svg%3E"),
+    linear-gradient(#000, #000);
+  mask-image: linear-gradient(#000, #000),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 76 88'%3E%3Cpath fill-rule='evenodd' d='M0 0H76V88H0Z M76 8A14 14 0 0 1 62 22L30 22A22 22 0 0 0 30 66L62 66A14 14 0 0 1 76 80L78 80L78 8Z'/%3E%3C/svg%3E"),
+    linear-gradient(#000, #000);
+  -webkit-mask-size: 100% var(--notch-y), 76px 88px, 100% calc(100% - var(--notch-y) - 88px);
+  mask-size: 100% var(--notch-y), 76px 88px, 100% calc(100% - var(--notch-y) - 88px);
+  -webkit-mask-position: 0 0, 0 var(--notch-y), 0 100%;
+  mask-position: 0 0, 0 var(--notch-y), 0 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+.riel-sin-ola .riel-fondo {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+.riel-trazo {
+  position: absolute;
+  left: 0;
+  top: var(--notch-y);
+  width: 76px;
+  height: 88px;
+  pointer-events: none;
+  z-index: 5;
+  overflow: visible;
+  stroke: color-mix(in srgb, var(--accent-bright) 70%, var(--foreground));
+}
+.riel-luz {
+  position: absolute;
+  left: 4px;
+  top: calc(var(--notch-y) + 4px);
+  width: 80px;
+  height: 80px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0.55;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--accent-bright) 75%, var(--foreground)) 0%,
+    color-mix(in srgb, var(--accent-bright) 40%, transparent) 40%,
+    transparent 70%
+  );
+}
+.riel-iconos {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 0;
+}
+.riel-ico {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  border-radius: 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  transition: color 0.2s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.riel-ico:hover {
+  color: var(--foreground);
+  transform: scale(1.15);
+}
+.riel-ico-activo {
+  color: var(--foreground);
+}
+.riel-tip {
+  position: absolute;
+  left: calc(100% + 18px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-4px);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: var(--foreground);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 40;
+}
+.riel-ico:hover .riel-tip,
+.riel-ico:focus-visible .riel-tip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+@keyframes riel-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.4) translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+.riel-popover {
+  transform-origin: left center;
+  animation: riel-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .riel {
+    transition: none;
+  }
+  .riel-ico,
+  .riel-popover {
+    transition: none;
+    animation: none;
+  }
+}
+
 .font-display {
   font-family: "Space Grotesk", sans-serif;
 }

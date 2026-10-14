@@ -7,6 +7,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
+import { Reveal } from "@/components/Reveal";
 import { DataTable } from "@/components/data-table/DataTable";
 import type { ColumnDef } from "@/components/data-table/types";
 import { formatCOP, formatUSD, formatEUR, formatMonth } from "@/lib/format";
@@ -88,12 +89,12 @@ export default function CuentaDetailPage() {
       <PageHeader title={cuenta.nombre} subtitle={`${cuenta.tipo} · ${cuenta.moneda} · ${cuenta.activa ? "Activa" : "Inactiva"}`} />
 
       <div className="grid grid-cols-2 max-w-md gap-4">
-        <KpiCard label="Saldo actual" value={formatMoneda(saldo?.saldo_actual ?? 0)} />
-        <KpiCard label="Rendimientos acumulados" value={formatMoneda(totalRendimientos)} />
+        <KpiCard label="Saldo actual" value={formatMoneda(saldo?.saldo_actual ?? 0)} count={saldo?.saldo_actual ?? 0} formatCount={formatMoneda} />
+        <KpiCard label="Rendimientos acumulados" value={formatMoneda(totalRendimientos)} count={totalRendimientos} formatCount={formatMoneda} />
       </div>
 
       {rendimientosPorMes.length > 0 && (
-        <div className="rounded-lg border border-border bg-surface p-4 max-w-2xl">
+        <Reveal className="glass glass-hover rounded-2xl p-4 max-w-2xl">
           <p className="text-sm font-medium mb-3">Rendimientos por mes</p>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={rendimientosPorMes}>
@@ -108,10 +109,10 @@ export default function CuentaDetailPage() {
                 }}
                 formatter={(value) => formatMoneda(Number(value))}
               />
-              <Bar dataKey="Rendimiento" fill="#5c8a72" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="Rendimiento" fill="#5c8a72" radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out" />
             </BarChart>
           </ResponsiveContainer>
-        </div>
+        </Reveal>
       )}
 
       <div>

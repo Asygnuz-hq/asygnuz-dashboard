@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer,
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
+import { Reveal } from "@/components/Reveal";
 import { DataTable } from "@/components/data-table/DataTable";
 import { VincularCuenta, type ItemVinculable } from "@/components/VincularCuenta";
 import type { ColumnDef } from "@/components/data-table/types";
@@ -99,25 +100,32 @@ export default function InversionesPage() {
       {!loading && inversiones.length > 0 && (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <KpiCard label="Total invertido" value={formatCOP(totalInvertido)} />
-            <KpiCard label="Valor actual" value={formatCOP(totalActual)} />
+            <KpiCard label="Total invertido" value={formatCOP(totalInvertido)} count={totalInvertido} formatCount={formatCOP} />
+            <KpiCard label="Valor actual" value={formatCOP(totalActual)} count={totalActual} formatCount={formatCOP} />
             <KpiCard
               label="Ganancia / Pérdida"
               value={formatCOP(gananciaTotal)}
+              count={gananciaTotal}
+              formatCount={formatCOP}
               hint={gananciaTotal >= 0 ? "En positivo" : "En negativo"}
             />
-            <KpiCard label="Retorno total" value={retornoTotal !== null ? formatPercent(retornoTotal) : "-"} />
+            <KpiCard
+              label="Retorno total"
+              value={retornoTotal !== null ? formatPercent(retornoTotal) : "-"}
+              count={(retornoTotal ?? 0) * 100}
+              formatCount={(n) => (retornoTotal !== null ? formatPercent(n / 100) : "-")}
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="rounded-lg border border-border bg-surface p-4">
+            <Reveal className="glass glass-hover rounded-2xl p-4" indice={0}>
               <p className="text-sm font-medium mb-3">Composición del portafolio (valor actual)</p>
               {composicion.length === 0 ? (
                 <p className="text-sm text-muted">Registra un valor actual para ver la composición.</p>
               ) : (
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={composicion} dataKey="valor" nameKey="tipo" innerRadius={55} outerRadius={100} paddingAngle={2}>
+                    <Pie data={composicion} dataKey="valor" nameKey="tipo" innerRadius={55} outerRadius={100} paddingAngle={2} animationDuration={1400} animationEasing="ease-out">
                       {composicion.map((_, i) => (
                         <Cell key={i} fill={PALETTE[i % PALETTE.length]} />
                       ))}
@@ -142,9 +150,9 @@ export default function InversionesPage() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </Reveal>
 
-            <div className="rounded-lg border border-border bg-surface p-4">
+            <Reveal className="glass glass-hover rounded-2xl p-4" indice={1}>
               <p className="text-sm font-medium mb-3">Invertido vs. Valor actual por activo</p>
               <ResponsiveContainer width="100%" height={Math.max(260, comparativo.length * 40)}>
                 <BarChart data={comparativo} layout="vertical" margin={{ left: 10 }}>
@@ -159,11 +167,11 @@ export default function InversionesPage() {
                     }}
                     formatter={(value) => formatCOP(Number(value))}
                   />
-                  <Bar dataKey="Invertido" fill="#8fa8c7" radius={[0, 4, 4, 0]} />
-                  <Bar dataKey="Valor Actual" fill="#3c5e99" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="Invertido" fill="#8fa8c7" radius={[0, 4, 4, 0]} animationDuration={1400} animationEasing="ease-out" />
+                  <Bar dataKey="Valor Actual" fill="#3c5e99" radius={[0, 4, 4, 0]} animationDuration={1400} animationEasing="ease-out" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </Reveal>
           </div>
         </>
       )}

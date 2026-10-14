@@ -427,7 +427,7 @@ export function DataTable({
         </p>
       )}
 
-      <div className="hidden md:block overflow-x-auto rounded-lg border border-border">
+      <div className="hidden md:block overflow-x-auto glass rounded-2xl">
         <table className="min-w-full text-sm">
           <thead>
             <tr className="bg-surface-alt text-left text-xs uppercase tracking-wide text-muted">

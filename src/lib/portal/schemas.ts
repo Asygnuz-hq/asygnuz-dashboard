@@ -70,3 +70,12 @@ export const crearPilarSchema = z.object({
   titulo: texto(80),
   texto: texto(600),
 });
+
+// Fuentes del Panel de Avance de un cliente: qué proyectos de Kaneo y qué
+// conexiones de Meta son suyos. Se reemplaza la lista completa en cada PUT.
+export const fuentesAvanceSchema = z.object({
+  kaneoProyectos: z
+    .array(z.object({ id: z.string().trim().min(1).max(64), nombre: texto(160) }))
+    .max(20),
+  metaConexiones: z.array(z.string().uuid()).max(20),
+});

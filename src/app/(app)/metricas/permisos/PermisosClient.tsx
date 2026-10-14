@@ -62,7 +62,7 @@ function ProyectoCard({
   }
 
   return (
-    <div className="rounded-lg border border-border p-4 flex flex-col gap-3">
+    <div className="glass glass-hover rounded-2xl p-4 flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-medium">{item.proyecto.name}</p>

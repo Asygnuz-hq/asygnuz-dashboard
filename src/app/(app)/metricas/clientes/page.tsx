@@ -674,7 +674,7 @@ export default function MetricasClientesPage() {
         <p className="text-sm rounded-md border border-border bg-surface p-3 text-danger print:hidden">{errorConexion}</p>
       )}
 
-      <div className="rounded-lg border border-border bg-surface p-4 flex items-end gap-3 print:hidden">
+      <div className="glass glass-hover rounded-2xl p-4 flex items-end gap-3 print:hidden">
         <label className="flex flex-col gap-1 text-sm flex-1 max-w-sm">
           Nombre del cliente
           <input
@@ -916,7 +916,7 @@ export default function MetricasClientesPage() {
             )}
 
             {momentos.length > 0 && (
-              <div className="rounded-lg border border-border bg-surface p-4">
+              <div className="glass glass-hover rounded-2xl p-4">
                 <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                   Mejor momento para publicar (según el histórico de esta cuenta)
                 </h3>
@@ -948,7 +948,7 @@ export default function MetricasClientesPage() {
                       href={m.permalink}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                      className="glass glass-hover rounded-2xl overflow-hidden text-xs flex flex-col"
                     >
                       {m.imagenUrl && (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -989,7 +989,7 @@ export default function MetricasClientesPage() {
                   <KpiCard label="CPM ponderado" value={moneda(String(cpmPonderado), monedaAds)} />
                 </div>
 
-                <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+                <div className="overflow-x-auto glass rounded-2xl">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
@@ -1048,7 +1048,7 @@ export default function MetricasClientesPage() {
                       href={p.permalink}
                       target="_blank"
                       rel="noreferrer"
-                      className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                      className="glass glass-hover rounded-2xl overflow-hidden text-xs flex flex-col"
                     >
                       {p.imagenUrl && (
                         /* eslint-disable-next-line @next/next/no-img-element */
@@ -1107,7 +1107,7 @@ export default function MetricasClientesPage() {
               )}
 
               {porTipo.length > 1 && (
-                <div className="rounded-lg border border-border bg-surface p-4">
+                <div className="glass glass-hover rounded-2xl p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                     Rendimiento por tipo de contenido
                   </h3>
@@ -1125,7 +1125,7 @@ export default function MetricasClientesPage() {
                         formatter={(v) => `${Number(v).toFixed(1)}%`}
                         contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", fontSize: 12 }}
                       />
-                      <Bar dataKey="tasaPromedio" name="Interacción promedio" fill="var(--accent-bright)" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="tasaPromedio" name="Interacción promedio" fill="var(--accent-bright)" radius={[4, 4, 0, 0]} animationDuration={1400} animationEasing="ease-out" />
                     </BarChart>
                   </ResponsiveContainer>
                   <div className="overflow-x-auto mt-2">
@@ -1171,7 +1171,7 @@ export default function MetricasClientesPage() {
                         href={m.permalink}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                        className="glass glass-hover rounded-2xl overflow-hidden text-xs flex flex-col"
                       >
                         {m.imagenUrl && (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -1199,7 +1199,7 @@ export default function MetricasClientesPage() {
                         href={m.permalink}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-danger flex flex-col opacity-80"
+                        className="glass glass-hover rounded-2xl overflow-hidden text-xs flex flex-col opacity-80"
                       >
                         {m.imagenUrl && (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -1255,7 +1255,7 @@ export default function MetricasClientesPage() {
               )}
 
               {demografia && (demografia.edadGenero || demografia.ciudad || demografia.pais) && (
-                <div className="rounded-lg border border-border bg-surface p-4">
+                <div className="glass glass-hover rounded-2xl p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Audiencia</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     {demografia.edadGenero && (
@@ -1299,7 +1299,7 @@ export default function MetricasClientesPage() {
               )}
 
               {porHashtag.length > 0 && (
-                <div className="rounded-lg border border-border bg-surface p-4">
+                <div className="glass glass-hover rounded-2xl p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                     Hashtags que mejor le funcionan a esta cuenta
                   </h3>
@@ -1332,7 +1332,7 @@ export default function MetricasClientesPage() {
               )}
 
               {porLongitud.length > 1 && (
-                <div className="rounded-lg border border-border bg-surface p-4">
+                <div className="glass glass-hover rounded-2xl p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                     Captions cortos vs. largos
                   </h3>
@@ -1350,7 +1350,7 @@ export default function MetricasClientesPage() {
               )}
 
               {rendimientoCampanas.length > 0 && (
-                <div className="rounded-lg border border-border bg-surface p-4">
+                <div className="glass glass-hover rounded-2xl p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">Rendimiento por campaña</h3>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -1381,7 +1381,7 @@ export default function MetricasClientesPage() {
               )}
 
               {celdasCalendario.length > 0 && (
-                <div className="rounded-lg border border-border bg-surface p-4 print:hidden">
+                <div className="glass glass-hover rounded-2xl p-4 print:hidden">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                     Calendario de {hoyReal.toLocaleDateString("es-CO", { month: "long", year: "numeric" })}
                   </h3>
@@ -1435,7 +1435,7 @@ export default function MetricasClientesPage() {
                         href={h.permalink}
                         target="_blank"
                         rel="noreferrer"
-                        className="rounded-lg border border-border bg-surface overflow-hidden text-xs hover:border-accent flex flex-col"
+                        className="glass glass-hover rounded-2xl overflow-hidden text-xs flex flex-col"
                       >
                         {h.imagenUrl && (
                           /* eslint-disable-next-line @next/next/no-img-element */
@@ -1460,7 +1460,7 @@ export default function MetricasClientesPage() {
               )}
 
               {!vistaCliente && media && media.length > 0 && (
-                <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+                <div className="overflow-x-auto glass rounded-2xl">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
@@ -1551,7 +1551,7 @@ export default function MetricasClientesPage() {
           {tieneIG && tendencia && Object.keys(tendencia).length > 0 && (
             <div className={`${tab === "tendencia" ? "grid" : "hidden"} print:grid grid-cols-1 md:grid-cols-2 gap-4`}>
               {Object.entries(tendencia).map(([metric, puntos]) => (
-                <div key={metric} className="rounded-lg border border-border bg-surface p-4">
+                <div key={metric} className="glass glass-hover rounded-2xl p-4">
                   <h3 className="text-sm font-semibold text-muted uppercase tracking-wide mb-3">
                     {TIPO_METRIC_LABEL[metric] ?? metric} — últimos 30 días
                   </h3>

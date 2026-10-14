@@ -71,8 +71,8 @@ export default function ElegirCuentaPage() {
           {cuentas.map((c, i) => (
             <label
               key={c.ad_account_id}
-              className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer transition ${
-                seleccion === i ? "border-accent bg-surface-alt" : "border-border bg-surface hover:bg-surface-alt"
+              className={`flex items-start gap-3 glass glass-hover rounded-2xl p-4 cursor-pointer transition ${
+                seleccion === i ? "ring-2 ring-accent-bright" : ""
               }`}
             >
               <input

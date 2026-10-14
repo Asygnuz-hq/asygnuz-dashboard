@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
+import { SeccionAvance, type EstadoAvance } from "./SeccionAvance";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
 
@@ -39,6 +40,7 @@ export function VistaPortal({
   reuniones,
   hrefParrilla,
   onDescargarArchivo,
+  avance,
 }: {
   nombreTenant: string | null;
   colorAcento: string | null;
@@ -50,6 +52,9 @@ export function VistaPortal({
   reuniones: ReunionVista[];
   hrefParrilla: string;
   onDescargarArchivo: (archivo: ArchivoVista) => void;
+  // Panel de Avance (Kaneo + Meta + parrilla). Opcional: si no se pasa, el
+  // portal se ve como antes.
+  avance?: EstadoAvance;
 }) {
   const acento = colorAcento || "var(--success)";
   const duracion = proyecto && (proyecto.fecha_inicio || proyecto.fecha_fin)
@@ -88,25 +93,27 @@ export function VistaPortal({
         {(proyecto?.tipo_proyecto || duracion || proyecto?.responsable_nombre) && (
           <div className="grid gap-4 sm:grid-cols-3">
             {proyecto?.tipo_proyecto && (
-              <div className="rounded bg-surface p-5" style={{ borderTop: `3px solid ${acento}` }}>
+              <div className="glass glass-hover rounded-2xl p-5" style={{ borderTop: `3px solid ${acento}` }}>
                 <p className="text-xs uppercase tracking-wide text-muted">Alcance</p>
                 <p className="mt-1.5 text-base font-semibold">{proyecto.tipo_proyecto}</p>
               </div>
             )}
             {duracion && (
-              <div className="rounded bg-surface p-5" style={{ borderTop: `3px solid ${acento}` }}>
+              <div className="glass glass-hover rounded-2xl p-5" style={{ borderTop: `3px solid ${acento}` }}>
                 <p className="text-xs uppercase tracking-wide text-muted">Duración</p>
                 <p className="mt-1.5 text-base font-semibold">{duracion}</p>
               </div>
             )}
             {proyecto?.responsable_nombre && (
-              <div className="rounded bg-surface p-5" style={{ borderTop: `3px solid ${acento}` }}>
+              <div className="glass glass-hover rounded-2xl p-5" style={{ borderTop: `3px solid ${acento}` }}>
                 <p className="text-xs uppercase tracking-wide text-muted">Responsable ASYGNUZ</p>
                 <p className="mt-1.5 text-base font-semibold">{proyecto.responsable_nombre}</p>
               </div>
             )}
           </div>
         )}
+
+        {avance && <SeccionAvance estado={avance} acento={acento} />}
 
         {pilares.length > 0 && (
           <section className="flex flex-col gap-4">
@@ -115,7 +122,7 @@ export function VistaPortal({
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               {pilares.map((pl) => (
-                <div key={pl.id} className="rounded bg-surface p-5 flex flex-col gap-2">
+                <div key={pl.id} className="glass glass-hover rounded-2xl p-5 flex flex-col gap-2">
                   <div className="flex items-center gap-2.5">
                     <span
                       className="flex h-7 w-7 items-center justify-center rounded-full text-sm"

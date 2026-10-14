@@ -20,7 +20,7 @@ export function ActionModal({
       onClick={onClose}
     >
       <div
-        className={`w-full ${wide ? "max-w-lg" : "max-w-sm"} rounded-lg border border-border bg-surface p-4 flex flex-col gap-3 shadow-xl`}
+        className={`w-full ${wide ? "max-w-lg" : "max-w-sm"} glass rounded-2xl p-4 flex flex-col gap-3 shadow-xl`}
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-sm font-medium">{title}</p>
