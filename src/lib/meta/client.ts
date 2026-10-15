@@ -164,11 +164,27 @@ export async function exchangeInstagramCode(
     body,
     cache: "no-store",
   });
-  const data = await res.json();
+  // user_id llega como NÚMERO en el JSON y puede pasar de 2^53: JSON.parse lo
+  // redondea y se guarda un ID que no existe (le pasó a la Dra. Ingrid:
+  // ...681 quedó como ...680). Se saca del texto crudo, nunca del número.
+  const texto = await res.text();
+  const data = JSON.parse(texto);
   if (!res.ok) {
-    throw new Error(`Instagram OAuth -> ${data?.error_message ?? JSON.stringify(data)}`);
+    throw new Error(`Instagram OAuth -> ${data?.error_message ?? texto}`);
   }
-  return { accessToken: data.access_token, instagramUserId: String(data.user_id) };
+  const idCrudo = texto.match(/"user_id"\s*:\s*"?(\d+)"?/)?.[1] ?? String(data.user_id);
+  return { accessToken: data.access_token, instagramUserId: idCrudo };
+}
+
+// id (como texto, exacto) y username de la cuenta dueña del token. Es la
+// fuente confiable del ID: Graph devuelve los IDs como strings.
+export async function fetchInstagramMe(accessToken: string): Promise<{ id: string; username: string | null }> {
+  const data = await graphFetch<{ id: string; username?: string }>(
+    "/me",
+    { fields: "id,username", access_token: accessToken },
+    GRAPH_INSTAGRAM_URL
+  );
+  return { id: String(data.id), username: data.username ?? null };
 }
 
 // Cambia el token corto (~1h) por uno de larga duración (~60 días).

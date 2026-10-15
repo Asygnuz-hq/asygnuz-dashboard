@@ -5,6 +5,7 @@ import {
   exchangeInstagramCode,
   exchangeInstagramLongLivedToken,
   fetchInstagramUsername,
+  fetchInstagramMe,
   fechaExpiracion,
 } from "@/lib/meta/client";
 
@@ -45,9 +46,12 @@ export async function GET(request: Request) {
   const { clienteNombre } = estadoValido;
 
   try {
-    const { accessToken: tokenCorto, instagramUserId } = await exchangeInstagramCode(code);
+    const { accessToken: tokenCorto, instagramUserId: idDelCodigo } = await exchangeInstagramCode(code);
     const { access_token, expires_in } = await exchangeInstagramLongLivedToken(tokenCorto);
-    const username = await fetchInstagramUsername(access_token, instagramUserId).catch(() => null);
+    // El ID bueno sale de /me (string exacto); el del intercambio queda de respaldo.
+    const me = await fetchInstagramMe(access_token).catch(() => null);
+    const instagramUserId = me?.id ?? idDelCodigo;
+    const username = me?.username ?? (await fetchInstagramUsername(access_token, instagramUserId).catch(() => null));
     const expiraEn = fechaExpiracion(expires_in);
 
     const { data: existente } = await supabase

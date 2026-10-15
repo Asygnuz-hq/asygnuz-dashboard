@@ -30,6 +30,12 @@ export async function GET(request: Request) {
     return Response.json({ error: "Conexión no encontrada." }, { status: 404 });
   }
 
+  // Conexión solo de Instagram (sin cuenta de anuncios): no es un error,
+  // simplemente no hay campañas que mostrar.
+  if (!conexion.ad_account_id) {
+    return Response.json({ cliente: conexion.cliente_nombre, insights: [], moneda: "USD", sinCuentaAnuncios: true });
+  }
+
   try {
     const [insights, moneda] = await Promise.all([
       fetchInsights(conexion, since && until ? { since, until } : {}),
