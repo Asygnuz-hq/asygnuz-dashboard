@@ -5,6 +5,7 @@ import {
   exchangeInstagramCode,
   exchangeInstagramLongLivedToken,
   fetchInstagramUsername,
+  fechaExpiracion,
 } from "@/lib/meta/client";
 
 // Instagram redirige aquí después de autorizar. Guarda el token (separado
@@ -47,7 +48,7 @@ export async function GET(request: Request) {
     const { accessToken: tokenCorto, instagramUserId } = await exchangeInstagramCode(code);
     const { access_token, expires_in } = await exchangeInstagramLongLivedToken(tokenCorto);
     const username = await fetchInstagramUsername(access_token, instagramUserId).catch(() => null);
-    const expiraEn = new Date(Date.now() + expires_in * 1000).toISOString();
+    const expiraEn = fechaExpiracion(expires_in);
 
     const { data: existente } = await supabase
       .from("meta_conexiones")

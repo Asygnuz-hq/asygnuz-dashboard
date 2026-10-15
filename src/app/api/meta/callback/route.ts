@@ -5,6 +5,7 @@ import {
   exchangeCodeForToken,
   exchangeForLongLivedToken,
   fetchCuentasDisponibles,
+  fechaExpiracion,
 } from "@/lib/meta/client";
 
 // Meta redirige aquí después de que el cliente autoriza el login. Cambia el
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const expiraEn = new Date(Date.now() + expires_in * 1000).toISOString();
+    const expiraEn = fechaExpiracion(expires_in);
 
     const { data: pendiente, error: dbError } = await supabase
       .from("meta_conexiones_pendientes")

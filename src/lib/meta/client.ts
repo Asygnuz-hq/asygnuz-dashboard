@@ -96,9 +96,19 @@ export async function exchangeCodeForToken(code: string): Promise<string> {
   return data.access_token;
 }
 
+// Fecha de vencimiento del token a partir de expires_in (segundos). Meta NO
+// manda expires_in cuando el token no vence (p. ej. cuentas de negocio); antes
+// eso daba new Date(NaN) → "Invalid time value" al conectar. null = no vence
+// (el cron de refresco ignora los null).
+export function fechaExpiracion(expires_in?: number | null): string | null {
+  return typeof expires_in === "number" && Number.isFinite(expires_in) && expires_in > 0
+    ? new Date(Date.now() + expires_in * 1000).toISOString()
+    : null;
+}
+
 // Cambia el token de corta duración (~horas) por uno de larga duración
 // (~60 días) — el que se guarda en Supabase.
-export async function exchangeForLongLivedToken(shortLivedToken: string): Promise<{ access_token: string; expires_in: number }> {
+export async function exchangeForLongLivedToken(shortLivedToken: string): Promise<{ access_token: string; expires_in?: number }> {
   const appId = env("META_APP_ID");
   const appSecret = env("META_APP_SECRET");
   return graphFetch("/oauth/access_token", {
@@ -164,7 +174,7 @@ export async function exchangeInstagramCode(
 // Cambia el token corto (~1h) por uno de larga duración (~60 días).
 export async function exchangeInstagramLongLivedToken(
   shortLivedToken: string
-): Promise<{ access_token: string; expires_in: number }> {
+): Promise<{ access_token: string; expires_in?: number }> {
   const appSecret = env("META_INSTAGRAM_APP_SECRET");
   return graphFetch(
     "/access_token",

@@ -1,6 +1,6 @@
 import { cronAutorizado } from "@/lib/cronAuth";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { exchangeForLongLivedToken, exchangeInstagramLongLivedToken } from "@/lib/meta/client";
+import { exchangeForLongLivedToken, exchangeInstagramLongLivedToken, fechaExpiracion } from "@/lib/meta/client";
 
 // Vercel llama esta ruta una vez al día (ver vercel.json) con el header
 // Authorization: Bearer $CRON_SECRET. Cualquier otra llamada se rechaza.
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
           .from("meta_conexiones")
           .update({
             access_token,
-            token_expira_en: new Date(Date.now() + expires_in * 1000).toISOString(),
+            token_expira_en: fechaExpiracion(expires_in),
           })
           .eq("id", c.id);
         ads = "renovado";
@@ -60,7 +60,7 @@ export async function GET(request: Request) {
           .from("meta_conexiones")
           .update({
             instagram_access_token: access_token,
-            instagram_token_expira_en: new Date(Date.now() + expires_in * 1000).toISOString(),
+            instagram_token_expira_en: fechaExpiracion(expires_in),
           })
           .eq("id", c.id);
         instagram = "renovado";
