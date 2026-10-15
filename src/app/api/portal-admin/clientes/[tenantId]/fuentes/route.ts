@@ -18,13 +18,14 @@ export async function GET(_request: Request, { params }: Params) {
   if (auth instanceof Response) return auth;
 
   const admin = createAdminClient();
-  const [vinculadosKaneo, vinculadasMeta, conexiones] = await Promise.all([
+  const [vinculadosKaneo, vinculadasMeta, conexiones, proyecto] = await Promise.all([
     admin.from("portal_kaneo_proyectos").select("kaneo_project_id").eq("tenant_id", tenantId),
     admin.from("portal_meta_conexiones").select("conexion_id").eq("tenant_id", tenantId),
     admin
       .from("meta_conexiones")
       .select("id, cliente_nombre, ad_account_id, instagram_business_id, instagram_username")
       .order("cliente_nombre"),
+    admin.from("portal_proyecto").select("presupuesto_mensual_pauta").eq("tenant_id", tenantId).maybeSingle(),
   ]);
 
   let kaneoDisponibles: { id: string; nombre: string }[] = [];
@@ -54,6 +55,7 @@ export async function GET(_request: Request, { params }: Params) {
       instagram: c.instagram_username ?? (c.instagram_business_id ? "conectado" : null),
     })),
     metaVinculadas: (vinculadasMeta.data ?? []).map((f) => f.conexion_id),
+    presupuestoMensualPauta: proyecto.data?.presupuesto_mensual_pauta ?? null,
   });
 }
 
@@ -66,7 +68,7 @@ export async function PUT(request: Request, { params }: Params) {
 
   const validado = await bodyValido(request, fuentesAvanceSchema);
   if (validado instanceof Response) return validado;
-  const { kaneoProyectos, metaConexiones } = validado.data;
+  const { kaneoProyectos, metaConexiones, presupuestoMensualPauta } = validado.data;
 
   const admin = createAdminClient();
   const { data: tenant } = await admin.from("tenants").select("id").eq("id", tenantId).maybeSingle();
@@ -88,6 +90,14 @@ export async function PUT(request: Request, { params }: Params) {
       .from("portal_meta_conexiones")
       .insert(metaConexiones.map((id) => ({ tenant_id: tenantId, conexion_id: id })));
     if (error) return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  // Guardar presupuesto mensual de pauta en portal_proyecto
+  if (presupuestoMensualPauta !== undefined) {
+    await admin
+      .from("portal_proyecto")
+      .update({ presupuesto_mensual_pauta: presupuestoMensualPauta })
+      .eq("tenant_id", tenantId);
   }
 
   return Response.json({ ok: true });

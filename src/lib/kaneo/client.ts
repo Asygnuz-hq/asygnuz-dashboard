@@ -40,6 +40,7 @@ export type KaneoTask = {
   assigneeName: string | null;
   assigneeId: string | null;
   projectId: string;
+  isMilestone?: boolean;
   // Fork ASYGNUZ: "requirement" (Requisito de Negocio) se comporta como épica.
   issueType?: "task" | "story" | "bug" | "epic" | "requirement" | null;
 };

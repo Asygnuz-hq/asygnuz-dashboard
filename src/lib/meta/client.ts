@@ -19,6 +19,7 @@ export type MetaConexion = {
   // Token separado del de anuncios — sale del login de Instagram
   // (ver buildInstagramAuthUrl), no del login de Facebook.
   instagram_access_token: string | null;
+  instagram_username?: string | null;
 };
 
 export type MetaInsightRow = {
@@ -30,7 +31,10 @@ export type MetaInsightRow = {
   cpc: string;
   cpm: string;
   ctr: string;
+  frequency?: string;
   actions?: { action_type: string; value: string }[];
+  date_start?: string;
+  date_stop?: string;
 };
 
 function env(name: string): string {
@@ -267,18 +271,66 @@ export async function fetchMonedaCuentaAnuncios(conexion: MetaConexion): Promise
 
 // -------- Métricas: leer una cuenta ya conectada --------
 
+export type MetaInsightOpts = {
+  since?: string;
+  until?: string;
+  level?: "campaign" | "ad" | "account";
+  time_increment?: number | string;
+  breakdowns?: string;
+};
+
+export type MetaAdInsightRow = {
+  ad_id?: string;
+  ad_name?: string;
+  campaign_name: string;
+  spend: string;
+  impressions: string;
+  reach: string;
+  clicks: string;
+  cpc: string;
+  cpm: string;
+  ctr: string;
+  frequency?: string;
+  actions?: { action_type: string; value: string }[];
+  video_play_actions?: { action_type: string; value: string }[];
+  date_start?: string;
+  date_stop?: string;
+};
+
 export async function fetchInsights(
   conexion: MetaConexion,
-  opts: { since?: string; until?: string } = {}
+  opts: MetaInsightOpts = {}
 ): Promise<MetaInsightRow[]> {
   if (!conexion.ad_account_id) {
     throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene cuenta de anuncios asociada.`);
   }
+  const fields = [
+    "campaign_name",
+    "spend",
+    "impressions",
+    "reach",
+    "clicks",
+    "cpc",
+    "cpm",
+    "ctr",
+    "frequency",
+    "actions",
+  ];
+  if (opts.level === "ad") {
+    fields.push("ad_id", "ad_name", "video_play_actions");
+  }
+
   const params: Record<string, string> = {
     access_token: conexion.access_token,
-    level: "campaign",
-    fields: "campaign_name,spend,impressions,reach,clicks,cpc,cpm,ctr,actions",
+    level: opts.level ?? "campaign",
+    fields: fields.join(","),
   };
+  if (opts.time_increment !== undefined) {
+    params.time_increment = String(opts.time_increment);
+  }
+  if (opts.breakdowns) {
+    params.breakdowns = opts.breakdowns;
+  }
   if (opts.since && opts.until) {
     params.time_range = JSON.stringify({ since: opts.since, until: opts.until });
   } else {
@@ -288,7 +340,36 @@ export async function fetchInsights(
     `/${conexion.ad_account_id}/insights`,
     params
   );
-  return data.data;
+  return data.data ?? [];
+}
+
+export async function fetchInsightsDiarios(
+  conexion: MetaConexion,
+  opts: { since?: string; until?: string } = {}
+): Promise<{ fecha: string; gasto: number; impresiones: number; clics: number; resultados: number }[]> {
+  const filas = await fetchInsights(conexion, {
+    ...opts,
+    level: "account",
+    time_increment: "1",
+  });
+  return filas.map((f: MetaInsightRow) => ({
+    fecha: f.date_start ?? "",
+    gasto: Number(f.spend) || 0,
+    impresiones: Number(f.impressions) || 0,
+    clics: Number(f.clicks) || 0,
+    resultados: (f.actions ?? []).reduce((s: number, a: { action_type: string; value: string }) => s + (Number(a.value) || 0), 0),
+  }));
+}
+
+export async function fetchAdsCreativesInsights(
+  conexion: MetaConexion,
+  opts: { since?: string; until?: string } = {}
+): Promise<MetaAdInsightRow[]> {
+  const filas = await fetchInsights(conexion, {
+    ...opts,
+    level: "ad",
+  });
+  return filas as MetaAdInsightRow[];
 }
 
 // -------- Instagram: contenido orgánico (reels, imágenes, carruseles, historias) --------
@@ -631,36 +712,58 @@ export async function fetchInstagramTendenciaCuenta(
     throw new Error(`La conexión "${conexion.cliente_nombre}" no tiene Instagram conectado.`);
   }
   const token = conexion.instagram_access_token;
-  const hasta = Math.floor(Date.now() / 1000);
-  const desde = hasta - dias * 86400;
+  const ahora = Math.floor(Date.now() / 1000);
   const metricas = ["reach", "profile_views", "follower_count"];
 
+  // Meta exige rangos de máximo 30 días por llamado. Si se piden más (ej. 90 días),
+  // se parte en bloques de 30 días hacia atrás y se concatenan ordenados.
+  const ventanas: { desde: number; hasta: number }[] = [];
+  let finVentana = ahora;
+  let diasRestantes = dias;
+  while (diasRestantes > 0) {
+    const bloque = Math.min(diasRestantes, 30);
+    const inicioVentana = finVentana - bloque * 86400;
+    ventanas.unshift({ desde: inicioVentana, hasta: finVentana });
+    finVentana = inicioVentana;
+    diasRestantes -= bloque;
+  }
+
   const resultado: Record<string, PuntoDiario[]> = {};
+
   await Promise.all(
     metricas.map(async (metric) => {
-      try {
-        const data = await graphFetch<{
-          data: { name: string; values: { value: number; end_time: string }[] }[];
-        }>(
-          `/${conexion.instagram_business_id}/insights`,
-          {
-            access_token: token,
-            metric,
-            period: "day",
-            since: String(desde),
-            until: String(hasta),
-          },
-          GRAPH_INSTAGRAM_URL
-        );
-        const serie = data.data?.[0]?.values ?? [];
-        if (serie.length > 0) {
-          resultado[metric] = serie.map((v) => ({ fecha: v.end_time, valor: v.value }));
+      const puntosMap = new Map<string, number>();
+      for (const v of ventanas) {
+        try {
+          const data = await graphFetch<{
+            data: { name: string; values: { value: number; end_time: string }[] }[];
+          }>(
+            `/${conexion.instagram_business_id}/insights`,
+            {
+              access_token: token,
+              metric,
+              period: "day",
+              since: String(v.desde),
+              until: String(v.hasta),
+            },
+            GRAPH_INSTAGRAM_URL
+          );
+          const serie = data.data?.[0]?.values ?? [];
+          for (const item of serie) {
+            puntosMap.set(item.end_time, item.value);
+          }
+        } catch {
+          // Si falla un bloque o la métrica no está disponible en este tier, continúa
         }
-      } catch {
-        // Esta métrica no aplica a este tipo de cuenta o no hay permiso —
-        // se omite, las demás se muestran igual.
+      }
+
+      if (puntosMap.size > 0) {
+        resultado[metric] = Array.from(puntosMap.entries())
+          .map(([fecha, valor]) => ({ fecha, valor }))
+          .sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime());
       }
     })
   );
+
   return resultado;
 }

@@ -12,12 +12,14 @@ type Fuentes = {
   errorKaneo: string | null;
   metaDisponibles: { id: string; nombre: string; anuncios: boolean; instagram: string | null }[];
   metaVinculadas: string[];
+  presupuestoMensualPauta?: number | null;
 };
 
 export function FuentesAvance({ tenantId }: { tenantId: string }) {
   const [fuentes, setFuentes] = useState<Fuentes | null>(null);
   const [kaneo, setKaneo] = useState<Set<string>>(new Set());
   const [meta, setMeta] = useState<Set<string>>(new Set());
+  const [presupuesto, setPresupuesto] = useState<string>("");
   const [estado, setEstado] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
 
@@ -29,6 +31,7 @@ export function FuentesAvance({ tenantId }: { tenantId: string }) {
         setFuentes(data);
         setKaneo(new Set(data.kaneoVinculados));
         setMeta(new Set(data.metaVinculadas));
+        setPresupuesto(data.presupuestoMensualPauta ? String(data.presupuestoMensualPauta) : "");
       })
       .catch((err: unknown) => setEstado(err instanceof Error ? err.message : "No se pudieron cargar las fuentes."));
   }, [tenantId]);
@@ -44,12 +47,14 @@ export function FuentesAvance({ tenantId }: { tenantId: string }) {
     if (!fuentes) return;
     setGuardando(true);
     setEstado(null);
+    const presNum = presupuesto.trim() ? Number(presupuesto.replace(/[^\d]/g, "")) : null;
     const res = await fetch(`/api/portal-admin/clientes/${tenantId}/fuentes`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         kaneoProyectos: fuentes.kaneoDisponibles.filter((p) => kaneo.has(p.id)),
         metaConexiones: [...meta],
+        presupuestoMensualPauta: Number.isFinite(presNum) && presNum !== null ? presNum : null,
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -94,6 +99,22 @@ export function FuentesAvance({ tenantId }: { tenantId: string }) {
             ))}
           </div>
         )}
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="text-sm font-medium mb-1">Presupuesto de pauta del mes (COP)</legend>
+        <p className="text-xs text-muted">Para calcular la barra de ritmo de presupuesto (gastado vs planeado) en el Portal del cliente.</p>
+        <div className="max-w-xs">
+          <input
+            type="number"
+            min="0"
+            step="100000"
+            placeholder="Ej. 4500000"
+            value={presupuesto}
+            onChange={(e) => setPresupuesto(e.target.value)}
+            className="w-full"
+          />
+        </div>
       </fieldset>
 
       <div className="flex items-center gap-3 flex-wrap">

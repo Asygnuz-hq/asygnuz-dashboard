@@ -86,4 +86,5 @@ export const fuentesAvanceSchema = z.object({
     .array(z.object({ id: z.string().trim().min(1).max(64), nombre: texto(160) }))
     .max(20),
   metaConexiones: z.array(z.string().uuid()).max(20),
+  presupuestoMensualPauta: z.number().nonnegative().nullable().optional(),
 });
