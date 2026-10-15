@@ -26,20 +26,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Cuerpo de solicitud vacío" }, { status: 400 });
   }
 
-  // 3. Validar firma criptográfica X-Hub-Signature-256 de Meta si está configurado el App Secret
-  const signatureHeader =
-    request.headers.get("x-hub-signature-256") ||
-    request.headers.get("X-Hub-Signature-256");
+  // 3. Validar firma criptográfica X-Hub-Signature-256 de Meta. Siempre:
+  // sin META_INSTAGRAM_APP_SECRET (que el OAuth de Instagram ya exige) la
+  // firma no valida y el evento se rechaza (falla cerrada).
+  const signatureHeader = request.headers.get("x-hub-signature-256");
   const appSecret = process.env.META_INSTAGRAM_APP_SECRET;
 
-  if (appSecret) {
-    const firmaValida = validarFirmaMeta(rawBody, signatureHeader, appSecret);
-    if (!firmaValida) {
-      return NextResponse.json(
-        { error: "Firma HMAC SHA256 de Meta inválida o ausente (falla cerrada)." },
-        { status: 401 }
-      );
-    }
+  if (!validarFirmaMeta(rawBody, signatureHeader, appSecret)) {
+    return NextResponse.json(
+      { error: "Firma HMAC SHA256 de Meta inválida o ausente (falla cerrada)." },
+      { status: 401 }
+    );
   }
 
   // 4. Procesar el evento con la lógica completa del dashboard
