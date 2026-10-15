@@ -37,6 +37,8 @@ export interface IgBienvenida {
   actualizado_en: string;
 }
 
+export type CanalRespuesta = "dm" | "respuesta_privada" | "solo_publica";
+
 export interface IgConversacion {
   id: string;
   conexion_id: string;
@@ -44,6 +46,10 @@ export interface IgConversacion {
   ig_usuario_id: string;
   ig_usuario_nombre: string | null;
   ultimo_mensaje_usuario_en: string;
+  ultimo_dm_usuario_en?: string | null;
+  ha_enviado_dm?: boolean;
+  comment_id_origen?: string | null;
+  respuesta_privada_enviada?: boolean;
   ultimo_mensaje_texto: string | null;
   tipo_ultimo_evento: "message" | "comment";
   estado: EstadoConversacion;
@@ -54,6 +60,7 @@ export interface IgConversacion {
   horas_restantes: number;
   minutos_restantes: number;
   vencida: boolean;
+  canal_respuesta?: CanalRespuesta;
   cliente_nombre?: string;
   instagram_username?: string;
   guia_marca?: string | null;

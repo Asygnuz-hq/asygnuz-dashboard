@@ -110,3 +110,90 @@ export function formatearHoraAmigable(fechaIso: string): string {
     hour12: true,
   });
 }
+
+export type CanalRespuesta = "dm" | "respuesta_privada" | "solo_publica";
+
+/**
+ * Determina el canal permitido para responder a una conversación según las políticas de Meta:
+ * - 'dm': El usuario ha enviado un DM y está dentro de la ventana de 24 horas desde su último DM.
+ * - 'respuesta_privada': Nació de un comentario, el usuario NUNCA ha enviado un DM, no se ha enviado
+ *   respuesta privada aún, y está dentro del límite de 7 días de Meta.
+ * - 'solo_publica': No se puede contactar por privado (se agotó la respuesta privada única del comentario,
+ *   pasaron los 7 días de la regla de comentario, o venció la ventana de 24 horas del último DM).
+ */
+export function determinarCanalRespuesta(conv: {
+  ha_enviado_dm?: boolean | null;
+  ultimo_dm_usuario_en?: string | null;
+  comment_id_origen?: string | null;
+  respuesta_privada_enviada?: boolean | null;
+  ultimo_mensaje_usuario_en: string;
+}): {
+  canal: CanalRespuesta;
+  motivo: string;
+  ventana24hValida: boolean;
+  ventana7dValida: boolean;
+} {
+  const ahora = Date.now();
+
+  // 1. Si el usuario ha enviado DM alguna vez
+  if (conv.ha_enviado_dm && conv.ultimo_dm_usuario_en) {
+    const fechaDm = new Date(conv.ultimo_dm_usuario_en).getTime();
+    const diffHoras = (ahora - fechaDm) / (1000 * 60 * 60);
+    const ventana24hValida = diffHoras < 24;
+
+    if (ventana24hValida) {
+      return {
+        canal: "dm",
+        motivo: "Ventana de 24 horas de DM abierta",
+        ventana24hValida: true,
+        ventana7dValida: false,
+      };
+    }
+
+    return {
+      canal: "solo_publica",
+      motivo: "Ventana de 24 horas de DM vencida. Meta no permite enviar nuevos DMs hasta que el usuario responda.",
+      ventana24hValida: false,
+      ventana7dValida: false,
+    };
+  }
+
+  // 2. Si nunca ha enviado un DM (nació de comentario)
+  const fechaComentario = new Date(conv.ultimo_mensaje_usuario_en).getTime();
+  const diffDias = (ahora - fechaComentario) / (1000 * 60 * 60 * 24);
+  const ventana7dValida = diffDias < 7;
+
+  if (conv.respuesta_privada_enviada) {
+    return {
+      canal: "solo_publica",
+      motivo: "Respuesta privada única ya enviada. Meta prohíbe DMs directos a usuarios que solo comentaron.",
+      ventana24hValida: false,
+      ventana7dValida,
+    };
+  }
+
+  if (!ventana7dValida) {
+    return {
+      canal: "solo_publica",
+      motivo: "Plazo de 7 días de Meta para responder en privado a comentarios expirado.",
+      ventana24hValida: false,
+      ventana7dValida: false,
+    };
+  }
+
+  if (conv.comment_id_origen) {
+    return {
+      canal: "respuesta_privada",
+      motivo: "Permitida respuesta privada única al comentario dentro del plazo de 7 días.",
+      ventana24hValida: false,
+      ventana7dValida: true,
+    };
+  }
+
+  return {
+    canal: "solo_publica",
+    motivo: "Sin identificador de mensaje ni comentario válido.",
+    ventana24hValida: false,
+    ventana7dValida: false,
+  };
+}

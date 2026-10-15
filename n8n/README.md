@@ -6,11 +6,12 @@ Este directorio contiene los flujos listos para importar en la instancia de n8n 
 
 ## 1. Archivos incluidos
 
-1. **`instagram-meta.json` (Flujo A — Webhook de Instagram):**
-   - **GET:** Responde el `hub.challenge` de verificación exigido por Meta en texto plano si coincide con el `META_VERIFY_TOKEN`.
-   - **POST:** Valida la firma criptográfica `X-Hub-Signature-256` (HMAC SHA-256) contra el `META_INSTAGRAM_APP_SECRET`. Responde `200 OK` de inmediato a Meta para cumplir el SLA y enruta DMs y comentarios sin IA hacia Supabase (`ig_eventos`, `ig_conversaciones`, `ig_mensajes`, `ig_acciones`).
-   - Deduplica por `meta_evento_id` e ignora ecos de la propia cuenta.
-   - Aplica el límite seguro de **máximo 60 respuestas automáticas por hora**.
+1. **`instagram-meta.json` (Flujo A — Webhook de Instagram: Verificación y Reenvío):**
+   - **GET:** Responde el `hub.challenge` de verificación exigido por Meta en texto plano si coincide estrictamente con `META_VERIFY_TOKEN` (falla cerrada: 403 si no coincide o no está configurado).
+   - **POST:** Valida la firma criptográfica `X-Hub-Signature-256` (HMAC SHA-256) contra `META_INSTAGRAM_APP_SECRET` con comparación segura de longitud y tiempo constante (`timingSafeEqual`, falla cerrada: 401 si no coincide o no está configurado).
+   - **Arquitectura desacoplada:** Responde `200 OK` de inmediato a Meta para cumplir el SLA (<3s) y reenvía el cuerpo crudo y encabezados hacia el endpoint del dashboard:
+     `POST /api/bandeja/procesar-evento` con encabezado `Authorization: Bearer $BANDEJA_N8N_SECRET`.
+   - Toda la lógica de negocio (deduplicación en `ig_eventos`, límite de 60/h, respuestas públicas/privadas, links con tracking `/r/[id]`, bienvenida y prevención de DMs en frío) se ejecuta directamente en TypeScript en el dashboard (`src/lib/bandeja/procesar.ts`).
 
 2. **`instagram-alertas.json` (Flujo B — Alertas cada 15 minutos):**
    - Revisa conversaciones en estado `pendiente` cuyo último mensaje del usuario esté entre 21 y 24 horas de antigüedad (menos de 3 horas restantes de la ventana de 24 horas).
@@ -19,17 +20,22 @@ Este directorio contiene los flujos listos para importar en la instancia de n8n 
 
 ---
 
-## 2. Variables de Entorno / Credenciales en n8n
+## 2. Variables de Entorno / Credenciales en n8n y Vercel
 
-En n8n, ve a **Settings → Variables** o configura las variables de entorno en el contenedor/VPS:
+### En n8n (Settings → Variables o variables de entorno del contenedor):
 
 | Variable | Descripción | Ejemplo |
 |---|---|---|
-| `SUPABASE_URL` | URL de tu proyecto de Supabase | `https://xxxx.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clave secreta service_role (nunca expuesta al cliente) | `eyJhbGciOi...` |
-| `META_VERIFY_TOKEN` | Token secreto que inventas para validar el webhook en Meta | `asygnuz_ig_webhook_2026_secret` |
-| `META_INSTAGRAM_APP_SECRET` | Secret de la App de Instagram en Meta Developers | `a1b2c3d4e5f6...` |
+| `META_VERIFY_TOKEN` | Token secreto para validar el webhook en Meta (falla cerrada si falta) | `asygnuz_ig_verify_secret_...` |
+| `META_INSTAGRAM_APP_SECRET` | App Secret de Instagram en Meta Developers (para HMAC SHA-256) | `a1b2c3d4e5f6...` |
+| `BANDEJA_N8N_SECRET` | Secreto compartido para autenticar n8n contra el dashboard | `sec_n8n_dashboard_...` |
+| `DASHBOARD_URL` | URL del dashboard de ASYGNUZ | `https://app.asygnuz.com` |
 | `CANAL_ALERTA_WEBHOOK_URL` | (Opcional) Webhook para recibir las alertas de 15m | `https://...` |
+
+### En Vercel (Variables de Entorno del Dashboard):
+- `BANDEJA_N8N_SECRET`: Debe ser idéntico al configurado en n8n.
+- `META_INSTAGRAM_APP_SECRET`: Para doble validación criptográfica en el endpoint `/api/bandeja/procesar-evento`.
+- `BANDEJA_LIMITE_POR_HORA`: (Opcional, por defecto `60`) Tope de respuestas automáticas exitosas por cuenta por hora.
 
 ---
 

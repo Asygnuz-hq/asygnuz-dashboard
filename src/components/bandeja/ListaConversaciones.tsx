@@ -157,8 +157,16 @@ export function ListaConversaciones({
                     </div>
                   </div>
 
-                  {/* Badge de ventana de 24h */}
-                  {conv.vencida ? (
+                  {/* Badge de ventana de 24h o canal */}
+                  {conv.canal_respuesta === "respuesta_privada" ? (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30 shrink-0">
+                      🔒 Privada (7d)
+                    </span>
+                  ) : conv.canal_respuesta === "solo_publica" ? (
+                    <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
+                      Solo pública
+                    </span>
+                  ) : conv.vencida ? (
                     <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-500/15 text-red-400 border border-red-500/30 shrink-0">
                       24h vencida
                     </span>

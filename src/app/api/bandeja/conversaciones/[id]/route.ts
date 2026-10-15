@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
 import { bodyValido } from "@/lib/api/validarBody";
-import { calcularVentana24h } from "@/lib/bandeja/texto";
+import { calcularVentana24h, determinarCanalRespuesta } from "@/lib/bandeja/texto";
 
 const SchemaActualizarEstado = z.object({
   estado: z.enum(["pendiente", "respondida", "archivada"]),
@@ -51,15 +51,22 @@ export async function GET(
     return Response.json({ error: msgErr.message }, { status: 500 });
   }
 
-  const ventana = calcularVentana24h(conv.ultimo_mensaje_usuario_en);
+  const canalInfo = determinarCanalRespuesta(conv);
+  const fechaRefVentana =
+    conv.ha_enviado_dm && conv.ultimo_dm_usuario_en
+      ? conv.ultimo_dm_usuario_en
+      : conv.ultimo_mensaje_usuario_en;
+  const ventana = calcularVentana24h(fechaRefVentana);
 
   return Response.json({
     conversacion: {
       ...conv,
       horas_restantes: ventana.horasRestantes,
       minutos_restantes: ventana.minutosRestantes,
-      vencida: ventana.vencida,
+      vencida: canalInfo.canal === "solo_publica" ? true : ventana.vencida,
       ventana_etiqueta: ventana.etiqueta,
+      canal_respuesta: canalInfo.canal,
+      canal_motivo: canalInfo.motivo,
       cliente_nombre: conexion?.cliente_nombre ?? "Cliente",
       instagram_username: conexion?.instagram_username ?? null,
       guia_marca: conexion?.guia_marca ?? null,

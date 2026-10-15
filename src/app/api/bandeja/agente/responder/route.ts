@@ -2,17 +2,23 @@ import { z } from "zod";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validarTokenAgente } from "@/lib/bandeja/tokenAgente";
 import { bodyValido } from "@/lib/api/validarBody";
-import { calcularVentana24h } from "@/lib/bandeja/texto";
-import { enviarMensajeInstagramDirecto, type MetaConexion } from "@/lib/meta/client";
+import { determinarCanalRespuesta } from "@/lib/bandeja/texto";
+import {
+  enviarMensajeInstagramDirecto,
+  enviarRespuestaPrivadaComentario,
+  publicarRespuestaComentario,
+  type MetaConexion,
+} from "@/lib/meta/client";
 
 const SchemaResponderAgente = z.object({
   conversacion_id: z.string().uuid("ID de conversación inválido"),
   texto: z.string().min(1, "El texto no puede estar vacío").max(1000, "Máximo 1000 caracteres"),
+  tipo_envio: z.enum(["automatica", "privada", "publica"]).default("automatica"),
 });
 
 // POST /api/bandeja/agente/responder
-// Envía una respuesta por DM a nombre de la cuenta usando Claude Code.
-// Protegido con Bearer token de agente.
+// Envía una respuesta por DM o comentario a nombre de la cuenta usando Claude Code.
+// Protegido con Bearer token de agente y respetando estrictamente las políticas de Meta contra DMs en frío.
 export async function POST(request: Request) {
   const auth = await validarTokenAgente(request);
   if (!auth.valido) {
@@ -21,14 +27,16 @@ export async function POST(request: Request) {
 
   const validacion = await bodyValido(request, SchemaResponderAgente);
   if (validacion instanceof Response) return validacion;
-  const { conversacion_id, texto } = validacion.data;
+  const { conversacion_id, texto, tipo_envio } = validacion.data;
 
   const supabase = createAdminClient();
 
-  // 1. Obtener la conversación
+  // 1. Obtener la conversación con campos de control de canal
   const { data: conv, error: convErr } = await supabase
     .from("ig_conversaciones")
-    .select("id, conexion_id, tenant_id, ig_usuario_id, ultimo_mensaje_usuario_en, estado")
+    .select(
+      "id, conexion_id, tenant_id, ig_usuario_id, ultimo_mensaje_usuario_en, ultimo_dm_usuario_en, ha_enviado_dm, comment_id_origen, respuesta_privada_enviada, estado"
+    )
     .eq("id", conversacion_id)
     .maybeSingle();
 
@@ -36,16 +44,8 @@ export async function POST(request: Request) {
     return Response.json({ error: "Conversación no encontrada" }, { status: 404 });
   }
 
-  // 2. Verificar ventana de 24 horas
-  const ventana = calcularVentana24h(conv.ultimo_mensaje_usuario_en);
-  if (ventana.vencida) {
-    return Response.json(
-      {
-        error: "No se puede responder: la ventana de 24 horas de Meta ya venció. El usuario debe enviar un nuevo mensaje.",
-      },
-      { status: 400 }
-    );
-  }
+  // 2. Determinar canal permitido según políticas de Meta
+  const canalInfo = determinarCanalRespuesta(conv);
 
   // 3. Obtener credenciales de Meta de la conexión
   const { data: conexion, error: conxErr } = await supabase
@@ -62,15 +62,69 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 4. Enviar DM a través de Instagram Graph API
-    const metaRes = await enviarMensajeInstagramDirecto(
-      conexion.instagram_access_token,
-      conexion.instagram_business_id,
-      conv.ig_usuario_id,
-      texto
-    );
+    let metaMessageId: string | undefined;
+    let tipoAccion = "respuesta_dm";
+    let actualizacionConv: Record<string, unknown> = {
+      estado: "respondida",
+      actualizado_en: new Date().toISOString(),
+    };
 
-    // 5. Registrar el mensaje en ig_mensajes
+    if (tipo_envio === "publica") {
+      if (!conv.comment_id_origen) {
+        return Response.json(
+          { error: "Esta conversación no tiene un comentario de origen para responder públicamente." },
+          { status: 400 }
+        );
+      }
+      const resPub = await publicarRespuestaComentario(
+        conexion.instagram_access_token,
+        conv.comment_id_origen,
+        texto
+      );
+      metaMessageId = resPub.commentId;
+      tipoAccion = "respuesta_publica_comentario";
+    } else {
+      // Envío privado
+      if (canalInfo.canal === "solo_publica") {
+        return Response.json(
+          {
+            error: `No se puede enviar un mensaje privado a este usuario (riesgo de bloqueo por DM en frío): ${canalInfo.motivo}`,
+            canal_respuesta: "solo_publica",
+          },
+          { status: 400 }
+        );
+      }
+
+      if (canalInfo.canal === "respuesta_privada") {
+        if (!conv.comment_id_origen) {
+          return Response.json(
+            { error: "Falta el ID del comentario de origen para la respuesta privada." },
+            { status: 400 }
+          );
+        }
+        const resPriv = await enviarRespuestaPrivadaComentario(
+          conexion.instagram_access_token,
+          conexion.instagram_business_id,
+          conv.comment_id_origen,
+          texto
+        );
+        metaMessageId = resPriv.messageId;
+        tipoAccion = "respuesta_privada_comentario";
+        actualizacionConv.respuesta_privada_enviada = true;
+      } else {
+        // canal === 'dm': DM normal permitido
+        const metaRes = await enviarMensajeInstagramDirecto(
+          conexion.instagram_access_token,
+          conexion.instagram_business_id,
+          conv.ig_usuario_id,
+          texto
+        );
+        metaMessageId = metaRes.messageId;
+        tipoAccion = "respuesta_dm";
+      }
+    }
+
+    // 4. Registrar el mensaje en ig_mensajes
     const { data: mensajeCreado, error: msgErr } = await supabase
       .from("ig_mensajes")
       .insert({
@@ -79,7 +133,7 @@ export async function POST(request: Request) {
         texto,
         enviado_por: "claude",
         estado_envio: "enviado",
-        meta_mensaje_id: metaRes.messageId ?? null,
+        meta_mensaje_id: metaMessageId ?? null,
       })
       .select()
       .single();
@@ -88,28 +142,26 @@ export async function POST(request: Request) {
       console.error("Error guardando mensaje en ig_mensajes:", msgErr);
     }
 
-    // 6. Actualizar conversación a respondida
+    // 5. Actualizar conversación a respondida
     await supabase
       .from("ig_conversaciones")
-      .update({
-        estado: "respondida",
-        actualizado_en: new Date().toISOString(),
-      })
+      .update(actualizacionConv)
       .eq("id", conv.id);
 
-    // 7. Registrar en ig_acciones
+    // 6. Registrar en ig_acciones
     await supabase.from("ig_acciones").insert({
       conexion_id: conv.conexion_id,
       tenant_id: conv.tenant_id,
       conversacion_id: conv.id,
-      tipo_accion: "respuesta_dm",
+      tipo_accion: tipoAccion,
       resultado: "exito",
     });
 
     return Response.json({
       ok: true,
       mensaje: mensajeCreado,
-      meta_message_id: metaRes.messageId,
+      meta_message_id: metaMessageId,
+      canal_usado: tipoAccion,
     });
   } catch (err) {
     const errorMsg = err instanceof Error ? err.message : "Error desconocido enviando mensaje a Meta";

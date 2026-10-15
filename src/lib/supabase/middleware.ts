@@ -7,7 +7,8 @@ import { estadoMfa } from "@/lib/api/mfa";
 export async function updateSession(request: NextRequest) {
   // /agenda es la landing pública de Cal.com para pautar — no requiere
   // sesión ni pasa por ninguna lógica de auth/MFA/emergencia de abajo.
-  if (request.nextUrl.pathname.startsWith("/agenda")) {
+  // /r/ son los enlaces de seguimiento acortados de la bandeja de Instagram (públicos).
+  if (request.nextUrl.pathname.startsWith("/agenda") || request.nextUrl.pathname.startsWith("/r/")) {
     return NextResponse.next({ request });
   }
 

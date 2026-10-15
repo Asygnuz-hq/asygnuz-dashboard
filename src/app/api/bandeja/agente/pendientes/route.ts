@@ -1,9 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validarTokenAgente } from "@/lib/bandeja/tokenAgente";
-import { calcularVentana24h } from "@/lib/bandeja/texto";
+import { calcularVentana24h, determinarCanalRespuesta } from "@/lib/bandeja/texto";
 
 // GET /api/bandeja/agente/pendientes
-// Devuelve las conversaciones pendientes dentro de la ventana de 24h,
+// Devuelve las conversaciones pendientes con su canal permitido (dm, respuesta_privada o solo_publica),
 // con su historial de mensajes, datos de la cuenta y su guía de marca.
 // Protegido con Bearer token de agente.
 export async function GET(request: Request) {
@@ -13,9 +13,10 @@ export async function GET(request: Request) {
   }
 
   const supabase = createAdminClient();
-  const hace24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  // Se consultan los últimos 7 días para cubrir la ventana de 7 días de respuesta privada a comentarios
+  const hace7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  // Traer conversaciones pendientes dentro de la ventana
+  // Traer conversaciones pendientes
   const { data: convs, error: convsErr } = await supabase
     .from("ig_conversaciones")
     .select(`
@@ -25,13 +26,17 @@ export async function GET(request: Request) {
       ig_usuario_id,
       ig_usuario_nombre,
       ultimo_mensaje_usuario_en,
+      ultimo_dm_usuario_en,
+      ha_enviado_dm,
+      comment_id_origen,
+      respuesta_privada_enviada,
       ultimo_mensaje_texto,
       tipo_ultimo_evento,
       estado,
       creado_en
     `)
     .eq("estado", "pendiente")
-    .gte("ultimo_mensaje_usuario_en", hace24h)
+    .gte("ultimo_mensaje_usuario_en", hace7d)
     .order("ultimo_mensaje_usuario_en", { ascending: false });
 
   if (convsErr) {
@@ -68,7 +73,10 @@ export async function GET(request: Request) {
 
   const pendientes = convs.map((c) => {
     const conexion = conxMap.get(c.conexion_id);
-    const ventana = calcularVentana24h(c.ultimo_mensaje_usuario_en);
+    const canalInfo = determinarCanalRespuesta(c);
+    const fechaRefVentana =
+      c.ha_enviado_dm && c.ultimo_dm_usuario_en ? c.ultimo_dm_usuario_en : c.ultimo_mensaje_usuario_en;
+    const ventana = calcularVentana24h(fechaRefVentana);
     const hist = msgMap.get(c.id) ?? [];
 
     return {
@@ -77,6 +85,11 @@ export async function GET(request: Request) {
       instagram_username: conexion?.instagram_username ?? null,
       ig_usuario_id: c.ig_usuario_id,
       ig_usuario_nombre: c.ig_usuario_nombre,
+      canal_respuesta: canalInfo.canal,
+      canal_motivo: canalInfo.motivo,
+      comment_id_origen: c.comment_id_origen ?? null,
+      ha_enviado_dm: Boolean(c.ha_enviado_dm),
+      respuesta_privada_enviada: Boolean(c.respuesta_privada_enviada),
       ultimo_mensaje_usuario_en: c.ultimo_mensaje_usuario_en,
       ultimo_mensaje_texto: c.ultimo_mensaje_texto,
       ventana_24h: {

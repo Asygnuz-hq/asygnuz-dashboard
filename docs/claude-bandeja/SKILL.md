@@ -35,25 +35,38 @@ curl -s -X GET "$ASYGNUZ_API_URL/api/bandeja/agente/pendientes" \
 Si no hay pendientes, responde:
 > "🎉 ¡Bandeja al día! No hay conversaciones pendientes dentro de la ventana de 24 horas."
 
-### Paso 2: Redactar Propuestas según la Guía de Marca
+### Paso 2: Redactar Propuestas según la Guía de Marca y Canal Permitido
 Por cada conversación devuelta en la lista:
-1. Analiza el historial de los últimos mensajes del usuario.
-2. Lee atentamente el campo `guia_marca` del cliente:
+1. Revisa el campo **`canal_respuesta`** devuelto por la API:
+   - **`dm`**: El usuario envió un mensaje directo y su ventana de 24 horas está abierta (`horas_restantes > 0`). Se responde normalmente por DM.
+   - **`respuesta_privada`**: La conversación proviene de un comentario en un post/reel. El usuario **NUNCA** ha enviado un DM. Meta permite **una única respuesta privada** dentro de un plazo de 7 días. Se enviará automáticamente vinculada al comentario de origen.
+   - **`solo_publica`**: **PROHIBIDO ENVIAR DM EN FRÍO** (puede causar suspensión o bloqueo de la cuenta por spam en Meta). La respuesta privada única ya fue utilizada o expiraron los 7 días. En este canal solo se permite responder públicamente al comentario con `"tipo_envio": "publica"`.
+2. Analiza el historial de los últimos mensajes o del comentario.
+3. Lee atentamente el campo `guia_marca` del cliente:
    - Aplica el tono solicitado (formal/informal, médico, cercano).
    - Respeta estrictamente los precios públicos y lo que **NO** se debe prometer.
    - Si el usuario muestra interés en comprar o consultar, incluye el link de agenda.
-3. Verifica que la ventana de 24 horas no haya vencido (`horas_restantes > 0`).
 
 ### Paso 3: Presentar a JM para Aprobación (NO ENVIAR AÚN)
-Muestra a JM una tabla o lista clara con las propuestas de respuesta:
+Muestra a JM una tabla o lista clara con las propuestas de respuesta, indicando claramente el canal:
 
 ```markdown
 ### 📬 Respuestas Propuestas para Aprobación
 
-1. **Cliente:** Dra. Ingrid Patiño | **Usuario:** @carlos_medina (Vence en 4 h)
+1. **Cliente:** Dra. Ingrid Patiño | **Usuario:** @carlos_medina | **Canal:** 💬 DM directo (Vence en 4 h)
    - **Último mensaje recibido:** "¿Cuánto cuesta la consulta y dónde están ubicados?"
    - **Respuesta propuesta:**
      > "¡Hola Carlos! La consulta dermatológica tiene un valor de $250.000 COP y estamos ubicados en El Poblado, Medellín. Puedes agendar tu espacio con nuestro equipo aquí: https://wa.me/573001234567. ¡Será un gusto atenderte!"
+
+2. **Cliente:** Dra. Ingrid Patiño | **Usuario:** @mariana_g | **Canal:** 🔒 Respuesta privada a comentario (1 permitida en 7 días)
+   - **Comentario en post:** "Información del tratamiento facial por favor"
+   - **Respuesta privada propuesta:**
+     > "¡Hola Mariana! Te enviamos la información completa de nuestro tratamiento por privado. Incluye valoración facial y protocolo personalizado..."
+
+3. **Cliente:** Dra. Ingrid Patiño | **Usuario:** @pedro_l | **Canal:** 📢 Solo pública (DM en frío bloqueado)
+   - **Comentario:** "Excelente servicio 🙌"
+   - **Respuesta pública propuesta (tipo_envio: "publica"):**
+     > "¡Muchas gracias Pedro! Nos alegra mucho atenderte."
 
 ---
 ¿Deseas enviar todas las respuestas, modificar alguna o aprobarlas una por una?
@@ -68,9 +81,11 @@ curl -s -X POST "$ASYGNUZ_API_URL/api/bandeja/agente/responder" \
   -H "Content-Type: application/json" \
   -d '{
     "conversacion_id": "<ID_CONVERSACION>",
-    "texto": "<TEXTO_APROBADO>"
+    "texto": "<TEXTO_APROBADO>",
+    "tipo_envio": "automatica"
   }'
 ```
+*(Para responder públicamente a comentarios en canal `solo_publica`, usa `"tipo_envio": "publica"`).*
 
 ### Paso 5: Reporte Final
 Informa a JM con el resumen del proceso:

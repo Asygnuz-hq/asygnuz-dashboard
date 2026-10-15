@@ -4,8 +4,13 @@ import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
 import { bodyValido } from "@/lib/api/validarBody";
 
 const SchemaBoton = z.object({
-  titulo: z.string().min(1),
-  url: z.string().url(),
+  titulo: z.string().min(1, "El título del botón no puede estar vacío"),
+  url: z
+    .string()
+    .url("Debe ser una URL válida")
+    .refine((u) => u.startsWith("https://"), {
+      message: "La URL de destino debe ser segura (https://)",
+    }),
 });
 
 const SchemaActualizarFlujo = z.object({

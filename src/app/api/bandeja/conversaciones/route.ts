@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
-import { calcularVentana24h } from "@/lib/bandeja/texto";
+import { calcularVentana24h, determinarCanalRespuesta } from "@/lib/bandeja/texto";
 
 // GET /api/bandeja/conversaciones
 // Consulta conversaciones de Instagram con filtros de cuenta, estado y tipo.
@@ -25,6 +25,10 @@ export async function GET(request: Request) {
       ig_usuario_id,
       ig_usuario_nombre,
       ultimo_mensaje_usuario_en,
+      ultimo_dm_usuario_en,
+      ha_enviado_dm,
+      comment_id_origen,
+      respuesta_privada_enviada,
       ultimo_mensaje_texto,
       tipo_ultimo_evento,
       estado,
@@ -53,14 +57,19 @@ export async function GET(request: Request) {
   const conxMap = new Map((conexiones ?? []).map((c) => [c.id, c]));
 
   let resultado = (convs ?? []).map((c) => {
-    const ventana = calcularVentana24h(c.ultimo_mensaje_usuario_en);
+    const canalInfo = determinarCanalRespuesta(c);
+    // Para DMs normales la ventana de 24h cuenta solo desde el último mensaje directo del usuario
+    const fechaRefVentana = c.ha_enviado_dm && c.ultimo_dm_usuario_en ? c.ultimo_dm_usuario_en : c.ultimo_mensaje_usuario_en;
+    const ventana = calcularVentana24h(fechaRefVentana);
     const conx = conxMap.get(c.conexion_id);
     return {
       ...c,
       horas_restantes: ventana.horasRestantes,
       minutos_restantes: ventana.minutosRestantes,
-      vencida: ventana.vencida,
+      vencida: canalInfo.canal === "solo_publica" ? true : ventana.vencida,
       ventana_etiqueta: ventana.etiqueta,
+      canal_respuesta: canalInfo.canal,
+      canal_motivo: canalInfo.motivo,
       cliente_nombre: conx?.cliente_nombre ?? "Cliente",
       instagram_username: conx?.instagram_username ?? null,
     };

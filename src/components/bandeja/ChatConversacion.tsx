@@ -72,7 +72,15 @@ export function ChatConversacion({
 
         {/* Acciones de estado y badge de ventana */}
         <div className="flex items-center gap-2 flex-wrap justify-end">
-          {conversacion.vencida ? (
+          {conversacion.canal_respuesta === "respuesta_privada" ? (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30">
+              🔒 Respuesta privada a comentario (1 en 7d)
+            </span>
+          ) : conversacion.canal_respuesta === "solo_publica" ? (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">
+              🚫 Solo pública (DM en frío bloqueado)
+            </span>
+          ) : conversacion.vencida ? (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-red-500/15 text-red-400 border border-red-500/30">
               🚫 Ventana 24h vencida
             </span>
@@ -193,8 +201,22 @@ export function ChatConversacion({
         <div ref={finMensajesRef} />
       </div>
 
-      {/* Banner si la ventana está vencida */}
-      {conversacion.vencida && (
+      {/* Banner según canal permitido */}
+      {conversacion.canal_respuesta === "solo_publica" ? (
+        <div className="p-3 bg-red-500/10 border-t border-red-500/20 text-red-300 text-xs flex items-center gap-2">
+          <span className="text-base shrink-0">⚠️</span>
+          <p className="text-[11px] leading-tight">
+            <strong>Riesgo de bloqueo (DM en frío prevenido):</strong> Esta persona comentó pero nunca escribió por DM. Meta solo permite una respuesta privada al comentario (ya usada o expirada). Solo se admiten respuestas públicas.
+          </p>
+        </div>
+      ) : conversacion.canal_respuesta === "respuesta_privada" ? (
+        <div className="p-3 bg-blue-500/10 border-t border-blue-500/20 text-blue-300 text-xs flex items-center gap-2">
+          <span className="text-base shrink-0">ℹ️</span>
+          <p className="text-[11px] leading-tight">
+            <strong>Respuesta privada única:</strong> Tu mensaje se enviará como respuesta privada al comentario de origen en Instagram (1 permitida dentro de 7 días).
+          </p>
+        </div>
+      ) : conversacion.vencida ? (
         <div className="p-3 bg-red-500/10 border-t border-red-500/20 text-red-300 text-xs flex items-center gap-2">
           <span className="text-base shrink-0">⚠️</span>
           <p className="text-[11px] leading-tight">
@@ -202,7 +224,7 @@ export function ChatConversacion({
             no es posible enviar nuevos mensajes hasta que el usuario te vuelva a escribir.
           </p>
         </div>
-      )}
+      ) : null}
 
       {/* Caja para responder */}
       <div className="p-3 border-t border-border bg-surface/40">
@@ -215,9 +237,17 @@ export function ChatConversacion({
               value={texto}
               onChange={(e) => setTexto(e.target.value)}
               onKeyDown={handleKeyDown}
-              disabled={conversacion.vencida || enviando}
+              disabled={
+                conversacion.canal_respuesta === "solo_publica" ||
+                (conversacion.canal_respuesta !== "respuesta_privada" && conversacion.vencida) ||
+                enviando
+              }
               placeholder={
-                conversacion.vencida
+                conversacion.canal_respuesta === "solo_publica"
+                  ? "Contacto privado no permitido por Meta para este comentario..."
+                  : conversacion.canal_respuesta === "respuesta_privada"
+                  ? "Escribe la respuesta privada única al comentario..."
+                  : conversacion.vencida
                   ? "Ventana vencida. Espera un nuevo mensaje del usuario..."
                   : "Escribe tu respuesta (Enter para enviar, Shift+Enter para salto de línea)..."
               }
@@ -229,7 +259,12 @@ export function ChatConversacion({
               <span className="text-[10px] text-muted">{texto.length}/1000</span>
               <button
                 type="submit"
-                disabled={!texto.trim() || enviando || conversacion.vencida}
+                disabled={
+                  !texto.trim() ||
+                  enviando ||
+                  conversacion.canal_respuesta === "solo_publica" ||
+                  (conversacion.canal_respuesta !== "respuesta_privada" && conversacion.vencida)
+                }
                 className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-foreground text-background hover:opacity-90 disabled:opacity-40 transition-all flex items-center gap-1.5"
               >
                 {enviando ? "Enviando..." : "Enviar 🚀"}

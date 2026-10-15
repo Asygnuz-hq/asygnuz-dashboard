@@ -48,11 +48,12 @@ create index if not exists idx_ig_bienvenida_conexion on public.ig_bienvenida (c
 
 -- 4. Tabla: ig_eventos
 -- Registro de cada webhook recibido para deduplicación y auditoría
+-- conexion_id es nullable: si llega un aviso de una cuenta no registrada en ASYGNUZ, se descarta/guarda sin romper
 create table if not exists public.ig_eventos (
   id uuid primary key default gen_random_uuid(),
   meta_evento_id text not null unique,
   tipo text not null check (tipo in ('comment', 'message', 'postback')),
-  conexion_id uuid not null references public.meta_conexiones(id) on delete cascade,
+  conexion_id uuid references public.meta_conexiones(id) on delete cascade,
   tenant_id uuid references public.tenants(id) on delete set null,
   ig_usuario_id text not null,
   ig_usuario_nombre text,
@@ -63,11 +64,14 @@ create table if not exists public.ig_eventos (
   crudo jsonb
 );
 
+alter table public.ig_eventos alter column conexion_id drop not null;
+
 create index if not exists idx_ig_eventos_conexion on public.ig_eventos (conexion_id, recibido_en desc);
 create index if not exists idx_ig_eventos_usuario on public.ig_eventos (ig_usuario_id);
 
 -- 5. Tabla: ig_conversaciones
--- Un hilo por usuario de Instagram y cuenta, con control de la ventana de 24 horas
+-- Un hilo por usuario de Instagram y cuenta.
+-- Control de ventana de 24h estricto para DMs y control de respuesta privada a comentarios (máx 1 dentro de 7 días).
 create table if not exists public.ig_conversaciones (
   id uuid primary key default gen_random_uuid(),
   conexion_id uuid not null references public.meta_conexiones(id) on delete cascade,
@@ -75,6 +79,10 @@ create table if not exists public.ig_conversaciones (
   ig_usuario_id text not null,
   ig_usuario_nombre text,
   ultimo_mensaje_usuario_en timestamptz not null default now(),
+  ultimo_dm_usuario_en timestamptz, -- Solo cuenta mensajes directos entrantes (para la ventana de 24h de DMs)
+  ha_enviado_dm boolean not null default false, -- Indica si el usuario alguna vez escribió por DM
+  comment_id_origen text, -- ID del comentario si la conversación nació de un comentario
+  respuesta_privada_enviada boolean not null default false, -- Control de respuesta privada única permitida por Meta
   ultimo_mensaje_texto text,
   tipo_ultimo_evento text default 'message' check (tipo_ultimo_evento in ('message', 'comment')),
   estado text not null default 'pendiente' check (estado in ('pendiente', 'respondida', 'archivada')),
@@ -83,6 +91,13 @@ create table if not exists public.ig_conversaciones (
   actualizado_en timestamptz not null default now(),
   constraint uq_ig_conversacion_cuenta_usuario unique (conexion_id, ig_usuario_id)
 );
+
+-- Modificaciones idempotentes por si la tabla ya existía
+alter table public.ig_conversaciones
+  add column if not exists ultimo_dm_usuario_en timestamptz,
+  add column if not exists ha_enviado_dm boolean not null default false,
+  add column if not exists comment_id_origen text,
+  add column if not exists respuesta_privada_enviada boolean not null default false;
 
 create index if not exists idx_ig_conv_conexion_estado on public.ig_conversaciones (conexion_id, estado);
 create index if not exists idx_ig_conv_ultimo_msg on public.ig_conversaciones (ultimo_mensaje_usuario_en desc);
@@ -136,6 +151,27 @@ create table if not exists public.ig_links_tracking (
 
 create index if not exists idx_ig_links_conexion on public.ig_links_tracking (conexion_id);
 create index if not exists idx_ig_links_flujo on public.ig_links_tracking (flujo_id);
+
+-- Función para incremento atómico de clics
+create or replace function public.incrementar_clic_link(p_link_id uuid)
+returns integer
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_nuevo_conteo integer;
+begin
+  update public.ig_links_tracking
+  set clics_count = clics_count + 1
+  where id = p_link_id
+  returning clics_count into v_nuevo_conteo;
+
+  return v_nuevo_conteo;
+end;
+$$;
+
+revoke all on function public.incrementar_clic_link(uuid) from public, anon;
+grant execute on function public.incrementar_clic_link(uuid) to service_role;
 
 -- 9. Tabla: tokens_agente
 -- Tokens personales para Claude Code u otros agentes locales
