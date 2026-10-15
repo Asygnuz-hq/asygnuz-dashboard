@@ -3,19 +3,20 @@
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "GET",
         "path": "instagram-meta",
         "responseMode": "responseNode",
         "options": {
           "rawBody": true
         }
       },
-      "id": "node-webhook-get",
+      "id": "2ecc2eee-4665-4a27-97ca-1da0b375c5de",
       "name": "Webhook GET (Verificación Meta)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [180, 240],
-      "webhookId": "instagram-meta-get"
+      "position": [
+        -656,
+        64
+      ]
     },
     {
       "parameters": {
@@ -26,22 +27,27 @@
           "rawBody": true
         }
       },
-      "id": "node-webhook-post",
+      "id": "b8b7e18e-d198-4e41-a09c-eb730dd2f561",
       "name": "Webhook POST (Eventos Meta)",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [180, 480],
-      "webhookId": "instagram-meta-post"
+      "position": [
+        -656,
+        304
+      ]
     },
     {
       "parameters": {
         "jsCode": "// Verificación del Webhook de Meta (hub.challenge)\n// Falla cerrada: sin META_VERIFY_TOKEN configurado, responde 403 siempre.\nconst query = $input.first().json.query || {};\nconst mode = query['hub.mode'];\nconst token = query['hub.verify_token'];\nconst challenge = query['hub.challenge'];\n\nconst VERIFY_TOKEN = $env['META_VERIFY_TOKEN'];\n\nif (VERIFY_TOKEN && mode === 'subscribe' && token === VERIFY_TOKEN) {\n  return [{ json: { autorizado: true, challenge: String(challenge) } }];\n} else {\n  return [{ json: { autorizado: false } }];\n}"
       },
-      "id": "node-verificar-get",
+      "id": "f59824b1-ab72-415f-bd38-b2c960d7d493",
       "name": "Comprobar Token GET",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [420, 240]
+      "position": [
+        -416,
+        64
+      ]
     },
     {
       "parameters": {
@@ -54,11 +60,14 @@
           ]
         }
       },
-      "id": "node-if-get",
+      "id": "ef235ecd-800e-42ed-b725-d28849aa6107",
       "name": "¿GET Válido?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [620, 240]
+      "position": [
+        -224,
+        64
+      ]
     },
     {
       "parameters": {
@@ -68,11 +77,14 @@
           "responseCode": 200
         }
       },
-      "id": "node-responder-challenge",
+      "id": "5ae60ec5-081e-459b-8a31-cc1b2cda18a4",
       "name": "Responder 200 Challenge",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [840, 180]
+      "position": [
+        0,
+        0
+      ]
     },
     {
       "parameters": {
@@ -82,38 +94,47 @@
           "responseCode": 403
         }
       },
-      "id": "node-responder-403",
+      "id": "61456f2d-8d7f-4b3d-95c4-9b7d57189e86",
       "name": "Responder 403 Prohibido",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [840, 300]
+      "position": [
+        0,
+        128
+      ]
     },
     {
       "parameters": {
-        "jsCode": "// Validación de firma criptográfica X-Hub-Signature-256\n// Falla cerrada: si falta secreto o firma, nunca valida.\nconst crypto = require('crypto');\n\nconst headers = $input.first().json.headers || {};\nconst rawBody = $input.first().json.rawBody || '';\nconst signatureHeader = headers['x-hub-signature-256'] || headers['X-Hub-Signature-256'] || '';\nconst appSecret = $env['META_INSTAGRAM_APP_SECRET'] || '';\n\nlet firmaValida = false;\nif (appSecret && signatureHeader && rawBody) {\n  const hmac = crypto.createHmac('sha256', appSecret);\n  hmac.update(rawBody, 'utf8');\n  const expected = 'sha256=' + hmac.digest('hex');\n\n  const sigBuf = Buffer.from(signatureHeader, 'utf8');\n  const expBuf = Buffer.from(expected, 'utf8');\n\n  if (sigBuf.byteLength === expBuf.byteLength) {\n    firmaValida = crypto.timingSafeEqual(sigBuf, expBuf);\n  }\n}\n\nreturn [{\n  json: {\n    firmaValida,\n    rawBody,\n    signatureHeader\n  }\n}];"
+        "jsCode": "// Recupera el aviso ORIGINAL de Meta (n8n lo deja codificado en binary.data\n// por la opción Raw Body) y la firma, para reenviarlos intactos al dashboard.\n// La firma X-Hub-Signature-256 la valida el dashboard (/api/bandeja/procesar-evento)\n// en tiempo constante y fallando cerrado; aquí no se usa crypto (n8n lo bloquea).\nconst item = $input.first();\nconst b64 = (item.binary && item.binary.data && item.binary.data.data) || '';\nconst rawBody = b64 ? Buffer.from(b64, 'base64').toString('utf8') : '';\nconst headers = item.json.headers || {};\nconst signatureHeader = headers['x-hub-signature-256'] || '';\nreturn [{ json: { listo: Boolean(rawBody && signatureHeader), rawBody, signatureHeader } }];"
       },
-      "id": "node-validar-firma",
-      "name": "Validar Firma HMAC SHA256",
+      "id": "15f3d298-3775-4091-828d-7ae73a706257",
+      "name": "Preparar reenvío al dashboard",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [420, 480]
+      "position": [
+        -416,
+        304
+      ]
     },
     {
       "parameters": {
         "conditions": {
           "boolean": [
             {
-              "value1": "={{ $json.firmaValida }}",
+              "value1": "={{ $json.listo }}",
               "value2": true
             }
           ]
         }
       },
-      "id": "node-if-firma",
+      "id": "2bd08437-962d-4240-9664-82879909952e",
       "name": "¿Firma Válida?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [620, 480]
+      "position": [
+        -224,
+        304
+      ]
     },
     {
       "parameters": {
@@ -123,11 +144,14 @@
           "responseCode": 401
         }
       },
-      "id": "node-responder-401",
+      "id": "00d3f71f-d26d-4b90-9147-26a0a25af504",
       "name": "Responder 401 Inválido",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [840, 580]
+      "position": [
+        0,
+        400
+      ]
     },
     {
       "parameters": {
@@ -137,11 +161,14 @@
           "responseCode": 200
         }
       },
-      "id": "node-responder-200-meta",
+      "id": "bb584e37-4396-4feb-ba4e-8e7907e369af",
       "name": "Responder 200 a Meta Inmediato",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [840, 420]
+      "position": [
+        0,
+        240
+      ]
     },
     {
       "parameters": {
@@ -150,62 +177,122 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $env['BANDEJA_N8N_SECRET'] }}" },
-            { "name": "x-hub-signature-256", "value": "={{ $json.signatureHeader }}" },
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env['BANDEJA_N8N_SECRET'] }}"
+            },
+            {
+              "name": "x-hub-signature-256",
+              "value": "={{ $json.signatureHeader }}"
+            }
           ]
         },
         "sendBody": true,
-        "specifyBody": "string",
-        "body": "={{ $json.rawBody }}"
+        "body": "={{ $json.rawBody }}",
+        "options": {},
+        "contentType": "raw",
+        "rawContentType": "application/json"
       },
-      "id": "node-reenviar-dashboard",
+      "id": "848d70c4-feeb-422d-965f-40976ccebcf9",
       "name": "Reenviar a Dashboard (procesar-evento)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1060, 480]
+      "position": [
+        224,
+        304
+      ]
     }
   ],
   "connections": {
     "Webhook GET (Verificación Meta)": {
       "main": [
-        [{ "node": "Comprobar Token GET", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Comprobar Token GET",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Comprobar Token GET": {
       "main": [
-        [{ "node": "¿GET Válido?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "¿GET Válido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "¿GET Válido?": {
       "main": [
-        [{ "node": "Responder 200 Challenge", "type": "main", "index": 0 }],
-        [{ "node": "Responder 403 Prohibido", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Responder 200 Challenge",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder 403 Prohibido",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Webhook POST (Eventos Meta)": {
       "main": [
-        [{ "node": "Validar Firma HMAC SHA256", "type": "main", "index": 0 }]
-      ]
-    },
-    "Validar Firma HMAC SHA256": {
-      "main": [
-        [{ "node": "¿Firma Válida?", "type": "main", "index": 0 }]
+        [
+          {
+            "node": "Preparar reenvío al dashboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "¿Firma Válida?": {
       "main": [
         [
-          { "node": "Responder 200 a Meta Inmediato", "type": "main", "index": 0 },
-          { "node": "Reenviar a Dashboard (procesar-evento)", "type": "main", "index": 0 }
+          {
+            "node": "Responder 200 a Meta Inmediato",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reenviar a Dashboard (procesar-evento)",
+            "type": "main",
+            "index": 0
+          }
         ],
         [
-          { "node": "Responder 401 Inválido", "type": "main", "index": 0 }
+          {
+            "node": "Responder 401 Inválido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar reenvío al dashboard": {
+      "main": [
+        [
+          {
+            "node": "¿Firma Válida?",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
   }
 }
