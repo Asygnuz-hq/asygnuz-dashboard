@@ -20,6 +20,8 @@ export type MetaConexion = {
   // (ver buildInstagramAuthUrl), no del login de Facebook.
   instagram_access_token: string | null;
   instagram_username?: string | null;
+  guia_marca?: string | null;
+  instagram_scopes?: string[] | null;
 };
 
 export type MetaInsightRow = {
@@ -133,7 +135,12 @@ export async function exchangeForLongLivedToken(shortLivedToken: string): Promis
 export function buildInstagramAuthUrl(state: string): string {
   const appId = env("META_INSTAGRAM_APP_ID");
   const redirectUri = env("META_INSTAGRAM_REDIRECT_URI");
-  const scopes = ["instagram_business_basic", "instagram_business_manage_insights"].join(",");
+  const scopes = [
+    "instagram_business_basic",
+    "instagram_business_manage_insights",
+    "instagram_business_manage_comments",
+    "instagram_business_manage_messages",
+  ].join(",");
   const params = new URLSearchParams({
     client_id: appId,
     redirect_uri: redirectUri,
@@ -797,4 +804,82 @@ export async function fetchInstagramTendenciaCuenta(
   );
 
   return resultado;
+}
+
+// -------- Envío de mensajes y respuestas en Instagram (Graph API) --------
+
+export async function enviarMensajeInstagramDirecto(
+  accessToken: string,
+  instagramUserId: string,
+  recipientId: string,
+  texto: string
+): Promise<{ messageId?: string }> {
+  const url = `${GRAPH_INSTAGRAM_URL}/${instagramUserId}/messages`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      recipient: { id: recipientId },
+      message: { text: texto },
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const errorMsg = data?.error?.message ?? JSON.stringify(data);
+    throw new Error(`Error enviando mensaje Instagram (${res.status}): ${errorMsg}`);
+  }
+  return { messageId: data.message_id ?? data.id };
+}
+
+export async function enviarRespuestaPrivadaComentario(
+  accessToken: string,
+  instagramUserId: string,
+  commentId: string,
+  texto: string
+): Promise<{ messageId?: string }> {
+  const url = `${GRAPH_INSTAGRAM_URL}/${instagramUserId}/messages`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      recipient: { comment_id: commentId },
+      message: { text: texto },
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const errorMsg = data?.error?.message ?? JSON.stringify(data);
+    throw new Error(`Error enviando respuesta privada a comentario (${res.status}): ${errorMsg}`);
+  }
+  return { messageId: data.message_id ?? data.id };
+}
+
+export async function publicarRespuestaComentario(
+  accessToken: string,
+  commentId: string,
+  texto: string
+): Promise<{ commentId?: string }> {
+  const url = `${GRAPH_INSTAGRAM_URL}/${commentId}/replies`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify({
+      message: texto,
+    }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    const errorMsg = data?.error?.message ?? JSON.stringify(data);
+    throw new Error(`Error publicando respuesta a comentario (${res.status}): ${errorMsg}`);
+  }
+  return { commentId: data.id };
 }

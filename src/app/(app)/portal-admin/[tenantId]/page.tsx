@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 import { FuentesAvance } from "@/components/portal/FuentesAvance";
+import { SeccionInstagramCliente } from "@/components/portal/SeccionInstagramCliente";
 
 type Cliente = { id: string; nombre: string; slug: string; color_acento: string | null };
 type Pilar = { id: string; icono: string; titulo: string; texto: string };
@@ -232,6 +233,10 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
 
       <TarjetaSeccion icono="📊" titulo="Fuentes del avance (Kaneo y Meta)">
         <FuentesAvance tenantId={tenantId} />
+      </TarjetaSeccion>
+
+      <TarjetaSeccion icono="📸" titulo="Instagram & Automatizaciones">
+        <SeccionInstagramCliente tenantId={tenantId} />
       </TarjetaSeccion>
 
       <TarjetaSeccion icono="🎯" titulo="Pilares estratégicos">

@@ -5,6 +5,7 @@ import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { SeccionAvance, type EstadoAvance } from "./SeccionAvance";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
+import { SeccionAutomatizacionesPortal } from "./SeccionAutomatizacionesPortal";
 
 export type ProyectoVista = {
   fecha_inicio: string | null;
@@ -157,6 +158,10 @@ export function VistaPortal({
           <Link href={hrefParrilla} className="text-sm underline w-fit">
             Ver parrilla completa →
           </Link>
+        </TarjetaSeccion>
+
+        <TarjetaSeccion icono="⚡" titulo="Automatizaciones de Instagram">
+          <SeccionAutomatizacionesPortal colorAcento={colorAcento} />
         </TarjetaSeccion>
 
         <div className="grid gap-6 sm:grid-cols-2">

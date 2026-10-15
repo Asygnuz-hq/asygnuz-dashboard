@@ -1,0 +1,137 @@
+{
+  "name": "instagram-alertas",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "*/15 * * * *"
+            }
+          ]
+        }
+      },
+      "id": "node-cron-15m",
+      "name": "Cada 15 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calcula el rango de tiempo para conversaciones con menos de 3h restantes\n// (es decir, el último mensaje fue recibido hace entre 21 y 24 horas)\nconst ahora = Date.now();\nconst hace24h = new Date(ahora - 24 * 60 * 60 * 1000).toISOString();\nconst hace21h = new Date(ahora - 21 * 60 * 60 * 1000).toISOString();\n\nreturn [{\n  json: {\n    hace24h,\n    hace21h\n  }\n}];"
+      },
+      "id": "node-calcular-rango",
+      "name": "Calcular Ventana Crítica (<= 3h)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [400, 240]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env['SUPABASE_URL'] }}/rest/v1/ig_conversaciones",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "estado", "value": "eq.pendiente" },
+            { "name": "ultimo_mensaje_usuario_en", "value": "gte.{{ $json.hace24h }}" },
+            { "name": "ultimo_mensaje_usuario_en", "value": "lte.{{ $json.hace21h }}" },
+            { "name": "select", "value": "id,ig_usuario_nombre,ultimo_mensaje_texto,ultimo_mensaje_usuario_en,conexion_id" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env['SUPABASE_SERVICE_ROLE_KEY'] }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env['SUPABASE_SERVICE_ROLE_KEY'] }}" }
+          ]
+        }
+      },
+      "id": "node-consultar-criticas",
+      "name": "Buscar Conversaciones por Vencer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [640, 240]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $items().length }}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "id": "node-if-hay-criticas",
+      "name": "¿Hay pendientes críticas?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [880, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Arma el mensaje de notificación para JM\nconst items = $input.all();\nconst total = items.length;\n\nlet texto = `⚠️ *Alerta ASYGNUZ — Ventana de Instagram por vencer*\\n\\nTienes *${total}* conversación(es) de Instagram que vencerán en menos de 3 horas:\\n\\n`;\n\nfor (const item of items) {\n  const conv = item.json;\n  const fecha = new Date(conv.ultimo_mensaje_usuario_en);\n  const vence = new Date(fecha.getTime() + 24 * 60 * 60 * 1000);\n  const minutosRestantes = Math.max(0, Math.round((vence.getTime() - Date.now()) / 60000));\n  const horas = Math.floor(minutosRestantes / 60);\n  const min = minutosRestantes % 60;\n\n  texto += `• @${conv.ig_usuario_nombre || 'usuario'} (${horas}h ${min}m restantes)\\n  Mensaje: \"${(conv.ultimo_mensaje_texto || '').slice(0, 60)}...\"\\n\\n`;\n}\n\ntexto += `Entra a responder en https://app.asygnuz.com/bandeja o corre el comando de Claude.`;\n\nreturn [{ json: { mensajeAlerta: texto, total } }];"
+      },
+      "id": "node-armar-alerta",
+      "name": "Formatear Mensaje de Alerta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env['CANAL_ALERTA_WEBHOOK_URL'] || 'https://api.telegram.org/bot' + $env['TELEGRAM_BOT_TOKEN'] + '/sendMessage' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"chat_id\": \"{{ $env['TELEGRAM_CHAT_ID'] || '123456789' }}\",\n  \"text\": \"{{ $json.mensajeAlerta }}\",\n  \"parse_mode\": \"Markdown\"\n}"
+      },
+      "id": "node-enviar-alerta",
+      "name": "Enviar Alerta a JM (WhatsApp / Telegram / HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1360, 200]
+    }
+  ],
+  "connections": {
+    "Cada 15 minutos": {
+      "main": [
+        [{ "node": "Calcular Ventana Crítica (<= 3h)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Calcular Ventana Crítica (<= 3h)": {
+      "main": [
+        [{ "node": "Buscar Conversaciones por Vencer", "type": "main", "index": 0 }]
+      ]
+    },
+    "Buscar Conversaciones por Vencer": {
+      "main": [
+        [{ "node": "¿Hay pendientes críticas?", "type": "main", "index": 0 }]
+      ]
+    },
+    "¿Hay pendientes críticas?": {
+      "main": [
+        [{ "node": "Formatear Mensaje de Alerta", "type": "main", "index": 0 }]
+      ]
+    },
+    "Formatear Mensaje de Alerta": {
+      "main": [
+        [{ "node": "Enviar Alerta a JM (WhatsApp / Telegram / HTTP)", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

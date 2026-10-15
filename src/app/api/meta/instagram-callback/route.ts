@@ -65,6 +65,12 @@ export async function GET(request: Request) {
       instagram_access_token: access_token,
       instagram_token_expira_en: expiraEn,
       instagram_username: username,
+      instagram_scopes: [
+        "instagram_business_basic",
+        "instagram_business_manage_insights",
+        "instagram_business_manage_comments",
+        "instagram_business_manage_messages",
+      ],
       actualizado_en: new Date().toISOString(),
     };
 
