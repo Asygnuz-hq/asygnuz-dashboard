@@ -198,6 +198,22 @@ export async function fetchInstagramMe(accessToken: string): Promise<{ id: strin
   return { id: String(data.id), username: data.username ?? null };
 }
 
+// Suscribe la cuenta de Instagram a los avisos (webhooks) de la app. Configurar
+// el webhook en Meta Developers no basta: con "Instagram API with Instagram
+// Login" cada cuenta debe suscribirse con su propio token, o Meta no envía sus
+// comentarios ni sus DMs. Requiere los permisos de comentarios y mensajes.
+export async function suscribirInstagramAAvisos(accessToken: string): Promise<void> {
+  const url = new URL(`${GRAPH_INSTAGRAM_URL}/me/subscribed_apps`);
+  url.searchParams.set("subscribed_fields", "comments,messages,messaging_postbacks");
+  url.searchParams.set("access_token", accessToken);
+  const res = await fetch(url.toString(), { method: "POST", cache: "no-store" });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok || body?.success === false) {
+    const mensaje = body?.error?.message ?? `HTTP ${res.status}`;
+    throw new Error(`No se pudo suscribir la cuenta a los avisos de Meta: ${mensaje}`);
+  }
+}
+
 // Cambia el token corto (~1h) por uno de larga duración (~60 días).
 export async function exchangeInstagramLongLivedToken(
   shortLivedToken: string
