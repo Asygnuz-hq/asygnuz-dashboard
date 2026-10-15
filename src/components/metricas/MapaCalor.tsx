@@ -23,16 +23,19 @@ export function MapaCalor({ datos, celdas, onSeleccionar, acento = "var(--succes
   const matrizMap = new Map<string, number>();
   listaCeldas.forEach((d) => matrizMap.set(`${d.dia}-${d.franja}`, d.intensidad));
 
-  // Matriz base si no hay datos
+  if (listaCeldas.length === 0) {
+    return (
+      <div className="h-44 flex flex-col items-center justify-center text-center p-4 text-muted text-xs">
+        <span className="text-2xl mb-1">🗓️</span>
+        <p className="font-medium text-foreground">Sin suficientes publicaciones para mapa de calor</p>
+        <p className="text-[11px] mt-0.5">Requiere publicaciones con interacción para identificar tus mejores horarios.</p>
+      </div>
+    );
+  }
+
   const obtenerIntensidad = (dia: string, franja: string) => {
     const key = `${dia}-${franja}`;
-    if (matrizMap.has(key)) return matrizMap.get(key)!;
-    // Valores por defecto realistas si la cuenta es nueva
-    if (franja === "19:00" && (dia === "Mié" || dia === "Jue")) return 0.95;
-    if (franja === "19:00") return 0.8;
-    if (franja === "16:00") return 0.65;
-    if (franja === "12:00") return 0.55;
-    return 0.3;
+    return matrizMap.get(key) ?? 0.1;
   };
 
   return (

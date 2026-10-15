@@ -154,25 +154,25 @@ export function PanelAvanceMetricas({
           valor={cuenta.seguidoresTotales !== null ? entero.format(cuenta.seguidoresTotales) : "—"}
           delta={cuenta.seguidoresDelta ?? undefined}
           acento={acento}
-          nota={cuenta.usuario ? `@${cuenta.usuario}` : "Cuenta conectada"}
-          benchmark="Promedio sector salud: 5k - 20k"
+          nota={cuenta.usuario ? `@${cuenta.usuario}` : cuenta.conectado ? "Cuenta conectada" : "Sin conectar"}
+          benchmark="En vivo (Instagram Graph API)"
         />
 
         <KpiCard
           etiqueta="Inversión en Pauta"
-          valor={pauta.conectado ? dinero(pauta.gasto, pauta.moneda) : "—"}
-          delta={pauta.gastoDelta ?? undefined}
+          valor={pauta.conectado && pauta.campanas.length > 0 ? dinero(pauta.gasto, pauta.moneda) : pauta.conectado ? "$0 COP" : "—"}
+          delta={pauta.campanas.length > 0 ? (pauta.gastoDelta ?? undefined) : undefined}
           acento={acento}
-          nota={pauta.conectado ? `${entero.format(pauta.resultados)} clientes potenciales` : "Sin cuenta activa"}
-          benchmark="Presupuesto sugerido: $2.5M - $5M"
+          nota={pauta.conectado && pauta.campanas.length > 0 ? `${entero.format(pauta.resultados)} clientes potenciales` : pauta.conectado ? "Sin campañas en el periodo" : "Sin cuenta activa"}
+          benchmark="Meta Ads en vivo"
         />
 
         <KpiCard
           etiqueta="Costo por Resultado"
           valor={pauta.conectado && pauta.cprPromedio > 0 ? dinero(pauta.cprPromedio, pauta.moneda) : "—"}
-          delta={pauta.cprDelta ?? undefined}
+          delta={pauta.campanas.length > 0 ? (pauta.cprDelta ?? undefined) : undefined}
           acento={acento}
-          nota="Por lead o conversación"
+          nota={pauta.cprPromedio > 0 ? "Por lead o conversación" : "Se calculará con campañas activas"}
           benchmark="Benchmark Medellín: $8.500 - $14.000"
         />
 
@@ -267,12 +267,12 @@ export function PanelAvanceMetricas({
             <div className="flex flex-col gap-6">
               <div className="glass rounded-2xl p-5 flex items-center gap-5">
                 <AnilloProgreso
-                  porcentaje={cuenta.tasaInteraccionPromedio ?? 4.2}
+                  porcentaje={cuenta.tasaInteraccionPromedio ?? 0}
                   maximo={10}
                   color={acento}
                   tamano={90}
                   anchoTrazo={9}
-                  formato={(val) => `${decimal.format(val)}%`}
+                  formato={(val) => (val > 0 ? `${decimal.format(val)}%` : "0%")}
                   subetiqueta="Interacción"
                 />
                 <div className="flex-1 min-w-0">
@@ -280,7 +280,9 @@ export function PanelAvanceMetricas({
                   <p className="text-sm text-muted mt-1 leading-snug">
                     {cuenta.tasaInteraccionPromedio && cuenta.tasaInteraccionPromedio > 3.8
                       ? "🔥 Superior al promedio del sector salud (3,8% en Colombia)."
-                      : "Buen ritmo de interacciones por cada persona alcanzada."}
+                      : cuenta.tasaInteraccionPromedio && cuenta.tasaInteraccionPromedio > 0
+                      ? "Buen ritmo de interacciones por cada persona alcanzada."
+                      : "Se calculará automáticamente con las publicaciones del periodo."}
                   </p>
                 </div>
               </div>
@@ -440,175 +442,193 @@ export function PanelAvanceMetricas({
               <span>📣</span> Meta Ads: Inversión, Creativos & Conversión
             </h3>
             {pauta.conectado && (
-              <span className="text-xs px-3 py-1 rounded-full glass font-medium text-emerald-400">
-                ● Campañas Activas
+              <span
+                className={`text-xs px-3 py-1 rounded-full glass font-medium ${
+                  pauta.campanas.length > 0 ? "text-emerald-400" : "text-muted"
+                }`}
+              >
+                {pauta.campanas.length > 0 ? "● Campañas Activas" : "○ Sin campañas activas"}
               </span>
             )}
           </div>
 
-          {/* Ritmo de Presupuesto del Mes & Semáforo de Frecuencia */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="glass rounded-2xl p-4 md:col-span-2 flex flex-col justify-between gap-3">
-              <div className="flex justify-between items-baseline">
-                <div>
+          {!pauta.conectado ? (
+            <div className="glass rounded-2xl p-8 border border-border text-center flex flex-col items-center justify-center gap-2">
+              <span className="text-3xl">📣</span>
+              <h4 className="text-base font-semibold text-foreground">Sin cuenta publicitaria vinculada</h4>
+              <p className="text-xs text-muted max-w-md">
+                Aún no hay una cuenta de anuncios conectada a este portal.
+              </p>
+            </div>
+          ) : pauta.campanas.length === 0 ? (
+            <div className="glass rounded-2xl p-8 border border-border text-center flex flex-col items-center justify-center gap-2">
+              <span className="text-3xl">📣</span>
+              <h4 className="text-base font-semibold text-foreground">Cuenta publicitaria conectada</h4>
+              <p className="text-xs text-muted max-w-md">
+                Aún no hay campañas activas con inversión en este periodo. Cuando comiencen a rodar los anuncios en Meta Ads, verás aquí el gasto diario, clics, costo por cliente potencial y el desglose de creativos ganadores en tiempo real.
+              </p>
+            </div>
+          ) : (
+            <>
+              {/* Ritmo de Presupuesto del Mes & Semáforo de Frecuencia */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="glass rounded-2xl p-4 md:col-span-2 flex flex-col justify-between gap-3">
+                  <div className="flex justify-between items-baseline">
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-muted font-bold">
+                        Ritmo de Presupuesto Mensual
+                      </p>
+                      <p className="text-sm font-medium mt-1">
+                        {dinero(pauta.gasto, pauta.moneda)} invertidos de{" "}
+                        <span className="text-muted">{dinero(pauta.presupuestoPlaneado ?? 0, pauta.moneda)} planeados</span>
+                      </p>
+                    </div>
+                    <span className="text-lg font-bold" style={{ fontFamily: FUENTE_DISPLAY, color: acento }}>
+                      {pauta.porcentajePresupuesto}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-3 overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{
+                        width: `${Math.min(pauta.porcentajePresupuesto ?? 0, 100)}%`,
+                        backgroundColor: acento,
+                      }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted">
+                    Ejecución al ritmo ideal según los días transcurridos del mes.
+                  </p>
+                </div>
+
+                <div className="glass rounded-2xl p-4 flex flex-col justify-between gap-2">
                   <p className="text-xs uppercase tracking-wider text-muted font-bold">
-                    Ritmo de Presupuesto Mensual
+                    Frecuencia Promedio de Anuncios
                   </p>
-                  <p className="text-sm font-medium mt-1">
-                    {dinero(pauta.gasto, pauta.moneda)} invertidos de{" "}
-                    <span className="text-muted">{dinero(pauta.presupuestoPlaneado ?? 3500000, pauta.moneda)} planeados</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold" style={{ fontFamily: FUENTE_DISPLAY }}>
+                      {decimal.format(pauta.frecuenciaPromedio)}x
+                    </span>
+                    <span
+                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                        pauta.semaforoFrecuencia === "verde"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : pauta.semaforoFrecuencia === "ambar"
+                          ? "bg-amber-500/20 text-amber-400"
+                          : "bg-rose-500/20 text-rose-400"
+                      }`}
+                    >
+                      {pauta.semaforoFrecuencia === "verde"
+                        ? "Óptimo (< 2.5x)"
+                        : pauta.semaforoFrecuencia === "ambar"
+                        ? "Atención (2.5x - 3.5x)"
+                        : "Saturación (> 3.5x)"}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-muted leading-tight">
+                    El público no está saturado y mantiene receptividad a los mensajes.
                   </p>
                 </div>
-                <span className="text-lg font-bold" style={{ fontFamily: FUENTE_DISPLAY, color: acento }}>
-                  {pauta.porcentajePresupuesto ?? 80}%
-                </span>
               </div>
-              <div className="w-full bg-border rounded-full h-3 overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min(pauta.porcentajePresupuesto ?? 80, 100)}%`,
-                    backgroundColor: acento,
-                  }}
-                />
-              </div>
-              <p className="text-[11px] text-muted">
-                Ejecución al ritmo ideal según los días transcurridos del mes.
-              </p>
-            </div>
 
-            <div className="glass rounded-2xl p-4 flex flex-col justify-between gap-2">
-              <p className="text-xs uppercase tracking-wider text-muted font-bold">
-                Frecuencia Promedio de Anuncios
-              </p>
-              <div className="flex items-center gap-3">
-                <span className="text-2xl font-bold" style={{ fontFamily: FUENTE_DISPLAY }}>
-                  {decimal.format(pauta.frecuenciaPromedio || 1.8)}x
-                </span>
-                <span
-                  className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                    pauta.semaforoFrecuencia === "verde"
-                      ? "bg-emerald-500/20 text-emerald-400"
-                      : pauta.semaforoFrecuencia === "ambar"
-                      ? "bg-amber-500/20 text-amber-400"
-                      : "bg-rose-500/20 text-rose-400"
-                  }`}
-                >
-                  {pauta.semaforoFrecuencia === "verde"
-                    ? "Óptimo (< 2.5x)"
-                    : pauta.semaforoFrecuencia === "ambar"
-                    ? "Atención (2.5x - 3.5x)"
-                    : "Saturación (> 3.5x)"}
-                </span>
-              </div>
-              <p className="text-[11px] text-muted leading-tight">
-                El público no está saturado y mantiene receptividad a los mensajes.
-              </p>
-            </div>
-          </div>
-
-          {/* Gráfica Dual: Inversión vs Resultados Diarios */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="glass rounded-2xl p-5 lg:col-span-2 flex flex-col gap-4">
-              <h4 className="text-sm font-semibold text-foreground">
-                Inversión vs. Resultados Generados por Día
-              </h4>
-              {pauta.serieDiaria.length > 0 ? (
-                <GraficaLinea
-                  datos={pauta.serieDiaria}
-                  lineas={[
-                    { key: "gasto", label: "Inversión (COP)", color: acento },
-                    { key: "resultados", label: "Resultados / Leads", color: "var(--accent-bright)", ejeY: "right" },
-                  ]}
-                  claveX="fecha"
-                  altura={260}
-                />
-              ) : (
-                <div className="h-64 flex items-center justify-center text-xs text-muted">
-                  Sin datos de serie diaria.
+              {/* Gráfica Dual: Inversión vs Resultados Diarios */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="glass rounded-2xl p-5 lg:col-span-2 flex flex-col gap-4">
+                  <h4 className="text-sm font-semibold text-foreground">
+                    Inversión vs. Resultados Generados por Día
+                  </h4>
+                  {pauta.serieDiaria.length > 0 ? (
+                    <GraficaLinea
+                      datos={pauta.serieDiaria}
+                      lineas={[
+                        { key: "gasto", label: "Inversión (COP)", color: acento },
+                        { key: "resultados", label: "Resultados / Leads", color: "var(--accent-bright)", ejeY: "right" },
+                      ]}
+                      claveX="fecha"
+                      altura={260}
+                    />
+                  ) : (
+                    <div className="h-64 flex items-center justify-center text-xs text-muted">
+                      Sin datos de serie diaria en el periodo.
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
 
-            {/* Embudo de Conversión 4 Etapas */}
-            <div className="glass rounded-2xl p-5 flex flex-col gap-3">
-              <div>
-                <h4 className="text-sm font-semibold text-foreground">
-                  Embudo de Conversión
-                </h4>
-                <p className="text-xs text-muted">
-                  Tasa de paso entre etapas publicitarias.
-                </p>
+                {/* Embudo de Conversión */}
+                <div className="glass rounded-2xl p-5 flex flex-col gap-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground">
+                      Embudo de Conversión
+                    </h4>
+                    <p className="text-xs text-muted">
+                      Tasa de paso entre etapas publicitarias.
+                    </p>
+                  </div>
+                  <Embudo pasos={pauta.embudo} acento={acento} />
+                </div>
               </div>
-              <Embudo pasos={pauta.embudo} acento={acento} />
-            </div>
-          </div>
 
-          {/* Campañas & Ubicaciones */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass rounded-2xl p-5 flex flex-col gap-3">
-              <h4 className="text-xs uppercase tracking-wider text-muted font-bold">
-                Inversión y Resultados por Campaña
-              </h4>
-              {pauta.campanas.length > 0 ? (
-                <GraficaBarras
-                  datos={pauta.campanas.map((c) => ({
-                    nombre: c.nombre.length > 20 ? `${c.nombre.slice(0, 18)}…` : c.nombre,
-                    gasto: c.gasto,
-                    resultados: c.resultados,
-                  }))}
-                  barras={[
-                    { key: "gasto", label: "Inversión (COP)", color: acento },
-                    { key: "resultados", label: "Resultados", color: "var(--accent-bright)" },
-                  ]}
-                  claveX="nombre"
-                  altura={220}
-                  horizontal
-                />
-              ) : (
-                <div className="h-48 flex items-center justify-center text-xs text-muted">
-                  Sin campañas en el periodo.
+              {/* Campañas & Ubicaciones */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass rounded-2xl p-5 flex flex-col gap-3">
+                  <h4 className="text-xs uppercase tracking-wider text-muted font-bold">
+                    Inversión y Resultados por Campaña
+                  </h4>
+                  <GraficaBarras
+                    datos={pauta.campanas.map((c) => ({
+                      nombre: c.nombre.length > 20 ? `${c.nombre.slice(0, 18)}…` : c.nombre,
+                      gasto: c.gasto,
+                      resultados: c.resultados,
+                    }))}
+                    barras={[
+                      { key: "gasto", label: "Inversión (COP)", color: acento },
+                      { key: "resultados", label: "Resultados", color: "var(--accent-bright)" },
+                    ]}
+                    claveX="nombre"
+                    altura={220}
+                    horizontal
+                  />
                 </div>
-              )}
-            </div>
 
-            <div className="glass rounded-2xl p-5 flex flex-col gap-3">
-              <h4 className="text-xs uppercase tracking-wider text-muted font-bold">
-                Distribución por Ubicación
-              </h4>
-              {pauta.ubicaciones.length > 0 ? (
-                <GraficaDona
-                  datos={pauta.ubicaciones}
-                  claveNombre="nombre"
-                  claveValor="porcentaje"
-                  altura={220}
-                  textoCentro="Canal"
-                />
-              ) : (
-                <div className="h-48 flex items-center justify-center text-xs text-muted">
-                  Sin ubicaciones registradas.
+                <div className="glass rounded-2xl p-5 flex flex-col gap-3">
+                  <h4 className="text-xs uppercase tracking-wider text-muted font-bold">
+                    Distribución por Ubicación
+                  </h4>
+                  {pauta.ubicaciones.length > 0 ? (
+                    <GraficaDona
+                      datos={pauta.ubicaciones}
+                      claveNombre="nombre"
+                      claveValor="porcentaje"
+                      altura={220}
+                      textoCentro="Canal"
+                    />
+                  ) : (
+                    <div className="h-48 flex items-center justify-center text-xs text-muted">
+                      Sin datos de ubicaciones.
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          {/* Grid de Anuncios Ganadores (Motion App + Madgicx + Escala) */}
-          <div className="flex flex-col gap-3">
-            <div>
-              <h4 className="text-base font-semibold" style={{ fontFamily: FUENTE_DISPLAY }}>
-                Creativos & Anuncios Ganadores (Motion App Analysis)
-              </h4>
-              <p className="text-xs text-muted">
-                Diagnóstico de retención de video, fatiga de anuncios y simulador interactivo de escala.
-              </p>
-            </div>
-            <CuadriculaAnuncios
-              anuncios={pauta.anunciosGanadores}
-              moneda={pauta.moneda}
-              acento={acento}
-              presupuestoMensual={pauta.presupuestoPlaneado}
-            />
-          </div>
+              {/* Grid de Anuncios Ganadores */}
+              <div className="flex flex-col gap-3">
+                <div>
+                  <h4 className="text-base font-semibold" style={{ fontFamily: FUENTE_DISPLAY }}>
+                    Creativos & Anuncios Ganadores (Motion App Analysis)
+                  </h4>
+                  <p className="text-xs text-muted">
+                    Diagnóstico de retención de video, fatiga de anuncios y simulador interactivo de escala.
+                  </p>
+                </div>
+                <CuadriculaAnuncios
+                  anuncios={pauta.anunciosGanadores}
+                  moneda={pauta.moneda}
+                  acento={acento}
+                  presupuestoMensual={pauta.presupuestoPlaneado}
+                />
+              </div>
+            </>
+          )}
         </div>
       )}
 

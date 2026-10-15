@@ -53,6 +53,17 @@ export function CuadriculaAnuncios({
   const resultadosProyectados = Math.round(inversionSimulada / (cprReferencia || 1));
   const alcanceProyectado = Math.round(inversionSimulada * 0.08); // aprox 80 personas por cada $1.000 COP
 
+  if (anuncios.length === 0) {
+    return (
+      <div className="glass rounded-2xl p-6 border border-border text-center">
+        <p className="text-sm font-semibold text-foreground">Aún no se registran anuncios activos en este periodo</p>
+        <p className="text-xs text-muted mt-1 max-w-md mx-auto">
+          Cuando las campañas de Meta Ads comiencen a difundir creativos, verás aquí el desglose de anuncios ganadores, métricas de retención de video (Hook y Hold Rate) y el simulador de escala.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {/* Controles de filtro y búsqueda */}

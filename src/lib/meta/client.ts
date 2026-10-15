@@ -214,6 +214,37 @@ export async function fetchInstagramUsername(accessToken: string, instagramUserI
   return data.username;
 }
 
+export type InstagramPerfil = {
+  id: string;
+  username: string;
+  followers_count?: number;
+  media_count?: number;
+};
+
+export async function fetchInstagramPerfil(conexion: MetaConexion): Promise<InstagramPerfil | null> {
+  if (!conexion.instagram_business_id || !conexion.instagram_access_token) return null;
+  try {
+    const data = await graphFetch<{
+      id: string;
+      username: string;
+      followers_count?: number;
+      media_count?: number;
+    }>(
+      `/${conexion.instagram_business_id}`,
+      { fields: "id,username,followers_count,media_count", access_token: conexion.instagram_access_token },
+      GRAPH_INSTAGRAM_URL
+    );
+    return {
+      id: String(data.id),
+      username: data.username,
+      followers_count: data.followers_count !== undefined ? Number(data.followers_count) : undefined,
+      media_count: data.media_count !== undefined ? Number(data.media_count) : undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export type CuentaDisponible = {
   ad_account_id: string;
   ad_account_name: string;

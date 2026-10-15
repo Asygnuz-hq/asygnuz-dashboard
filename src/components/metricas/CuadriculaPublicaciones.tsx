@@ -31,7 +31,14 @@ export function CuadriculaPublicaciones({ publicaciones }: CuadriculaPublicacion
   }, [publicaciones, filtroTipo, busqueda, criterioOrden]);
 
   if (publicaciones.length === 0) {
-    return <p className="text-sm text-muted">Aún no hay publicaciones en el periodo seleccionado.</p>;
+    return (
+      <div className="glass rounded-2xl p-6 border border-border text-center">
+        <p className="text-sm font-semibold text-foreground">Aún no se registran publicaciones en Instagram en este periodo</p>
+        <p className="text-xs text-muted mt-1 max-w-md mx-auto">
+          Tan pronto se publiquen piezas en Instagram, verás aquí la cuadrícula interactiva con alcance, interacciones y el análisis 360°.
+        </p>
+      </div>
+    );
   }
 
   return (

@@ -8,6 +8,7 @@ import {
   fetchInstagramMedia,
   fetchInstagramTendenciaCuenta,
   fetchInstagramDemografia,
+  fetchInstagramPerfil,
   fetchMonedaCuentaAnuncios,
   type MetaConexion,
   type InstagramMedia,
@@ -43,7 +44,7 @@ function numero(valor: unknown): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-function calcularDelta(actual: number, anterior: number): DeltaComparativo {
+export function calcularDelta(actual: number, anterior: number): DeltaComparativo {
   const delta = actual - anterior;
   const deltaPct = anterior > 0 ? (delta / anterior) * 100 : actual > 0 ? 100 : 0;
   return {
@@ -106,22 +107,70 @@ async function ejecutarCalculoAvance(tenantId: string, periodo: PeriodoMetricas)
 
   const contenido = bloqueContenido(contenidoRes.data ?? [], cuenta.publicadasMes);
 
-  // Generación de resumen en lenguaje humano dinámico (sin IA)
-  const seguidoresTxt = cuenta.bloque.seguidoresGanados !== null
-    ? `${cuenta.bloque.seguidoresGanados > 0 ? "+" : ""}${cuenta.bloque.seguidoresGanados.toLocaleString("es-CO")} seguidores`
-    : "crecimiento constante";
-  const mejorReel = cuenta.bloque.topPublicaciones.find((p) => p.media_product_type === "REELS") ?? cuenta.bloque.topPublicaciones[0];
-  const alcanceReelTxt = mejorReel ? `${mejorReel.alcance.toLocaleString("es-CO")} personas` : "excelente alcance";
-  const costoCitaTxt = pauta.cprPromedio > 0
-    ? new Intl.NumberFormat("es-CO", { style: "currency", currency: pauta.moneda ?? "COP", maximumFractionDigits: 0 }).format(pauta.cprPromedio)
-    : "$4.850 COP";
+  // Generación de resumen en lenguaje humano dinámico y 100% verídico
+  const partes: string[] = [];
 
-  const resumenHumano = `En los ${resolverDiasPeriodo(periodo).etiqueta}: Ganaste ${seguidoresTxt}, tu reel más destacado alcanzó a ${alcanceReelTxt}, y cada conversación de WhatsApp para cita de valoración promedió ${costoCitaTxt}.`;
+  if (pauta.conectado) {
+    if (pauta.campanas.length > 0 && pauta.gasto > 0) {
+      const gastoFmt = new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: pauta.moneda ?? "COP",
+        maximumFractionDigits: 0,
+      }).format(pauta.gasto);
+      const cprFmt = new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: pauta.moneda ?? "COP",
+        maximumFractionDigits: 0,
+      }).format(pauta.cprPromedio);
+      partes.push(
+        `En Meta Ads has invertido ${gastoFmt}, logrando ${pauta.resultados.toLocaleString("es-CO")} resultados a ${cprFmt} por resultado.`
+      );
+    } else {
+      partes.push("Tu cuenta publicitaria de Meta Ads está conectada y preparada para activar campañas.");
+    }
+  }
+
+  if (cuenta.bloque.conectado) {
+    if (cuenta.bloque.topPublicaciones.length > 0) {
+      const mejorReel = cuenta.bloque.topPublicaciones.find((p) => p.media_product_type === "REELS");
+      if (mejorReel && mejorReel.alcance > 0) {
+        partes.push(`Tu Reel más visto alcanzó a ${mejorReel.alcance.toLocaleString("es-CO")} personas.`);
+      } else {
+        partes.push(`Se han publicado ${cuenta.bloque.topPublicaciones.length} piezas en Instagram.`);
+      }
+    } else {
+      partes.push(
+        cuenta.bloque.usuario
+          ? `Instagram @${cuenta.bloque.usuario} conectado. Aún no se registran publicaciones en este periodo.`
+          : "Instagram conectado. Aún no se registran publicaciones en este periodo."
+      );
+    }
+  }
+
+  if (trabajo.conectado) {
+    partes.push(
+      `En la operación, el equipo ha completado ${trabajo.hechas} de ${trabajo.totalTareas} tareas (${trabajo.porcentajeAvance} % de avance).`
+    );
+  }
+
+  const resumenHumano = partes.join(" ") || "Tu portal de crecimiento está activo y conectado con ASYGNUZ.";
 
   const metas = {
-    metaCitas: { objetivo: 600, actual: pauta.resultados || 670, porcentaje: Math.round(((pauta.resultados || 670) / 600) * 100) },
-    metaAlcance: { objetivo: 100000, actual: cuenta.bloque.alcancePeriodo || 114820, porcentaje: Math.round(((cuenta.bloque.alcancePeriodo || 114820) / 100000) * 100) },
-    retencionObjetivo: { objetivo: 15, actual: 18.4, estado: "Top 10% sector estética" },
+    metaCitas: {
+      objetivo: 600,
+      actual: pauta.resultados,
+      porcentaje: pauta.resultados > 0 ? Math.round((pauta.resultados / 600) * 100) : 0,
+    },
+    metaAlcance: {
+      objetivo: 50000,
+      actual: cuenta.bloque.alcancePeriodo ?? 0,
+      porcentaje: cuenta.bloque.alcancePeriodo ? Math.round((cuenta.bloque.alcancePeriodo / 50000) * 100) : 0,
+    },
+    retencionObjetivo: {
+      objetivo: 15,
+      actual: cuenta.bloque.retencionReels.length > 0 ? cuenta.bloque.retencionReels[0].avgWatchTime : 0,
+      estado: cuenta.bloque.retencionReels.length > 0 ? "Medición activa" : "Sin reels aún",
+    },
   };
 
   return {
@@ -353,38 +402,14 @@ async function bloquePauta(conexiones: MetaConexion[], dias: number, presupuesto
     cprDelta: null,
     presupuestoPlaneado,
     porcentajePresupuesto: 0,
-    frecuenciaPromedio: 1.84,
+    frecuenciaPromedio: 0,
     semaforoFrecuencia: "verde",
     serieDiaria: [],
     embudo: [],
-    ubicaciones: [
-      { nombre: "Instagram Reels", porcentaje: 42 },
-      { nombre: "Instagram Stories", porcentaje: 31 },
-      { nombre: "Instagram Feed", porcentaje: 21 },
-      { nombre: "Facebook & Otras", porcentaje: 6 },
-    ],
+    ubicaciones: [],
     campanas: [],
     anunciosGanadores: [],
-    diagnosticos: [
-      {
-        tipo: "winner",
-        titulo: "🚀 Creativo Estrella: Botox 30 Días",
-        descripcion: "El reel testimonial tiene un Thumbstop (Hook) Rate del 36,4 % y costo de $3.920 COP por cita. Fase óptima de escala.",
-        accion: "Aumentar 20% de presupuesto a este ad set.",
-      },
-      {
-        tipo: "scale",
-        titulo: "💡 Formato Ganador: Microcánula",
-        descripcion: "Los videos demostrativos de procedimiento tienen un Hold Rate de 41,8 % (ven el video completo).",
-        accion: "Rodar 2 piezas similares en el próximo sprint.",
-      },
-      {
-        tipo: "warning",
-        titulo: "⚠️ Fatiga Detectada: Mitos Ácido",
-        descripcion: "La frecuencia subió a 2,85 y el CTR cayó esta semana. La audiencia local ya vio el anuncio repetidas veces.",
-        accion: "Rotar el gancho inicial (primeros 3 segundos).",
-      },
-    ],
+    diagnosticos: [],
     errores: [],
   };
 
@@ -408,6 +433,7 @@ async function bloquePauta(conexiones: MetaConexion[], dias: number, presupuesto
             .reduce((s, a) => s + numero(a.value), 0);
           const gastoCampana = numero(f.spend);
           const campana: CampanaAvance = {
+            id: f.campaign_name,
             nombre: f.campaign_name,
             gasto: gastoCampana,
             alcance: numero(f.reach),
@@ -426,7 +452,7 @@ async function bloquePauta(conexiones: MetaConexion[], dias: number, presupuesto
         }
 
         // Series diarias reales
-        if (diarios.length > 0) {
+        if (diarios && diarios.length > 0) {
           bloque.serieDiaria = diarios.map((d) => ({
             fecha: d.fecha,
             gasto: d.gasto,
@@ -434,31 +460,33 @@ async function bloquePauta(conexiones: MetaConexion[], dias: number, presupuesto
           }));
         }
 
-        // Anuncios para Creative Analytics
-        if (adsFilas.length > 0) {
-          bloque.anunciosGanadores = adsFilas.slice(0, 6).map((ad, idx) => {
+        // Anuncios reales para Creative Analytics
+        if (adsFilas && adsFilas.length > 0) {
+          bloque.anunciosGanadores = adsFilas.map((ad, idx) => {
             const gastoAd = numero(ad.spend);
             const clicsAd = numero(ad.clicks);
             const impAd = numero(ad.impressions);
-            const resAd = (ad.actions ?? []).filter((a) => ACCIONES_RESULTADO.has(a.action_type)).reduce((s, a) => s + numero(a.value), 0);
-            const freq = numero(ad.frequency) || 1.6 + idx * 0.2;
+            const resAd = (ad.actions ?? [])
+              .filter((a) => ACCIONES_RESULTADO.has(a.action_type))
+              .reduce((s, a) => s + numero(a.value), 0);
+            const freq = numero(ad.frequency) || 1.0;
             return {
               id: ad.ad_id ?? `ad-${idx}`,
               nombre: ad.ad_name ?? `Anuncio ${idx + 1}`,
               campana: ad.campaign_name,
-              imagenUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&q=80",
-              estado: freq > 2.5 ? "FATIGUE" : idx === 0 ? "WINNER" : "TESTING",
-              estadoTexto: freq > 2.5 ? "⚠️ Fatiga detectada" : idx === 0 ? "🚀 Ganador (Escalando)" : "🧪 En prueba",
-              inversion: gastoAd || 940000 - idx * 110000,
-              impresiones: impAd || 142000 - idx * 24000,
-              clics: clicsAd || 3200 - idx * 400,
-              ctr: numero(ad.ctr) || Number((3.84 - idx * 0.5).toFixed(2)),
-              resultados: resAd || 240 - idx * 45,
-              cpr: resAd > 0 ? Math.round(gastoAd / resAd) : 3920 + idx * 330,
-              hookRate: 36.4 - idx * 4.3,
-              holdRate: 41.8 - idx * 3.3,
+              imagenUrl: null,
+              estado: freq > 3.0 ? "FATIGUE" : idx === 0 ? "WINNER" : "TESTING",
+              estadoTexto: freq > 3.0 ? "⚠️ Fatiga detectada" : idx === 0 ? "🏆 Mejor anuncio" : "🧪 En prueba",
+              inversion: gastoAd,
+              impresiones: impAd,
+              clics: clicsAd,
+              ctr: numero(ad.ctr),
+              resultados: resAd,
+              cpr: resAd > 0 ? Math.round(gastoAd / resAd) : 0,
+              hookRate: 0,
+              holdRate: 0,
               frecuencia: Number(freq.toFixed(2)),
-              fatigaDiagnostico: freq > 2.5 ? "Audiencia saturada, renovar creativo" : "Creativo saludable",
+              fatigaDiagnostico: freq > 3.0 ? "Frecuencia alta: la audiencia ya vio este anuncio repetidas veces." : "Frecuencia óptima.",
             };
           });
         }
@@ -468,31 +496,27 @@ async function bloquePauta(conexiones: MetaConexion[], dias: number, presupuesto
     })
   );
 
-  // Valores de respaldo realistas si la cuenta no reporta datos suficientes todavía
-  if (bloque.gasto === 0) bloque.gasto = 3250000;
-  if (bloque.resultados === 0) bloque.resultados = 670;
-  if (bloque.impresiones === 0) bloque.impresiones = 485000;
-  if (bloque.clics === 0) bloque.clics = 14200;
+  // Calcular métricas agregadas SOLO si hay campañas reales
+  if (bloque.campanas.length > 0) {
+    bloque.cprPromedio = bloque.resultados > 0 ? Math.round(bloque.gasto / bloque.resultados) : 0;
+    bloque.ctrPromedio = bloque.impresiones > 0 ? Number(((bloque.clics / bloque.impresiones) * 100).toFixed(2)) : 0;
+    bloque.porcentajePresupuesto = presupuestoPlaneado && presupuestoPlaneado > 0
+      ? Math.min(Math.round((bloque.gasto / presupuestoPlaneado) * 100), 100)
+      : 0;
 
-  bloque.cprPromedio = bloque.resultados > 0 ? Math.round(bloque.gasto / bloque.resultados) : 4850;
-  bloque.ctrPromedio = bloque.impresiones > 0 ? Number(((bloque.clics / bloque.impresiones) * 100).toFixed(2)) : 2.93;
-  bloque.porcentajePresupuesto = presupuestoPlaneado > 0 ? Math.min(Math.round((bloque.gasto / presupuestoPlaneado) * 100), 100) : 72;
+    bloque.frecuenciaPromedio = bloque.alcance > 0 ? Number((bloque.impresiones / bloque.alcance).toFixed(2)) : 1.0;
+    bloque.semaforoFrecuencia = bloque.frecuenciaPromedio >= 4 ? "rojo" : bloque.frecuenciaPromedio >= 2.5 ? "ambar" : "verde";
 
-  bloque.semaforoFrecuencia = bloque.frecuenciaPromedio >= 4 ? "rojo" : bloque.frecuenciaPromedio >= 2.5 ? "ambar" : "verde";
+    // Embudo de conversión real
+    bloque.embudo = [
+      { etapa: "1. Impresiones", valor: bloque.impresiones, porcentajePaso: 100, tasaConversion: 100 },
+      { etapa: "2. Clics", valor: bloque.clics, porcentajePaso: Math.round(bloque.ctrPromedio), tasaConversion: bloque.ctrPromedio },
+      { etapa: "3. Clientes potenciales", valor: bloque.resultados, porcentajePaso: bloque.clics > 0 ? Math.round((bloque.resultados / bloque.clics) * 100) : 0, tasaConversion: bloque.clics > 0 ? Number(((bloque.resultados / bloque.clics) * 100).toFixed(1)) : 0 },
+    ];
 
-  bloque.gastoDelta = calcularDelta(bloque.gasto, bloque.gasto * 0.9);
-  bloque.resultadosDelta = calcularDelta(bloque.resultados, Math.round(bloque.resultados * 0.87));
-  bloque.cprDelta = calcularDelta(bloque.cprPromedio, bloque.cprPromedio * 1.08);
+    bloque.campanas.sort((a, b) => b.gasto - a.gasto);
+  }
 
-  // Embudo de conversión estructurado
-  bloque.embudo = [
-    { etapa: "1. Impresiones", valor: bloque.impresiones, porcentajePaso: 100, tasaConversion: 100 },
-    { etapa: "2. Clics", valor: bloque.clics, porcentajePaso: 75, tasaConversion: bloque.ctrPromedio },
-    { etapa: "3. Clics WhatsApp", valor: Math.round(bloque.clics * 0.57), porcentajePaso: 52, tasaConversion: 57.0 },
-    { etapa: "4. Citas Iniciadas", valor: bloque.resultados, porcentajePaso: 32, tasaConversion: 8.27 },
-  ];
-
-  bloque.campanas.sort((a, b) => b.gasto - a.gasto);
   return bloque;
 }
 
@@ -504,72 +528,29 @@ async function bloqueCuenta(
   const bloque: BloqueCuenta = {
     conectado: Boolean(ig),
     usuario: null,
-    seguidoresTotales: 28450,
-    seguidoresGanados: 340,
-    seguidoresDelta: { actual: 28450, anterior: 28110, delta: 340, deltaPct: 12.4, esPositivo: true },
-    alcancePeriodo: 114820,
-    alcanceDelta: { actual: 114820, anterior: 96570, delta: 18250, deltaPct: 18.9, esPositivo: true },
-    visitasPerfilPeriodo: 8920,
-    clicsEnlacePeriodo: 2450,
-    tasaInteraccionPromedio: 4.68,
+    seguidoresTotales: null,
+    seguidoresGanados: null,
+    seguidoresDelta: null,
+    alcancePeriodo: null,
+    alcanceDelta: null,
+    visitasPerfilPeriodo: null,
+    clicsEnlacePeriodo: null,
+    tasaInteraccionPromedio: null,
     serieSeguidores: [],
     serieNuevos: [],
     serieAlcance: [],
     serieVistas: [],
     seriePerfil: [],
     serieClics: [],
-    interaccionesSemanales: [
-      { semana: "Semana 1", likes: 1120, comentarios: 95, guardados: 340, compartidos: 210 },
-      { semana: "Semana 2", likes: 1450, comentarios: 140, guardados: 480, compartidos: 310 },
-      { semana: "Semana 3", likes: 1590, comentarios: 165, guardados: 520, compartidos: 390 },
-      { semana: "Semana 4", likes: 1840, comentarios: 190, guardados: 610, compartidos: 430 },
-    ],
-    demografia: {
-      genero: [{ nombre: "Mujeres", valor: 82 }, { nombre: "Hombres", valor: 18 }],
-      edad: [
-        { rango: "18-24", porcentaje: 14 },
-        { rango: "25-34", porcentaje: 46 },
-        { rango: "35-44", porcentaje: 28 },
-        { rango: "45-54", porcentaje: 9 },
-        { rango: "55+", porcentaje: 3 },
-      ],
-      ciudades: [
-        { ciudad: "Bogotá", porcentaje: 62 },
-        { ciudad: "Medellín", porcentaje: 18 },
-        { ciudad: "Cali", porcentaje: 9 },
-        { ciudad: "Barranquilla", porcentaje: 6 },
-        { ciudad: "Otras", porcentaje: 5 },
-      ],
-    },
+    interaccionesSemanales: [],
+    demografia: null,
     formatos: {
-      distribucion: [
-        { formato: "Reels", porcentaje: 50 },
-        { formato: "Carruseles", porcentaje: 35 },
-        { formato: "Fotos", porcentaje: 15 },
-      ],
-      rendimiento: [
-        { formato: "Reels", alcancePromedio: 14200, guardadosPromedio: 380 },
-        { formato: "Carrusel", alcancePromedio: 7800, guardadosPromedio: 240 },
-        { formato: "Foto", alcancePromedio: 3100, guardadosPromedio: 45 },
-      ],
+      distribucion: [],
+      rendimiento: [],
     },
-    mapaCalor: [
-      { dia: "Lun", franja: "19:00", intensidad: 0.75 },
-      { dia: "Mar", franja: "19:00", intensidad: 0.85 },
-      { dia: "Mié", franja: "19:00", intensidad: 0.95 },
-      { dia: "Jue", franja: "19:00", intensidad: 0.98 },
-      { dia: "Vie", franja: "19:00", intensidad: 0.90 },
-      { dia: "Sáb", franja: "16:00", intensidad: 0.75 },
-      { dia: "Dom", franja: "19:00", intensidad: 0.85 },
-    ],
+    mapaCalor: [],
     topPublicaciones: [],
-    retencionReels: [
-      { reelTitulo: "Armonización Labial", avgWatchTime: 18.4, skipRate: 14.2 },
-      { reelTitulo: "¿Duele el Botox?", avgWatchTime: 15.2, skipRate: 22.0 },
-      { reelTitulo: "Rutina Post-Láser CO2", avgWatchTime: 22.8, skipRate: 11.0 },
-      { reelTitulo: "Antes/Después Rinomodelación", avgWatchTime: 19.5, skipRate: 15.0 },
-      { reelTitulo: "Mitos Ácido Hialurónico", avgWatchTime: 14.1, skipRate: 28.0 },
-    ],
+    retencionReels: [],
     errores: [],
   };
 
@@ -578,21 +559,29 @@ async function bloqueCuenta(
   bloque.usuario = ig.instagram_username ?? null;
   let publicadasMes: number | null = null;
 
-  const [tendencia, media, demografia] = await Promise.allSettled([
+  const [perfilRes, tendencia, media, demografia] = await Promise.allSettled([
+    fetchInstagramPerfil(ig),
     fetchInstagramTendenciaCuenta(ig, dias),
     fetchInstagramMedia(ig, 50),
     fetchInstagramDemografia(ig),
   ]);
 
+  if (perfilRes.status === "fulfilled" && perfilRes.value) {
+    bloque.seguidoresTotales = perfilRes.value.followers_count ?? null;
+    if (!bloque.usuario && perfilRes.value.username) {
+      bloque.usuario = perfilRes.value.username;
+    }
+  }
+
   if (tendencia.status === "fulfilled") {
     const t = tendencia.value;
     const suma = (serie?: { valor: number }[]) =>
       serie && serie.length > 0 ? serie.reduce((s, p) => s + p.valor, 0) : null;
-    bloque.alcancePeriodo = suma(t.reach) ?? bloque.alcancePeriodo;
-    bloque.visitasPerfilPeriodo = suma(t.profile_views) ?? bloque.visitasPerfilPeriodo;
-    bloque.seguidoresGanados = suma(t.follower_count) ?? bloque.seguidoresGanados;
+    bloque.alcancePeriodo = suma(t.reach) ?? null;
+    bloque.visitasPerfilPeriodo = suma(t.profile_views) ?? null;
+    bloque.seguidoresGanados = suma(t.follower_count) ?? null;
     bloque.serieAlcance = t.reach ?? [];
-    bloque.serieVistas = (t.reach ?? []).map((p) => ({ fecha: p.fecha, valor: Math.round(p.valor * 1.5) }));
+    bloque.serieVistas = (t.reach ?? []).map((p) => ({ fecha: p.fecha, valor: p.valor }));
     bloque.seriePerfil = t.profile_views ?? [];
     bloque.serieSeguidores = t.follower_count ?? [];
   } else {
@@ -606,46 +595,83 @@ async function bloqueCuenta(
     inicioMes.setHours(0, 0, 0, 0);
     publicadasMes = lista.filter((m) => new Date(m.timestamp) >= inicioMes).length;
 
-    bloque.topPublicaciones = lista.map((m: InstagramMedia) => ({
-      id: m.id,
-      caption: m.caption,
-      media_type: m.media_type,
-      media_product_type: m.media_product_type,
-      timestamp: m.timestamp,
-      permalink: m.permalink,
-      imagenUrl: m.imagenUrl,
-      alcance: m.metricas.reach ?? 14500,
-      impresiones: m.metricas.views ?? (m.metricas.reach ? Math.round(m.metricas.reach * 1.3) : 18000),
-      likes: m.metricas.likes ?? 850,
-      comments: m.metricas.comments ?? 45,
-      shares: m.metricas.shares ?? 120,
-      saved: m.metricas.saved ?? 240,
-      views: m.metricas.views ?? 18000,
-      tasaInteraccion: m.metricas.reach && m.metricas.total_interactions
-        ? Number(((m.metricas.total_interactions / m.metricas.reach) * 100).toFixed(2))
-        : 4.8,
-      pilar: m.media_product_type === "REELS" ? "Reels Demostrativo" : "Educativo",
-      avgWatchTime: m.metricas.ig_reels_avg_watch_time ?? 18.4,
-      skipRate: m.metricas.reels_skip_rate ?? 14.2,
-    }));
-  } else {
-    bloque.errores.push("No se pudieron leer las publicaciones de Instagram.");
+    bloque.topPublicaciones = lista.map((m: InstagramMedia) => {
+      const alcance = m.metricas.reach ?? 0;
+      const interacciones =
+        (m.metricas.likes ?? 0) +
+        (m.metricas.comments ?? 0) +
+        (m.metricas.shares ?? 0) +
+        (m.metricas.saved ?? 0);
+      const tasa = alcance > 0 ? Number(((interacciones / alcance) * 100).toFixed(2)) : 0;
+      return {
+        id: m.id,
+        caption: m.caption,
+        media_type: m.media_type,
+        media_product_type: m.media_product_type,
+        timestamp: m.timestamp,
+        permalink: m.permalink,
+        imagenUrl: m.imagenUrl,
+        alcance,
+        impresiones: m.metricas.views ?? alcance,
+        likes: m.metricas.likes ?? 0,
+        comments: m.metricas.comments ?? 0,
+        shares: m.metricas.shares ?? 0,
+        saved: m.metricas.saved ?? 0,
+        views: m.metricas.views ?? 0,
+        tasaInteraccion: tasa,
+        pilar: m.media_product_type === "REELS" ? "Reels" : "Feed",
+        avgWatchTime: m.metricas.ig_reels_avg_watch_time
+          ? Number((m.metricas.ig_reels_avg_watch_time / 1000).toFixed(1))
+          : null,
+        skipRate: m.metricas.reels_skip_rate ? Number(m.metricas.reels_skip_rate.toFixed(1)) : null,
+      };
+    });
+
+    // Calcular tasa de interacción promedio real
+    const conAlcance = bloque.topPublicaciones.filter((p) => p.alcance > 0);
+    if (conAlcance.length > 0) {
+      bloque.tasaInteraccionPromedio = Number(
+        (conAlcance.reduce((s, p) => s + p.tasaInteraccion, 0) / conAlcance.length).toFixed(2)
+      );
+    }
+
+    // Retención de Reels REAL (solo para reels reales existentes)
+    const reels = bloque.topPublicaciones.filter(
+      (p) => p.media_product_type === "REELS" && p.avgWatchTime !== null && p.avgWatchTime !== undefined
+    );
+    if (reels.length > 0) {
+      bloque.retencionReels = reels.slice(0, 6).map((r) => ({
+        reelTitulo: r.caption ? (r.caption.slice(0, 24) + "…") : "Reel",
+        avgWatchTime: r.avgWatchTime ?? 0,
+        skipRate: r.skipRate ?? 0,
+      }));
+    }
+
+    // Mix de formatos REAL
+    if (lista.length > 0) {
+      const counts: Record<string, number> = {};
+      lista.forEach((m) => {
+        const tipo = m.media_product_type === "REELS" ? "Reels" : m.media_type === "CAROUSEL_ALBUM" ? "Carruseles" : "Fotos";
+        counts[tipo] = (counts[tipo] ?? 0) + 1;
+      });
+      bloque.formatos.distribucion = Object.entries(counts).map(([formato, count]) => ({
+        formato,
+        porcentaje: Math.round((count / lista.length) * 100),
+      }));
+    }
   }
 
   if (demografia.status === "fulfilled" && demografia.value) {
     const d = demografia.value;
     if (d.edadGenero && d.edadGenero.length > 0) {
       bloque.demografia = {
-        genero: [
-          { nombre: "Mujeres", valor: 82 },
-          { nombre: "Hombres", valor: 18 },
-        ],
+        genero: [],
         edad: d.edadGenero.slice(0, 5).map((e) => ({
-          rango: e.dimension[0] ?? "25-34",
+          rango: e.dimension[0] ?? "",
           porcentaje: Math.round(e.valor),
         })),
         ciudades: (d.ciudad ?? []).slice(0, 5).map((c) => ({
-          ciudad: c.dimension[0] ?? "Bogotá",
+          ciudad: c.dimension[0] ?? "",
           porcentaje: Math.round(c.valor),
         })),
       };
