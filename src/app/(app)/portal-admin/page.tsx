@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
+import { GestorTokensAgente } from "@/components/portal/GestorTokensAgente";
 
 type Cliente = { id: string; nombre: string; slug: string; creado_en: string };
 
@@ -63,47 +64,51 @@ export default function PortalAdminPage() {
         subtitle="Crea el portal de un cliente y gestiona su parrilla de contenido, enlaces, reuniones y archivos."
       />
 
-      <form onSubmit={handleCrear} className="flex flex-col gap-3 max-w-sm glass rounded-2xl p-4">
-        <p className="text-xs uppercase tracking-wide text-muted">Nuevo cliente</p>
-        <label className="flex flex-col gap-1 text-sm">
-          Nombre
-          <input
-            type="text"
-            value={nombre}
-            required
-            maxLength={80}
-            onChange={(e) => {
-              setNombre(e.target.value);
-              if (!slugTocado) setSlug(slugificar(e.target.value));
-            }}
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Slug (identificador único)
-          <input
-            type="text"
-            value={slug}
-            required
-            pattern="[a-z0-9]+(-[a-z0-9]+)*"
-            onChange={(e) => {
-              setSlug(e.target.value);
-              setSlugTocado(true);
-            }}
-          />
-        </label>
-        <button
-          type="submit"
-          disabled={creando}
-          className="rounded-md bg-accent text-accent-foreground font-medium py-2 disabled:opacity-60"
-        >
-          {creando ? "Creando..." : "Crear portal"}
-        </button>
-        {message && <p className="text-sm text-muted">{message}</p>}
-        <p className="text-xs text-muted">
-          Después de crearlo: crea el usuario del cliente en Supabase (Authentication → Users → Add user) y
-          vincúlalo desde la ficha del cliente.
-        </p>
-      </form>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <form onSubmit={handleCrear} className="flex flex-col gap-3 glass rounded-2xl p-4">
+          <p className="text-xs uppercase tracking-wide text-muted">Nuevo cliente</p>
+          <label className="flex flex-col gap-1 text-sm">
+            Nombre
+            <input
+              type="text"
+              value={nombre}
+              required
+              maxLength={80}
+              onChange={(e) => {
+                setNombre(e.target.value);
+                if (!slugTocado) setSlug(slugificar(e.target.value));
+              }}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Slug (identificador único)
+            <input
+              type="text"
+              value={slug}
+              required
+              pattern="[a-z0-9]+(-[a-z0-9]+)*"
+              onChange={(e) => {
+                setSlug(e.target.value);
+                setSlugTocado(true);
+              }}
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={creando}
+            className="rounded-md bg-accent text-accent-foreground font-medium py-2 disabled:opacity-60"
+          >
+            {creando ? "Creando..." : "Crear portal"}
+          </button>
+          {message && <p className="text-sm text-muted">{message}</p>}
+          <p className="text-xs text-muted">
+            Después de crearlo: crea el usuario del cliente en Supabase (Authentication → Users → Add user) y
+            vincúlalo desde la ficha del cliente.
+          </p>
+        </form>
+
+        <GestorTokensAgente />
+      </div>
 
       <section>
         <p className="text-xs uppercase tracking-wide text-muted mb-3">Clientes</p>

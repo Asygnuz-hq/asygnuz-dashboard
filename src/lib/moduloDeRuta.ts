@@ -16,6 +16,7 @@ export const MODULO_HOME: Record<Modulo, string> = {
 // Marketing; /disenadores/cobros-clientes es Financiero pero
 // /disenadores/control-mensual es Nómina).
 const RUTA_A_MODULO: { prefix: string; modulo: Modulo }[] = [
+  { prefix: "/bandeja", modulo: "marketing_pauta" },
   { prefix: "/metricas/clientes", modulo: "marketing_pauta" },
   { prefix: "/metricas", modulo: "operacion" },
   { prefix: "/requisitos", modulo: "operacion" },

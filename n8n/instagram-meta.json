@@ -1,0 +1,186 @@
+{
+  "name": "instagram-meta",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "instagram-meta",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "node-webhook-get",
+      "name": "Webhook GET (Verificación Meta)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 240],
+      "webhookId": "instagram-meta-get"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "instagram-meta",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "node-webhook-post",
+      "name": "Webhook POST (Eventos Meta)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 480],
+      "webhookId": "instagram-meta-post"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Verificación del Webhook de Meta (hub.challenge)\nconst query = $input.first().json.query || {};\nconst mode = query['hub.mode'];\nconst token = query['hub.verify_token'];\nconst challenge = query['hub.challenge'];\n\n// El verify_token se toma de las variables de entorno o credencial de n8n\nconst VERIFY_TOKEN = $env['META_VERIFY_TOKEN'] || 'asygnuz_ig_webhook_secret_2026';\n\nif (mode === 'subscribe' && token === VERIFY_TOKEN) {\n  return [{ json: { autorizado: true, challenge: String(challenge) } }];\n} else {\n  return [{ json: { autorizado: false } }];\n}"
+      },
+      "id": "node-verificar-get",
+      "name": "Comprobar Token GET",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 240]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.challenge }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "node-responder-challenge",
+      "name": "Responder 200 Challenge",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [660, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Token de verificación inválido",
+        "options": {
+          "responseCode": 403
+        }
+      },
+      "id": "node-responder-403",
+      "name": "Responder 403 Prohibido",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [660, 320]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.autorizado }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "node-if-get",
+      "name": "¿GET Válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [540, 240]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validación de firma criptográfica X-Hub-Signature-256\nconst crypto = require('crypto');\n\nconst headers = $input.first().json.headers || {};\nconst rawBody = $input.first().json.rawBody || JSON.stringify($input.first().json.body || {});\nconst signatureHeader = headers['x-hub-signature-256'] || headers['X-Hub-Signature-256'] || '';\n\n// El App Secret de Instagram configurado en n8n\nconst APP_SECRET = $env['META_INSTAGRAM_APP_SECRET'] || '';\n\nlet firmaValida = true;\nif (APP_SECRET && signatureHeader) {\n  const hmac = crypto.createHmac('sha256', APP_SECRET);\n  hmac.update(rawBody, 'utf8');\n  const expected = 'sha256=' + hmac.digest('hex');\n  firmaValida = crypto.timingSafeEqual(Buffer.from(signatureHeader), Buffer.from(expected));\n}\n\nreturn [{\n  json: {\n    firmaValida,\n    body: typeof $input.first().json.body === 'object' ? $input.first().json.body : JSON.parse(rawBody || '{}')\n  }\n}];"
+      },
+      "id": "node-validar-firma",
+      "name": "Validar Firma HMAC SHA256",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [420, 480]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"status\":\"ok\"}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "node-responder-200-meta",
+      "name": "Responder 200 a Meta Inmediato",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [660, 480]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalización y enrutamiento de eventos entrantes de Instagram\nconst body = $input.first().json.body || {};\nconst entries = body.entry || [];\n\nconst eventosProcesados = [];\n\nfor (const entry of entries) {\n  const igAccountId = entry.id;\n  const time = entry.time;\n\n  // 1. Mensajes Directos (DMs)\n  if (entry.messaging && Array.isArray(entry.messaging)) {\n    for (const msg of entry.messaging) {\n      // Descartar ecos generados por la propia cuenta\n      if (msg.message && msg.message.is_echo) continue;\n      if (msg.sender && msg.sender.id === igAccountId) continue;\n\n      eventosProcesados.push({\n        tipo: 'message',\n        ig_cuenta_id: igAccountId,\n        ig_usuario_id: msg.sender?.id,\n        meta_evento_id: msg.message?.mid || `msg_${time}_${msg.sender?.id}`,\n        texto: msg.message?.text || '',\n        timestamp: new Date(msg.timestamp || time || Date.now()).toISOString(),\n        crudo: msg\n      });\n    }\n  }\n\n  // 2. Comentarios en Publicaciones\n  if (entry.changes && Array.isArray(entry.changes)) {\n    for (const change of entry.changes) {\n      if (change.field === 'comments') {\n        const val = change.value || {};\n        // Ignorar comentarios de la propia cuenta\n        if (val.from && val.from.id === igAccountId) continue;\n\n        eventosProcesados.push({\n          tipo: 'comment',\n          ig_cuenta_id: igAccountId,\n          ig_usuario_id: val.from?.id,\n          ig_usuario_nombre: val.from?.username,\n          meta_evento_id: val.id || `cmt_${time}_${val.from?.id}`,\n          comment_id: val.id,\n          media_id: val.media?.id,\n          texto: val.text || '',\n          timestamp: new Date(Date.now()).toISOString(),\n          crudo: change\n        });\n      }\n    }\n  }\n}\n\nreturn eventosProcesados.map(e => ({ json: e }));"
+      },
+      "id": "node-enrutar-eventos",
+      "name": "Parsear y Enrutar Eventos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 480]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env['SUPABASE_URL'] }}/rest/v1/ig_eventos",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env['SUPABASE_SERVICE_ROLE_KEY'] }}" },
+            { "name": "Authorization", "value": "Bearer {{ $env['SUPABASE_SERVICE_ROLE_KEY'] }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "resolution=ignore-duplicates" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"meta_evento_id\": \"{{ $json.meta_evento_id }}\",\n  \"tipo\": \"{{ $json.tipo }}\",\n  \"ig_usuario_id\": \"{{ $json.ig_usuario_id }}\",\n  \"ig_usuario_nombre\": \"{{ $json.ig_usuario_nombre || null }}\",\n  \"texto\": \"{{ $json.texto }}\",\n  \"media_id\": \"{{ $json.media_id || null }}\",\n  \"comment_id\": \"{{ $json.comment_id || null }}\",\n  \"crudo\": {{ JSON.stringify($json.crudo) }}\n}"
+      },
+      "id": "node-guardar-evento",
+      "name": "Deduplicar y Guardar Evento en Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1140, 480]
+    }
+  ],
+  "connections": {
+    "Webhook GET (Verificación Meta)": {
+      "main": [
+        [{ "node": "Comprobar Token GET", "type": "main", "index": 0 }]
+      ]
+    },
+    "Comprobar Token GET": {
+      "main": [
+        [{ "node": "¿GET Válido?", "type": "main", "index": 0 }]
+      ]
+    },
+    "¿GET Válido?": {
+      "main": [
+        [{ "node": "Responder 200 Challenge", "type": "main", "index": 0 }],
+        [{ "node": "Responder 403 Prohibido", "type": "main", "index": 0 }]
+      ]
+    },
+    "Webhook POST (Eventos Meta)": {
+      "main": [
+        [{ "node": "Validar Firma HMAC SHA256", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validar Firma HMAC SHA256": {
+      "main": [
+        [{ "node": "Responder 200 a Meta Inmediato", "type": "main", "index": 0 }],
+        [{ "node": "Parsear y Enrutar Eventos", "type": "main", "index": 0 }]
+      ]
+    },
+    "Parsear y Enrutar Eventos": {
+      "main": [
+        [{ "node": "Deduplicar y Guardar Evento en Supabase", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

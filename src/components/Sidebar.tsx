@@ -92,6 +92,8 @@ const sections: NavSection[] = [
     modulo: "marketing_pauta",
     items: [
       { href: "/marketing", label: "Marketing" },
+      { href: "/bandeja", label: "Bandeja Instagram" },
+      { href: "/bandeja/flujos", label: "Flujos Automáticos" },
       { href: "/metricas/clientes", label: "Meta Ads por Cliente" },
       { href: "/metricas/clientes/ranking", label: "Ranking entre Clientes" },
     ],
