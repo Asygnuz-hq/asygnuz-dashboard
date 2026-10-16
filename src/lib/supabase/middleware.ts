@@ -8,7 +8,13 @@ export async function updateSession(request: NextRequest) {
   // /agenda es la landing pública de Cal.com para pautar — no requiere
   // sesión ni pasa por ninguna lógica de auth/MFA/emergencia de abajo.
   // /r/ son los enlaces de seguimiento acortados de la bandeja de Instagram (públicos).
-  if (request.nextUrl.pathname.startsWith("/agenda") || request.nextUrl.pathname.startsWith("/r/")) {
+  if (
+    request.nextUrl.pathname.startsWith("/agenda") ||
+    request.nextUrl.pathname.startsWith("/r/") ||
+    // Páginas legales que exige Meta para la app (públicas).
+    request.nextUrl.pathname === "/privacidad" ||
+    request.nextUrl.pathname === "/eliminacion-datos"
+  ) {
     return NextResponse.next({ request });
   }
 

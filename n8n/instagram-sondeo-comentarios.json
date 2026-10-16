@@ -1,0 +1,27 @@
+{
+  "name": "instagram-sondeo-comentarios",
+  "nodes": [
+    {
+      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutesInterval": 2 } ] } },
+      "name": "Cada 2 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env['DASHBOARD_URL'] || 'https://app.asygnuz.com').replace(/\\/+$/, '') }}/api/bandeja/sondear-comentarios",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [ { "name": "Authorization", "value": "=Bearer {{ $env['BANDEJA_N8N_SECRET'] }}" } ] },
+        "options": { "timeout": 55000 }
+      },
+      "name": "Sondear comentarios en el dashboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [260, 0]
+    }
+  ],
+  "connections": { "Cada 2 minutos": { "main": [ [ { "node": "Sondear comentarios en el dashboard", "type": "main", "index": 0 } ] ] } },
+  "settings": { "executionOrder": "v1", "saveDataSuccessExecution": "none", "saveDataErrorExecution": "all" }
+}
