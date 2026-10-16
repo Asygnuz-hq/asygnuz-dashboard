@@ -31,7 +31,9 @@ export default function FlujosBandejaPage() {
         const res = await fetch("/api/meta/conexiones");
         if (res.ok) {
           const data = await res.json();
-          const conIg = (data ?? []).filter((c: MetaConexion) => c.instagram_business_id);
+          // /api/meta/conexiones responde { conexiones: [...] }, no la lista directa.
+          const lista: MetaConexion[] = Array.isArray(data) ? data : data?.conexiones ?? [];
+          const conIg = lista.filter((c) => c.instagram_business_id);
           setConexiones(conIg);
           if (conIg.length > 0 && !conexionSeleccionadaId) {
             setConexionSeleccionadaId(conIg[0].id);
