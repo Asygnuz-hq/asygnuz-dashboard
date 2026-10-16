@@ -39,12 +39,23 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Toda redirección debe llevar las cookies que getUser() pudo haber
+  // renovado arriba. Un NextResponse.redirect "pelado" las descarta: el
+  // navegador se queda con el refresh token viejo (ya rotado), el siguiente
+  // pedido lo reusa, Supabase lo detecta como reuso y cierra la sesión
+  // (el "me saca cada pocos minutos").
+  const redirigir = (url: URL) => {
+    const redireccion = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redireccion.cookies.set(cookie));
+    return redireccion;
+  };
+
   const isLoginPage = request.nextUrl.pathname.startsWith("/login");
 
   if (!user && !isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return redirigir(url);
   }
 
   if (user) {
@@ -59,7 +70,7 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = destino;
       url.search = "";
-      return NextResponse.redirect(url);
+      return redirigir(url);
     };
 
     if (estado === "verificar" && !isLoginPage) return redirigirA("/login");
@@ -79,7 +90,7 @@ export async function updateSession(request: NextRequest) {
       if (esEmergencia && !enRutaEmergencia) {
         const url = request.nextUrl.clone();
         url.pathname = "/emergencia";
-        return NextResponse.redirect(url);
+        return redirigir(url);
       }
 
       // Módulos contratados: se exigen aquí, en el servidor. Antes solo el
@@ -94,7 +105,7 @@ export async function updateSession(request: NextRequest) {
           const url = request.nextUrl.clone();
           url.pathname = destino ? MODULO_HOME[destino] : "/sin-acceso";
           url.search = "";
-          if (url.pathname !== pathname) return NextResponse.redirect(url);
+          if (url.pathname !== pathname) return redirigir(url);
         }
 
         // /analitica embebe un dashboard de PostHog con el uso de TODOS los
@@ -104,7 +115,7 @@ export async function updateSession(request: NextRequest) {
           const url = request.nextUrl.clone();
           url.pathname = "/";
           url.search = "";
-          return NextResponse.redirect(url);
+          return redirigir(url);
         }
 
         // /portal-admin es la gestión de portales de clientes de Growth —
@@ -116,7 +127,7 @@ export async function updateSession(request: NextRequest) {
             const url = request.nextUrl.clone();
             url.pathname = "/";
             url.search = "";
-            return NextResponse.redirect(url);
+            return redirigir(url);
           }
         }
       }
