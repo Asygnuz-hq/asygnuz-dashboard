@@ -61,3 +61,5 @@ Este directorio contiene los flujos listos para importar en la instancia de n8n 
    - `messages` (DMs entrantes)
    - `comments` (Comentarios en posts y reels)
    - `messaging_postbacks` (Clics en botones)
+
+> **Actualización (2026-10-15):** n8n bloquea `require('crypto')` en los nodos Code (task runners). Por eso el flujo `instagram-meta` ya **no valida la firma**: recupera el cuerpo original desde `binary.data` (opción Raw Body), lo reenvía **byte por byte** (HTTP Request con `contentType: raw`) junto con `x-hub-signature-256`, y el dashboard (`/api/bandeja/procesar-evento`) valida la firma en tiempo constante, fallando cerrado. Avisos sin firma se rechazan con 401 en n8n.
