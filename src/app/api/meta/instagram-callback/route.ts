@@ -7,6 +7,7 @@ import {
   fetchInstagramUsername,
   fetchInstagramMe,
   fechaExpiracion,
+  suscribirInstagramAAvisos,
 } from "@/lib/meta/client";
 
 // Instagram redirige aquí después de autorizar. Guarda el token (separado
@@ -82,10 +83,18 @@ export async function GET(request: Request) {
 
     if (dbError) throw new Error(dbError.message);
 
-    return Response.redirect(
-      new URL(`/metricas/clientes?conectado=${encodeURIComponent(clienteNombre)}`, request.url),
-      302
-    );
+    // La conexión ya quedó guardada: si la suscripción a los avisos falla, las
+    // métricas siguen funcionando y solo se avisa (la Bandeja no recibirá
+    // comentarios ni DMs hasta reconectar).
+    let destino = `/metricas/clientes?conectado=${encodeURIComponent(clienteNombre)}`;
+    try {
+      await suscribirInstagramAAvisos(access_token);
+    } catch (errSub) {
+      const aviso = errSub instanceof Error ? errSub.message : "No se pudo suscribir la cuenta a los avisos.";
+      destino += `&error=${encodeURIComponent(aviso)}`;
+    }
+
+    return Response.redirect(new URL(destino, request.url), 302);
   } catch (err) {
     const mensaje = err instanceof Error ? err.message : "Error desconocido conectando Instagram";
     return Response.redirect(
