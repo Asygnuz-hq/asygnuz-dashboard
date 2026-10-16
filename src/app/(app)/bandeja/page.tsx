@@ -30,7 +30,9 @@ export default function BandejaInstagramPage() {
         if (res.ok) {
           const data = await res.json();
           // Filtrar solo las que tengan cuenta de Instagram
-          const conIg = (data ?? []).filter((c: MetaConexion) => c.instagram_business_id);
+          // /api/meta/conexiones responde { conexiones: [...] }, no la lista directa.
+          const lista: MetaConexion[] = Array.isArray(data) ? data : data?.conexiones ?? [];
+          const conIg = lista.filter((c) => c.instagram_business_id);
           setConexiones(conIg);
         }
       } catch (err) {
