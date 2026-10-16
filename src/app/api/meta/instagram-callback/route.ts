@@ -63,6 +63,7 @@ export async function GET(request: Request) {
 
     const campos = {
       instagram_business_id: instagramUserId,
+      instagram_user_id: me?.userId ?? null,
       instagram_access_token: access_token,
       instagram_token_expira_en: expiraEn,
       instagram_username: username,

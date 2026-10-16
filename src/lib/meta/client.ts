@@ -189,13 +189,16 @@ export async function exchangeInstagramCode(
 
 // id (como texto, exacto) y username de la cuenta dueña del token. Es la
 // fuente confiable del ID: Graph devuelve los IDs como strings.
-export async function fetchInstagramMe(accessToken: string): Promise<{ id: string; username: string | null }> {
-  const data = await graphFetch<{ id: string; username?: string }>(
+export async function fetchInstagramMe(
+  accessToken: string
+): Promise<{ id: string; userId: string | null; username: string | null }> {
+  const data = await graphFetch<{ id: string; user_id?: string | number; username?: string }>(
     "/me",
-    { fields: "id,username", access_token: accessToken },
+    { fields: "id,user_id,username", access_token: accessToken },
     GRAPH_INSTAGRAM_URL
   );
-  return { id: String(data.id), username: data.username ?? null };
+  // user_id = id de cuenta profesional; es el que llega en los webhooks.
+  return { id: String(data.id), userId: data.user_id != null ? String(data.user_id) : null, username: data.username ?? null };
 }
 
 // Suscribe la cuenta de Instagram a los avisos (webhooks) de la app. Configurar

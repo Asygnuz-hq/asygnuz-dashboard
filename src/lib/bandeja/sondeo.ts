@@ -67,7 +67,7 @@ export async function sondearComentarios(): Promise<ResultadoSondeo> {
 
   const { data: conexiones } = await supabase
     .from("meta_conexiones")
-    .select("id, cliente_nombre, instagram_business_id, instagram_access_token")
+    .select("id, cliente_nombre, instagram_business_id, instagram_user_id, instagram_username, instagram_access_token")
     .in("id", conexionIds);
 
   const entradas: unknown[] = [];
@@ -101,7 +101,9 @@ export async function sondearComentarios(): Promise<ResultadoSondeo> {
             });
             for (const com of comentarios.data ?? []) {
               if (new Date(com.timestamp).getTime() < corte) continue;
-              if (!com.from?.id || com.from.id === igId) continue;
+              if (!com.from?.id) continue;
+              if (com.from.id === igId || com.from.id === c.instagram_user_id) continue;
+              if (com.from.username && com.from.username === c.instagram_username) continue;
               comentariosNuevos++;
               // Misma forma que el webhook de Meta (field "comments"), para
               // reutilizar el motor y su deduplicación por id de comentario.

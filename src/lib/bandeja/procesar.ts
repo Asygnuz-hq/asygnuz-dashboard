@@ -159,9 +159,13 @@ export async function procesarEventoWebhook(
     // 1. Identificar la conexión en base de datos
     const { data: conexion, error: conxErr } = await supabase
       .from("meta_conexiones")
-      .select("id, instagram_business_id, instagram_access_token, instagram_username, cliente_nombre")
-      .eq("instagram_business_id", instagramBusinessId)
-      .maybeSingle<MetaConexion>();
+      .select("id, instagram_business_id, instagram_user_id, instagram_access_token, instagram_username, cliente_nombre")
+      // entry.id de los webhooks es el id de cuenta profesional (instagram_user_id);
+      // el sondeo usa el de Instagram Login (instagram_business_id). Ver
+      // supabase/schema-instagram-user-id.sql.
+      .or(`instagram_business_id.eq.${instagramBusinessId},instagram_user_id.eq.${instagramBusinessId}`)
+      .limit(1)
+      .maybeSingle<MetaConexion & { instagram_user_id: string | null }>();
 
     if (conxErr || !conexion) {
       console.warn(
@@ -188,12 +192,23 @@ export async function procesarEventoWebhook(
 
     const tenantId = portalRel?.tenant_id ?? null;
 
+    // Ids con los que la propia cuenta puede aparecer como autora (para no
+    // responderse a sí misma).
+    const idsPropios = new Set(
+      [instagramBusinessId, conexion.instagram_business_id, conexion.instagram_user_id]
+        .filter(Boolean)
+        .map(String)
+    );
+    const esPropio = (id?: string | null, username?: string | null) =>
+      (id != null && idsPropios.has(String(id))) ||
+      (!!username && !!conexion.instagram_username && username === conexion.instagram_username);
+
     // 2. Extraer eventos de mensajes directos (DMs)
     const messagingList = Array.isArray(entry.messaging) ? entry.messaging : [];
     for (const msg of messagingList) {
       // Ignorar ecos generados por la propia cuenta
       if (msg.message?.is_echo) continue;
-      if (msg.sender?.id === instagramBusinessId) continue;
+      if (esPropio(msg.sender?.id)) continue;
 
       const senderId = String(msg.sender?.id || "");
       if (!senderId) continue;
@@ -464,7 +479,7 @@ export async function procesarEventoWebhook(
       const val = change.value || {};
 
       // Ignorar comentarios de la propia cuenta
-      if (val.from?.id === instagramBusinessId) continue;
+      if (esPropio(val.from?.id, val.from?.username)) continue;
 
       const commenterId = String(val.from?.id || "");
       const commentId = String(val.id || "");
