@@ -346,38 +346,134 @@ section { padding: 84px 0; position: relative; }
   font-weight: 300;
 }
 
-/* Resumen diagnóstico lateral */
+/* Resumen ejecutivo y mapa de 3 bloques en el Hero */
 .audit-summary {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 16px;
   border-color: var(--hairline-blue);
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.55) 0%, rgba(255, 255, 255, 0.96) 38%);
 }
-.audit-rows {
+.exec-block-list {
   display: flex;
   flex-direction: column;
-  margin: 18px 0;
-  border-top: 1px solid var(--hairline);
+  gap: 10px;
+  margin-top: 14px;
 }
-.audit-row {
+.exec-block-card {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--hairline);
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: 11px;
+  background: #ffffff;
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--sans);
 }
-.audit-row .k {
-  font-size: 0.84rem;
+.exec-block-card:hover {
+  border-color: var(--hairline-blue);
+  background: rgba(239, 246, 255, 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.06);
+}
+.exec-block-card.is-current {
+  border-color: var(--hairline-blue);
+  background: rgba(239, 246, 255, 0.72);
+  cursor: default;
+}
+.exec-block-card.is-current:hover {
+  transform: none;
+}
+.exec-block-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.exec-block-num {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--blue);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 6px;
+  padding: 4px 7px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.exec-block-info strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--heading);
+  line-height: 1.3;
+}
+.exec-block-info span {
+  display: block;
+  font-size: 0.77rem;
   color: var(--muted);
   font-weight: 300;
+  line-height: 1.4;
+  margin-top: 2px;
 }
-.audit-row .v {
+.exec-block-pill {
   font-family: var(--mono);
-  font-size: 0.95rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline-mid);
+  background: var(--surface-subtle);
+  color: var(--fg);
+  transition: all 0.2s ease;
+}
+.exec-block-card:hover .exec-block-pill {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #ffffff;
+}
+.exec-block-card.is-current .exec-block-pill {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--blue);
+}
+.exec-mini-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
+}
+.exec-mini-kpi {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid var(--hairline);
+}
+.exec-mini-kpi strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  font-weight: 500;
   color: var(--heading);
 }
-.audit-row .v.alert { color: var(--danger-soft); }
+.exec-mini-kpi strong.alert { color: var(--danger-soft); }
+.exec-mini-kpi span {
+  display: block;
+  font-size: 0.69rem;
+  color: var(--muted);
+  margin-top: 1px;
+}
 
 /* SECCIÓN DE RESULTADOS CON CUENTA QUE BAJA CON CADA MEDIDA */
 .scroll-account-layout {
@@ -1467,22 +1563,59 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         </div>
       </div>
 
-      <!-- Navegación rápida a los 3 bloques -->
+      <!-- Mapa Ejecutivo de los 3 Bloques + Síntesis Rápida -->
       <aside class="panel-box pad audit-summary">
         <div>
-          <div class="kicker" style="margin-bottom:10px">Estructura en 3 Bloques</div>
-          <h3>Navega por cada parte de la presentación</h3>
+          <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">Estructura en 3 Bloques</div>
+          <h3 style="font-size:1.22rem">Explora cada parte de la presentación</h3>
           <p class="muted" style="font-size:0.84rem;margin-top:4px">
-            Dividimos la experiencia en 3 bloques independientes para revisarla cómodamente desde computador o celular:
+            Toca cualquiera de los bloques para cambiar de vista al instante desde computador o celular:
           </p>
-          <div class="audit-rows">
-            <div class="audit-row"><span class="k"><b>01 · Propuesta Comercial</b></span><span class="v num" style="color:var(--blue)">Estás aquí</span></div>
-            <div class="audit-row"><span class="k"><b>02 · Resultados y Pauta</b> ($180k USD + IG)</span><button type="button" class="btn-line" data-goto-mode="resultados" style="padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:0.72rem;cursor:pointer">Abrir 02 →</button></div>
-            <div class="audit-row"><span class="k"><b>03 · Diagnóstico Lumia</b> (Meta, Google, 503)</span><button type="button" class="btn-line" data-goto-mode="analisis" style="padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:0.72rem;cursor:pointer">Abrir 03 →</button></div>
+
+          <div class="exec-block-list">
+            <div class="exec-block-card is-current">
+              <div class="exec-block-left">
+                <span class="exec-block-num">01</span>
+                <div class="exec-block-info">
+                  <strong>Propuesta Comercial</strong>
+                  <span>Hoja de ruta, esquema fijo + % y los 3 paquetes</span>
+                </div>
+              </div>
+              <span class="exec-block-pill">● Estás aquí</span>
+            </div>
+
+            <button type="button" class="exec-block-card" data-goto-mode="resultados">
+              <div class="exec-block-left">
+                <span class="exec-block-num">02</span>
+                <div class="exec-block-info">
+                  <strong>Resultados, Pauta y Edición</strong>
+                  <span>$180k USD en Meta Ads · 842k IG · Videos y fotos</span>
+                </div>
+              </div>
+              <span class="exec-block-pill">Abrir 02 →</span>
+            </button>
+
+            <button type="button" class="exec-block-card" data-goto-mode="analisis">
+              <div class="exec-block-left">
+                <span class="exec-block-num">03</span>
+                <div class="exec-block-info">
+                  <strong>Diagnóstico de Lumia</strong>
+                  <span>Auditoría Meta Ads, Google Ads, Error 503 y embudo</span>
+                </div>
+              </div>
+              <span class="exec-block-pill">Abrir 03 →</span>
+            </button>
           </div>
         </div>
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-          <a class="btn btn-line" href="Propuesta_ASYGNUZ_Lumia_con_Diagnostico.pdf" download style="padding:7px 13px;font-size:0.78rem;width:100%;justify-content:center">
+
+        <div>
+          <div class="exec-mini-kpis">
+            <div class="exec-mini-kpi"><strong class="num">$5,4 M / mes</strong><span>Pauta actual de Lumia</span></div>
+            <div class="exec-mini-kpi"><strong class="num alert">63 % en 1 video</strong><span>Concentración en Meta</span></div>
+            <div class="exec-mini-kpi"><strong class="num alert">54 % en "caries"</strong><span>Fuga en Google Ads</span></div>
+            <div class="exec-mini-kpi"><strong class="num alert">Error 503 (www)</strong><span>0 conversiones web</span></div>
+          </div>
+          <a class="btn btn-line" href="Propuesta_ASYGNUZ_Lumia_con_Diagnostico.pdf" download style="margin-top:12px;padding:9px 14px;font-size:0.8rem;width:100%;justify-content:center">
             ↓ Descargar Propuesta + Diagnóstico (PDF)
           </a>
         </div>
@@ -1492,73 +1625,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 01 DE PROPUESTA: PROPUESTA DE EDICIÓN Y PORTAFOLIO AUDIOVISUAL + FOTOS -->
-  <section id="contenido">
-    <div class="wrap">
-      <div class="sec-head">
-        <div class="kicker">01 — Nuestra Propuesta de Edición & Dirección Visual</div>
-        <h2>Edición diseñada para retener la atención y construir autoridad clínica</h2>
-        <p class="lead">
-          Un paciente de implantes o diseño de sonrisa no compra por impulso: evalúa el criterio del especialista. Nuestro sistema de edición combina cuatro capas en cada pieza:
-        </p>
-      </div>
-
-      <div class="edit-pillars">
-        <div class="panel-box edit-pillar">
-          <span class="step-num">01 · Segundos 0 a 3</span>
-          <h3>Gancho visual y tipográfico</h3>
-          <p>Apertura en acción con titulares limpios de jerarquía clara que detienen el desplazamiento desde el primer segundo.</p>
-        </div>
-        <div class="panel-box edit-pillar">
-          <span class="step-num">02 · Segundos 3 a 25</span>
-          <h3>Cortes de ritmo y retención</h3>
-          <p>Eliminación de silencios, reencuadres suaves y cambios de plano cada 3–4 segundos que sostienen ThruPlays de $7 COP.</p>
-        </div>
-        <div class="panel-box edit-pillar">
-          <span class="step-num">03 · Respaldo visual</span>
-          <h3>Evidencia en pantalla (B-Roll)</h3>
-          <p>Lo que el doctor explica se refuerza visualmente: casos reales, simulaciones 3D, pizarras o datos en pantalla.</p>
-        </div>
-        <div class="panel-box edit-pillar">
-          <span class="step-num">04 · Escalabilidad</span>
-          <h3>Doble salida: Redes + Pauta</h3>
-          <p>De cada jornada quincenal en Lumia producimos tanto reels orgánicos de autoridad como anuncios con variaciones de gancho.</p>
-        </div>
-      </div>
-
-      <!-- Filtro de Video -->
-      <div class="filter-bar">
-        <div class="filter-group" role="group" aria-label="Filtrar videos">
-          <button class="filter-btn" type="button" aria-pressed="true" data-vfilter="destacados">Selección Principal (Claudia ×4 · Ingrid ×2)</button>
-          <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="claudia">Claudia Uribe Completo (6 cortes)</button>
-          <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="salud">Salud & Estética (Dra. Ingrid Patiño)</button>
-        </div>
-        <span class="muted" style="font-size:0.78rem;font-family:var(--mono)">Toca cualquier video para pausar / reproducir</span>
-      </div>
-
-      <div class="reel-grid" id="reelGrid"></div>
-
-      <!-- Galería de Fotografía y Dirección de Arte Ampliada (8 piezas) -->
-      <div style="margin-top:52px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
-          <div>
-            <div class="kicker" style="margin-bottom:8px">Fotografía Clínica, Estudio & Diseño Editorial</div>
-            <h3>Muestras de fotografía de especialista, procedimiento y carruseles</h3>
-          </div>
-          <span class="muted" style="font-size:0.8rem">Toca cualquier fotografía para verla en tamaño completo</span>
-        </div>
-        <div class="stills-grid" id="stillsGrid"></div>
-      </div>
-    </div>
-  </section>
-
-  <div class="rule"></div>
-
-  <!-- SECCIÓN 02 DE PROPUESTA: PLAN DE INTERVENCIÓN EN 8 PILARES -->
+  <!-- SECCIÓN 01 DE PROPUESTA: PLAN DE INTERVENCIÓN EN 8 PILARES -->
   <section id="mejoras">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">02 — Hoja de Ruta en Lumia</div>
+        <div class="kicker">01 — Hoja de Ruta en Lumia</div>
         <h2>Las 8 intervenciones que ejecutaremos desde el primer mes</h2>
       </div>
       <div class="pillars-grid">
@@ -1576,11 +1647,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 03 DE PROPUESTA: ESQUEMA COMERCIAL (ARRIBA DE LOS PAQUETES Y PRECIOS) -->
+  <!-- SECCIÓN 02 DE PROPUESTA: ESQUEMA COMERCIAL (ARRIBA DE LOS PAQUETES Y PRECIOS) -->
   <section id="comision">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">03 — Esquema Comercial: Valor Fijo Mensual + % por Tratamiento</div>
+        <div class="kicker">02 — Esquema Comercial: Valor Fijo Mensual + % por Tratamiento</div>
         <h2>Claridad total antes de ver los planes: es la mensualidad fija MÁS el porcentaje que se defina por tratamiento cerrado</h2>
         <p class="lead">
           No trabajamos bajo un modelo únicamente variable. Para que la operación funcione al nivel que requiere Lumia, nuestra propuesta integra todo el equipo de trabajo mes a mes y estructura la inversión en <b>dos componentes que se suman</b>:
@@ -1657,11 +1728,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 05: TRES PLANES (PAQUETES) -->
+  <!-- SECCIÓN 03 DE PROPUESTA: TRES PLANES (PAQUETES) -->
   <section id="planes">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">05 — Tres Niveles de Servicio (Valor Mensual + % por Tratamiento)</div>
+        <div class="kicker">03 — Tres Niveles de Servicio (Valor Mensual + % por Tratamiento)</div>
         <h2>Los 3 paquetes de operación mensual</h2>
         <p class="lead">
           Elige el alcance operativo para Lumia. Todos los paquetes incluyen <b>su valor fijo mensual MÁS (+) el porcentaje que se defina (5 % a 10 %)</b> por tratamiento cerrado desde $2.000.000 COP. Recomendamos el <b>Plan Integral ($2.000.000/mes + %)</b>.
@@ -1676,11 +1747,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 06: CONFIGURADOR MODULAR ("ARMA TU PLAN") -->
+  <!-- SECCIÓN 04 DE PROPUESTA: CONFIGURADOR MODULAR ("ARMA TU PLAN") -->
   <section id="plan">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">06 — Configurador Modular (Detalle por Módulo)</div>
+        <div class="kicker">04 — Configurador Modular (Detalle por Módulo)</div>
         <h2>Explora qué incluye cada paquete o arma el plan por módulos</h2>
         <p class="lead">
           Aquí puedes ver el valor individual de cada uno de los 10 módulos o personalizar la combinación. Si los módulos elegidos caben dentro de un paquete, se aplica automáticamente la tarifa preferencial del paquete (siempre bajo el esquema <b>mensualidad fija + % por tratamiento cerrado</b>).
@@ -1722,11 +1793,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     </div>
   </section>
 
-  <!-- SECCIÓN 07: HOUSE OF DEV -->
+  <!-- SECCIÓN 05 DE PROPUESTA: HOUSE OF DEV -->
   <section id="desarrollo" style="padding-top:10px">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">07 — ASYGNUZ House of Dev (Opcional)</div>
+        <div class="kicker">05 — ASYGNUZ House of Dev (Opcional)</div>
         <h2>Módulos de desarrollo de software e inteligencia artificial</h2>
         <p class="lead">Activos tecnológicos construidos por nuestra casa de software que se cotizan según el alcance cuando la operación lo requiera:</p>
       </div>
@@ -1750,11 +1821,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     </div>
   </section>
 
-  <!-- SECCIÓN 08: CONDICIONES Y CONTACTO -->
+  <!-- SECCIÓN 06 DE PROPUESTA: CONDICIONES Y CONTACTO -->
   <section id="condiciones" style="padding-top:10px">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">08 — Condiciones Comerciales</div>
+        <div class="kicker">06 — Condiciones Comerciales</div>
         <h2>Términos de operación y arranque</h2>
       </div>
       <dl class="terms">
@@ -1781,7 +1852,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 </main>
 
 <!-- ===================================================================== -->
-<!-- BLOQUE 02: RESULTADOS DE PAUTA Y CRECIMIENTO ORGÁNICO                 -->
+<!-- BLOQUE 02: RESULTADOS DE PAUTA, ORGÁNICO Y PORTAFOLIO DE EDICIÓN      -->
 <!-- ===================================================================== -->
 <main id="view-resultados" hidden>
 
@@ -1789,10 +1860,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="wrap">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap">
         <div>
-          <div class="kicker">Bloque 02 — Evidencia Real en Pauta y Orgánico</div>
-          <h1>Resultados auditados en Meta Ads <span class="hl-blue">($180.121 USD)</span>, Colombia ($66 COP/clic) e Instagram</h1>
+          <div class="kicker">Bloque 02 — Evidencia Real en Pauta, Orgánico y Edición</div>
+          <h1>Resultados auditados en Meta Ads <span class="hl-blue">($180.121 USD)</span>, Instagram y Portafolio Audiovisual</h1>
           <p class="hero-lead">
-            Recorrido fila por fila de nuestras cuentas administradas, análisis individual de las 3 capturas de pauta descargadas y resultados de crecimiento orgánico y conversión en CRM. Optimizado para lectura en celular y computador.
+            Recorrido fila por fila de nuestras cuentas administradas, análisis de las 3 capturas de pauta descargadas, crecimiento en Instagram y muestras reales de edición de video y fotografía.
           </p>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -2081,11 +2152,73 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         </div>
       </div>
 
-      <div style="margin-top:36px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- PARTE D EN RESULTADOS: NUESTRA PROPUESTA DE EDICIÓN Y PORTAFOLIO AUDIOVISUAL + FOTOS -->
+  <section id="contenido">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">04 — Nuestra Propuesta de Edición & Dirección Visual</div>
+        <h2>Edición diseñada para retener la atención y construir autoridad clínica</h2>
+        <p class="lead">
+          Un paciente de implantes o diseño de sonrisa no compra por impulso: evalúa el criterio del especialista. Nuestro sistema de edición combina cuatro capas en cada pieza:
+        </p>
+      </div>
+
+      <div class="edit-pillars">
+        <div class="panel-box edit-pillar">
+          <span class="step-num">01 · Segundos 0 a 3</span>
+          <h3>Gancho visual y tipográfico</h3>
+          <p>Apertura en acción con titulares limpios de jerarquía clara que detienen el desplazamiento desde el primer segundo.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">02 · Segundos 3 a 25</span>
+          <h3>Cortes de ritmo y retención</h3>
+          <p>Eliminación de silencios, reencuadres suaves y cambios de plano cada 3–4 segundos que sostienen ThruPlays de $7 COP.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">03 · Respaldo visual</span>
+          <h3>Evidencia en pantalla (B-Roll)</h3>
+          <p>Lo que el doctor explica se refuerza visualmente: casos reales, simulaciones 3D, pizarras o datos en pantalla.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">04 · Escalabilidad</span>
+          <h3>Doble salida: Redes + Pauta</h3>
+          <p>De cada jornada quincenal en Lumia producimos tanto reels orgánicos de autoridad como anuncios con variaciones de gancho.</p>
+        </div>
+      </div>
+
+      <!-- Filtro de Video -->
+      <div class="filter-bar">
+        <div class="filter-group" role="group" aria-label="Filtrar videos">
+          <button class="filter-btn" type="button" aria-pressed="true" data-vfilter="destacados">Selección Principal (Claudia ×4 · Ingrid ×2)</button>
+          <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="claudia">Claudia Uribe Completo (6 cortes)</button>
+          <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="salud">Salud & Estética (Dra. Ingrid Patiño)</button>
+        </div>
+        <span class="muted" style="font-size:0.78rem;font-family:var(--mono)">Toca cualquier video para pausar / reproducir</span>
+      </div>
+
+      <div class="reel-grid" id="reelGrid"></div>
+
+      <!-- Galería de Fotografía y Dirección de Arte Ampliada (8 piezas) -->
+      <div style="margin-top:52px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">Fotografía Clínica, Estudio & Diseño Editorial</div>
+            <h3>Muestras de fotografía de especialista, procedimiento y carruseles</h3>
+          </div>
+          <span class="muted" style="font-size:0.8rem">Toca cualquier fotografía para verla en tamaño completo</span>
+        </div>
+        <div class="stills-grid" id="stillsGrid"></div>
+      </div>
+
+      <div style="margin-top:42px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
         <button class="btn btn-line" type="button" data-goto-mode="propuesta">← Volver a 01 · Propuesta Comercial</button>
         <button class="btn" type="button" data-goto-mode="analisis">Ir a 03 · Diagnóstico de Lumia →</button>
       </div>
-
     </div>
   </section>
 
@@ -2334,7 +2467,6 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   ctaTopBtn.addEventListener("click", e => {
     if (viewPropuesta.hidden) { e.preventDefault(); setMode("propuesta"); }
   });
-  window.DEFAULT_MODE = "resultados";
   if (location.search.includes("analisis") || location.hash === "#analisis" || window.DEFAULT_MODE === "analisis") {
     setMode("analisis", false);
   } else if (location.search.includes("resultados") || location.hash === "#resultados" || window.DEFAULT_MODE === "resultados") {
