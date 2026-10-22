@@ -430,16 +430,105 @@ section { padding: 84px 0; position: relative; }
   background: #f8fafc;
   cursor: crosshair;
 }
+.account-window.zoom-cols {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
 .account-track {
   position: relative;
   width: 100%;
   will-change: transform;
   transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }
+.account-window.zoom-cols .account-track {
+  width: 195%;
+  min-width: 760px;
+}
 .account-track img {
   display: block;
   width: 100%;
   height: auto;
+}
+
+/* En celular y escritorio: recorte ampliado directo en cada tarjeta de medida + 3 KPIs claros */
+.step-kpis-mini {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+}
+.step-kpis-mini div strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--heading);
+}
+.step-kpis-mini div span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.step-crop-preview {
+  margin-top: 10px;
+  height: 74px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-blue);
+  background-image: url("media/ads-escala-full.png");
+  background-repeat: no-repeat;
+  background-size: 165% auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+}
+.step-crop-preview::after {
+  content: "Recorte directo de la fila (Resultados · Impresiones · Costo · Gastado)";
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(9, 13, 22, 0.82);
+  color: #fff;
+}
+
+.cap-rows-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.78rem;
+}
+.cap-row-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: var(--surface-subtle);
+}
+.cap-row-item .r-name {
+  color: var(--fg-soft);
+  font-weight: 400;
+}
+.cap-row-item .r-val {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--blue);
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .row-focus-band {
@@ -524,6 +613,7 @@ section { padding: 84px 0; position: relative; }
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 .measure-step .step-tag {
   font-family: var(--mono);
@@ -577,7 +667,7 @@ section { padding: 84px 0; position: relative; }
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top left;
+  object-position: top right;
   transition: transform 0.4s ease;
 }
 .cap-img-wrap:hover img { transform: scale(1.03); }
@@ -1293,13 +1383,23 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 @media (max-width: 980px) {
   .hero-grid, .scroll-account-layout, .ig-crm-grid, .builder, .comm-grid, .panel, .angtop { grid-template-columns: minmax(0, 1fr); }
   .sticky-account-stage, .summary { position: static; }
+  .account-window { height: 320px; }
   .three-captures-grid, .edit-pillars, .plans, .three, .reel-grid, .angles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .stills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  .topbar-in { justify-content: center; }
+  .mode-switch { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .mode-btn { justify-content: center; padding: 8px 6px; font-size: 0.74rem; text-align: center; }
   .three-captures-grid, .edit-pillars, .plans, .three, .reel-grid, .angles, .pillars-grid, .terms, .tiles, .ig-showcase { grid-template-columns: minmax(0, 1fr); }
   .meta-line { grid-template-columns: minmax(0, 1fr); }
-  section { padding: 56px 0; }
+  .step-kpis-mini { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; }
+  .step-kpis-mini div strong { font-size: 0.82rem; }
+  .step-crop-preview { height: 68px; background-size: 210% auto; }
+  .eq-grid-2 { grid-template-columns: minmax(0, 1fr) !important; gap: 12px !important; }
+  .kpi-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  section { padding: 48px 0; }
 }
 </style>
 </head>
@@ -1307,7 +1407,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
 <div class="tip" id="tip" role="status" aria-live="polite"></div>
 
-<!-- BARRA SUPERIOR CON CAMBIO DE MODO Y CAMBIO BLANCO / NEGRO -->
+<!-- BARRA SUPERIOR CON LOS 3 BLOQUES: PROPUESTA · RESULTADOS · DIAGNÓSTICO -->
 <header class="topbar">
   <div class="wrap topbar-in">
     <div class="brand-lockup">
@@ -1316,12 +1416,15 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <img class="lumia-logo" src="media/lumia-logo.png" alt="Lumia Odontología Especializada">
     </div>
 
-    <div class="mode-switch" role="tablist" aria-label="Documento">
+    <div class="mode-switch" role="tablist" aria-label="Bloques del documento">
       <button class="mode-btn" type="button" role="tab" id="modePropuestaBtn" aria-selected="true" data-mode="propuesta">
-        <span class="idx">01</span> Propuesta Comercial
+        <span class="idx">01</span> Propuesta
+      </button>
+      <button class="mode-btn" type="button" role="tab" id="modeResultadosBtn" aria-selected="false" data-mode="resultados">
+        <span class="idx">02</span> Resultados y Pauta
       </button>
       <button class="mode-btn" type="button" role="tab" id="modeAnalisisBtn" aria-selected="false" data-mode="analisis">
-        <span class="idx">02</span> Diagnóstico de Pauta
+        <span class="idx">03</span> Diagnóstico
       </button>
     </div>
 
@@ -1335,7 +1438,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 </header>
 
 <!-- ===================================================================== -->
-<!-- VISTA 01: PROPUESTA COMERCIAL                                         -->
+<!-- BLOQUE 01: PROPUESTA COMERCIAL                                        -->
 <!-- ===================================================================== -->
 <main id="view-propuesta">
 
@@ -1343,19 +1446,19 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
-        <div class="kicker">ASYGNUZ Growth & House of Dev · Manizales</div>
+        <div class="kicker">Bloque 01 · Propuesta Comercial — ASYGNUZ × Lumia</div>
         <h1>Hoy saben cuánto cuesta un mensaje. Vamos a medir <span class="hl-blue">cuánto cuesta cada paciente.</span></h1>
         <p class="hero-lead">
           Estrategia de adquisición por perfil de paciente, administración de Meta Ads y Google Ads orientada a tratamientos de alto valor, producción audiovisual quincenal en clínica y trazabilidad completa desde el anuncio hasta el cierre.
         </p>
         <div class="hero-actions">
           <a class="btn" href="#comision">Ver Esquema y Planes</a>
-          <button class="btn btn-line" type="button" data-goto-mode="analisis">
-            Explorar Diagnóstico de Lumia →
+          <button class="btn btn-line" type="button" data-goto-mode="resultados">
+            02 · Ver Resultados de Pauta →
           </button>
-          <a class="btn btn-line" href="Propuesta_ASYGNUZ_Lumia_con_Diagnostico.pdf" download>
-            ↓ Propuesta + Diagnóstico (PDF)
-          </a>
+          <button class="btn btn-line" type="button" data-goto-mode="analisis">
+            03 · Ver Diagnóstico de Lumia →
+          </button>
         </div>
         <div class="meta-line">
           <div><small>Preparado para</small><span>Dr. Alejandro Restrepo · Sebastián Restrepo</span></div>
@@ -1364,26 +1467,24 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         </div>
       </div>
 
-      <!-- Síntesis del Diagnóstico con líneas finas -->
+      <!-- Navegación rápida a los 3 bloques -->
       <aside class="panel-box pad audit-summary">
         <div>
-          <div class="kicker" style="margin-bottom:10px">Síntesis del Diagnóstico</div>
-          <h3>Lo que encontramos en las cuentas de Lumia</h3>
+          <div class="kicker" style="margin-bottom:10px">Estructura en 3 Bloques</div>
+          <h3>Navega por cada parte de la presentación</h3>
           <p class="muted" style="font-size:0.84rem;margin-top:4px">
-            Auditoría de Meta Ads (jun–oct), Google Ads (septiembre) y sitio web:
+            Dividimos la experiencia en 3 bloques independientes para revisarla cómodamente desde computador o celular:
           </p>
           <div class="audit-rows">
-            <div class="audit-row"><span class="k">Pauta mensual visible</span><span class="v num">$5,4 M COP</span></div>
-            <div class="audit-row"><span class="k">Concentración en 1 solo anuncio (Meta)</span><span class="v alert num">63 % (frec. 6,65)</span></div>
-            <div class="audit-row"><span class="k">Gasto de Google en "caries dental"</span><span class="v alert num">54 % ($93.643/llamada)</span></div>
-            <div class="audit-row"><span class="k">Estado de www.lumiaodontologia.com</span><span class="v alert num">Error 503 · 0 conv. web</span></div>
+            <div class="audit-row"><span class="k"><b>01 · Propuesta Comercial</b></span><span class="v num" style="color:var(--blue)">Estás aquí</span></div>
+            <div class="audit-row"><span class="k"><b>02 · Resultados y Pauta</b> ($180k USD + IG)</span><button type="button" class="btn-line" data-goto-mode="resultados" style="padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:0.72rem;cursor:pointer">Abrir 02 →</button></div>
+            <div class="audit-row"><span class="k"><b>03 · Diagnóstico Lumia</b> (Meta, Google, 503)</span><button type="button" class="btn-line" data-goto-mode="analisis" style="padding:4px 10px;border-radius:6px;font-family:var(--mono);font-size:0.72rem;cursor:pointer">Abrir 03 →</button></div>
           </div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-          <span class="muted" style="font-size:0.78rem">10 anuncios auditados · embudo · benchmark local</span>
-          <button class="btn btn-line" type="button" data-goto-mode="analisis" style="padding:7px 13px;font-size:0.78rem">
-            Abrir Diagnóstico →
-          </button>
+          <a class="btn btn-line" href="Propuesta_ASYGNUZ_Lumia_con_Diagnostico.pdf" download style="padding:7px 13px;font-size:0.78rem;width:100%;justify-content:center">
+            ↓ Descargar Propuesta + Diagnóstico (PDF)
+          </a>
         </div>
       </aside>
     </div>
@@ -1391,228 +1492,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 01: EVIDENCIA Y RESULTADOS REALES -->
-  <section id="resultados">
-    <div class="wrap">
-      <div class="sec-head">
-        <div class="kicker">01 — Evidencia y Resultados Reales</div>
-        <h2>Cuentas auditadas en pauta y crecimiento orgánico</h2>
-        <p class="lead">
-          A medida que bajas por cada indicador (o haces clic en cualquiera de ellos), el administrador de anuncios de la izquierda se desplaza automáticamente por la cuenta mostrando cada bloque de resultados.
-        </p>
-      </div>
-
-      <!-- PARTE A: LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA -->
-      <div class="scroll-account-layout">
-
-        <!-- Visor Sticky que va bajando por la cuenta completa -->
-        <div class="sticky-account-stage">
-          <div class="stage-bar">
-            <span class="live-indicator" id="stageHeaderLabel">CUENTA AUDITADA · META ADS MANAGER (219 CAMPAÑAS)</span>
-            <div style="display:flex;gap:8px">
-              <button class="btn-line" type="button" id="openFullAccountBtn" style="padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:0.68rem;cursor:pointer">
-                ⤢ Ver captura completa
-              </button>
-            </div>
-          </div>
-
-          <div class="account-window" id="accWindow">
-            <div class="account-track" id="accTrack">
-              <img id="accTrackImg" src="media/ads-escala-full.png" alt="Administrador de anuncios de Meta — Recorrido completo de cuenta">
-              <div class="row-focus-band" id="rowBand" data-label="FILA SELECCIONADA"></div>
-            </div>
-            <div class="loupe" id="accLoupe"></div>
-          </div>
-
-          <div class="stage-footer">
-            <span id="stageStepIndicator">Recorrido de cuenta: Bloque 01 de 06</span>
-            <span>Pasa el cursor sobre la tabla para activar la lupa (2.2×)</span>
-          </div>
-        </div>
-
-        <!-- Medida por medida: al bajar o hacer clic, la tabla de la izquierda baja sola -->
-        <div class="measure-steps" id="measureSteps">
-          <article class="measure-step active" data-step="0">
-            <div class="step-head">
-              <span class="step-tag">Medida 01 · Captación en Frío (Captura 1)</span>
-              <span class="step-metric num">3.675 registros · $1,68 USD</span>
-            </div>
-            <h4>Volumen sostenido con costo por registro controlado</h4>
-            <p>En la parte superior de la cuenta ($6.182,47 USD invertidos y 912.918 impresiones), el sistema genera 3.675 registros completados a $1,68 USD manteniendo el costo estable a gran escala.</p>
-          </article>
-
-          <article class="measure-step" data-step="1">
-            <div class="step-head">
-              <span class="step-tag">Medida 02 · Conversión Directa en Web (Captura 1)</span>
-              <span class="step-metric num">193 compras · $27,17 USD</span>
-            </div>
-            <h4>Atribución de cierres reales mediante Píxel y API de Conversiones</h4>
-            <p>Justo debajo ($5.244,25 USD invertidos), la campaña optimiza directamente por transacciones en el sitio web (193 compras), exactamente lo que habilitaremos en Lumia al conectar GTM, Píxel y CAPI.</p>
-          </article>
-
-          <article class="measure-step" data-step="2">
-            <div class="step-head">
-              <span class="step-tag">Medida 03 · Escala de Leads Calificados (Captura 1)</span>
-              <span class="step-metric num">4.113 leads · $1,07 USD</span>
-            </div>
-            <h4>Más de 1,58 millones de impresiones a $1,07 USD por cliente potencial</h4>
-            <p>Al bajar al bloque central de la primera captura ($4.393,97 USD), una sola estructura con rotación de ángulos produce 4.113 clientes potenciales a $1,07 USD (~$4.400 COP) y otra suma 2.621 leads a $1,86 USD.</p>
-          </article>
-
-          <article class="measure-step" data-step="3">
-            <div class="step-head">
-              <span class="step-tag">Medida 04 · Optimización Sub-$1 USD (Captura 2)</span>
-              <span class="step-metric num">2.050 leads · $0,92 USD</span>
-            </div>
-            <h4>Bajando a la segunda captura: leads calificados por debajo de $1 USD</h4>
-            <p>Desplazando la cuenta hacia abajo ($1.892,51 USD y 1.051.854 impresiones), el costo por cliente potencial cae hasta $0,92 USD (~$3.800 COP) gracias a aislar los anuncios ganadores en su propio presupuesto.</p>
-          </article>
-
-          <article class="measure-step" data-step="4">
-            <div class="step-head">
-              <span class="step-tag">Medida 05 · Consistencia Multi-Campaña (Captura 2)</span>
-              <span class="step-metric num">5.023 leads · $1,13 – $1,74 USD</span>
-            </div>
-            <h4>Cinco campañas consecutivas replicando el mismo resultado</h4>
-            <p>En la parte media-baja de la segunda captura se observan 5 campañas seguidas entregando 1.255 leads ($1,41), 934 registros ($1,74), 1.399 leads ($1,16), 1.435 leads ($1,13) y 64 cierres de remarketing ($22,01).</p>
-          </article>
-
-          <article class="measure-step" data-step="5">
-            <div class="step-head">
-              <span class="step-tag">Medida 06 · Consolidado Histórico de Cuenta</span>
-              <span class="step-metric num">$180.121,41 USD · 44,4M imp.</span>
-            </div>
-            <h4>Más de $750 millones COP ejecutados con trazabilidad de punta a punta</h4>
-            <p>En el cierre de la tabla se consolida la operación completa: $180.121,41 USD invertidos y 44.446.047 impresiones administradas a través de 219 campañas estructuradas.</p>
-          </article>
-        </div>
-      </div>
-
-      <!-- PARTE B: LAS 3 CAPTURAS DE PAUTA DESCARGADAS (VISIBLES Y ANALIZADAS INDIVIDUALMENTE) -->
-      <div style="margin-top:52px">
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
-          <div>
-            <div class="kicker" style="margin-bottom:8px">Las 3 Capturas de Pauta Auditadas</div>
-            <h3>Análisis individual de los 3 pantallazos de resultados en Meta Ads</h3>
-          </div>
-          <span class="muted" style="font-size:0.8rem">Haz clic en cualquiera de las 3 capturas para abrirla en pantalla completa</span>
-        </div>
-
-        <div class="three-captures-grid">
-          <!-- Captura 1 -->
-          <article class="panel-box cap-card">
-            <div class="cap-img-wrap" data-full="media/ads-escala-1.png" data-cap="Captura 01 — Top Campañas por Inversión ($180.121,41 USD acumulados y 44,4M impresiones)">
-              <img src="media/ads-escala-1.png" alt="Captura 1 Meta Ads Manager USD">
-              <span class="zoom-hint">⤢ Ampliar captura 01</span>
-            </div>
-            <div class="cap-body">
-              <span class="cap-kicker">Captura 01 · Top Campañas (USD)</span>
-              <h4>Escala masiva y compras en sitio web</h4>
-              <div class="cap-kpis">
-                <div><span class="num">$180.121 USD</span><small>Inversión total en cuenta</small></div>
-                <div><span class="num">44,4 M</span><small>Impresiones totales</small></div>
-              </div>
-              <p style="font-size:0.83rem;color:var(--muted)">
-                Muestra las campañas de mayor inversión: 3.675 registros a $1,68 USD, 193 compras web a $27,17 USD, 4.113 clientes potenciales a $1,07 USD y 27.086 clics a $0,13 USD.
-              </p>
-            </div>
-          </article>
-
-          <!-- Captura 2 -->
-          <article class="panel-box cap-card">
-            <div class="cap-img-wrap" data-full="media/ads-escala-2.png" data-cap="Captura 02 — Bloques de Escala y Consistencia de Costo por Lead ($0,92 a $1,74 USD)">
-              <img src="media/ads-escala-2.png" alt="Captura 2 Meta Ads Manager USD continuación">
-              <span class="zoom-hint">⤢ Ampliar captura 02</span>
-            </div>
-            <div class="cap-body">
-              <span class="cap-kicker">Captura 02 · Bloques de Escala (USD)</span>
-              <h4>Consistencia de leads entre $0,92 y $1,70 USD</h4>
-              <div class="cap-kpis">
-                <div><span class="num">$0,92 USD</span><small>Costo mínimo (2.050 leads)</small></div>
-                <div><span class="num">8.645+</span><small>Leads en este bloque</small></div>
-              </div>
-              <p style="font-size:0.83rem;color:var(--muted)">
-                Demuestra que el resultado no depende de un solo anuncio: 7 campañas consecutivas entre $1.477 y $1.901 USD sosteniendo costos de $0,92, $1,13, $1,16 y $1,41 USD por lead.
-              </p>
-            </div>
-          </article>
-
-          <!-- Captura 3 -->
-          <article class="panel-box cap-card">
-            <div class="cap-img-wrap" data-full="media/ads-eficiencia-cop.png" data-cap="Captura 03 — Eficiencia de Tráfico, Visitas al Perfil y Retención de Video en COP">
-              <img src="media/ads-eficiencia-cop.png" alt="Captura 3 Meta Ads Manager COP">
-              <span class="zoom-hint">⤢ Ampliar captura 03</span>
-            </div>
-            <div class="cap-body">
-              <span class="cap-kicker">Captura 03 · Eficiencia en Colombia (COP)</span>
-              <h4>Tráfico a $66 COP y retención de video a $7 COP</h4>
-              <div class="cap-kpis">
-                <div><span class="num">$66 COP</span><small>Por clic (19.003 clics)</small></div>
-                <div><span class="num">$7 – $8 COP</span><small>Por ThruPlay (34.968 vistas)</small></div>
-              </div>
-              <p style="font-size:0.83rem;color:var(--muted)">
-                19.003 clics al enlace con $1.252.483 COP, 2.109 visitas al perfil de Instagram a $100 COP y 34.968 reproducciones completas de video (ThruPlays) entre $7 y $8 pesos.
-              </p>
-            </div>
-          </article>
-        </div>
-      </div>
-
-      <!-- PARTE C: RESULTADO DE INSTAGRAM (VISIBLE DIRECTAMENTE) + EMBUDO CRM -->
-      <div class="ig-crm-grid">
-        <div class="panel-box pad ig-showcase">
-          <div class="ig-shot" data-full="media/valentina-stats.jpg" data-cap="Panel Profesional de Instagram — 842,5 mil visualizaciones y 53,0 mil interacciones en 30 días">
-            <img src="media/valentina-stats.jpg" alt="Panel profesional de Instagram — 842,5 mil visualizaciones">
-          </div>
-          <div>
-            <div class="kicker" style="margin-bottom:8px">Resultado en Instagram · 30 Días</div>
-            <div class="big-number num">842,5 mil</div>
-            <p class="muted" style="font-size:0.88rem;margin-top:4px">
-              Visualizaciones orgánicas y de contenido en 30 días (13 jun – 12 jul · Panel Profesional de Instagram)
-            </p>
-            <div class="stat-row-3">
-              <div><div class="v num">53,0 mil</div><div class="l">Interacciones totales</div></div>
-              <div><div class="v num">+4,2 mil</div><div class="l">Seguidores nuevos</div></div>
-              <div><div class="v num">6,3 %</div><div class="l">Tasa de interacción</div></div>
-            </div>
-            <p class="muted" style="font-size:0.8rem;margin-top:14px">
-              Cuando los reels tienen estructura de retención, el crecimiento orgánico construye la confianza clínica antes de que el paciente escriba a WhatsApp.
-            </p>
-          </div>
-        </div>
-
-        <div class="panel-box pad" style="display:flex;flex-direction:column;justify-content:space-between">
-          <div>
-            <div class="kicker" style="margin-bottom:8px">Caso de Implementación · Primeros 20 Días</div>
-            <h3>Embudo de conversión, retención web y trazabilidad en CRM</h3>
-            <p class="muted" style="font-size:0.85rem;margin-top:4px">
-              Resultados de conectar pauta, páginas de aterrizaje y seguimiento centralizado:
-            </p>
-            <div class="crm-grid-6">
-              <div class="crm-cell"><div class="v num">1.340</div><div class="l">Usuarios únicos en retención</div></div>
-              <div class="crm-cell"><div class="v num">44 %</div><div class="l">CTR de inicio a formulario</div></div>
-              <div class="crm-cell"><div class="v num">200</div><div class="l">Leads centralizados en CRM</div></div>
-              <div class="crm-cell"><div class="v num">11</div><div class="l">Países por alcance orgánico</div></div>
-              <div class="crm-cell"><div class="v num">6</div><div class="l">Integraciones activas</div></div>
-              <div class="crm-cell"><div class="v num">1.800</div><div class="l">Sesiones entregadas</div></div>
-            </div>
-          </div>
-          <p class="muted" style="font-size:0.78rem;margin-top:14px">
-            Esta misma arquitectura es la que conectará los anuncios de Lumia con las hojas de Valoraciones, Cierres y Dentalink.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <div class="rule"></div>
-
-  <!-- SECCIÓN 02: PROPUESTA DE EDICIÓN Y PORTAFOLIO AUDIOVISUAL + FOTOS -->
+  <!-- SECCIÓN 01 DE PROPUESTA: PROPUESTA DE EDICIÓN Y PORTAFOLIO AUDIOVISUAL + FOTOS -->
   <section id="contenido">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">02 — Nuestra Propuesta de Edición & Dirección Visual</div>
+        <div class="kicker">01 — Nuestra Propuesta de Edición & Dirección Visual</div>
         <h2>Edición diseñada para retener la atención y construir autoridad clínica</h2>
         <p class="lead">
           Un paciente de implantes o diseño de sonrisa no compra por impulso: evalúa el criterio del especialista. Nuestro sistema de edición combina cuatro capas en cada pieza:
@@ -1649,7 +1533,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="claudia">Claudia Uribe Completo (6 cortes)</button>
           <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="salud">Salud & Estética (Dra. Ingrid Patiño)</button>
         </div>
-        <span class="muted" style="font-size:0.78rem;font-family:var(--mono)">Clic sobre cualquier video para pausar / reproducir</span>
+        <span class="muted" style="font-size:0.78rem;font-family:var(--mono)">Toca cualquier video para pausar / reproducir</span>
       </div>
 
       <div class="reel-grid" id="reelGrid"></div>
@@ -1661,7 +1545,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
             <div class="kicker" style="margin-bottom:8px">Fotografía Clínica, Estudio & Diseño Editorial</div>
             <h3>Muestras de fotografía de especialista, procedimiento y carruseles</h3>
           </div>
-          <span class="muted" style="font-size:0.8rem">Haz clic en cualquier fotografía para verla en tamaño completo</span>
+          <span class="muted" style="font-size:0.8rem">Toca cualquier fotografía para verla en tamaño completo</span>
         </div>
         <div class="stills-grid" id="stillsGrid"></div>
       </div>
@@ -1670,11 +1554,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 03: PLAN DE INTERVENCIÓN EN 8 PILARES -->
+  <!-- SECCIÓN 02 DE PROPUESTA: PLAN DE INTERVENCIÓN EN 8 PILARES -->
   <section id="mejoras">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">03 — Hoja de Ruta en Lumia</div>
+        <div class="kicker">02 — Hoja de Ruta en Lumia</div>
         <h2>Las 8 intervenciones que ejecutaremos desde el primer mes</h2>
       </div>
       <div class="pillars-grid">
@@ -1692,11 +1576,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
   <div class="rule"></div>
 
-  <!-- SECCIÓN 04: ESQUEMA COMERCIAL (ARRIBA DE LOS PAQUETES Y PRECIOS) -->
+  <!-- SECCIÓN 03 DE PROPUESTA: ESQUEMA COMERCIAL (ARRIBA DE LOS PAQUETES Y PRECIOS) -->
   <section id="comision">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">04 — Esquema Comercial: Valor Fijo Mensual + % por Tratamiento</div>
+        <div class="kicker">03 — Esquema Comercial: Valor Fijo Mensual + % por Tratamiento</div>
         <h2>Claridad total antes de ver los planes: es la mensualidad fija MÁS el porcentaje que se defina por tratamiento cerrado</h2>
         <p class="lead">
           No trabajamos bajo un modelo únicamente variable. Para que la operación funcione al nivel que requiere Lumia, nuestra propuesta integra todo el equipo de trabajo mes a mes y estructura la inversión en <b>dos componentes que se suman</b>:
@@ -1724,7 +1608,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
       <!-- Fórmula visual explícita: Parte 1 + Parte 2 -->
       <div class="panel-box pad" style="margin-bottom:28px;border-color:var(--hairline-blue);background:var(--surface-active)">
-        <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center">
+        <div class="eq-grid-2" style="display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center">
           <div>
             <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);font-weight:500;margin-bottom:6px">Componente 01 · Dinero Fijo Mensual</div>
             <h3 style="font-size:1.35rem">El Valor Mensual del Plan Elegido</h3>
@@ -1888,6 +1772,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <a class="btn" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20vimos%20la%20propuesta%20de%20ASYGNUZ%20para%20Lumia" target="_blank" rel="noopener">Escribir a Juan Manuel por WhatsApp</a>
           <button class="btn btn-line" id="copyMail" type="button">juan.marin@asygnuz.com</button>
+          <button class="btn btn-line" type="button" data-goto-mode="resultados">Ir a 02 · Resultados y Pauta →</button>
         </div>
       </div>
     </div>
@@ -1896,7 +1781,318 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 </main>
 
 <!-- ===================================================================== -->
-<!-- VISTA 02: DIAGNÓSTICO DE PAUTA Y ADQUISICIÓN                          -->
+<!-- BLOQUE 02: RESULTADOS DE PAUTA Y CRECIMIENTO ORGÁNICO                 -->
+<!-- ===================================================================== -->
+<main id="view-resultados" hidden>
+
+  <section class="hero" style="padding-bottom:40px">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap">
+        <div>
+          <div class="kicker">Bloque 02 — Evidencia Real en Pauta y Orgánico</div>
+          <h1>Resultados auditados en Meta Ads <span class="hl-blue">($180.121 USD)</span>, Colombia ($66 COP/clic) e Instagram</h1>
+          <p class="hero-lead">
+            Recorrido fila por fila de nuestras cuentas administradas, análisis individual de las 3 capturas de pauta descargadas y resultados de crecimiento orgánico y conversión en CRM. Optimizado para lectura en celular y computador.
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-line" type="button" data-goto-mode="propuesta">← 01 · Propuesta Comercial</button>
+          <button class="btn" type="button" data-goto-mode="analisis">03 · Ver Diagnóstico de Lumia →</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid-4" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:36px">
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">$180.121 USD</div><span class="muted" style="font-size:0.78rem">Inversión auditada en cuenta Meta Ads (+$750M COP)</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">44,4 M</div><span class="muted" style="font-size:0.78rem">Impresiones entregadas en 219 campañas</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem;color:var(--blue)">$66 COP</div><span class="muted" style="font-size:0.78rem">Costo por clic en Colombia (19.003 clics) y $7 COP ThruPlay</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">842,5 mil</div><span class="muted" style="font-size:0.78rem">Visualizaciones orgánicas en Instagram en 30 días</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section id="resultados">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">01 — Recorrido de Cuenta Meta Ads (Celular & Computador)</div>
+        <h2>La cuenta va bajando medida por medida con recorte directo a las cifras</h2>
+        <p class="lead">
+          Cada tarjeta incluye el <b>recorte ampliado de las columnas de Resultados, Impresiones, Costo e Importe Gastado</b> para que en celular se lean los números con total nitidez sin necesidad de hacer zoom manual.
+        </p>
+      </div>
+
+      <!-- PARTE A: LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA -->
+      <div class="scroll-account-layout">
+
+        <!-- Visor Sticky que va bajando por la cuenta completa -->
+        <div class="sticky-account-stage">
+          <div class="stage-bar">
+            <span class="live-indicator" id="stageHeaderLabel">CUENTA AUDITADA · META ADS (219 CAMPAÑAS)</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-line" type="button" id="toggleColZoomBtn" style="padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:0.68rem;cursor:pointer;color:var(--blue);border-color:var(--hairline-blue)">
+                🔍 Enfocar Cifras
+              </button>
+              <button class="btn-line" type="button" id="openFullAccountBtn" style="padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:0.68rem;cursor:pointer">
+                ⤢ Pantalla completa
+              </button>
+            </div>
+          </div>
+
+          <div class="account-window" id="accWindow">
+            <div class="account-track" id="accTrack">
+              <img id="accTrackImg" src="media/ads-escala-full.png" alt="Administrador de anuncios de Meta — Recorrido completo de cuenta">
+              <div class="row-focus-band" id="rowBand" data-label="FILA SELECCIONADA"></div>
+            </div>
+            <div class="loupe" id="accLoupe"></div>
+          </div>
+
+          <div class="stage-footer">
+            <span id="stageStepIndicator">Recorrido de cuenta: Medida 01 de 06</span>
+            <span>En celular: desliza la tabla lateralmente o mira el recorte en cada tarjeta</span>
+          </div>
+        </div>
+
+        <!-- Medida por medida: con KPIs grandes + recorte directo de la fila para celular -->
+        <div class="measure-steps" id="measureSteps">
+          <article class="measure-step active" data-step="0">
+            <div class="step-head">
+              <span class="step-tag">Medida 01 · Captación en Frío (Captura 1)</span>
+              <span class="step-metric num">3.675 registros · $1,68 USD</span>
+            </div>
+            <h4>Volumen sostenido con costo por registro controlado</h4>
+            <p>En la parte superior de la cuenta ($6.182,47 USD invertidos y 912.918 impresiones), el sistema genera 3.675 registros completados a $1,68 USD manteniendo el costo estable a gran escala.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">3.675</strong><span>Registros</span></div>
+              <div><strong class="num" style="color:var(--blue)">$1,68 USD</strong><span>Costo / registro</span></div>
+              <div><strong class="num">$6.182 USD</strong><span>912.918 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-1.png" data-cap="Medida 01 — 3.675 registros completados a $1,68 USD ($6.182,47 USD invertidos)" style="background-position: 98% 17%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="1">
+            <div class="step-head">
+              <span class="step-tag">Medida 02 · Conversión Directa en Web (Captura 1)</span>
+              <span class="step-metric num">193 compras · $27,17 USD</span>
+            </div>
+            <h4>Atribución de cierres reales mediante Píxel y API de Conversiones</h4>
+            <p>Justo debajo ($5.244,25 USD invertidos), la campaña optimiza directamente por transacciones en el sitio web (193 compras), exactamente lo que habilitaremos en Lumia al conectar GTM, Píxel y CAPI.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">193</strong><span>Compras en web</span></div>
+              <div><strong class="num" style="color:var(--blue)">$27,17 USD</strong><span>Costo / compra</span></div>
+              <div><strong class="num">$5.244 USD</strong><span>471.400 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-1.png" data-cap="Medida 02 — 193 compras directas en web a $27,17 USD ($5.244,25 USD invertidos)" style="background-position: 98% 23%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="2">
+            <div class="step-head">
+              <span class="step-tag">Medida 03 · Escala de Leads Calificados (Captura 1)</span>
+              <span class="step-metric num">4.113 leads · $1,07 USD</span>
+            </div>
+            <h4>Más de 1,58 millones de impresiones a $1,07 USD por cliente potencial</h4>
+            <p>Al bajar al bloque central de la primera captura ($4.393,97 USD), una sola estructura con rotación de ángulos produce 4.113 clientes potenciales a $1,07 USD (~$4.400 COP) y otra suma 2.621 leads a $1,86 USD.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">4.113</strong><span>Leads Meta</span></div>
+              <div><strong class="num" style="color:var(--blue)">$1,07 USD</strong><span>Costo / lead (~$4,4k)</span></div>
+              <div><strong class="num">$4.393 USD</strong><span>1.584.996 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-1.png" data-cap="Medida 03 — 4.113 clientes potenciales a $1,07 USD con 1.584.996 impresiones" style="background-position: 98% 40%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="3">
+            <div class="step-head">
+              <span class="step-tag">Medida 04 · Optimización Sub-$1 USD (Captura 2)</span>
+              <span class="step-metric num">2.050 leads · $0,92 USD</span>
+            </div>
+            <h4>Bajando a la segunda captura: leads calificados por debajo de $1 USD</h4>
+            <p>Desplazando la cuenta hacia abajo ($1.892,51 USD y 1.051.854 impresiones), el costo por cliente potencial cae hasta $0,92 USD (~$3.800 COP) gracias a aislar los anuncios ganadores en su propio presupuesto.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">2.050</strong><span>Leads Meta</span></div>
+              <div><strong class="num" style="color:var(--blue)">$0,92 USD</strong><span>Costo sub-$1 USD</span></div>
+              <div><strong class="num">$1.892 USD</strong><span>1.051.854 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-2.png" data-cap="Medida 04 — 2.050 clientes potenciales a $0,92 USD ($1.892,51 USD invertidos)" style="background-position: 98% 63.5%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="4">
+            <div class="step-head">
+              <span class="step-tag">Medida 05 · Consistencia Multi-Campaña (Captura 2)</span>
+              <span class="step-metric num">5.023 leads · $1,13 – $1,74 USD</span>
+            </div>
+            <h4>Cinco campañas consecutivas replicando el mismo resultado</h4>
+            <p>En la parte media-baja de la segunda captura se observan 5 campañas seguidas entregando 1.255 leads ($1,41), 934 registros ($1,74), 1.399 leads ($1,16), 1.435 leads ($1,13) y 64 cierres de remarketing ($22,01).</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">5.023</strong><span>Leads en 5 filas</span></div>
+              <div><strong class="num" style="color:var(--blue)">$1,13 – $1,74</strong><span>Rango por lead</span></div>
+              <div><strong class="num">64 compras</strong><span>Remarketing $22 USD</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-2.png" data-cap="Medida 05 — 5 campañas consecutivas sosteniendo costos entre $1,13 y $1,74 USD" style="background-position: 98% 76%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="5">
+            <div class="step-head">
+              <span class="step-tag">Medida 06 · Consolidado Histórico de Cuenta</span>
+              <span class="step-metric num">$180.121,41 USD · 44,4M imp.</span>
+            </div>
+            <h4>Más de $750 millones COP ejecutados con trazabilidad de punta a punta</h4>
+            <p>En el cierre de la tabla se consolida la operación completa: $180.121,41 USD invertidos y 44.446.047 impresiones administradas a través de 219 campañas estructuradas.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">$180.121 USD</strong><span>Inversión total</span></div>
+              <div><strong class="num" style="color:var(--blue)">44.446.047</strong><span>Impresiones</span></div>
+              <div><strong class="num">219</strong><span>Campañas medidas</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-full.png" data-cap="Medida 06 — Consolidado de 219 campañas: $180.121,41 USD invertidos y 44.446.047 impresiones" style="background-position: 98% 97.5%;"></div>
+          </article>
+        </div>
+      </div>
+
+      <!-- PARTE B: LAS 3 CAPTURAS DE PAUTA DESCARGADAS (CON DESGLOSE LEGIBLE EN CELULAR) -->
+      <div style="margin-top:56px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">02 — Las 3 Capturas de Pauta Descargadas</div>
+            <h2>Análisis individual de los 3 pantallazos con desglose de cifras para celular</h2>
+          </div>
+          <span class="muted" style="font-size:0.84rem">Toca cualquier captura para abrirla en pantalla completa</span>
+        </div>
+
+        <div class="three-captures-grid">
+          <!-- Captura 1 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-escala-1.png" data-cap="Captura 01 — Top Campañas por Inversión ($180.121,41 USD acumulados y 44,4M impresiones)">
+              <img src="media/ads-escala-1.png" alt="Captura 1 Meta Ads Manager USD">
+              <span class="zoom-hint">⤢ Tocar para ampliar captura 01</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 01 · Top Campañas (USD)</span>
+              <h4>Escala masiva y compras en sitio web</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$180.121 USD</span><small>Inversión total en cuenta</small></div>
+                <div><span class="num">44,4 M</span><small>Impresiones totales</small></div>
+              </div>
+              <div class="cap-rows-mini">
+                <div class="cap-row-item"><span class="r-name">Campaña Registros Web</span><span class="r-val">3.675 reg. · $1,68 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Compras Web</span><span class="r-val">193 compras · $27,17 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Clientes Potenciales</span><span class="r-val">4.113 leads · $1,07 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Leads Escala 2</span><span class="r-val">2.621 leads · $1,86 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Tráfico Calificado</span><span class="r-val">27.086 clics · $0,13 USD</span></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Captura 2 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-escala-2.png" data-cap="Captura 02 — Bloques de Escala y Consistencia de Costo por Lead ($0,92 a $1,74 USD)">
+              <img src="media/ads-escala-2.png" alt="Captura 2 Meta Ads Manager USD continuación">
+              <span class="zoom-hint">⤢ Tocar para ampliar captura 02</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 02 · Bloques de Escala (USD)</span>
+              <h4>Consistencia de leads entre $0,92 y $1,74 USD</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$0,92 USD</span><small>Costo mínimo (2.050 leads)</small></div>
+                <div><span class="num">8.645+</span><small>Leads en este bloque</small></div>
+              </div>
+              <div class="cap-rows-mini">
+                <div class="cap-row-item"><span class="r-name">Bloque Ganadores Sub-$1</span><span class="r-val">2.050 leads · $0,92 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Escala Leads Bloque A</span><span class="r-val">1.435 leads · $1,13 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Escala Leads Bloque B</span><span class="r-val">1.399 leads · $1,16 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Escala Leads Bloque C</span><span class="r-val">1.255 leads · $1,41 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Cierres Remarketing Web</span><span class="r-val">64 compras · $22,01 USD</span></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Captura 3 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-eficiencia-cop.png" data-cap="Captura 03 — Eficiencia de Tráfico, Visitas al Perfil y Retención de Video en COP">
+              <img src="media/ads-eficiencia-cop.png" alt="Captura 3 Meta Ads Manager COP">
+              <span class="zoom-hint">⤢ Tocar para ampliar captura 03</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 03 · Eficiencia en Colombia (COP)</span>
+              <h4>Tráfico a $66 COP y retención de video a $7 COP</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$66 COP</span><small>Por clic (19.003 clics)</small></div>
+                <div><span class="num">$7 – $8 COP</span><small>Por ThruPlay (34.968 vistas)</small></div>
+              </div>
+              <div class="cap-rows-mini">
+                <div class="cap-row-item"><span class="r-name">Tráfico a Enlace / WhatsApp</span><span class="r-val">19.003 clics · $66 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Visitas al Perfil de IG</span><span class="r-val">2.109 visitas · $100 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Retención Video (ThruPlay 1)</span><span class="r-val">21.370 vistas · $7 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Retención Video (ThruPlay 2)</span><span class="r-val">13.598 vistas · $8 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Inversión Total Captura 3</span><span class="r-val">$1.954.687 COP</span></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- PARTE C: RESULTADO DE INSTAGRAM (VISIBLE DIRECTAMENTE) + EMBUDO CRM -->
+      <div style="margin-top:56px">
+        <div class="sec-head" style="margin-bottom:24px">
+          <div class="kicker">03 — Crecimiento Orgánico en Instagram & Conversión en CRM</div>
+          <h2>842,5 mil visualizaciones en 30 días y embudo conectado a CRM</h2>
+        </div>
+
+        <div class="ig-crm-grid" style="margin-top:0">
+          <div class="panel-box pad ig-showcase">
+            <div class="ig-shot" data-full="media/valentina-stats.jpg" data-cap="Panel Profesional de Instagram — 842,5 mil visualizaciones y 53,0 mil interacciones en 30 días">
+              <img src="media/valentina-stats.jpg" alt="Panel profesional de Instagram — 842,5 mil visualizaciones">
+            </div>
+            <div>
+              <div class="kicker" style="margin-bottom:8px">Resultado en Instagram · 30 Días</div>
+              <div class="big-number num">842,5 mil</div>
+              <p class="muted" style="font-size:0.88rem;margin-top:4px">
+                Visualizaciones orgánicas y de contenido en 30 días (13 jun – 12 jul · Panel Profesional de Instagram)
+              </p>
+              <div class="stat-row-3">
+                <div><div class="v num">53,0 mil</div><div class="l">Interacciones totales</div></div>
+                <div><div class="v num">+4,2 mil</div><div class="l">Seguidores nuevos</div></div>
+                <div><div class="v num">6,3 %</div><div class="l">Tasa de interacción</div></div>
+              </div>
+              <p class="muted" style="font-size:0.8rem;margin-top:14px">
+                Cuando los reels tienen estructura de retención, el crecimiento orgánico construye la confianza clínica antes de que el paciente escriba a WhatsApp.
+              </p>
+            </div>
+          </div>
+
+          <div class="panel-box pad" style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <div class="kicker" style="margin-bottom:8px">Caso de Implementación · Primeros 20 Días</div>
+              <h3>Embudo de conversión, retención web y trazabilidad en CRM</h3>
+              <p class="muted" style="font-size:0.85rem;margin-top:4px">
+                Resultados de conectar pauta, páginas de aterrizaje y seguimiento centralizado:
+              </p>
+              <div class="crm-grid-6">
+                <div class="crm-cell"><div class="v num">1.340</div><div class="l">Usuarios únicos en retención</div></div>
+                <div class="crm-cell"><div class="v num">44 %</div><div class="l">CTR de inicio a formulario</div></div>
+                <div class="crm-cell"><div class="v num">200</div><div class="l">Leads centralizados en CRM</div></div>
+                <div class="crm-cell"><div class="v num">11</div><div class="l">Países por alcance orgánico</div></div>
+                <div class="crm-cell"><div class="v num">6</div><div class="l">Integraciones activas</div></div>
+                <div class="crm-cell"><div class="v num">1.800</div><div class="l">Sesiones entregadas</div></div>
+              </div>
+            </div>
+            <p class="muted" style="font-size:0.78rem;margin-top:14px">
+              Esta misma arquitectura es la que conectará los anuncios de Lumia con las hojas de Valoraciones, Cierres y Dentalink.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:36px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+        <button class="btn btn-line" type="button" data-goto-mode="propuesta">← Volver a 01 · Propuesta Comercial</button>
+        <button class="btn" type="button" data-goto-mode="analisis">Ir a 03 · Diagnóstico de Lumia →</button>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================================================================== -->
+<!-- BLOQUE 03: DIAGNÓSTICO DE PAUTA Y ADQUISICIÓN                         -->
 <!-- ===================================================================== -->
 <main id="view-analisis" hidden>
 
@@ -1904,7 +2100,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="wrap">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap">
         <div>
-          <div class="kicker">Documento 02 — Auditoría de Adquisición</div>
+          <div class="kicker">Bloque 03 — Auditoría de Adquisición de Lumia</div>
           <h1>Diagnóstico de Pauta y Adquisición · <span class="hl-blue">Lumia Odontología</span></h1>
           <p class="hero-lead">
             Revisión técnica de Meta Ads (1 jun – 20 oct 2026), Google Ads (septiembre 2026), estado de medición en <code>lumiaodontologia.com</code>, embudo actual y competencia en Manizales.
@@ -1912,11 +2108,12 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
           <a class="btn" href="Diagnostico_Pauta_Lumia_Odontologia.pdf" download>↓ Descargar Diagnóstico en PDF (8 págs.)</a>
-          <button class="btn btn-line" type="button" data-goto-mode="propuesta">← Volver a la Propuesta</button>
+          <button class="btn btn-line" type="button" data-goto-mode="resultados">← 02 · Resultados y Pauta</button>
+          <button class="btn btn-line" type="button" data-goto-mode="propuesta">← 01 · Propuesta</button>
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:36px">
+      <div class="kpi-grid-4" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:36px">
         <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">$5,4 M</div><span class="muted" style="font-size:0.78rem">Pauta mensual visible · Meta $4,2M + Google $1,2M</span></div>
         <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">$5.703</div><span class="muted" style="font-size:0.78rem">Costo promedio por conversación en Meta (~3.462 conv.)</span></div>
         <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem;color:var(--danger-soft)">$93.643</div><span class="muted" style="font-size:0.78rem">Costo por llamada en Google Ads (13 conv. en sept.)</span></div>
@@ -2055,7 +2252,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 
       <div style="margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
         <a class="btn" href="Diagnostico_Pauta_Lumia_Odontologia.pdf" download>↓ Descargar Diagnóstico Completo en PDF</a>
-        <button class="btn btn-line" type="button" data-goto-mode="propuesta">Ir a la Propuesta Comercial →</button>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-line" type="button" data-goto-mode="resultados">← Ir a 02 · Resultados y Pauta</button>
+          <button class="btn btn-line" type="button" data-goto-mode="propuesta">Ir a 01 · Propuesta Comercial →</button>
+        </div>
       </div>
     </div>
   </section>
@@ -2076,7 +2276,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
 <footer>
   <div class="wrap">
     <span>ASYGNUZ · Growth & House of Dev · Manizales, Colombia</span>
-    <span>Propuesta y Diagnóstico para Lumia Odontología Especializada · Octubre 2026</span>
+    <span>Propuesta, Resultados y Diagnóstico para Lumia Odontología Especializada · Octubre 2026</span>
   </div>
 </footer>
 
@@ -2110,32 +2310,38 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   document.documentElement.setAttribute("data-theme", "light");
   try { localStorage.removeItem("lumia_theme"); } catch(e) {}
 
-  /* 1. Conmutador Propuesta vs Análisis */
+  /* 1. Conmutador entre los 3 Bloques: Propuesta · Resultados · Diagnóstico */
   const viewPropuesta = document.getElementById("view-propuesta");
+  const viewResultados = document.getElementById("view-resultados");
   const viewAnalisis = document.getElementById("view-analisis");
   const modeBtns = document.querySelectorAll(".mode-btn");
   const ctaTopBtn = document.getElementById("ctaTopBtn");
 
   function setMode(mode, scroll = true) {
-    const isAnalisis = mode === "analisis";
-    viewPropuesta.hidden = isAnalisis;
-    viewAnalisis.hidden = !isAnalisis;
+    viewPropuesta.hidden = mode !== "propuesta";
+    viewResultados.hidden = mode !== "resultados";
+    viewAnalisis.hidden = mode !== "analisis";
     modeBtns.forEach(b => b.setAttribute("aria-selected", b.dataset.mode === mode));
-    ctaTopBtn.textContent = isAnalisis ? "Ver Propuesta y Planes" : "Configurar Plan";
+    ctaTopBtn.textContent = mode === "propuesta" ? "Esquema y Planes" : "Ver Propuesta y Planes";
     drawThemed();
+    if (mode === "resultados") {
+      setTimeout(() => applyStep(activeStepIdx), 60);
+    }
     if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
   }
   modeBtns.forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
   document.querySelectorAll("[data-goto-mode]").forEach(b => b.addEventListener("click", () => setMode(b.dataset.gotoMode)));
   ctaTopBtn.addEventListener("click", e => {
-    if (!viewAnalisis.hidden) { e.preventDefault(); setMode("propuesta"); }
+    if (viewPropuesta.hidden) { e.preventDefault(); setMode("propuesta"); }
   });
   if (location.search.includes("analisis") || location.hash === "#analisis" || window.DEFAULT_MODE === "analisis") {
     setMode("analisis", false);
+  } else if (location.search.includes("resultados") || location.hash === "#resultados" || window.DEFAULT_MODE === "resultados") {
+    setMode("resultados", false);
   }
 
   /* =========================================================================
-     2. LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA
+     2. LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA + ZOOM EN CELULAR
      ========================================================================= */
   const STEPS = [
     { bandTop: 15.5, bandH: 5.8, label: "3.675 REGISTROS · $1,68 USD", ind: "Recorrido de cuenta: Medida 01 de 06 (Parte superior · Captura 1)" },
@@ -2152,8 +2358,32 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   const rowBand = document.getElementById("rowBand");
   const accLoupe = document.getElementById("accLoupe");
   const stageStepIndicator = document.getElementById("stageStepIndicator");
+  const toggleColZoomBtn = document.getElementById("toggleColZoomBtn");
   const stepCards = [...document.querySelectorAll(".measure-step")];
   let activeStepIdx = 0;
+
+  function setColZoom(enable) {
+    accWindow.classList.toggle("zoom-cols", enable);
+    if (toggleColZoomBtn) {
+      toggleColZoomBtn.textContent = enable ? "↔ Ver tabla completa" : "🔍 Enfocar Cifras";
+    }
+    setTimeout(() => {
+      if (enable) {
+        accWindow.scrollLeft = accWindow.scrollWidth;
+      } else {
+        accWindow.scrollLeft = 0;
+      }
+      applyStep(activeStepIdx);
+    }, 50);
+  }
+  if (toggleColZoomBtn) {
+    toggleColZoomBtn.addEventListener("click", () => {
+      setColZoom(!accWindow.classList.contains("zoom-cols"));
+    });
+  }
+  if (window.innerWidth <= 980) {
+    setColZoom(true);
+  }
 
   function applyStep(idx) {
     activeStepIdx = idx;
