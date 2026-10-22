@@ -1108,11 +1108,17 @@ section { padding: 84px 0; position: relative; }
   border-color: var(--hairline-blue);
   color: var(--heading);
 }
+[hidden] {
+  display: none !important;
+}
 .panel {
   display: grid;
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
   gap: 20px;
   align-items: start;
+}
+.panel[hidden] {
+  display: none !important;
 }
 .seg {
   display: inline-flex;
@@ -2674,7 +2680,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   function drawThemed() {
     const activeSeg = document.querySelector(".seg button[aria-pressed=true]");
     if (activeSeg) drawMeta(activeSeg.dataset.m);
-    if (!document.getElementById("p-google").hidden) drawGoogle();
+    drawGoogle();
     donut(document.getElementById("donut"), [
       { name: "Procedimiento / resultado", v: 8, color: "#2563eb" },
       { name: "Mitos", v: 1, color: "#60a5fa" },
