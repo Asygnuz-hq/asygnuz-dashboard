@@ -1,0 +1,2678 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<script>if(location.pathname.startsWith("/lumia")){var b=document.createElement("base");b.href="/lumia/";document.head.appendChild(b);}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASYGNUZ × Lumia Odontología — Propuesta & Diagnóstico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root, :root[data-theme="dark"] {
+  --bg: #020306;
+  --bg-soft: #060911;
+  --bg-grad:
+    radial-gradient(900px 440px at 50% -140px, rgba(30, 64, 175, 0.16), transparent 72%),
+    linear-gradient(180deg, #020306 0%, #060a13 38%, #04060c 72%, #020306 100%);
+  --topbar-bg: rgba(2, 3, 6, 0.84);
+  --surface: rgba(10, 14, 24, 0.72);
+  --surface-hover: rgba(14, 20, 34, 0.88);
+  --surface-subtle: rgba(255, 255, 255, 0.02);
+  --surface-active: linear-gradient(180deg, rgba(20, 32, 58, 0.55) 0%, rgba(10, 15, 28, 0.85) 100%);
+  --stage-chrome: rgba(8, 12, 22, 0.96);
+  --hairline: rgba(255, 255, 255, 0.065);
+  --hairline-mid: rgba(255, 255, 255, 0.12);
+  --hairline-blue: rgba(59, 130, 246, 0.34);
+  --heading: #ffffff;
+  --fg: #f4f6fb;
+  --fg-soft: #cbd5e1;
+  --muted: #64748b;
+  --blue: #3b82f6;
+  --blue-soft: #93c5fd;
+  --blue-deep: #1d4ed8;
+  --danger: #f43f5e;
+  --danger-soft: #fda4af;
+  --warning: #f59e0b;
+  --success: #10b981;
+  --shadow: 0 24px 54px rgba(0, 0, 0, 0.55);
+  --logo-Filter: brightness(1.06);
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #fcfdff;
+  --bg-soft: #f3f6fb;
+  --bg-grad:
+    radial-gradient(900px 440px at 50% -140px, rgba(37, 99, 235, 0.07), transparent 72%),
+    linear-gradient(180deg, #ffffff 0%, #f7f9fc 48%, #f1f5f9 100%);
+  --topbar-bg: rgba(255, 255, 255, 0.88);
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-hover: rgba(255, 255, 255, 0.98);
+  --surface-subtle: rgba(15, 23, 42, 0.025);
+  --surface-active: linear-gradient(180deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+  --stage-chrome: rgba(248, 250, 252, 0.98);
+  --hairline: rgba(15, 23, 42, 0.08);
+  --hairline-mid: rgba(15, 23, 42, 0.15);
+  --hairline-blue: rgba(37, 99, 235, 0.38);
+  --heading: #090d16;
+  --fg: #0f172a;
+  --fg-soft: #334155;
+  --muted: #64748b;
+  --blue: #2563eb;
+  --blue-soft: #1d4ed8;
+  --blue-deep: #1e40af;
+  --danger: #e11d48;
+  --danger-soft: #be123c;
+  --warning: #d97706;
+  --success: #059669;
+  --shadow: 0 18px 42px rgba(15, 23, 42, 0.07);
+  --logo-Filter: brightness(0.72) contrast(1.15);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: var(--bg-grad);
+  background-attachment: fixed;
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.68;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.wrap {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+/* Tipografía minimalista, delgada y sin ruido visual */
+h1, h2, h3, h4 {
+  font-family: var(--sans);
+  font-weight: 400;
+  letter-spacing: -0.032em;
+  color: var(--heading);
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.25rem, 4.4vw, 3.8rem); line-height: 1.07; font-weight: 300; }
+h1 strong, h2 strong { font-weight: 500; color: var(--heading); }
+h2 { font-size: clamp(1.65rem, 2.8vw, 2.4rem); line-height: 1.15; font-weight: 300; }
+h3 { font-size: 1.12rem; line-height: 1.38; font-weight: 400; color: var(--heading); }
+h4 { font-size: 0.96rem; line-height: 1.4; font-weight: 500; color: var(--heading); }
+p { color: var(--fg-soft); font-weight: 300; }
+b, strong { font-weight: 500; color: var(--fg); }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+.hl-blue {
+  color: var(--blue-soft);
+  font-weight: 400;
+}
+
+/* Líneas delicadas de 1px */
+.rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--hairline-mid) 20%, var(--hairline-mid) 80%, transparent);
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--blue-soft);
+  margin-bottom: 16px;
+}
+.kicker::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.kicker::after {
+  content: "";
+  height: 1px;
+  width: 48px;
+  background: linear-gradient(90deg, var(--hairline-blue), transparent);
+}
+
+.sec-head { margin-bottom: 42px; }
+.sec-head .lead {
+  font-size: 1.02rem;
+  color: var(--muted);
+  max-width: 66ch;
+  margin-top: 12px;
+  font-weight: 300;
+}
+
+section { padding: 84px 0; position: relative; }
+
+/* Superficies con líneas delicadas */
+.panel-box {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+.panel-box:hover { border-color: var(--hairline-mid); }
+.pad { padding: 28px; }
+.pad-sm { padding: 20px; }
+
+/* Barra superior minimalista */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  padding: 14px 0;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--hairline);
+}
+.topbar-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.asy-logo {
+  display: block;
+  width: 86px;
+  aspect-ratio: 487 / 292;
+  background: var(--heading);
+  -webkit-mask: url(media/asygnuz-logo.png) center / contain no-repeat;
+  mask: url(media/asygnuz-logo.png) center / contain no-repeat;
+}
+.brand-sep {
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 300;
+}
+.lumia-logo {
+  height: 28px;
+  width: auto;
+  filter: var(--logo-Filter);
+}
+
+/* Conmutador limpio de 2 vistas */
+.mode-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+  gap: 2px;
+}
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 7px 15px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.mode-btn span.idx {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--blue-soft);
+  opacity: 0.85;
+}
+.mode-btn[aria-selected="true"] {
+  background: rgba(59, 130, 246, 0.13);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+.mode-btn:hover:not([aria-selected="true"]) { color: var(--fg); }
+
+/* Botón Blanco y Negro (Claro / Oscuro) */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-mid);
+  background: var(--surface-subtle);
+  color: var(--fg-soft);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.theme-toggle:hover {
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+.theme-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffffff 50%, #090d16 50%);
+  border: 1px solid var(--hairline-mid);
+}
+
+/* Botones delicados */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.84rem;
+  letter-spacing: -0.01em;
+  padding: 9px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  border-color: rgba(147, 197, 253, 0.65);
+  filter: brightness(1.06);
+}
+.btn-line {
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline-mid);
+  color: var(--fg-soft);
+}
+.btn-line:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+
+/* HERO */
+.hero { padding: 72px 0 64px; }
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.85fr);
+  gap: 36px;
+  align-items: stretch;
+}
+.hero-lead {
+  font-size: 1.08rem;
+  color: var(--muted);
+  margin-top: 20px;
+  max-width: 58ch;
+  font-weight: 300;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+.meta-line {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
+}
+.meta-line small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.meta-line span {
+  font-size: 0.86rem;
+  color: var(--fg-soft);
+  font-weight: 300;
+}
+
+/* Resumen diagnóstico lateral */
+.audit-summary {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-color: var(--hairline-blue);
+}
+.audit-rows {
+  display: flex;
+  flex-direction: column;
+  margin: 18px 0;
+  border-top: 1px solid var(--hairline);
+}
+.audit-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.audit-row .k {
+  font-size: 0.84rem;
+  color: var(--muted);
+  font-weight: 300;
+}
+.audit-row .v {
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  color: var(--heading);
+}
+.audit-row .v.alert { color: var(--danger-soft); }
+
+/* SECCIÓN DE RESULTADOS CON CUENTA QUE BAJA CON CADA MEDIDA */
+.scroll-account-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.sticky-account-stage {
+  position: sticky;
+  top: 82px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--hairline-mid);
+  box-shadow: var(--shadow);
+}
+
+.stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  background: var(--stage-chrome);
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.stage-bar .live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--fg-soft);
+}
+.stage-bar .live-indicator::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.account-window {
+  position: relative;
+  height: 520px;
+  overflow: hidden;
+  background: #f8fafc;
+  cursor: crosshair;
+}
+.account-track {
+  position: relative;
+  width: 100%;
+  will-change: transform;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.account-track img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.row-focus-band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1.5px solid #2563eb;
+  border-bottom: 1.5px solid #2563eb;
+  background: rgba(37, 99, 235, 0.06);
+  box-shadow: 0 0 0 9999px rgba(2, 4, 10, 0.28);
+  pointer-events: none;
+  transition: top 0.55s cubic-bezier(0.16, 1, 0.3, 1), height 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 5;
+}
+.row-focus-band::before {
+  content: attr(data-label);
+  position: absolute;
+  right: 12px;
+  top: -22px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  background: #090d16;
+  color: #93c5fd;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(59, 130, 246, 0.4);
+}
+
+.loupe {
+  position: absolute;
+  width: 240px;
+  height: 145px;
+  border-radius: 10px;
+  border: 1px solid rgba(59, 130, 246, 0.7);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  background-repeat: no-repeat;
+  z-index: 20;
+}
+
+.stage-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--stage-chrome);
+  border-top: 1px solid var(--hairline);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.measure-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.measure-step {
+  padding: 22px 24px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.measure-step:hover {
+  border-color: var(--hairline-mid);
+  background: var(--surface-hover);
+}
+.measure-step.active {
+  border-color: var(--hairline-blue);
+  background: var(--surface-active);
+}
+.measure-step .step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.measure-step .step-tag {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--blue-soft);
+}
+.measure-step .step-metric {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--heading);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--hairline-mid);
+  background: var(--surface-subtle);
+}
+.measure-step h4 {
+  font-size: 1.04rem;
+  font-weight: 400;
+  color: var(--heading);
+  margin-bottom: 6px;
+}
+.measure-step p {
+  font-size: 0.87rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* LAS 3 CAPTURAS DE PAUTA DESCARGADAS */
+.three-captures-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 36px;
+}
+.cap-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.cap-img-wrap {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: #f8fafc;
+  overflow: hidden;
+  border-bottom: 1px solid var(--hairline);
+  cursor: zoom-in;
+}
+.cap-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+  transition: transform 0.4s ease;
+}
+.cap-img-wrap:hover img { transform: scale(1.03); }
+.cap-img-wrap .zoom-hint {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  padding: 4px 8px;
+  border-radius: 5px;
+  background: rgba(9, 13, 22, 0.82);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.cap-body {
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+.cap-body .cap-kicker {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue-soft);
+}
+.cap-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px 0;
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+}
+.cap-kpis div span {
+  display: block;
+  font-family: var(--sans);
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--heading);
+}
+.cap-kpis div small {
+  font-size: 0.73rem;
+  color: var(--muted);
+}
+
+/* RESULTADO DE INSTAGRAM + EMBUDO CRM */
+.ig-crm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+.ig-showcase {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  align-items: center;
+}
+.ig-shot {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--hairline-mid);
+  cursor: zoom-in;
+  background: #fff;
+}
+.ig-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.big-number {
+  font-family: var(--sans);
+  font-size: clamp(2.4rem, 4.2vw, 3.4rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  color: var(--heading);
+  line-height: 1;
+}
+.stat-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+.stat-row-3 .v {
+  font-size: 1.28rem;
+  font-weight: 400;
+  color: var(--heading);
+}
+.stat-row-3 .l {
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.crm-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+.crm-cell {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-subtle);
+}
+.crm-cell .v {
+  font-size: 1.35rem;
+  font-weight: 400;
+  color: var(--heading);
+}
+.crm-cell .l {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* PROPUESTA DE EDICIÓN */
+.edit-pillars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 32px;
+}
+.edit-pillar { padding: 22px; }
+.edit-pillar .step-num {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--blue-soft);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: block;
+}
+.edit-pillar h3 { font-size: 1rem; margin-bottom: 8px; }
+.edit-pillar p { font-size: 0.84rem; color: var(--muted); }
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.filter-group { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.filter-btn {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-subtle);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.filter-btn[aria-pressed="true"] {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+
+.reel-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.reel-card { display: flex; flex-direction: column; overflow: hidden; }
+.reel-video-wrap {
+  position: relative;
+  aspect-ratio: 9 / 15.2;
+  background: #04060b;
+  overflow: hidden;
+  border-bottom: 1px solid var(--hairline);
+}
+.reel-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.reel-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 5px;
+  background: rgba(2, 3, 6, 0.78);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(8px);
+}
+.reel-play {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(2, 3, 6, 0.72);
+  color: #fff;
+  cursor: pointer;
+  font-size: 0.75rem;
+  display: grid;
+  place-items: center;
+}
+.reel-info {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.reel-info .client {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  color: var(--blue-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.reel-info h4 { font-size: 0.96rem; font-weight: 400; color: var(--heading); }
+.reel-info p { font-size: 0.82rem; color: var(--muted); }
+.reel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding-top: 10px;
+}
+.reel-tags span {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--surface-subtle);
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+}
+
+/* Galería ampliada de fotografía (8 piezas en grilla 4x2) */
+.stills-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.still-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: #060911;
+  position: relative;
+  aspect-ratio: 4 / 5;
+  cursor: zoom-in;
+}
+.still-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.5s ease;
+}
+.still-card:hover img { transform: scale(1.03); }
+.still-card figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 28px 14px 12px;
+  background: linear-gradient(transparent, rgba(2, 3, 6, 0.9));
+  font-size: 0.76rem;
+  color: #cbd5e1;
+}
+.still-card figcaption span {
+  display: block;
+  font-size: 0.85rem;
+  color: #f8fafc;
+  font-weight: 400;
+}
+
+/* 8 PILARES DE INTERVENCIÓN */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.pillar-item {
+  padding: 22px 24px;
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.pillar-num {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--blue-soft);
+  padding-top: 2px;
+}
+.pillar-item h4 {
+  font-size: 0.98rem;
+  font-weight: 400;
+  color: var(--heading);
+  margin-bottom: 4px;
+}
+.pillar-item p { font-size: 0.85rem; color: var(--muted); }
+
+/* CONFIGURADOR DE PLANES */
+.builder {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.planbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+.planbtn {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.84rem;
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline);
+  background: var(--surface-subtle);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.planbtn[aria-pressed="true"] {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+.group { margin-bottom: 22px; }
+.group h4 {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tile {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  transition: all 0.18s ease;
+}
+.tile:hover { border-color: var(--hairline-mid); }
+.tile[aria-pressed="true"] {
+  border-color: var(--hairline-blue);
+  background: rgba(37, 99, 235, 0.07);
+}
+.box {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid var(--muted);
+  display: grid;
+  place-items: center;
+  margin-top: 3px;
+}
+.tile[aria-pressed="true"] .box {
+  background: var(--blue);
+  border-color: var(--blue);
+}
+.tile[aria-pressed="true"] .box::after {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border-left: 1.5px solid #fff;
+  border-bottom: 1.5px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+.tile .n { font-weight: 400; color: var(--heading); font-size: 0.9rem; display: block; }
+.tile .d { font-size: 0.78rem; color: var(--muted); line-height: 1.45; margin-top: 4px; display: block; font-weight: 300; }
+.tile .p { font-family: var(--mono); font-size: 0.78rem; color: var(--fg-soft); white-space: nowrap; }
+
+.summary {
+  position: sticky;
+  top: 86px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-color: var(--hairline-blue);
+}
+.sumrow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+.sumrow .num { color: var(--fg); font-family: var(--mono); }
+.strike { text-decoration: line-through; color: var(--muted) !important; }
+.price {
+  font-family: var(--sans);
+  font-size: clamp(2.1rem, 3.6vw, 2.85rem);
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--heading);
+  line-height: 1;
+}
+.applied {
+  font-size: 0.82rem;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid var(--hairline-blue);
+  color: var(--fg-soft);
+}
+.save { font-family: var(--mono); font-size: 0.8rem; color: var(--success); }
+.meter { height: 4px; border-radius: 4px; background: var(--hairline); overflow: hidden; }
+.meter i { display: block; height: 100%; background: var(--blue); transition: width 0.4s ease; }
+
+/* TARJETAS DE LOS 3 PLANES */
+.plans {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.plan {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.plan.rec {
+  border-color: var(--hairline-blue);
+  background: var(--surface-active);
+}
+.plan .tag {
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue-soft);
+  border: 1px solid var(--hairline-blue);
+  background: rgba(59, 130, 246, 0.1);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.plan .pr {
+  font-family: var(--sans);
+  font-size: 2rem;
+  font-weight: 300;
+  letter-spacing: -0.03em;
+  color: var(--heading);
+}
+.plan .pr small { font-size: 0.82rem; font-weight: 300; color: var(--muted); }
+.plan .sep { font-family: var(--mono); font-size: 0.76rem; color: var(--muted); }
+.plan ul { margin: 8px 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.plan li { list-style: none; font-size: 0.85rem; display: grid; grid-template-columns: 16px 1fr; gap: 6px; color: var(--fg-soft); font-weight: 300; }
+.plan li::before { content: "✓"; color: var(--blue-soft); }
+.plan li.no { color: var(--muted); opacity: 0.4; }
+.plan li.no::before { content: "–"; color: var(--muted); }
+.plan .btn { margin-top: auto; }
+
+/* COMISIÓN */
+.comm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 28px;
+  align-items: center;
+}
+.rules { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; list-style: none; }
+.rules li { padding-left: 18px; position: relative; font-size: 0.88rem; color: var(--muted); font-weight: 300; }
+.rules li::before { content: ""; position: absolute; left: 0; top: 10px; width: 7px; height: 1px; background: var(--blue-soft); }
+.calcout { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+.calcout div { background: var(--surface-subtle); border: 1px solid var(--hairline); border-radius: 8px; padding: 12px; }
+.calcout small { display: block; font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; }
+.calcout span { font-family: var(--sans); font-size: 1.2rem; font-weight: 400; color: var(--heading); }
+
+/* ELEMENTOS DEL DIAGNÓSTICO */
+.tabs {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.tab {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.83rem;
+  padding: 8px 16px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tab[aria-selected="true"] {
+  background: rgba(59, 130, 246, 0.14);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.seg {
+  display: inline-flex;
+  gap: 4px;
+  padding: 3px;
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.seg button {
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  font-weight: 400;
+  padding: 6px 11px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.seg button[aria-pressed="true"] {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--heading);
+}
+.chart { position: relative; width: 100%; overflow-x: auto; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--sans); fill: var(--muted); font-size: 11px; font-weight: 300; }
+.chart .lbl { fill: var(--fg-soft); font-size: 11.5px; }
+.chart .val { font-family: var(--mono); font-size: 10.5px; fill: var(--fg); }
+.chart .grid { stroke: var(--hairline); stroke-dasharray: 2 4; }
+.chart .base { stroke: var(--hairline-mid); }
+.chart .bar { transition: all 0.55s cubic-bezier(0.16, 1, 0.3, 1); }
+.chart .bar:hover { filter: brightness(1.15); }
+
+.findings { display: flex; flex-direction: column; gap: 12px; }
+.finding { padding: 18px 20px; display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+.sev { width: 7px; height: 7px; border-radius: 50%; margin-top: 8px; background: var(--warning); }
+.sev.crit { background: var(--danger); }
+.finding h4 { font-size: 0.95rem; font-weight: 400; color: var(--heading); margin-bottom: 4px; }
+.finding p { font-size: 0.85rem; color: var(--muted); }
+
+.mrow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) auto minmax(0, 2fr);
+  gap: 14px;
+  padding: 13px 0;
+  border-top: 1px solid var(--hairline);
+  align-items: start;
+}
+.mrow:first-child { border-top: 0; padding-top: 0; }
+.chip {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  border: 1px solid var(--hairline);
+}
+.chip.crit { color: var(--danger-soft); border-color: rgba(244, 63, 94, 0.35); background: rgba(244, 63, 94, 0.08); }
+.chip.warn { color: var(--warning); border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.08); }
+.chip.ok { color: var(--success); border-color: rgba(16, 185, 129, 0.35); background: rgba(16, 185, 129, 0.08); }
+
+.funnel { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.fstep {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 0.86rem;
+  background: rgba(37, 99, 235, 0.12);
+  border: 1px solid var(--hairline-blue);
+}
+.fstep span:last-child { font-family: var(--mono); }
+.fstep.unk { background: transparent; border: 1px dashed rgba(245, 158, 11, 0.5); }
+.fstep.unk span:last-child { color: var(--warning); }
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+.data-table th {
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--hairline-mid);
+}
+.data-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--fg-soft);
+  font-weight: 300;
+}
+
+.angtop { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 32px; align-items: center; margin-bottom: 28px; }
+.angles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.ang { padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+.ang .t { font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue-soft); }
+.ang q { font-family: var(--sans); font-size: 0.94rem; font-weight: 300; line-height: 1.45; color: var(--fg); quotes: "“" "”"; }
+.ang .s { font-size: 0.75rem; color: var(--muted); margin-top: auto; }
+
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.terms div { padding: 18px 22px; }
+.terms dt { font-size: 0.92rem; font-weight: 400; color: var(--heading); }
+.terms dd { margin-top: 4px; font-size: 0.84rem; color: var(--muted); font-weight: 300; }
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(2, 3, 6, 0.92);
+  backdrop-filter: blur(18px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.lightbox[hidden] { display: none; }
+.lightbox-inner {
+  max-width: 1180px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lightbox-inner img {
+  width: 100%;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tip {
+  position: fixed;
+  z-index: 90;
+  pointer-events: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  max-width: 240px;
+  opacity: 0;
+  transition: opacity 0.12s;
+  background: rgba(6, 9, 17, 0.96);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.tip b { display: block; font-weight: 500; color: #fff; margin-bottom: 2px; }
+
+footer {
+  padding: 36px 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 980px) {
+  .hero-grid, .scroll-account-layout, .ig-crm-grid, .builder, .comm-grid, .panel, .angtop { grid-template-columns: minmax(0, 1fr); }
+  .sticky-account-stage, .summary { position: static; }
+  .three-captures-grid, .edit-pillars, .plans, .three, .reel-grid, .angles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .three-captures-grid, .edit-pillars, .plans, .three, .reel-grid, .angles, .pillars-grid, .terms, .tiles, .ig-showcase { grid-template-columns: minmax(0, 1fr); }
+  .meta-line { grid-template-columns: minmax(0, 1fr); }
+  section { padding: 56px 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+
+<!-- BARRA SUPERIOR CON CAMBIO DE MODO Y CAMBIO BLANCO / NEGRO -->
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand-lockup">
+      <span class="asy-logo" role="img" aria-label="ASYGNUZ"></span>
+      <span class="brand-sep">×</span>
+      <img class="lumia-logo" src="media/lumia-logo.png" alt="Lumia Odontología Especializada">
+    </div>
+
+    <div class="mode-switch" role="tablist" aria-label="Documento">
+      <button class="mode-btn" type="button" role="tab" id="modePropuestaBtn" aria-selected="true" data-mode="propuesta">
+        <span class="idx">01</span> Propuesta Comercial
+      </button>
+      <button class="mode-btn" type="button" role="tab" id="modeAnalisisBtn" aria-selected="false" data-mode="analisis">
+        <span class="idx">02</span> Diagnóstico de Pauta
+      </button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button class="theme-toggle" type="button" id="themeToggleBtn" title="Cambiar entre modo oscuro (negro) y modo claro (blanco)">
+        <span class="theme-dot"></span>
+        <span id="themeToggleLabel">Modo Claro</span>
+      </button>
+      <a class="btn btn-line" href="Diagnostico_Pauta_Lumia_Odontologia.pdf" download>
+        ↓ Diagnóstico PDF
+      </a>
+      <a class="btn" href="#plan" id="ctaTopBtn">Configurar Plan</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===================================================================== -->
+<!-- VISTA 01: PROPUESTA COMERCIAL                                         -->
+<!-- ===================================================================== -->
+<main id="view-propuesta">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="kicker">ASYGNUZ Growth & House of Dev · Manizales</div>
+        <h1>Hoy saben cuánto cuesta un mensaje. Vamos a medir <span class="hl-blue">cuánto cuesta cada paciente.</span></h1>
+        <p class="hero-lead">
+          Estrategia de adquisición por perfil de paciente, administración de Meta Ads y Google Ads orientada a tratamientos de alto valor, producción audiovisual quincenal en clínica y trazabilidad completa desde el anuncio hasta el cierre.
+        </p>
+        <div class="hero-actions">
+          <a class="btn" href="#plan">Armar plan a medida</a>
+          <button class="btn btn-line" type="button" data-goto-mode="analisis">
+            Explorar Diagnóstico de Lumia →
+          </button>
+          <a class="btn btn-line" href="Propuesta_ASYGNUZ_Lumia_con_Diagnostico.pdf" download>
+            ↓ Propuesta + Diagnóstico (PDF)
+          </a>
+        </div>
+        <div class="meta-line">
+          <div><small>Preparado para</small><span>Dr. Alejandro Restrepo · Sebastián Restrepo</span></div>
+          <div><small>Preparado por</small><span>Juan Manuel Marín · ASYGNUZ</span></div>
+          <div><small>Fecha y vigencia</small><span>22 oct 2026 · Válida por 15 días</span></div>
+        </div>
+      </div>
+
+      <!-- Síntesis del Diagnóstico con líneas finas -->
+      <aside class="panel-box pad audit-summary">
+        <div>
+          <div class="kicker" style="margin-bottom:10px">Síntesis del Diagnóstico</div>
+          <h3>Lo que encontramos en las cuentas de Lumia</h3>
+          <p class="muted" style="font-size:0.84rem;margin-top:4px">
+            Auditoría de Meta Ads (jun–oct), Google Ads (septiembre) y sitio web:
+          </p>
+          <div class="audit-rows">
+            <div class="audit-row"><span class="k">Pauta mensual visible</span><span class="v num">$5,4 M COP</span></div>
+            <div class="audit-row"><span class="k">Concentración en 1 solo anuncio (Meta)</span><span class="v alert num">63 % (frec. 6,65)</span></div>
+            <div class="audit-row"><span class="k">Gasto de Google en "caries dental"</span><span class="v alert num">54 % ($93.643/llamada)</span></div>
+            <div class="audit-row"><span class="k">Estado de www.lumiaodontologia.com</span><span class="v alert num">Error 503 · 0 conv. web</span></div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+          <span class="muted" style="font-size:0.78rem">10 anuncios auditados · embudo · benchmark local</span>
+          <button class="btn btn-line" type="button" data-goto-mode="analisis" style="padding:7px 13px;font-size:0.78rem">
+            Abrir Diagnóstico →
+          </button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 01: EVIDENCIA Y RESULTADOS REALES -->
+  <section id="resultados">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">01 — Evidencia y Resultados Reales</div>
+        <h2>Cuentas auditadas en pauta y crecimiento orgánico</h2>
+        <p class="lead">
+          A medida que bajas por cada indicador (o haces clic en cualquiera de ellos), el administrador de anuncios de la izquierda se desplaza automáticamente por la cuenta mostrando cada bloque de resultados.
+        </p>
+      </div>
+
+      <!-- PARTE A: LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA -->
+      <div class="scroll-account-layout">
+
+        <!-- Visor Sticky que va bajando por la cuenta completa -->
+        <div class="sticky-account-stage">
+          <div class="stage-bar">
+            <span class="live-indicator" id="stageHeaderLabel">CUENTA AUDITADA · META ADS MANAGER (219 CAMPAÑAS)</span>
+            <div style="display:flex;gap:8px">
+              <button class="btn-line" type="button" id="openFullAccountBtn" style="padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:0.68rem;cursor:pointer">
+                ⤢ Ver captura completa
+              </button>
+            </div>
+          </div>
+
+          <div class="account-window" id="accWindow">
+            <div class="account-track" id="accTrack">
+              <img id="accTrackImg" src="media/ads-escala-full.png" alt="Administrador de anuncios de Meta — Recorrido completo de cuenta">
+              <div class="row-focus-band" id="rowBand" data-label="FILA SELECCIONADA"></div>
+            </div>
+            <div class="loupe" id="accLoupe"></div>
+          </div>
+
+          <div class="stage-footer">
+            <span id="stageStepIndicator">Recorrido de cuenta: Bloque 01 de 06</span>
+            <span>Pasa el cursor sobre la tabla para activar la lupa (2.2×)</span>
+          </div>
+        </div>
+
+        <!-- Medida por medida: al bajar o hacer clic, la tabla de la izquierda baja sola -->
+        <div class="measure-steps" id="measureSteps">
+          <article class="measure-step active" data-step="0">
+            <div class="step-head">
+              <span class="step-tag">Medida 01 · Captación en Frío (Captura 1)</span>
+              <span class="step-metric num">3.675 registros · $1,68 USD</span>
+            </div>
+            <h4>Volumen sostenido con costo por registro controlado</h4>
+            <p>En la parte superior de la cuenta ($6.182,47 USD invertidos y 912.918 impresiones), el sistema genera 3.675 registros completados a $1,68 USD manteniendo el costo estable a gran escala.</p>
+          </article>
+
+          <article class="measure-step" data-step="1">
+            <div class="step-head">
+              <span class="step-tag">Medida 02 · Conversión Directa en Web (Captura 1)</span>
+              <span class="step-metric num">193 compras · $27,17 USD</span>
+            </div>
+            <h4>Atribución de cierres reales mediante Píxel y API de Conversiones</h4>
+            <p>Justo debajo ($5.244,25 USD invertidos), la campaña optimiza directamente por transacciones en el sitio web (193 compras), exactamente lo que habilitaremos en Lumia al conectar GTM, Píxel y CAPI.</p>
+          </article>
+
+          <article class="measure-step" data-step="2">
+            <div class="step-head">
+              <span class="step-tag">Medida 03 · Escala de Leads Calificados (Captura 1)</span>
+              <span class="step-metric num">4.113 leads · $1,07 USD</span>
+            </div>
+            <h4>Más de 1,58 millones de impresiones a $1,07 USD por cliente potencial</h4>
+            <p>Al bajar al bloque central de la primera captura ($4.393,97 USD), una sola estructura con rotación de ángulos produce 4.113 clientes potenciales a $1,07 USD (~$4.400 COP) y otra suma 2.621 leads a $1,86 USD.</p>
+          </article>
+
+          <article class="measure-step" data-step="3">
+            <div class="step-head">
+              <span class="step-tag">Medida 04 · Optimización Sub-$1 USD (Captura 2)</span>
+              <span class="step-metric num">2.050 leads · $0,92 USD</span>
+            </div>
+            <h4>Bajando a la segunda captura: leads calificados por debajo de $1 USD</h4>
+            <p>Desplazando la cuenta hacia abajo ($1.892,51 USD y 1.051.854 impresiones), el costo por cliente potencial cae hasta $0,92 USD (~$3.800 COP) gracias a aislar los anuncios ganadores en su propio presupuesto.</p>
+          </article>
+
+          <article class="measure-step" data-step="4">
+            <div class="step-head">
+              <span class="step-tag">Medida 05 · Consistencia Multi-Campaña (Captura 2)</span>
+              <span class="step-metric num">5.023 leads · $1,13 – $1,74 USD</span>
+            </div>
+            <h4>Cinco campañas consecutivas replicando el mismo resultado</h4>
+            <p>En la parte media-baja de la segunda captura se observan 5 campañas seguidas entregando 1.255 leads ($1,41), 934 registros ($1,74), 1.399 leads ($1,16), 1.435 leads ($1,13) y 64 cierres de remarketing ($22,01).</p>
+          </article>
+
+          <article class="measure-step" data-step="5">
+            <div class="step-head">
+              <span class="step-tag">Medida 06 · Consolidado Histórico de Cuenta</span>
+              <span class="step-metric num">$180.121,41 USD · 44,4M imp.</span>
+            </div>
+            <h4>Más de $750 millones COP ejecutados con trazabilidad de punta a punta</h4>
+            <p>En el cierre de la tabla se consolida la operación completa: $180.121,41 USD invertidos y 44.446.047 impresiones administradas a través de 219 campañas estructuradas.</p>
+          </article>
+        </div>
+      </div>
+
+      <!-- PARTE B: LAS 3 CAPTURAS DE PAUTA DESCARGADAS (VISIBLES Y ANALIZADAS INDIVIDUALMENTE) -->
+      <div style="margin-top:52px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">Las 3 Capturas de Pauta Auditadas</div>
+            <h3>Análisis individual de los 3 pantallazos de resultados en Meta Ads</h3>
+          </div>
+          <span class="muted" style="font-size:0.8rem">Haz clic en cualquiera de las 3 capturas para abrirla en pantalla completa</span>
+        </div>
+
+        <div class="three-captures-grid">
+          <!-- Captura 1 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-escala-1.png" data-cap="Captura 01 — Top Campañas por Inversión ($180.121,41 USD acumulados y 44,4M impresiones)">
+              <img src="media/ads-escala-1.png" alt="Captura 1 Meta Ads Manager USD">
+              <span class="zoom-hint">⤢ Ampliar captura 01</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 01 · Top Campañas (USD)</span>
+              <h4>Escala masiva y compras en sitio web</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$180.121 USD</span><small>Inversión total en cuenta</small></div>
+                <div><span class="num">44,4 M</span><small>Impresiones totales</small></div>
+              </div>
+              <p style="font-size:0.83rem;color:var(--muted)">
+                Muestra las campañas de mayor inversión: 3.675 registros a $1,68 USD, 193 compras web a $27,17 USD, 4.113 clientes potenciales a $1,07 USD y 27.086 clics a $0,13 USD.
+              </p>
+            </div>
+          </article>
+
+          <!-- Captura 2 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-escala-2.png" data-cap="Captura 02 — Bloques de Escala y Consistencia de Costo por Lead ($0,92 a $1,74 USD)">
+              <img src="media/ads-escala-2.png" alt="Captura 2 Meta Ads Manager USD continuación">
+              <span class="zoom-hint">⤢ Ampliar captura 02</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 02 · Bloques de Escala (USD)</span>
+              <h4>Consistencia de leads entre $0,92 y $1,70 USD</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$0,92 USD</span><small>Costo mínimo (2.050 leads)</small></div>
+                <div><span class="num">8.645+</span><small>Leads en este bloque</small></div>
+              </div>
+              <p style="font-size:0.83rem;color:var(--muted)">
+                Demuestra que el resultado no depende de un solo anuncio: 7 campañas consecutivas entre $1.477 y $1.901 USD sosteniendo costos de $0,92, $1,13, $1,16 y $1,41 USD por lead.
+              </p>
+            </div>
+          </article>
+
+          <!-- Captura 3 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-eficiencia-cop.png" data-cap="Captura 03 — Eficiencia de Tráfico, Visitas al Perfil y Retención de Video en COP">
+              <img src="media/ads-eficiencia-cop.png" alt="Captura 3 Meta Ads Manager COP">
+              <span class="zoom-hint">⤢ Ampliar captura 03</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 03 · Eficiencia en Colombia (COP)</span>
+              <h4>Tráfico a $66 COP y retención de video a $7 COP</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$66 COP</span><small>Por clic (19.003 clics)</small></div>
+                <div><span class="num">$7 – $8 COP</span><small>Por ThruPlay (34.968 vistas)</small></div>
+              </div>
+              <p style="font-size:0.83rem;color:var(--muted)">
+                19.003 clics al enlace con $1.252.483 COP, 2.109 visitas al perfil de Instagram a $100 COP y 34.968 reproducciones completas de video (ThruPlays) entre $7 y $8 pesos.
+              </p>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- PARTE C: RESULTADO DE INSTAGRAM (VISIBLE DIRECTAMENTE) + EMBUDO CRM -->
+      <div class="ig-crm-grid">
+        <div class="panel-box pad ig-showcase">
+          <div class="ig-shot" data-full="media/valentina-stats.jpg" data-cap="Panel Profesional de Instagram — 842,5 mil visualizaciones y 53,0 mil interacciones en 30 días">
+            <img src="media/valentina-stats.jpg" alt="Panel profesional de Instagram — 842,5 mil visualizaciones">
+          </div>
+          <div>
+            <div class="kicker" style="margin-bottom:8px">Resultado en Instagram · 30 Días</div>
+            <div class="big-number num">842,5 mil</div>
+            <p class="muted" style="font-size:0.88rem;margin-top:4px">
+              Visualizaciones orgánicas y de contenido en 30 días (13 jun – 12 jul · Panel Profesional de Instagram)
+            </p>
+            <div class="stat-row-3">
+              <div><div class="v num">53,0 mil</div><div class="l">Interacciones totales</div></div>
+              <div><div class="v num">+4,2 mil</div><div class="l">Seguidores nuevos</div></div>
+              <div><div class="v num">6,3 %</div><div class="l">Tasa de interacción</div></div>
+            </div>
+            <p class="muted" style="font-size:0.8rem;margin-top:14px">
+              Cuando los reels tienen estructura de retención, el crecimiento orgánico construye la confianza clínica antes de que el paciente escriba a WhatsApp.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel-box pad" style="display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">Caso de Implementación · Primeros 20 Días</div>
+            <h3>Embudo de conversión, retención web y trazabilidad en CRM</h3>
+            <p class="muted" style="font-size:0.85rem;margin-top:4px">
+              Resultados de conectar pauta, páginas de aterrizaje y seguimiento centralizado:
+            </p>
+            <div class="crm-grid-6">
+              <div class="crm-cell"><div class="v num">1.340</div><div class="l">Usuarios únicos en retención</div></div>
+              <div class="crm-cell"><div class="v num">44 %</div><div class="l">CTR de inicio a formulario</div></div>
+              <div class="crm-cell"><div class="v num">200</div><div class="l">Leads centralizados en CRM</div></div>
+              <div class="crm-cell"><div class="v num">11</div><div class="l">Países por alcance orgánico</div></div>
+              <div class="crm-cell"><div class="v num">6</div><div class="l">Integraciones activas</div></div>
+              <div class="crm-cell"><div class="v num">1.800</div><div class="l">Sesiones entregadas</div></div>
+            </div>
+          </div>
+          <p class="muted" style="font-size:0.78rem;margin-top:14px">
+            Esta misma arquitectura es la que conectará los anuncios de Lumia con las hojas de Valoraciones, Cierres y Dentalink.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 02: PROPUESTA DE EDICIÓN Y PORTAFOLIO AUDIOVISUAL + FOTOS -->
+  <section id="contenido">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">02 — Nuestra Propuesta de Edición & Dirección Visual</div>
+        <h2>Edición diseñada para retener la atención y construir autoridad clínica</h2>
+        <p class="lead">
+          Un paciente de implantes o diseño de sonrisa no compra por impulso: evalúa el criterio del especialista. Nuestro sistema de edición combina cuatro capas en cada pieza:
+        </p>
+      </div>
+
+      <div class="edit-pillars">
+        <div class="panel-box edit-pillar">
+          <span class="step-num">01 · Segundos 0 a 3</span>
+          <h3>Gancho visual y tipográfico</h3>
+          <p>Apertura en acción con titulares limpios de jerarquía clara que detienen el desplazamiento desde el primer segundo.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">02 · Segundos 3 a 25</span>
+          <h3>Cortes de ritmo y retención</h3>
+          <p>Eliminación de silencios, reencuadres suaves y cambios de plano cada 3–4 segundos que sostienen ThruPlays de $7 COP.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">03 · Respaldo visual</span>
+          <h3>Evidencia en pantalla (B-Roll)</h3>
+          <p>Lo que el doctor explica se refuerza visualmente: casos reales, simulaciones 3D, pizarras o datos en pantalla.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">04 · Escalabilidad</span>
+          <h3>Doble salida: Redes + Pauta</h3>
+          <p>De cada jornada quincenal en Lumia producimos tanto reels orgánicos de autoridad como anuncios con variaciones de gancho.</p>
+        </div>
+      </div>
+
+      <!-- Filtro de Video -->
+      <div class="filter-bar">
+        <div class="filter-group" role="group" aria-label="Filtrar videos">
+          <button class="filter-btn" type="button" aria-pressed="true" data-vfilter="destacados">Selección Principal (Claudia ×4 · Ingrid ×2)</button>
+          <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="claudia">Claudia Uribe Completo (6 cortes)</button>
+          <button class="filter-btn" type="button" aria-pressed="false" data-vfilter="salud">Salud & Estética (Dra. Ingrid Patiño)</button>
+        </div>
+        <span class="muted" style="font-size:0.78rem;font-family:var(--mono)">Clic sobre cualquier video para pausar / reproducir</span>
+      </div>
+
+      <div class="reel-grid" id="reelGrid"></div>
+
+      <!-- Galería de Fotografía y Dirección de Arte Ampliada (8 piezas) -->
+      <div style="margin-top:52px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">Fotografía Clínica, Estudio & Diseño Editorial</div>
+            <h3>Muestras de fotografía de especialista, procedimiento y carruseles</h3>
+          </div>
+          <span class="muted" style="font-size:0.8rem">Haz clic en cualquier fotografía para verla en tamaño completo</span>
+        </div>
+        <div class="stills-grid" id="stillsGrid"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 03: PLAN DE INTERVENCIÓN EN 8 PILARES -->
+  <section id="mejoras">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">03 — Hoja de Ruta en Lumia</div>
+        <h2>Las 8 intervenciones que ejecutaremos desde el primer mes</h2>
+      </div>
+      <div class="pillars-grid">
+        <div class="panel-box pillar-item"><span class="pillar-num">01</span><div><h4>Corrección inmediata del subdominio www (Error 503)</h4><p>Hoy www.lumiaodontologia.com responde con error 503 y certificado inválido en Traefik, haciendo perder clics pagos en Google Ads.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">02</span><div><h4>Arquitectura de medición completa (GTM + GA4 + Píxel + CAPI)</h4><p>Implementación de Google Tag Manager, conversiones de Google Ads, Píxel de Meta con API de Conversiones y parámetros UTM por anuncio.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">03</span><div><h4>Trazabilidad real: Mensaje → Valoración → Paciente Cerrado</h4><p>Identificación única por anuncio en WhatsApp cruzada mensualmente con las hojas de Valoraciones, Cierres y Dentalink.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">04</span><div><h4>Desconcentración del gasto en Meta Ads y escalamiento de ganadores</h4><p>Reducimos la dependencia del 63 % en un solo video con frecuencia 6,65 y damos presupuesto propio a ganadores como "Caja de dientes" ($2.261/conv.).</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">05</span><div><h4>12 nuevos ángulos creativos por perfil de paciente (ICP)</h4><p>Pasamos de mostrar solo procedimientos (8 de 10 anuncios actuales) a resolver objeciones de dolor, precio, tiempo, naturalidad y turismo dental.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">06</span><div><h4>Reestructuración de Google Ads por tratamiento de alto valor</h4><p>Eliminamos la fuga del 54 % del gasto en "caries dental" para enfocarnos en Implantes, Diseño de Sonrisa, Rehabilitación e Invisalign.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">07</span><div><h4>Producción audiovisual quincenal en la clínica</h4><p>Dos jornadas de grabación al mes en Lumia con guiones por ángulo para renovar creativos cada 3–4 semanas sin fatiga de audiencia.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">08</span><div><h4>Ecosistema multicanal: Formularios, Retargeting y Redes</h4><p>Campañas de retargeting para quienes vieron video o visitaron la web, formularios calificados y parrilla orgánica alineada con la pauta.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 04: CONFIGURADOR MODULAR ("ARMA TU PLAN") -->
+  <section id="plan">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">04 — Configurador Modular</div>
+        <h2>Arma el plan de Lumia por módulos o selecciona un plan integrado</h2>
+        <p class="lead">
+          Activa o desactiva cada módulo según las prioridades de la clínica. Si la combinación elegida cabe dentro de un plan, se aplica automáticamente el valor preferencial del plan.
+        </p>
+      </div>
+
+      <div class="planbar" id="planbar" role="group" aria-label="Elegir un plan"></div>
+
+      <div class="builder">
+        <div id="groups"></div>
+        <aside class="panel-box summary" aria-live="polite">
+          <div class="kicker" style="margin:0">Inversión Mensual Estimada</div>
+          <div class="sumrow"><span>Módulos seleccionados</span><span class="num" id="sCount"></span></div>
+          <div class="meter"><i id="sMeter"></i></div>
+          <div class="sumrow"><span>Suma por separado</span><span class="num" id="sSum"></span></div>
+          <div class="price num" id="sPrice"></div>
+          <span class="muted" style="font-size:0.78rem">COP / mes · IVA no incluido</span>
+          <div class="applied" id="sApplied"></div>
+          <div class="save" id="sSave"></div>
+          <p class="muted" style="font-size:0.78rem">
+            Más comisión del 5 % al 10 % por paciente trazado en tratamientos desde $2.000.000. La pauta se paga directo a Meta y Google.
+          </p>
+          <a class="btn" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20revisamos%20la%20propuesta%20de%20ASYGNUZ%20para%20Lumia" target="_blank" rel="noopener">
+            Confirmar este plan por WhatsApp →
+          </a>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 05: TRES PLANES -->
+  <section id="planes" style="padding-top:10px">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">05 — Tres Niveles de Servicio</div>
+        <h2>Mismo sistema, tres alcances acumulativos</h2>
+        <p class="lead">
+          Recomendamos el Plan Integral ($2.000.000/mes): incluye las 2 jornadas de grabación quincenal en la clínica, edición de anuncios y redes, gestión de pauta y trazabilidad completa.
+        </p>
+      </div>
+      <div class="plans" id="plans"></div>
+      <div class="panel-box pad" style="margin-top:20px">
+        <div class="chart" id="planChart"></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 06: COMISIÓN POR RESULTADOS -->
+  <section id="comision">
+    <div class="wrap comm-grid">
+      <div>
+        <div class="kicker">06 — Modelo Variable por Éxito</div>
+        <h2>Comisión del 5 % al 10 % únicamente por paciente trazado y cobrado</h2>
+        <p class="lead" style="margin-top:10px">
+          Aplica en tratamientos de $2.000.000 COP o más. El porcentaje específico por servicio se acuerda con Lumia antes de iniciar.
+        </p>
+        <ul class="rules">
+          <li><b>Pacientes verificables:</b> aplica solo a pacientes que llegan por un anuncio identificado (código en WhatsApp, UTM o formulario) y quedan registrados en el seguimiento.</li>
+          <li><b>Sobre dinero efectivamente recaudado:</b> se liquida mes vencido sobre los pagos recibidos por Lumia. Si el paciente paga por cuotas, la comisión acompaña el recaudo.</li>
+          <li><b>Conciliación mensual:</b> cada fin de mes se cruza el reporte de pacientes trazados con las hojas de cierre de Lumia antes de facturar.</li>
+        </ul>
+      </div>
+
+      <div class="panel-box pad">
+        <div class="kicker" style="margin-bottom:10px">Simulador de Comisión</div>
+        <label for="tval" style="display:block;font-size:0.86rem;color:var(--muted);margin-bottom:8px">Valor del tratamiento cerrado</label>
+        <input type="range" id="tval" min="2000000" max="20000000" step="100000" value="2500000" style="width:100%;accent-color:var(--blue)">
+        <div class="price num" style="font-size:1.9rem;margin-top:10px" id="tvalOut"></div>
+        <div class="calcout">
+          <div><small>Con 5 %</small><span class="num" id="c5"></span></div>
+          <div><small>Con 7,5 %</small><span class="num" id="c75"></span></div>
+          <div><small>Con 10 %</small><span class="num" id="c10"></span></div>
+        </div>
+        <p class="muted" style="font-size:0.76rem;margin-top:12px">
+          Ejemplo base: Diseño de sonrisa desde $2.500.000 COP según tarifa publicada en la web de Lumia.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 07: HOUSE OF DEV -->
+  <section id="desarrollo" style="padding-top:10px">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">07 — ASYGNUZ House of Dev (Opcional)</div>
+        <h2>Módulos de desarrollo de software e inteligencia artificial</h2>
+        <p class="lead">Activos tecnológicos construidos por nuestra casa de software que se cotizan según el alcance cuando la operación lo requiera:</p>
+      </div>
+      <div class="three">
+        <div class="panel-box pad">
+          <div class="kicker" style="margin-bottom:8px">Landings</div>
+          <h3>Páginas de conversión por servicio</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:6px">Landings específicas para Implantes, Diseño de Sonrisa, Invisalign y Turismo Dental conectadas a la medición.</p>
+        </div>
+        <div class="panel-box pad">
+          <div class="kicker" style="margin-bottom:8px">Automatizaciones</div>
+          <h3>Seguimiento y reactivación</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:6px">Flujos automáticos para quienes escribieron y no agendaron, recordatorios de valoración y reactivación de pacientes.</p>
+        </div>
+        <div class="panel-box pad">
+          <div class="kicker" style="margin-bottom:8px">Agente de IA</div>
+          <h3>Atención en WhatsApp 24/7</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:6px">Responde al instante las conversaciones de pauta, resuelve dudas frecuentes y precalifica al paciente antes de pasarlo a cierre.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN 08: CONDICIONES Y CONTACTO -->
+  <section id="condiciones" style="padding-top:10px">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">08 — Condiciones Comerciales</div>
+        <h2>Términos de operación y arranque</h2>
+      </div>
+      <dl class="terms">
+        <div class="panel-box"><dt>Inversión mensual</dt><dd>Plan Pauta $1.000.000 · Plan Contenido $1.500.000 · Plan Integral $2.000.000, o módulos por separado. IVA no incluido.</dd></div>
+        <div class="panel-box"><dt>Comisión por resultados</dt><dd>5 % a 10 % por paciente trazado en tratamientos de $2.000.000 o más, liquidado mes vencido sobre lo recaudado.</dd></div>
+        <div class="panel-box"><dt>Inversión publicitaria en medios</dt><dd>La paga Lumia directamente a Meta y Google (actualmente ~$6.000.000 en Meta y ~$1.200.000 en Google).</dd></div>
+        <div class="panel-box"><dt>Facturación y permanencia</dt><dd>Mes anticipado para el fee fijo; mes vencido para la comisión. Permanencia mínima de 3 meses.</dd></div>
+      </dl>
+
+      <div class="panel-box pad" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;border-color:var(--hairline-blue)">
+        <div>
+          <h3>Inicio de operación en 48 horas</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:4px">Con la confirmación del plan y los accesos comenzamos por corregir el error 503 e instalar la medición completa.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <a class="btn" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20vimos%20la%20propuesta%20de%20ASYGNUZ%20para%20Lumia" target="_blank" rel="noopener">Escribir a Juan Manuel por WhatsApp</a>
+          <button class="btn btn-line" id="copyMail" type="button">juan.marin@asygnuz.com</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================================================================== -->
+<!-- VISTA 02: DIAGNÓSTICO DE PAUTA Y ADQUISICIÓN                          -->
+<!-- ===================================================================== -->
+<main id="view-analisis" hidden>
+
+  <section class="hero" style="padding-bottom:40px">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap">
+        <div>
+          <div class="kicker">Documento 02 — Auditoría de Adquisición</div>
+          <h1>Diagnóstico de Pauta y Adquisición · <span class="hl-blue">Lumia Odontología</span></h1>
+          <p class="hero-lead">
+            Revisión técnica de Meta Ads (1 jun – 20 oct 2026), Google Ads (septiembre 2026), estado de medición en <code>lumiaodontologia.com</code>, embudo actual y competencia en Manizales.
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn" href="Diagnostico_Pauta_Lumia_Odontologia.pdf" download>↓ Descargar Diagnóstico en PDF (8 págs.)</a>
+          <button class="btn btn-line" type="button" data-goto-mode="propuesta">← Volver a la Propuesta</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:36px">
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">$5,4 M</div><span class="muted" style="font-size:0.78rem">Pauta mensual visible · Meta $4,2M + Google $1,2M</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">$5.703</div><span class="muted" style="font-size:0.78rem">Costo promedio por conversación en Meta (~3.462 conv.)</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem;color:var(--danger-soft)">$93.643</div><span class="muted" style="font-size:0.78rem">Costo por llamada en Google Ads (13 conv. en sept.)</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem;color:var(--danger-soft)">Error 503</div><span class="muted" style="font-size:0.78rem">En www.lumiaodontologia.com + 0 conversiones web</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section id="diagnostico">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">01 — Radiografía por Canal</div>
+        <h2>Desempeño actual en Meta Ads, Google Ads y Sitio Web</h2>
+        <p class="lead">Cambia de canal o de métrica para inspeccionar el comportamiento de cada anuncio.</p>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Canal auditado">
+        <button class="tab" role="tab" id="t-meta" aria-selected="true" aria-controls="p-meta">01 · Meta Ads ($19,74M acumulados)</button>
+        <button class="tab" role="tab" id="t-google" aria-selected="false" aria-controls="p-google">02 · Google Ads ($1,21M sept.)</button>
+        <button class="tab" role="tab" id="t-med" aria-selected="false" aria-controls="p-med">03 · Web, Píxeles y Embudo</button>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-meta" aria-labelledby="t-meta">
+        <div class="panel-box pad">
+          <div class="seg" role="group" aria-label="Métrica de Meta Ads">
+            <button aria-pressed="true" data-m="gasto">Gasto total</button>
+            <button aria-pressed="false" data-m="conv">Conversaciones</button>
+            <button aria-pressed="false" data-m="cpc">Costo / conv.</button>
+            <button aria-pressed="false" data-m="frec">Frecuencia</button>
+            <button aria-pressed="false" data-m="ctr">CTR (%)</button>
+          </div>
+          <div class="chart" id="metaChart"></div>
+          <p class="muted" style="font-size:0.78rem;margin-top:14px">
+            10 anuncios en 2 conjuntos activos ("Diseño – Copia WSSP IA" $40k/día y "Rehabilitación IA" $100k/día). Línea punteada = promedio.
+          </p>
+        </div>
+        <div class="findings">
+          <div class="panel-box finding"><span class="sev crit"></span><div><h4>Un solo anuncio concentra el 63 % del presupuesto</h4><p>"Video implantes Alejo" consume $12.445.343 de $19.743.008, lleva 19 meses activo y tiene frecuencia 6,65.</p></div></div>
+          <div class="panel-box finding"><span class="sev"></span><div><h4>El anuncio más eficiente casi no recibe presupuesto</h4><p>"Video caja de dientes" logra la conversación a $2.261 con CTR de 4,74 %, pero comparte conjunto con el video de implantes.</p></div></div>
+          <div class="panel-box finding"><span class="sev"></span><div><h4>140 días sin renovación creativa</h4><p>No hay rotación mensual de ganchos y el único testimonio ("Reel testimonio Gladys", CTR 2,83 %) está apagado.</p></div></div>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-google" aria-labelledby="t-google" hidden>
+        <div class="panel-box pad">
+          <div class="chart" id="googleChart"></div>
+          <p class="muted" style="font-size:0.78rem;margin-top:14px">
+            Campaña "Search todo" (septiembre 2026): 436 clics, $1.217.714 invertidos y 13 conversiones (solo llamadas).
+          </p>
+        </div>
+        <div class="findings">
+          <div class="panel-box finding"><span class="sev crit"></span><div><h4>"Caries dental" absorbe el 54 % del gasto ($659.204)</h4><p>Búsqueda informativa o de consulta básica, lejos de los tratamientos de alto ticket.</p></div></div>
+          <div class="panel-box finding"><span class="sev crit"></span><div><h4>Implantes, diseño e Invisalign no están compitiendo</h4><p>La campaña de implantes está detenida; no hay palabras activas para los tratamientos más rentables.</p></div></div>
+          <div class="panel-box finding"><span class="sev crit"></span><div><h4>$93.643 por llamada y 0 conversiones web</h4><p>Los anuncios que llevan a la web marcan 0 conversiones por falta de etiquetas de seguimiento.</p></div></div>
+        </div>
+      </div>
+
+      <div class="panel" role="tabpanel" id="p-med" aria-labelledby="t-med" hidden>
+        <div class="panel-box pad" id="meas"></div>
+        <div class="panel-box pad">
+          <h3 style="margin-bottom:14px">El Embudo Hoy</h3>
+          <div class="funnel" id="funnel"></div>
+          <p class="muted" style="font-size:0.78rem;margin-top:14px">
+            Las etapas punteadas se llevan en hojas y Dentalink, sin conexión con los anuncios que las generaron.
+          </p>
+        </div>
+      </div>
+
+      <div class="panel-box pad" style="margin-top:22px;overflow-x:auto">
+        <h3 style="margin-bottom:14px">Tabla Completa de Anuncios en Meta Ads (1 jun – 20 oct 2026)</h3>
+        <table class="data-table">
+          <thead>
+            <tr><th>Anuncio</th><th>Estado</th><th>Gasto (COP)</th><th>% Gasto</th><th>Costo / Conv.</th><th>Conv. Est.</th><th>Frecuencia</th><th>CTR</th></tr>
+          </thead>
+          <tbody id="metaTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section id="angulos">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">02 — Perfiles de Paciente (ICP) & Ángulos</div>
+        <h2>8 de cada 10 anuncios actuales muestran únicamente un procedimiento</h2>
+      </div>
+
+      <div class="angtop panel-box pad">
+        <div class="chart" id="donut" style="max-width:240px;margin:0 auto"></div>
+        <div style="overflow-x:auto">
+          <table class="data-table">
+            <thead>
+              <tr><th>Perfil de Paciente</th><th>Deseo</th><th>Objeción Principal</th><th>Servicio</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Rehabilitación (45–65 años)</td><td>Volver a comer y sonreír con firmeza</td><td>Miedo a cirugía y precio</td><td>Implantes · All-on-X</td></tr>
+              <tr><td>Estética Natural (25–40 años)</td><td>Sonrisa armónica y natural</td><td>Temor a aspecto artificial</td><td>Diseño 3D · Carillas</td></tr>
+              <tr><td>Fecha Límite (Bodas, Grados, Dic.)</td><td>Tener la sonrisa lista a tiempo</td><td>Número de citas</td><td>Diseño en 2–3 citas</td></tr>
+              <tr><td>Turismo Dental (Exterior)</td><td>Ahorro del 60–70 % frente a EE. UU.</td><td>Confianza a distancia</td><td>Implantes · Diseño</td></tr>
+              <tr><td>Ortodoncia Invisible (20–35)</td><td>Alinear sin brackets</td><td>Duración y presupuesto</td><td>Invisalign</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="angles" id="angles"></div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section id="competencia">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">03 — Referencia Competitiva en Manizales</div>
+        <h2>Vistazo preliminar de clínicas locales</h2>
+      </div>
+      <div class="panel-box pad" style="overflow-x:auto">
+        <table class="data-table">
+          <thead>
+            <tr><th>Clínica</th><th>Propuesta Visible</th><th>Precio Publicado</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Lumia Odontología</td><td>Diseño digital 3D, ceramistas propios, turismo dental, Google 5,0 ★</td><td>Diseño desde $2.500.000</td></tr>
+            <tr><td>Monti Odontología</td><td>Implantes y ortodoncia en Av. Santander · Google 4,8 ★ (49 reseñas)</td><td>Valoración $35.000 – $80.000</td></tr>
+            <tr><td>Artek Odontología Láser</td><td>Odontología láser con precios abiertos en directorios</td><td>Implante $2,4 M · All-on-4 $16 M</td></tr>
+            <tr><td>Smilingtek (CC Sancancio)</td><td>Maxilofacial, implantología, carillas Emax/zirconio</td><td>Por consulta + tomografía 3D</td></tr>
+            <tr><td>Dr. Santiago González</td><td>Implantología en Manizales, Pereira y Armenia</td><td>Por consulta</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:28px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+        <a class="btn" href="Diagnostico_Pauta_Lumia_Odontologia.pdf" download>↓ Descargar Diagnóstico Completo en PDF</a>
+        <button class="btn btn-line" type="button" data-goto-mode="propuesta">Ir a la Propuesta Comercial →</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Vista ampliada">
+  <div class="lightbox-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="kicker" id="lbCaption" style="margin:0;color:#93c5fd">Vista en Alta Resolución</span>
+      <button class="btn btn-line" type="button" id="closeLightboxBtn" style="color:#fff;border-color:rgba(255,255,255,0.2)">✕ Cerrar (Esc)</button>
+    </div>
+    <img id="lbImg" src="" alt="Vista ampliada">
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>ASYGNUZ · Growth & House of Dev · Manizales, Colombia</span>
+    <span>Propuesta y Diagnóstico para Lumia Odontología Especializada · Octubre 2026</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const fmt = n => "$" + Math.round(n).toLocaleString("es-CO");
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (t, a = {}, txt) => {
+    const e = document.createElementNS(NS, t);
+    for (const k in a) e.setAttribute(k, a[k]);
+    if (txt != null) e.textContent = txt;
+    return e;
+  };
+  const tip = document.getElementById("tip");
+  function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; moveTip(e); }
+  function moveTip(e) {
+    const x = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 8);
+    const y = Math.max(8, e.clientY - tip.offsetHeight - 12);
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function hideTip() { tip.style.opacity = 0; }
+  function bindTip(node, html) {
+    node.addEventListener("pointerenter", e => showTip(e, html));
+    node.addEventListener("pointermove", moveTip);
+    node.addEventListener("pointerleave", hideTip);
+  }
+
+  /* 0. Cambio de Tema Blanco / Negro (Claro / Oscuro) */
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeToggleLabel = document.getElementById("themeToggleLabel");
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    themeToggleLabel.textContent = theme === "dark" ? "Modo Claro" : "Modo Oscuro";
+    try { localStorage.setItem("lumia_theme", theme); } catch(e) {}
+    drawThemed();
+  }
+  const savedTheme = (() => { try { return localStorage.getItem("lumia_theme"); } catch(e) { return null; } })();
+  if (savedTheme === "light" || savedTheme === "dark") {
+    document.documentElement.setAttribute("data-theme", savedTheme);
+    themeToggleLabel.textContent = savedTheme === "dark" ? "Modo Claro" : "Modo Oscuro";
+  }
+  themeToggleBtn.addEventListener("click", () => {
+    const cur = document.documentElement.getAttribute("data-theme") || "dark";
+    applyTheme(cur === "dark" ? "light" : "dark");
+  });
+
+  /* 1. Conmutador Propuesta vs Análisis */
+  const viewPropuesta = document.getElementById("view-propuesta");
+  const viewAnalisis = document.getElementById("view-analisis");
+  const modeBtns = document.querySelectorAll(".mode-btn");
+  const ctaTopBtn = document.getElementById("ctaTopBtn");
+
+  function setMode(mode, scroll = true) {
+    const isAnalisis = mode === "analisis";
+    viewPropuesta.hidden = isAnalisis;
+    viewAnalisis.hidden = !isAnalisis;
+    modeBtns.forEach(b => b.setAttribute("aria-selected", b.dataset.mode === mode));
+    ctaTopBtn.textContent = isAnalisis ? "Ver Propuesta y Planes" : "Configurar Plan";
+    drawThemed();
+    if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  modeBtns.forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+  document.querySelectorAll("[data-goto-mode]").forEach(b => b.addEventListener("click", () => setMode(b.dataset.gotoMode)));
+  ctaTopBtn.addEventListener("click", e => {
+    if (!viewAnalisis.hidden) { e.preventDefault(); setMode("propuesta"); }
+  });
+  window.DEFAULT_MODE = "analisis";
+  if (location.search.includes("analisis") || location.hash === "#analisis" || window.DEFAULT_MODE === "analisis") {
+    setMode("analisis", false);
+  }
+
+  /* =========================================================================
+     2. LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA
+     ========================================================================= */
+  const STEPS = [
+    { bandTop: 15.5, bandH: 5.8, label: "3.675 REGISTROS · $1,68 USD", ind: "Recorrido de cuenta: Medida 01 de 06 (Parte superior · Captura 1)" },
+    { bandTop: 21.3, bandH: 5.8, label: "193 COMPRAS WEB · $27,17 USD", ind: "Recorrido de cuenta: Medida 02 de 06 (Compras en web · Captura 1)" },
+    { bandTop: 38.0, bandH: 6.0, label: "4.113 LEADS · $1,07 USD", ind: "Recorrido de cuenta: Medida 03 de 06 (Escala 1,58M imp. · Captura 1)" },
+    { bandTop: 61.5, bandH: 5.5, label: "2.050 LEADS · $0,92 USD", ind: "Recorrido de cuenta: Medida 04 de 06 (Bajando a Captura 2 · Sub-$1 USD)" },
+    { bandTop: 67.0, bandH: 20.5, label: "5 CAMPAÑAS · $1,13 A $1,74 USD", ind: "Recorrido de cuenta: Medida 05 de 06 (Consistencia multi-campaña · Captura 2)" },
+    { bandTop: 92.5, bandH: 6.8, label: "TOTAL: $180.121,41 USD · 44,4M IMP.", ind: "Recorrido de cuenta: Medida 06 de 06 (Total acumulado al final de la cuenta)" }
+  ];
+
+  const accWindow = document.getElementById("accWindow");
+  const accTrack = document.getElementById("accTrack");
+  const accTrackImg = document.getElementById("accTrackImg");
+  const rowBand = document.getElementById("rowBand");
+  const accLoupe = document.getElementById("accLoupe");
+  const stageStepIndicator = document.getElementById("stageStepIndicator");
+  const stepCards = [...document.querySelectorAll(".measure-step")];
+  let activeStepIdx = 0;
+
+  function applyStep(idx) {
+    activeStepIdx = idx;
+    const s = STEPS[idx];
+    stepCards.forEach((c, i) => c.classList.toggle("active", i === idx));
+    rowBand.style.top = s.bandTop + "%";
+    rowBand.style.height = s.bandH + "%";
+    rowBand.setAttribute("data-label", s.label);
+    stageStepIndicator.textContent = s.ind;
+
+    const imgH = accTrackImg.clientHeight || 900;
+    const winH = accWindow.clientHeight || 520;
+    const maxShift = Math.max(0, imgH - winH);
+    const targetCenterY = ((s.bandTop + s.bandH / 2) / 100) * imgH;
+    const desiredShift = Math.min(maxShift, Math.max(0, targetCenterY - winH * 0.48));
+    accTrack.style.transform = `translateY(${-desiredShift}px)`;
+  }
+
+  stepCards.forEach((card, i) => {
+    card.addEventListener("click", () => applyStep(i));
+    card.addEventListener("pointerenter", () => applyStep(i));
+  });
+
+  const stepObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = +entry.target.dataset.step;
+        applyStep(idx);
+      }
+    });
+  }, { rootMargin: "-32% 0px -48% 0px", threshold: 0.1 });
+  stepCards.forEach(c => stepObserver.observe(c));
+
+  accTrackImg.addEventListener("load", () => applyStep(0));
+  window.addEventListener("resize", () => applyStep(activeStepIdx));
+  setTimeout(() => applyStep(0), 120);
+
+  accLoupe.style.backgroundImage = "url(media/ads-escala-full.png)";
+  accWindow.addEventListener("pointermove", e => {
+    const winRect = accWindow.getBoundingClientRect();
+    const imgRect = accTrackImg.getBoundingClientRect();
+    const wx = e.clientX - winRect.left;
+    const wy = e.clientY - winRect.top;
+    const ix = e.clientX - imgRect.left;
+    const iy = e.clientY - imgRect.top;
+    const xp = Math.max(0, Math.min(100, (ix / imgRect.width) * 100));
+    const yp = Math.max(0, Math.min(100, (iy / imgRect.height) * 100));
+    accLoupe.style.opacity = 1;
+    accLoupe.style.left = Math.min(Math.max(10, wx - 120), winRect.width - 250) + "px";
+    accLoupe.style.top = Math.min(Math.max(10, wy - 155), winRect.height - 155) + "px";
+    accLoupe.style.backgroundSize = `${imgRect.width * 2.15}px auto`;
+    accLoupe.style.backgroundPosition = `${xp}% ${yp}%`;
+  });
+  accWindow.addEventListener("pointerleave", () => { accLoupe.style.opacity = 0; });
+
+  /* Lightbox */
+  const lightbox = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCaption = document.getElementById("lbCaption");
+  function openLightbox(src, cap) {
+    lbImg.src = src;
+    lbCaption.textContent = cap || "Vista en Alta Resolución";
+    lightbox.hidden = false;
+  }
+  document.getElementById("openFullAccountBtn").addEventListener("click", () => {
+    openLightbox("media/ads-escala-full.png", "Recorrido Completo de Cuenta Meta Ads ($180.121,41 USD · 44,4M Impresiones)");
+  });
+  document.querySelectorAll("[data-full]").forEach(node => {
+    node.addEventListener("click", () => openLightbox(node.dataset.full, node.dataset.cap));
+  });
+  document.getElementById("closeLightboxBtn").addEventListener("click", () => { lightbox.hidden = true; });
+  lightbox.addEventListener("click", e => { if (e.target === lightbox) lightbox.hidden = true; });
+  window.addEventListener("keydown", e => { if (e.key === "Escape") lightbox.hidden = true; });
+
+  /* =========================================================================
+     3. PORTAFOLIO AUDIOVISUAL Y GALERÍA DE 8 FOTOGRAFÍAS
+     ========================================================================= */
+  const REELS = [
+    {
+      id: "claudia-acciones",
+      cat: "claudia",
+      featured: true,
+      client: "Claudia Uribe · @soyclaudiauribe",
+      badge: "Hook en Locación + Titular",
+      title: "¿Cómo comprar acciones desde Latinoamérica?",
+      desc: "Apertura en movimiento con titular de alto contraste y entrada de cifra ($150 USD) en los primeros segundos.",
+      tags: ["Hook 0–3s", "Motion de Cifras", "Subtítulo Editorial"]
+    },
+    {
+      id: "claudia-sp500",
+      cat: "claudia",
+      featured: true,
+      client: "Claudia Uribe · @soyclaudiauribe",
+      badge: "Data Storytelling",
+      title: "Las 100 empresas de tecnología y el S&P 500",
+      desc: "Explicación respaldada con capas gráficas sincronizadas (100 empresas, S&P 500 y banderas) manteniendo el ritmo.",
+      tags: ["Capas Gráficas", "Autoridad", "Ritmo Dinámico"]
+    },
+    {
+      id: "claudia-despido",
+      cat: "claudia",
+      featured: true,
+      client: "Claudia Uribe · @soyclaudiauribe",
+      badge: "Gancho de Dolor + Pizarra",
+      title: "¿Qué haría si hoy me despiden del trabajo?",
+      desc: "Gancho directo a una objeción real seguido de explicación estructurada en pizarra.",
+      tags: ["Ángulo de Dolor", "Pizarra en Vivo", "Retención"]
+    },
+    {
+      id: "claudia-rentabilidad",
+      cat: "claudia",
+      featured: true,
+      client: "Claudia Uribe · @soyclaudiauribe",
+      badge: "Prueba en Pantalla",
+      title: "Demostración en vivo: 40 % portafolio y 29 % rentabilidad",
+      desc: "Prueba real en pantalla del celular combinada con indicadores numéricos claros.",
+      tags: ["Prueba Social", "B-Roll Celular", "Conversión"]
+    },
+    {
+      id: "claudia-dowjones",
+      cat: "claudia",
+      featured: false,
+      client: "Claudia Uribe · @soyclaudiauribe",
+      badge: "Contraste de Valor",
+      title: "Del gasto cotidiano al Dow Jones ($170.000.000)",
+      desc: "Contraste numérico en locación para aterrizar el valor de largo plazo en una cifra concreta.",
+      tags: ["Storytelling", "Anclaje", "Finanzas"]
+    },
+    {
+      id: "claudia-portafolios",
+      cat: "claudia",
+      featured: false,
+      client: "Claudia Uribe · @soyclaudiauribe",
+      badge: "Educación Estructurada",
+      title: "Máximo 3 portafolios en fondos de pensiones",
+      desc: "Secuencia educativa con alternancia entre exterior, pizarra y pantalla móvil.",
+      tags: ["Multi-Plano", "Educativo", "Claridad"]
+    },
+    {
+      id: "ingrid-toxina",
+      cat: "salud",
+      featured: true,
+      client: "Dra. Ingrid Patiño · Medicina Estética",
+      badge: "Ángulo Clínico Educativo",
+      title: "Usos médicos de la toxina: bruxismo y sonrisa gingival",
+      desc: "La especialista educa sobre condiciones clínicas (bruxismo, sonrisa gingival) con apoyo visual en la parte superior.",
+      tags: ["Salud & Estética", "Split Visual", "Autoridad Médica"]
+    },
+    {
+      id: "ingrid-zonas",
+      cat: "salud",
+      featured: true,
+      client: "Dra. Ingrid Patiño · Medicina Estética",
+      badge: "Demostración Anatómica",
+      title: "Zonas faciales que se pueden elevar con criterio médico",
+      desc: "Plano demostrativo limpio con encabezado editorial constante para consumo sin sonido.",
+      tags: ["Demostración", "Línea Editorial", "Estética"]
+    }
+  ];
+
+  const reelGrid = document.getElementById("reelGrid");
+  function renderReels(filter) {
+    const list = REELS.filter(r => filter === "destacados" ? r.featured : r.cat === filter);
+    reelGrid.innerHTML = list.map(r => `
+      <article class="panel-box reel-card">
+        <div class="reel-video-wrap">
+          <video src="media/${r.id}.mp4" poster="media/${r.id}.jpg" muted loop playsinline preload="metadata" autoplay></video>
+          <span class="reel-badge">${r.badge}</span>
+          <button type="button" class="reel-play" aria-label="Pausar o reproducir">❚❚</button>
+        </div>
+        <div class="reel-info">
+          <span class="client">${r.client}</span>
+          <h4>${r.title}</h4>
+          <p>${r.desc}</p>
+          <div class="reel-tags">${r.tags.map(t => `<span>${t}</span>`).join("")}</div>
+        </div>
+      </article>
+    `).join("");
+
+    reelGrid.querySelectorAll(".reel-card").forEach(card => {
+      const v = card.querySelector("video");
+      const b = card.querySelector(".reel-play");
+      const sync = () => { b.textContent = v.paused ? "▶" : "❚❚"; };
+      b.addEventListener("click", () => { v.paused ? v.play().catch(()=>{}) : v.pause(); });
+      v.addEventListener("click", () => { v.paused ? v.play().catch(()=>{}) : v.pause(); });
+      v.addEventListener("play", sync);
+      v.addEventListener("pause", sync);
+    });
+  }
+
+  document.querySelectorAll("[data-vfilter]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("[data-vfilter]").forEach(b => b.setAttribute("aria-pressed", b === btn));
+      renderReels(btn.dataset.vfilter);
+    });
+  });
+  renderReels("destacados");
+
+  const STILLS = [
+    { file: "mariana-1", title: "Fotografía Clínica en Consultorio", sub: "Odontología · Detalle de procedimiento" },
+    { file: "mariana-2", title: "Retrato Clínico en Fondo Negro", sub: "Odontología · Iluminación de estudio" },
+    { file: "mariana-estudio-1", title: "Retrato Corporativo de Especialista", sub: "Odontología · Autoridad de marca personal" },
+    { file: "mariana-estudio-2", title: "Dirección de Pose Editorial", sub: "Odontología · Producción en estudio" },
+    { file: "ingrid-4", title: "Pieza Estática de Criterio Médico", sub: "Dirección de arte en clave baja" },
+    { file: "ingrid-antes-despues", title: "Comparativa Clínica Antes y Después", sub: "Presentación limpia de casos reales" },
+    { file: "ingrid-labios", title: "Ficha Editorial de Resultado Natural", sub: "Diseño limpio para tratamientos estéticos" },
+    { file: "ingrid-3", title: "Portada de Carrusel de Autoridad", sub: "Composición tipográfica minimalista" }
+  ];
+  const stillsGrid = document.getElementById("stillsGrid");
+  stillsGrid.innerHTML = STILLS.map(s => `
+    <figure class="still-card" data-full="media/${s.file}.jpg" data-cap="${s.title} — ${s.sub}">
+      <img src="media/${s.file}.jpg" alt="${s.title}" loading="lazy">
+      <figcaption><span>${s.title}</span>${s.sub}</figcaption>
+    </figure>
+  `).join("");
+  stillsGrid.addEventListener("click", e => {
+    const fig = e.target.closest(".still-card");
+    if (fig) openLightbox(fig.dataset.full, fig.dataset.cap);
+  });
+
+  /* =========================================================================
+     4. CONFIGURADOR DE PLANES Y MÓDULOS
+     ========================================================================= */
+  const MODS = [
+    ["Estrategia", "Estrategia y benchmarking", "Plan mensual, perfiles de paciente (ICP), investigación de mercado, competencia y ángulos.", 450000],
+    ["Pauta", "Administración de Meta Ads", "Campañas por servicio y perfil, pruebas de ángulos, formularios, retargeting y optimización semanal.", 600000],
+    ["Pauta", "Administración de Google Ads", "Campañas por servicio (implantes, diseño, Invisalign), palabras de alta intención y conversiones reales.", 500000],
+    ["Pauta", "Medición y trazabilidad", "Tag Manager, GA4, píxel + API de Conversiones, UTMs, WhatsApp por anuncio y seguimiento hasta el cierre.", 350000],
+    ["Contenido", "Grabación para pauta", "1 jornada al mes en la clínica, con guion estructurado por ángulo.", 400000],
+    ["Contenido", "Grabación para redes", "1 jornada al mes en clínica: educación, detrás de cámaras, casos y equipo.", 400000],
+    ["Contenido", "Edición para pauta", "8 anuncios al mes en video e imagen con variaciones de gancho para testear.", 350000],
+    ["Contenido", "Edición para redes", "12 piezas al mes entre reels, carruseles e historias con dirección de arte.", 350000],
+    ["Contenido", "Gestión de redes sociales", "Parrilla mensual, carruseles, copies y publicación 3–4 veces por semana.", 450000],
+    ["Resultados", "Lectura de métricas e informes", "Informe mensual con costo por mensaje, valoración y paciente, más comité de decisiones.", 250000]
+  ];
+  const PLANS = [
+    { name: "Plan Pauta", price: 1000000, mods: [0, 1, 2, 3, 9], desc: "Estrategia, Meta Ads, Google Ads, trazabilidad completa e informes." },
+    { name: "Plan Contenido", price: 1500000, mods: [0, 1, 2, 3, 9, 6, 7, 8], desc: "Todo el Plan Pauta + edición para pauta y redes + gestión de redes." },
+    { name: "Plan Integral", price: 2000000, mods: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], desc: "Todo el Plan Contenido + grabación en la clínica cada 15 días (2 jornadas/mes).", rec: true }
+  ];
+  const sumOf = ids => ids.reduce((a, i) => a + MODS[i][3], 0);
+  let sel = new Set(PLANS[2].mods);
+  const groups = {};
+  MODS.forEach((m, i) => (groups[m[0]] = groups[m[0]] || []).push(i));
+
+  document.getElementById("groups").innerHTML = Object.entries(groups).map(([g, ids]) => `
+    <div class="group">
+      <h4>${g}</h4>
+      <div class="tiles">
+        ${ids.map(i => `<button class="tile" type="button" data-i="${i}" aria-pressed="true"><span class="box"></span><span><span class="n">${MODS[i][1]}</span><span class="d">${MODS[i][2]}</span></span><span class="p">${fmt(MODS[i][3])}</span></button>`).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  document.getElementById("planbar").innerHTML = PLANS.map((p, j) =>
+    `<button class="planbtn" type="button" data-j="${j}" aria-pressed="false">${p.name} · ${fmt(p.price)}/mes</button>`
+  ).join("");
+
+  function renderBuilder() {
+    const ids = [...sel];
+    const sum = sumOf(ids);
+    const fits = PLANS.filter(p => ids.every(i => p.mods.includes(i))).sort((a, b) => a.price - b.price);
+    const plan = fits[0] && fits[0].price < sum ? fits[0] : null;
+    const price = plan ? plan.price : sum;
+    document.querySelectorAll(".tile").forEach(t => t.setAttribute("aria-pressed", sel.has(+t.dataset.i)));
+    document.querySelectorAll(".planbtn").forEach(b => {
+      const p = PLANS[+b.dataset.j];
+      b.setAttribute("aria-pressed", p.mods.length === ids.length && p.mods.every(i => sel.has(i)));
+    });
+    document.getElementById("sCount").textContent = `${ids.length} de ${MODS.length}`;
+    document.getElementById("sMeter").style.width = (ids.length / MODS.length * 100) + "%";
+    const sS = document.getElementById("sSum");
+    sS.textContent = fmt(sum);
+    sS.classList.toggle("strike", !!plan);
+    document.getElementById("sPrice").textContent = ids.length ? fmt(price) : "$0";
+    const ap = document.getElementById("sApplied");
+    ap.hidden = !ids.length;
+    ap.textContent = plan ? `Se aplica la tarifa del ${plan.name} (${fmt(plan.price)}/mes).` : "Módulos sueltos: se cobra la suma individual.";
+    const sv = document.getElementById("sSave");
+    sv.textContent = plan ? `Ahorro mensual: ${fmt(sum - price)} (${Math.round((sum - price) / sum * 100)} %)` : "";
+    sv.hidden = !plan;
+  }
+
+  document.getElementById("groups").addEventListener("click", e => {
+    const t = e.target.closest(".tile");
+    if (!t) return;
+    const i = +t.dataset.i;
+    sel.has(i) ? sel.delete(i) : sel.add(i);
+    renderBuilder();
+  });
+  document.getElementById("planbar").addEventListener("click", e => {
+    const b = e.target.closest(".planbtn");
+    if (!b) return;
+    sel = new Set(PLANS[+b.dataset.j].mods);
+    renderBuilder();
+  });
+  renderBuilder();
+
+  document.getElementById("plans").innerHTML = PLANS.map((p, j) => `
+    <div class="panel-box plan${p.rec ? " rec" : ""}">
+      ${p.rec ? '<span class="tag">Recomendado</span>' : ""}
+      <h3>${p.name}</h3>
+      <div class="pr num">${fmt(p.price)} <small>/mes</small></div>
+      <div class="sep">Por separado: ${fmt(sumOf(p.mods))}</div>
+      <p class="muted" style="font-size:0.84rem">${p.desc}</p>
+      <ul>${MODS.map((m, i) => `<li class="${p.mods.includes(i) ? "" : "no"}">${m[1]}</li>`).join("")}</ul>
+      <a class="btn${p.rec ? "" : " btn-line"}" href="#plan" data-pick="${j}">Seleccionar ${p.name}</a>
+    </div>
+  `).join("");
+  document.getElementById("plans").addEventListener("click", e => {
+    const a = e.target.closest("[data-pick]");
+    if (a) { sel = new Set(PLANS[+a.dataset.pick].mods); renderBuilder(); }
+  });
+
+  const tval = document.getElementById("tval");
+  function calcComm() {
+    const v = +tval.value;
+    document.getElementById("tvalOut").textContent = fmt(v);
+    document.getElementById("c5").textContent = fmt(v * 0.05);
+    document.getElementById("c75").textContent = fmt(v * 0.075);
+    document.getElementById("c10").textContent = fmt(v * 0.10);
+  }
+  tval.addEventListener("input", calcComm);
+  calcComm();
+
+  const cm = document.getElementById("copyMail");
+  cm.addEventListener("click", () => {
+    const o = cm.textContent;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(o).then(() => {
+        cm.textContent = "✓ Correo copiado";
+        setTimeout(() => { cm.textContent = o; }, 1600);
+      }).catch(()=>{});
+    }
+  });
+
+  /* =========================================================================
+     5. GRÁFICAS DEL DIAGNÓSTICO
+     ========================================================================= */
+  const nice = (max, n = 4) => {
+    const raw = max / n, p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const s = [1, 2, 2.5, 5, 10].find(m => m * p >= raw) * p;
+    return { step: s, top: Math.ceil(max / s) * s };
+  };
+
+  function hbar(box, rows, o) {
+    if (!box) return;
+    const W = 560, L = o.labelW || 180, R = 68, T = 26, rowH = 30, H = T + rows.length * rowH + 8;
+    const max = Math.max(...rows.map(r => r.v)), sc = nice(max), x = v => L + (W - L - R) * v / sc.top;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": o.title });
+    for (let v = 0; v <= sc.top + 1e-9; v += sc.step) {
+      svg.append(el("line", { x1: x(v), x2: x(v), y1: T - 6, y2: H - 4, class: "grid" }));
+      svg.append(el("text", { x: x(v), y: 12, "text-anchor": "middle" }, o.axis(v)));
+    }
+    if (o.avg != null) {
+      svg.append(el("line", { x1: x(o.avg), x2: x(o.avg), y1: T - 6, y2: H - 4, stroke: "#f59e0b", "stroke-dasharray": "4 3", "stroke-width": 1.2 }));
+    }
+    rows.forEach((r, i) => {
+      const y = T + i * rowH;
+      svg.append(el("text", { x: L - 10, y: y + rowH / 2 + 4, "text-anchor": "end", class: "lbl", opacity: r.off ? .5 : 1 }, r.label));
+      const b = el("rect", { x: L, y: y + 7, width: Math.max(2, x(r.v) - L), height: rowH - 14, rx: 4, class: "bar", fill: r.hi ? "#60a5fa" : "#2563eb", opacity: r.off ? .45 : 0.9 });
+      svg.append(b);
+      svg.append(el("text", { x: Math.max(L, x(r.v)) + 8, y: y + rowH / 2 + 4, class: "val" }, r.t));
+      bindTip(b, r.tip);
+    });
+    box.replaceChildren(svg);
+  }
+
+  function vgroup(box, cats, series, o) {
+    if (!box) return;
+    const W = 620, H = 240, L = 58, B = 34, T = 34, R = 14;
+    const max = Math.max(...series.flatMap(s => s.data)), sc = nice(max), y = v => H - B - (H - B - T) * v / sc.top;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": o.title });
+    for (let v = 0; v <= sc.top + 1e-9; v += sc.step) {
+      svg.append(el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), class: v ? "grid" : "base" }));
+      svg.append(el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, o.axis(v)));
+    }
+    const gw = (W - L - R) / cats.length, bw = Math.min(58, gw / (series.length + 1));
+    cats.forEach((c, i) => {
+      const cx = L + gw * i + gw / 2;
+      series.forEach((s, j) => {
+        const v = s.data[i], bx = cx - (series.length * bw) / 2 + j * bw + 4;
+        const b = el("rect", { x: bx, width: bw - 8, y: y(v), height: H - B - y(v), rx: 4, class: "bar", fill: s.color });
+        svg.append(b);
+        svg.append(el("text", { x: bx + (bw - 8) / 2, y: y(v) - 8, "text-anchor": "middle", class: "val" }, o.fmt(v)));
+        bindTip(b, `<b>${c}</b>${s.name}: ${o.fmt(v)}`);
+      });
+      svg.append(el("text", { x: cx, y: H - B + 20, "text-anchor": "middle", class: "lbl" }, c));
+    });
+    let lx = L;
+    series.forEach(s => {
+      svg.append(el("rect", { x: lx, y: 4, width: 9, height: 9, rx: 2, fill: s.color }));
+      svg.append(el("text", { x: lx + 15, y: 12 }, s.name));
+      lx += 165;
+    });
+    box.replaceChildren(svg);
+  }
+
+  function donut(box, parts, center, sub) {
+    if (!box) return;
+    const S = 240, r = 86, sw = 24, c = 2 * Math.PI * r, total = parts.reduce((a, p) => a + p.v, 0);
+    const svg = el("svg", { viewBox: `0 0 ${S} ${S}`, role: "img", "aria-label": "Ángulos en la pauta actual" });
+    svg.append(el("circle", { cx: S / 2, cy: S / 2, r, fill: "none", stroke: css("--hairline-mid"), "stroke-width": sw }));
+    let off = 0;
+    parts.forEach(p => {
+      const len = c * p.v / total;
+      const a = el("circle", { cx: S / 2, cy: S / 2, r, fill: "none", stroke: p.color, "stroke-width": sw, "stroke-dasharray": `${Math.max(0, len - 3)} ${c}`, "stroke-dashoffset": -off, transform: `rotate(-90 ${S / 2} ${S / 2})`, class: "bar" });
+      svg.append(a);
+      bindTip(a, `<b>${p.name}</b>${p.v} de ${total} anuncios`);
+      off += len;
+    });
+    svg.append(el("text", { x: S / 2, y: S / 2 + 6, "text-anchor": "middle", style: `font-family:var(--sans);font-size:40px;font-weight:300;fill:${css("--heading")}` }, center));
+    svg.append(el("text", { x: S / 2, y: S / 2 + 28, "text-anchor": "middle" }, sub));
+    box.replaceChildren(svg);
+  }
+
+  const META = [
+    ["Video implantes Alejo", 12445343, 5069, 6.65, 1.74, true],
+    ["Video Alejo mejora diseño", 3631057, 9169, 4.12, 1.73, true],
+    ["Diseño resina alta estética", 1726281, 8898, 2.94, 1.35, true],
+    ["Reel testimonio Gladys", 596401, 8170, 3.34, 2.83, false],
+    ["Video caja de dientes", 551681, 2261, 1.86, 4.74, true],
+    ["Imagen antes-después", 238211, 9925, 2.15, 2.36, false],
+    ["Reel cambio en resina", 221744, 5544, 2.31, 2.14, true],
+    ["Imágenes diseño", 186933, 7789, 2.35, 2.32, false],
+    ["Video preparación ortodoncia", 131608, 11964, 1.94, 1.58, false],
+    ["Post diseño mitos", 13749, 13749, 1.34, 2.10, true]
+  ];
+  const conv = r => Math.round(r[1] / r[2]);
+  const totalMetaSpend = META.reduce((s, r) => s + r[1], 0);
+
+  document.getElementById("metaTableBody").innerHTML = META.map(r => `
+    <tr>
+      <td>${r[0]}</td>
+      <td><span class="chip ${r[5] ? "ok" : "warn"}">${r[5] ? "Activo" : "Apagado"}</span></td>
+      <td class="num">${fmt(r[1])}</td>
+      <td class="num">${(r[1] / totalMetaSpend * 100).toFixed(1)} %</td>
+      <td class="num">${fmt(r[2])}</td>
+      <td class="num">${conv(r).toLocaleString("es-CO")}</td>
+      <td class="num">${r[3].toLocaleString("es-CO")}</td>
+      <td class="num">${r[4].toLocaleString("es-CO")} %</td>
+    </tr>
+  `).join("");
+
+  const M = {
+    gasto: { get: r => r[1], t: v => "$" + (v / 1e6).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " M", axis: v => v ? "$" + (v / 1e6) + "M" : "0", hi: r => r[0] === "Video implantes Alejo", avg: null, sort: -1 },
+    conv: { get: conv, t: v => v.toLocaleString("es-CO"), axis: v => v.toLocaleString("es-CO"), hi: r => r[0] === "Video implantes Alejo", avg: 3462 / 10, sort: -1 },
+    cpc: { get: r => r[2], t: fmt, axis: v => v ? "$" + (v / 1000) + "k" : "0", hi: r => r[0] === "Video caja de dientes", avg: 5703, sort: 1 },
+    frec: { get: r => r[3], t: v => v.toLocaleString("es-CO"), axis: v => v.toLocaleString("es-CO"), hi: r => r[3] > 4, avg: 3, sort: -1 },
+    ctr: { get: r => r[4], t: v => v.toLocaleString("es-CO") + " %", axis: v => v.toLocaleString("es-CO") + "%", hi: r => r[0] === "Video caja de dientes", avg: 2.29, sort: -1 }
+  };
+
+  function drawMeta(m) {
+    const k = M[m];
+    const rows = META.slice().sort((a, b) => k.sort * (k.get(a) - k.get(b))).map(r => ({
+      label: r[0], off: !r[5], v: k.get(r), t: k.t(k.get(r)), hi: k.hi(r),
+      tip: `<b>${r[0]}</b>${r[5] ? "Activo" : "Apagado"} · gasto ${fmt(r[1])}<br>~${conv(r).toLocaleString("es-CO")} conversaciones a ${fmt(r[2])}<br>Frecuencia ${r[3].toLocaleString("es-CO")} · CTR ${r[4].toLocaleString("es-CO")} %`
+    }));
+    hbar(document.getElementById("metaChart"), rows, { labelW: 186, axis: k.axis, avg: k.avg, title: "Meta Ads por anuncio" });
+  }
+
+  document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+    document.querySelectorAll(".seg button").forEach(x => x.setAttribute("aria-pressed", x === b));
+    drawMeta(b.dataset.m);
+  }));
+
+  function drawGoogle() {
+    const G = [["caries dental", 659204, 6, 230], ["cita dentista", 348017, 5, 132], ["clínicas dentistas", 151320, 2, 48], ["otras palabras", 59173, 0, 26]];
+    hbar(document.getElementById("googleChart"), G.map((g, i) => ({
+      label: g[0], v: g[1], t: `${fmt(g[1])} · ${g[2]} conv.`, hi: i === 0,
+      tip: `<b>${g[0]}</b>${g[3]} clics · ${fmt(g[1])}<br>${g[2]} conversiones · ${(g[1] / 1217714 * 100).toFixed(0)} % del gasto`
+    })), { labelW: 130, axis: v => v ? "$" + (v / 1000) + "k" : "0", title: "Gasto por palabra clave" });
+  }
+
+  const MEAS = [
+    ["Dominio www", "crit", "Error 503", "Los anuncios de Google muestran www.lumiaodontologia.com y responde con error 503."],
+    ["Conversiones Google Ads", "crit", "Sin configurar", "La web no reporta eventos de conversión a Google Ads."],
+    ["Píxel de Meta + CAPI", "crit", "No detectado", "Meta no aprende de quienes visitan la web ni permite retargeting."],
+    ["Google Tag Manager", "warn", "No instalado", "Cada ajuste de medición obliga a editar el código."],
+    ["UTMs y WhatsApp", "warn", "Sin trazabilidad", "Todos los botones llevan al mismo wa.me sin origen de anuncio."],
+    ["Google Analytics 4", "ok", "Instalado", "Mide visitas generales pero sin eventos conectados a pauta."]
+  ];
+  document.getElementById("meas").innerHTML = MEAS.map(m => `<div class="mrow"><span>${m[0]}</span><span class="chip ${m[1]}">${m[2]}</span><p class="muted" style="font-size:0.84rem">${m[3]}</p></div>`).join("");
+
+  const FUN = [
+    ["Impresiones en Meta (jun–oct)", "3,10 M", 100, 0],
+    ["Conversaciones de WhatsApp", "~3.462", 86, 0],
+    ["Valoraciones agendadas", "Sin conectar", 72, 1],
+    ["Valoraciones asistidas", "Sin conectar", 60, 1],
+    ["Tratamientos cerrados", "Sin conectar", 48, 1]
+  ];
+  document.getElementById("funnel").innerHTML = FUN.map(f => `<div class="fstep${f[3] ? " unk" : ""}" style="max-width:${f[2]}%"><span>${f[0]}</span><span>${f[1]}</span></div>`).join("");
+
+  const tabs = [...document.querySelectorAll(".tab")];
+  tabs.forEach(t => t.addEventListener("click", () => {
+    tabs.forEach(x => {
+      const on = x === t;
+      x.setAttribute("aria-selected", on);
+      document.getElementById(x.getAttribute("aria-controls")).hidden = !on;
+    });
+    if (t.id === "t-google") drawGoogle();
+  }));
+
+  const ANG = [
+    ["Autoridad del fundador", "15 años y 2.500 sonrisas: lo que reviso antes de poner un implante", "Implantes"],
+    ["Volver a comer", "Volví a comer carne con seguridad después de 10 años con prótesis", "Rehabilitación · Testimonio"],
+    ["Comparación clara", "Implante, puente o prótesis: cuál conviene según cada caso", "Implantes"],
+    ["Natural vs. exagerado", "Tu diseño de sonrisa no tiene que verse artificial", "Diseño de sonrisa"],
+    ["Corrección de casos", "Corregimos diseños mal realizados: casos reales", "Diseño de sonrisa"],
+    ["Simulación previa", "Mira tu nueva sonrisa en 3D antes de tocar un diente", "Diseño · Mock-up"],
+    ["Fecha límite", "Diciembre está a pocas semanas: diseño en 2–3 citas", "Diseño · Blanqueamiento"],
+    ["Precio transparente", "Diseño desde $2,5 M: qué incluye y qué no", "Diseño de sonrisa"],
+    ["Miedo al dolor", "Así es tu primera cita de valoración en Lumia, paso a paso", "Todos"],
+    ["Ceramistas propios", "Quién esculpe tus carillas detrás de cada caso en Lumia", "Diseño · Laboratorio"],
+    ["Garantía escrita", "Garantía extendida por escrito: qué respalda", "Implantes · Diseño"],
+    ["Turismo dental", "Ahorra hasta 70 % frente a EE. UU. en el Eje Cafetero", "Turismo odontológico"]
+  ];
+  document.getElementById("angles").innerHTML = ANG.map(a => `<div class="panel-box ang"><span class="t">${a[0]}</span><q>${a[1]}</q><span class="s">${a[2]}</span></div>`).join("");
+
+  function drawThemed() {
+    const activeSeg = document.querySelector(".seg button[aria-pressed=true]");
+    if (activeSeg) drawMeta(activeSeg.dataset.m);
+    if (!document.getElementById("p-google").hidden) drawGoogle();
+    donut(document.getElementById("donut"), [
+      { name: "Procedimiento / resultado", v: 8, color: "#2563eb" },
+      { name: "Mitos", v: 1, color: "#60a5fa" },
+      { name: "Testimonio (apagado)", v: 1, color: "#f59e0b" }
+    ], "8/10", "procedimiento");
+    vgroup(document.getElementById("planChart"), PLANS.map(p => p.name), [
+      { name: "Módulos por separado", data: PLANS.map(p => sumOf(p.mods)), color: "rgba(148, 163, 184, 0.35)" },
+      { name: "Valor en Plan ASYGNUZ", data: PLANS.map(p => p.price), color: "#3b82f6" }
+    ], {
+      axis: v => v ? "$" + (v / 1e6).toLocaleString("es-CO") + "M" : "0",
+      fmt: v => "$" + (v / 1e6).toLocaleString("es-CO", { maximumFractionDigits: 2 }) + " M",
+      title: "Por separado vs. En el plan"
+    });
+  }
+  drawThemed();
+})();
+</script>
+</body>
+</html>

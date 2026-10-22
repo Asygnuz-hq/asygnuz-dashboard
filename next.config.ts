@@ -19,6 +19,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: headersDeSeguridad }];
   },
+  async rewrites() {
+    return [
+      { source: "/lumia", destination: "/lumia/Propuesta_Lumia.html" },
+      { source: "/lumia/propuesta", destination: "/lumia/Propuesta_Lumia.html" },
+      { source: "/lumia/analisis", destination: "/lumia/Analisis_Lumia.html" },
+    ];
+  },
 };
 
 export default nextConfig;
