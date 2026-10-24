@@ -1454,120 +1454,108 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 06 CALCULADORA FINANCIERA DE ROI Y RECUPERACIÓN -->
+<!-- 06 CALCULADORA FINANCIERA DE RECUPERACIÓN Y RETORNO -->
 <section id="calculadora-roi">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">06 · Análisis Financiero &amp; Retorno de Inversión</div>
-      <h2>Calculadora de retorno de inversión (ROI) y punto de equilibrio</h2>
+      <div class="kicker">06 · Análisis Financiero &amp; Tiempo de Recuperación</div>
+      <h2>Calculadora de retorno de inversión y tiempo de recuperación</h2>
       <p class="lead">
-        Coloca tus propios datos de operación en los campos interactivos de abajo para calcular en tiempo real el margen operativo, el volumen de estudios necesarios para amortizar la plataforma y en cuánto tiempo recuperas los <strong>$20.000.000 COP</strong>:
+        Coloca tus propios datos de operación en los 4 campos de abajo. La calculadora proyecta en tiempo real el valor mensual generado, cuántos estudios amortizan la plataforma y en cuánto tiempo recuperas los <strong>$20.000.000 COP</strong>:
       </p>
     </div>
 
     <div class="panel-box pad">
-      <div style="display:grid;grid-template-columns:1.15fr 0.85fr;gap:36px;align-items:start">
-        <!-- Formulario de Inputs -->
+      <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:36px;align-items:start">
+        <!-- Formulario de 4 Inputs Directos -->
         <div>
-          <h4 style="margin-bottom:18px;display:flex;align-items:center;gap:8px">
-            <span style="color:var(--blue)">●</span> Variables de Operación (Modifica los valores a tu medida)
+          <h4 style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <span style="color:var(--blue)">●</span> Ingresa tus datos de operación
           </h4>
+          <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px">
+            Modifica cualquiera de estos 4 valores para ver el cálculo de recuperación en tiempo real:
+          </p>
 
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:18px">
             <div class="sim-input-group">
-              <label class="sim-label">Promedio de Estudios al Mes</label>
-              <input type="number" id="roi-studies" class="sim-input num" value="1800" min="100" step="50" oninput="calculateROI()">
-              <span style="font-size:0.73rem;color:var(--muted)">Base propuesta: 1.500–2.000 estudios/mes</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label class="sim-label" style="margin-bottom:0">1. Promedio de Estudios al Mes</label>
+                <span id="label-studies-disp" class="mono" style="font-size:0.8rem;color:var(--blue);font-weight:600">1.800 estudios/mes</span>
+              </div>
+              <input type="number" id="calc-studies" class="sim-input num" value="1800" min="1" step="50" oninput="runRecoveryCalc()">
+              <span style="font-size:0.75rem;color:var(--muted)">Volumen mensual de estudios de Centro Radia (ref: 1.500–2.000).</span>
             </div>
 
             <div class="sim-input-group">
-              <label class="sim-label">Precio Cobrado Promedio por Estudio (COP)</label>
-              <input type="number" id="roi-price" class="sim-input num" value="120000" min="10000" step="5000" oninput="calculateROI()">
-              <span style="font-size:0.73rem;color:var(--muted)">Tarifa promedio a pacientes/doctores</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label class="sim-label" style="margin-bottom:0">2. Costo o Valor por Estudio (COP)</label>
+                <span id="label-cost-disp" class="mono" style="font-size:0.8rem;color:var(--blue);font-weight:600">$10.000 COP</span>
+              </div>
+              <input type="number" id="calc-cost-per-study" class="sim-input num" value="10000" min="0" step="1000" oninput="runRecoveryCalc()">
+              <span style="font-size:0.75rem;color:var(--muted)">Lo que cuesta o cobra por procesar/almacenar cada estudio (o margen por estudio).</span>
             </div>
 
             <div class="sim-input-group">
-              <label class="sim-label">Costo Operativo Directo por Estudio (COP)</label>
-              <input type="number" id="roi-cost" class="sim-input num" value="35000" min="0" step="1000" oninput="calculateROI()">
-              <span style="font-size:0.73rem;color:var(--muted)">Insumos, tiempo técnico y operación</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label class="sim-label" style="margin-bottom:0">3. Valor Mensual Fijo (COP)</label>
+                <span id="label-monthly-disp" class="mono" style="font-size:0.8rem;color:var(--blue);font-weight:600">$200.000 COP</span>
+              </div>
+              <input type="number" id="calc-monthly-val" class="sim-input num" value="200000" min="0" step="50000" oninput="runRecoveryCalc()">
+              <span style="font-size:0.75rem;color:var(--muted)">Suscripción mensual fija, servidor o gasto de operación mensual.</span>
             </div>
 
             <div class="sim-input-group">
-              <label class="sim-label">Gasto Mensual de Nube / Operación (COP)</label>
-              <input type="number" id="roi-monthly-expense" class="sim-input num" value="200000" min="0" step="25000" oninput="calculateROI()">
-              <span style="font-size:0.73rem;color:var(--muted)">Infraestructura cloud directa (~$50 USD)</span>
-            </div>
-
-            <div class="sim-input-group">
-              <label class="sim-label">Inversión Total de la Plataforma (COP)</label>
-              <input type="number" id="roi-investment" class="sim-input num" value="20000000" min="1000000" step="1000000" oninput="calculateROI()">
-              <span style="font-size:0.73rem;color:var(--muted)">Precio cerrado todo incluido de la oferta</span>
-            </div>
-
-            <div class="sim-input-group">
-              <label class="sim-label">Costo de Software Externo por Estudio (COP)</label>
-              <input type="number" id="roi-license-per-study" class="sim-input num" value="5000" min="0" step="500" oninput="calculateROI()">
-              <span style="font-size:0.73rem;color:var(--muted)">Tarifa típica SaaS por procesar cada estudio</span>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <label class="sim-label" style="margin-bottom:0">4. Inversión Total de la Plataforma (COP)</label>
+                <span id="label-inv-disp" class="mono" style="font-size:0.8rem;color:var(--blue);font-weight:600">$20.000.000 COP</span>
+              </div>
+              <input type="number" id="calc-investment" class="sim-input num" value="20000000" min="1000000" step="1000000" oninput="runRecoveryCalc()">
+              <span style="font-size:0.75rem;color:var(--muted)">Precio cerrado todo incluido de desarrollo para Centro Radia.</span>
             </div>
           </div>
         </div>
 
-        <!-- Panel de Resultados Dinámicos -->
-        <div style="background:linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);border:1px solid var(--hairline-blue);border-radius:14px;padding:24px">
-          <div class="mono" style="font-size:0.73rem;color:var(--blue);font-weight:600;margin-bottom:6px">TIEMPO ESTIMADO DE RECUPERACIÓN</div>
-          
-          <div style="margin:10px 0 16px 0">
-            <div id="roi-time-display" style="font-size:2.3rem;font-weight:600;color:var(--heading);letter-spacing:-0.03em;line-height:1.15" class="num">
-              ~4 días
+        <!-- Panel de Resultados de Recuperación -->
+        <div style="background:linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);border:1px solid var(--hairline-blue);border-radius:16px;padding:26px">
+          <div class="mono" style="font-size:0.75rem;color:var(--blue);font-weight:600;letter-spacing:0.08em;text-transform:uppercase">
+            TIEMPO ESTIMADO DE RECUPERACIÓN (ROI)
+          </div>
+
+          <div style="margin:14px 0 18px 0">
+            <div id="res-payback-main" style="font-size:2.5rem;font-weight:600;color:var(--heading);letter-spacing:-0.03em;line-height:1.1" class="num">
+              ~1,1 meses
             </div>
-            <div id="roi-months-sub" style="font-size:0.86rem;color:var(--muted);margin-top:2px">
-              Equivalente a 0,13 meses de operación regular
+            <div id="res-payback-days" style="font-size:0.92rem;color:var(--blue-deep);font-weight:500;margin-top:4px">
+              Apenas ~33 días de operación
             </div>
           </div>
 
-          <div style="height:1px;background:var(--hairline-mid);margin:14px 0"></div>
+          <div style="height:1px;background:var(--hairline-mid);margin:16px 0"></div>
 
-          <div style="display:flex;flex-direction:column;gap:11px;font-size:0.84rem">
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:0.88rem">
             <div style="display:flex;justify-content:space-between">
-              <span class="muted">Margen neto por estudio:</span>
-              <strong id="roi-net-margin" class="num font-medium" style="color:var(--blue-deep)">$85.000 COP</strong>
+              <span class="muted">Valor / Ahorro mensual generado:</span>
+              <strong id="res-monthly-total" class="num font-medium" style="color:var(--success)">$18.200.000 COP / mes</strong>
             </div>
 
             <div style="display:flex;justify-content:space-between">
-              <span class="muted">Punto de equilibrio en estudios:</span>
-              <strong id="roi-break-even-studies" class="num font-medium" style="color:var(--success)">236 estudios</strong>
+              <span class="muted">Proyección a 1 año (12 meses):</span>
+              <strong id="res-annual-total" class="num font-medium" style="color:var(--blue)">$218.400.000 COP / año</strong>
             </div>
 
             <div style="display:flex;justify-content:space-between">
-              <span class="muted">% del mes necesario para pagar el software:</span>
-              <strong id="roi-break-even-pct" class="num font-medium">13,1 % de 1 mes</strong>
+              <span class="muted">Estudios necesarios para pagar los $20M:</span>
+              <strong id="res-studies-needed" class="num font-medium" style="color:var(--heading)">2.000 estudios</strong>
             </div>
 
             <div style="display:flex;justify-content:space-between">
-              <span class="muted">Margen operativo mensual generado:</span>
-              <strong id="roi-monthly-net" class="num font-medium">$152.800.000 COP</strong>
-            </div>
-
-            <div style="height:1px;background:var(--hairline);margin:4px 0"></div>
-
-            <div style="display:flex;justify-content:space-between">
-              <span class="muted">Ahorro mensual vs. licencias externas:</span>
-              <strong id="roi-monthly-savings" class="num font-medium" style="color:var(--success)">$9.000.000 COP / mes</strong>
-            </div>
-
-            <div style="display:flex;justify-content:space-between">
-              <span class="muted">Ahorro acumulado en 1 año:</span>
-              <strong id="roi-annual-savings" class="num font-medium" style="color:var(--blue)">$108.000.000 COP / año</strong>
-            </div>
-
-            <div style="display:flex;justify-content:space-between">
-              <span class="muted">Recuperación solo por ahorro de licencias:</span>
-              <strong id="roi-payback-savings" class="num font-medium">2,2 meses</strong>
+              <span class="muted">% de 1 mes que amortiza el software:</span>
+              <strong id="res-month-pct" class="num font-medium">111,1 % de 1 mes</strong>
             </div>
           </div>
 
-          <div style="margin-top:18px;font-size:0.75rem;background:#fff;padding:12px;border-radius:8px;border:1px solid var(--hairline);color:var(--fg-soft);line-height:1.45">
-            <strong>Conclusión financiera:</strong> Al ser un software propio y sin cobro por estudio, Centro Radia amortiza la totalidad de los $20.000.000 COP con los primeros <strong><span id="roi-concl-studies">236</span> estudios</strong> procesados. Todo el volumen posterior genera rentabilidad pura sin costo de licencia.
+          <div style="margin-top:22px;background:#fff;border:1px solid var(--hairline-blue);border-radius:10px;padding:14px;font-size:0.8rem;color:var(--fg-soft);line-height:1.5">
+            <strong>Lectura del cálculo:</strong> Con <strong><span id="res-summary-studies">1.800</span> estudios al mes</strong> y un costo/valor de <strong><span id="res-summary-cost">$10.000 COP</span> por estudio</strong> (+ <span id="res-summary-monthly">$200.000 COP</span> fijos), la plataforma propia se amortiza al 100 % en solo <strong><span id="res-summary-time">~1,1 meses</span></strong>. A partir de ese momento, la operación no paga cuotas de software a terceros.
           </div>
         </div>
       </div>
@@ -1991,61 +1979,65 @@ function toggleSimInvalidate() {
 }
 
 
-// Calculadora de ROI y Punto de Equilibrio
-function calculateROI() {
-  const studies = parseFloat(document.getElementById("roi-studies").value) || 0;
-  const price = parseFloat(document.getElementById("roi-price").value) || 0;
-  const cost = parseFloat(document.getElementById("roi-cost").value) || 0;
-  const monthlyExp = parseFloat(document.getElementById("roi-monthly-expense").value) || 0;
-  const investment = parseFloat(document.getElementById("roi-investment").value) || 20000000;
-  const extFee = parseFloat(document.getElementById("roi-license-per-study").value) || 0;
+// Calculadora Financiera de Recuperacion (ROI)
+function runRecoveryCalc() {
+  const studies = parseFloat(document.getElementById("calc-studies").value) || 0;
+  const costPerStudy = parseFloat(document.getElementById("calc-cost-per-study").value) || 0;
+  const monthlyVal = parseFloat(document.getElementById("calc-monthly-val").value) || 0;
+  const investment = parseFloat(document.getElementById("calc-investment").value) || 20000000;
 
-  const netMarginPerStudy = Math.max(0, price - cost);
-  const monthlyGross = studies * price;
-  const monthlyCosts = (studies * cost) + monthlyExp;
-  const monthlyNet = Math.max(0, monthlyGross - monthlyCosts);
+  // Actualizar labels auxiliares
+  document.getElementById("label-studies-disp").innerText = studies.toLocaleString("es-CO") + " estudios/mes";
+  document.getElementById("label-cost-disp").innerText = "$" + costPerStudy.toLocaleString("es-CO") + " COP";
+  document.getElementById("label-monthly-disp").innerText = "$" + monthlyVal.toLocaleString("es-CO") + " COP";
+  document.getElementById("label-inv-disp").innerText = "$" + investment.toLocaleString("es-CO") + " COP";
 
-  // Punto de equilibrio: cuántos estudios pagan la inversión total
-  const breakEvenStudies = netMarginPerStudy > 0 ? Math.ceil(investment / netMarginPerStudy) : 0;
-  const breakEvenPct = studies > 0 ? ((breakEvenStudies / studies) * 100).toFixed(1) : 0;
+  // Total mensual generado o evitado
+  const monthlyTotal = (studies * costPerStudy) + monthlyVal;
+  const annualTotal = monthlyTotal * 12;
 
-  // Tiempo de recuperacion (Payback)
-  let timeStr = "—";
-  let monthsSub = "—";
-  if (monthlyNet > 0) {
-    const months = investment / monthlyNet;
+  // Estudios necesarios para amortizar
+  const effectiveCostUnit = costPerStudy > 0 ? costPerStudy : (studies > 0 ? (monthlyVal / studies) : 0);
+  const studiesNeeded = effectiveCostUnit > 0 ? Math.ceil(investment / effectiveCostUnit) : 0;
+  const monthPct = studies > 0 ? ((studiesNeeded / studies) * 100).toFixed(1) : 0;
+
+  // Tiempo de recuperacion
+  let paybackMain = "—";
+  let paybackDays = "Ingresa valores mayores a 0 para calcular";
+  let summaryTime = "—";
+
+  if (monthlyTotal > 0 && investment > 0) {
+    const months = investment / monthlyTotal;
     const days = Math.round(months * 30);
-    if (days <= 30) {
-      timeStr = `~${days} días`;
-      monthsSub = `Equivalente a ${months.toFixed(2)} meses de operación`;
+    
+    if (months < 1) {
+      paybackMain = `~${days} días`;
+      paybackDays = `Apenas ${months.toFixed(2)} meses de operación`;
+      summaryTime = `~${days} días`;
     } else {
-      timeStr = `~${months.toFixed(1)} meses`;
-      monthsSub = `Equivalente a ~${days} días de operación`;
+      paybackMain = `~${months.toFixed(1)} meses`;
+      paybackDays = `Aproximadamente ${days} días de operación`;
+      summaryTime = `~${months.toFixed(1)} meses`;
     }
   }
 
-  // Ahorro frente a licencias externas
-  const monthlySavings = studies * extFee;
-  const annualSavings = monthlySavings * 12;
-  const paybackSavingsMonths = monthlySavings > 0 ? (investment / monthlySavings).toFixed(1) : "—";
-
   // Actualizar DOM
-  document.getElementById("roi-time-display").innerText = timeStr;
-  document.getElementById("roi-months-sub").innerText = monthsSub;
-  document.getElementById("roi-net-margin").innerText = "$" + netMarginPerStudy.toLocaleString("es-CO") + " COP";
-  document.getElementById("roi-break-even-studies").innerText = breakEvenStudies.toLocaleString("es-CO") + " estudios";
-  document.getElementById("roi-break-even-pct").innerText = breakEvenPct + " % de 1 mes";
-  document.getElementById("roi-monthly-net").innerText = "$" + Math.round(monthlyNet).toLocaleString("es-CO") + " COP";
-  document.getElementById("roi-monthly-savings").innerText = "$" + Math.round(monthlySavings).toLocaleString("es-CO") + " COP / mes";
-  document.getElementById("roi-annual-savings").innerText = "$" + Math.round(annualSavings).toLocaleString("es-CO") + " COP / año";
-  document.getElementById("roi-payback-savings").innerText = paybackSavingsMonths + " meses";
-  const conclEl = document.getElementById("roi-concl-studies");
-  if (conclEl) conclEl.innerText = breakEvenStudies.toLocaleString("es-CO");
+  document.getElementById("res-payback-main").innerText = paybackMain;
+  document.getElementById("res-payback-days").innerText = paybackDays;
+  document.getElementById("res-monthly-total").innerText = "$" + Math.round(monthlyTotal).toLocaleString("es-CO") + " COP / mes";
+  document.getElementById("res-annual-total").innerText = "$" + Math.round(annualTotal).toLocaleString("es-CO") + " COP / año";
+  document.getElementById("res-studies-needed").innerText = studiesNeeded.toLocaleString("es-CO") + " estudios";
+  document.getElementById("res-month-pct").innerText = monthPct + " % de 1 mes";
+
+  document.getElementById("res-summary-studies").innerText = studies.toLocaleString("es-CO");
+  document.getElementById("res-summary-cost").innerText = "$" + costPerStudy.toLocaleString("es-CO") + " COP";
+  document.getElementById("res-summary-monthly").innerText = "$" + monthlyVal.toLocaleString("es-CO") + " COP";
+  document.getElementById("res-summary-time").innerText = summaryTime;
 }
 
 // Inicializar al cargar
 document.addEventListener("DOMContentLoaded", function() {
-  calculateROI();
+  runRecoveryCalc();
 });
 
 // Calculadora de almacenamiento cloud
