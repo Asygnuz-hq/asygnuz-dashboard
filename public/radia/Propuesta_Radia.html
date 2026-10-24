@@ -725,6 +725,7 @@ section { padding: 76px 0; position: relative; }
         <a href="#simulador" class="nav-item">Simulador Interactivo</a>
         <a href="#cronograma" class="nav-item">Cronograma (14–18 sem)</a>
         <a href="#hitos" class="nav-item">Hitos ($20M)</a>
+        <a href="#calculadora-roi" class="nav-item">Calculadora ROI</a>
         <a href="#infraestructura" class="nav-item">Infraestructura</a>
         <a href="#garantia" class="nav-item">Garantía & SLA</a>
       </nav>
@@ -827,7 +828,7 @@ section { padding: 76px 0; position: relative; }
 
     <div class="cards-grid-3">
       <div class="card-pillar">
-        <div class="icon-pill">🎯</div>
+        <div class="icon-pill">01</div>
         <h4>Control Operativo Absoluto</h4>
         <p style="font-size:0.88rem;margin-top:8px">
           El equipo administrativo opera todo el flujo: registro de pacientes, creación de órdenes, asignación de doctor remitente, subida de estudios y publicación de resultados. Cada doctor consulta de forma estricta únicamente los estudios que se le hayan asignado.
@@ -835,7 +836,7 @@ section { padding: 76px 0; position: relative; }
       </div>
 
       <div class="card-pillar">
-        <div class="icon-pill">🛡️</div>
+        <div class="icon-pill">02</div>
         <h4>Etapa 0 Gratuita y sin Riesgo</h4>
         <p style="font-size:0.88rem;margin-top:8px">
           Antes de cobrar o iniciar el desarrollo de $20.000.000 COP (valor habitual de referencia: $30.000.000 COP), realizamos la <strong>Etapa 0 (3–5 días hábiles, 100 % gratuita)</strong>. Evaluamos muestras reales de estudios de Centro Radia y confirmamos las capacidades del visor 2D/3D. No se inicia ningún trabajo pagado sin su aprobación escrita.
@@ -843,7 +844,7 @@ section { padding: 76px 0; position: relative; }
       </div>
 
       <div class="card-pillar">
-        <div class="icon-pill">💎</div>
+        <div class="icon-pill">03</div>
         <h4>Sin Cuotas Mensuales de Licencia</h4>
         <p style="font-size:0.88rem;margin-top:8px">
           La plataforma es propiedad de Centro Radia. No existen licencias obligatorias recurrentes ni cobros por doctor registrado. La infraestructura en la nube (AWS / Cloudflare / GCP) se contrata directamente a nombre de Centro Radia a costo directo.
@@ -990,16 +991,16 @@ section { padding: 76px 0; position: relative; }
               <div class="mono" style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase">Herramientas Clínicas</div>
               
               <div class="sim-viewer-controls">
-                <button class="sim-v-btn active" onclick="toggleViewerTool(this, 'Regla')">📏 Regla (mm)</button>
-                <button class="sim-v-btn" onclick="toggleViewerTool(this, 'Ángulo')">📐 Ángulo</button>
-                <button class="sim-v-btn" onclick="toggleViewerTool(this, 'Implante')">📍 Implante</button>
+                <button class="sim-v-btn active" onclick="toggleViewerTool(this, 'Regla')">Regla milimétrica (mm)</button>
+                <button class="sim-v-btn" onclick="toggleViewerTool(this, 'Ángulo')">Medición de ángulo</button>
+                <button class="sim-v-btn" onclick="toggleViewerTool(this, 'Implante')">Marcador de implante</button>
               </div>
 
               <div class="mono" style="font-size:0.72rem;color:#94a3b8;text-transform:uppercase;margin-top:6px">Ventana / Contraste</div>
               <div style="display:flex;flex-direction:column;gap:6px">
-                <button class="sim-v-btn active" style="text-align:left">🦴 Ventana Ósea (Bone)</button>
-                <button class="sim-v-btn" style="text-align:left">🦷 Ventana Dental / Esmalte</button>
-                <button class="sim-v-btn" style="text-align:left">🫁 Tejidos Blandos</button>
+                <button class="sim-v-btn active" style="text-align:left">Ventana ósea (Bone)</button>
+                <button class="sim-v-btn" style="text-align:left">Ventana dental / esmalte</button>
+                <button class="sim-v-btn" style="text-align:left">Tejidos blandos</button>
               </div>
 
               <div style="margin-top:auto;background:#0f172a;padding:10px;border-radius:6px;font-size:0.75rem;border:1px solid #334155">
@@ -1081,8 +1082,8 @@ section { padding: 76px 0; position: relative; }
                 </div>
 
                 <div style="display:flex;gap:12px;margin-top:14px;font-size:0.82rem;color:var(--muted)">
-                  <span>⏳ Vence en: <strong>179 días, 23 horas</strong></span>
-                  <span>🔒 Alcance: <strong>Solo reporte PDF</strong></span>
+                  <span>Vigencia restante: <strong>179 días, 23 horas</strong></span>
+                  <span>Alcance: <strong>Solo reporte PDF</strong></span>
                 </div>
 
                 <div style="margin-top:18px;display:flex;gap:10px">
@@ -1165,7 +1166,7 @@ section { padding: 76px 0; position: relative; }
                 </div>
 
                 <button class="btn btn-primary" style="width:100%;margin-top:16px;font-size:0.82rem;padding:9px" onclick="alert('Generando Cuenta de Cobro PDF oficial para el Dr. Alejandro Gómez...')">
-                  📄 Generar Cuenta de Cobro PDF Oficial
+                  Generar Cuenta de Cobro en PDF
                 </button>
               </div>
             </div>
@@ -1186,7 +1187,7 @@ section { padding: 76px 0; position: relative; }
                     <span style="font-size:0.75rem;color:var(--muted)">Especialidad: Ortodoncia</span>
                   </div>
                   <span style="font-size:0.74rem;background:var(--danger-soft);color:var(--danger);padding:4px 8px;border-radius:6px;font-weight:600">
-                    ⚠️ 48 DÍAS SIN REMITIR
+                    Alerta: 48 días sin remisiones
                   </span>
                 </div>
 
@@ -1196,7 +1197,7 @@ section { padding: 76px 0; position: relative; }
                     <span style="font-size:0.75rem;color:var(--muted)">Especialidad: Implantología</span>
                   </div>
                   <span style="font-size:0.74rem;background:var(--warning-soft);color:var(--warning);padding:4px 8px;border-radius:6px;font-weight:600">
-                    ⚡ 22 DÍAS SIN REMITIR
+                    Atención: 22 días sin remisiones
                   </span>
                 </div>
 
@@ -1206,7 +1207,7 @@ section { padding: 76px 0; position: relative; }
                     <span style="font-size:0.75rem;color:var(--muted)">Especialidad: Rehabilitación</span>
                   </div>
                   <span style="font-size:0.74rem;background:var(--success-soft);color:var(--success);padding:4px 8px;border-radius:6px;font-weight:600">
-                    ✓ ACTIVO (Ayer)
+                    Activo: remisión reciente (Ayer)
                   </span>
                 </div>
               </div>
@@ -1233,7 +1234,7 @@ section { padding: 76px 0; position: relative; }
       <!-- Módulo 1 -->
       <div class="panel-box pad">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <span style="font-size:1.4rem">👥</span>
+          <span style="font-size:1.4rem">01</span>
           <h3>Operación, Usuarios y Pacientes</h3>
         </div>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;font-size:0.88rem">
@@ -1255,7 +1256,7 @@ section { padding: 76px 0; position: relative; }
       <!-- Módulo 2 -->
       <div class="panel-box pad">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <span style="font-size:1.4rem">🔬</span>
+          <span style="font-size:1.4rem">02</span>
           <h3>Estudios, Visor 2D/3D y Entrega</h3>
         </div>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;font-size:0.88rem">
@@ -1277,7 +1278,7 @@ section { padding: 76px 0; position: relative; }
       <!-- Módulo 3 -->
       <div class="panel-box pad">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <span style="font-size:1.4rem">💼</span>
+          <span style="font-size:1.4rem">03</span>
           <h3>Gestión Comercial, Tarifas y Cartera</h3>
         </div>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;font-size:0.88rem">
@@ -1299,7 +1300,7 @@ section { padding: 76px 0; position: relative; }
       <!-- Módulo 4 -->
       <div class="panel-box pad">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
-          <span style="font-size:1.4rem">⚙️</span>
+          <span style="font-size:1.4rem">04</span>
           <h3>Infraestructura, Seguridad y Garantía</h3>
         </div>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;font-size:0.88rem">
@@ -1444,7 +1445,7 @@ section { padding: 76px 0; position: relative; }
       </table>
 
       <div style="margin-top:24px;display:flex;gap:20px;background:#f8fafc;padding:16px;border-radius:10px;font-size:0.83rem;color:var(--fg-soft)">
-        <div style="flex-shrink:0;color:var(--blue)">ℹ️</div>
+        <div style="flex-shrink:0;color:var(--blue)">Nota:</div>
         <div>
           <strong>Validación transparente:</strong> Centro Radia dispone de <strong>cinco (5) días hábiles</strong> tras cada demostración para comunicar observaciones o ajustes pendientes; estos se corrigen antes de formalizar el acta del hito.
         </div>
@@ -1453,21 +1454,132 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-      <div style="margin-top:24px;display:flex;gap:20px;background:#f8fafc;padding:16px;border-radius:10px;font-size:0.83rem;color:var(--fg-soft)">
-        <div style="flex-shrink:0;color:var(--blue)">ℹ️</div>
+<!-- 06 CALCULADORA FINANCIERA DE ROI Y RECUPERACIÓN -->
+<section id="calculadora-roi">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="kicker">06 · Análisis Financiero &amp; Retorno de Inversión</div>
+      <h2>Calculadora de retorno de inversión (ROI) y punto de equilibrio</h2>
+      <p class="lead">
+        Coloca tus propios datos de operación en los campos interactivos de abajo para calcular en tiempo real el margen operativo, el volumen de estudios necesarios para amortizar la plataforma y en cuánto tiempo recuperas los <strong>$20.000.000 COP</strong>:
+      </p>
+    </div>
+
+    <div class="panel-box pad">
+      <div style="display:grid;grid-template-columns:1.15fr 0.85fr;gap:36px;align-items:start">
+        <!-- Formulario de Inputs -->
         <div>
-          <strong>Validación transparente:</strong> Centro Radia dispone de <strong>cinco (5) días hábiles</strong> tras cada demostración para comunicar observaciones o ajustes pendientes; estos se corrigen antes de formalizar el acta del hito.
+          <h4 style="margin-bottom:18px;display:flex;align-items:center;gap:8px">
+            <span style="color:var(--blue)">●</span> Variables de Operación (Modifica los valores a tu medida)
+          </h4>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div class="sim-input-group">
+              <label class="sim-label">Promedio de Estudios al Mes</label>
+              <input type="number" id="roi-studies" class="sim-input num" value="1800" min="100" step="50" oninput="calculateROI()">
+              <span style="font-size:0.73rem;color:var(--muted)">Base propuesta: 1.500–2.000 estudios/mes</span>
+            </div>
+
+            <div class="sim-input-group">
+              <label class="sim-label">Precio Cobrado Promedio por Estudio (COP)</label>
+              <input type="number" id="roi-price" class="sim-input num" value="120000" min="10000" step="5000" oninput="calculateROI()">
+              <span style="font-size:0.73rem;color:var(--muted)">Tarifa promedio a pacientes/doctores</span>
+            </div>
+
+            <div class="sim-input-group">
+              <label class="sim-label">Costo Operativo Directo por Estudio (COP)</label>
+              <input type="number" id="roi-cost" class="sim-input num" value="35000" min="0" step="1000" oninput="calculateROI()">
+              <span style="font-size:0.73rem;color:var(--muted)">Insumos, tiempo técnico y operación</span>
+            </div>
+
+            <div class="sim-input-group">
+              <label class="sim-label">Gasto Mensual de Nube / Operación (COP)</label>
+              <input type="number" id="roi-monthly-expense" class="sim-input num" value="200000" min="0" step="25000" oninput="calculateROI()">
+              <span style="font-size:0.73rem;color:var(--muted)">Infraestructura cloud directa (~$50 USD)</span>
+            </div>
+
+            <div class="sim-input-group">
+              <label class="sim-label">Inversión Total de la Plataforma (COP)</label>
+              <input type="number" id="roi-investment" class="sim-input num" value="20000000" min="1000000" step="1000000" oninput="calculateROI()">
+              <span style="font-size:0.73rem;color:var(--muted)">Precio cerrado todo incluido de la oferta</span>
+            </div>
+
+            <div class="sim-input-group">
+              <label class="sim-label">Costo de Software Externo por Estudio (COP)</label>
+              <input type="number" id="roi-license-per-study" class="sim-input num" value="5000" min="0" step="500" oninput="calculateROI()">
+              <span style="font-size:0.73rem;color:var(--muted)">Tarifa típica SaaS por procesar cada estudio</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Panel de Resultados Dinámicos -->
+        <div style="background:linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);border:1px solid var(--hairline-blue);border-radius:14px;padding:24px">
+          <div class="mono" style="font-size:0.73rem;color:var(--blue);font-weight:600;margin-bottom:6px">TIEMPO ESTIMADO DE RECUPERACIÓN</div>
+          
+          <div style="margin:10px 0 16px 0">
+            <div id="roi-time-display" style="font-size:2.3rem;font-weight:600;color:var(--heading);letter-spacing:-0.03em;line-height:1.15" class="num">
+              ~4 días
+            </div>
+            <div id="roi-months-sub" style="font-size:0.86rem;color:var(--muted);margin-top:2px">
+              Equivalente a 0,13 meses de operación regular
+            </div>
+          </div>
+
+          <div style="height:1px;background:var(--hairline-mid);margin:14px 0"></div>
+
+          <div style="display:flex;flex-direction:column;gap:11px;font-size:0.84rem">
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">Margen neto por estudio:</span>
+              <strong id="roi-net-margin" class="num font-medium" style="color:var(--blue-deep)">$85.000 COP</strong>
+            </div>
+
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">Punto de equilibrio en estudios:</span>
+              <strong id="roi-break-even-studies" class="num font-medium" style="color:var(--success)">236 estudios</strong>
+            </div>
+
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">% del mes necesario para pagar el software:</span>
+              <strong id="roi-break-even-pct" class="num font-medium">13,1 % de 1 mes</strong>
+            </div>
+
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">Margen operativo mensual generado:</span>
+              <strong id="roi-monthly-net" class="num font-medium">$152.800.000 COP</strong>
+            </div>
+
+            <div style="height:1px;background:var(--hairline);margin:4px 0"></div>
+
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">Ahorro mensual vs. licencias externas:</span>
+              <strong id="roi-monthly-savings" class="num font-medium" style="color:var(--success)">$9.000.000 COP / mes</strong>
+            </div>
+
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">Ahorro acumulado en 1 año:</span>
+              <strong id="roi-annual-savings" class="num font-medium" style="color:var(--blue)">$108.000.000 COP / año</strong>
+            </div>
+
+            <div style="display:flex;justify-content:space-between">
+              <span class="muted">Recuperación solo por ahorro de licencias:</span>
+              <strong id="roi-payback-savings" class="num font-medium">2,2 meses</strong>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;font-size:0.75rem;background:#fff;padding:12px;border-radius:8px;border:1px solid var(--hairline);color:var(--fg-soft);line-height:1.45">
+            <strong>Conclusión financiera:</strong> Al ser un software propio y sin cobro por estudio, Centro Radia amortiza la totalidad de los $20.000.000 COP con los primeros <strong><span id="roi-concl-studies">236</span> estudios</strong> procesados. Todo el volumen posterior genera rentabilidad pura sin costo de licencia.
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 06 CALCULADORA DE INFRAESTRUCTURA (COSA INTERESANTE) -->
+<!-- 07 CALCULADORA DE INFRAESTRUCTURA -->
 <section id="infraestructura">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">06 · Dimensionamiento & Costos Reales</div>
+      <div class="kicker">07 · Dimensionamiento & Costos Reales</div>
       <h2>Calculadora de almacenamiento e infraestructura cloud</h2>
       <p class="lead">
         Centro Radia contrata directamente su infraestructura (AWS / Cloudflare R2 / GCP) a costo de fábrica. Usa este simulador para estimar el consumo según el volumen de estudios y los meses de retención acordados (6 a 12 meses):
@@ -1524,7 +1636,7 @@ section { padding: 76px 0; position: relative; }
           </div>
 
           <div style="margin-top:16px;font-size:0.75rem;color:var(--fg-soft);background:#fff;padding:10px;border-radius:8px;border:1px solid var(--hairline)">
-            💡 <strong>En la Etapa 0 gratuita</strong> medimos el peso real promedio de sus archivos DICOM/CBCT para afinar esta cifra con exactitud milimétrica.
+            <strong>Nota técnica: en la Etapa 0 gratuita</strong> medimos el peso real promedio de sus archivos DICOM/CBCT para afinar esta cifra con exactitud milimétrica.
           </div>
         </div>
       </div>
@@ -1532,11 +1644,11 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 07 MATRIZ RBAC DE ROLES & PERMISOS -->
+<!-- 08 MATRIZ RBAC DE ROLES & PERMISOS -->
 <section id="permisos" style="background:var(--bg-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">07 · Seguridad & Privacidad Clínica</div>
+      <div class="kicker">08 · Seguridad & Privacidad Clínica</div>
       <h2>Matriz de permisos y aislamiento estricto de datos</h2>
       <p class="lead">
         Garantizamos que ningún doctor remitente pueda visualizar información de pacientes ajenos. Cada perfil cuenta con privilegios estrictos:
@@ -1596,11 +1708,11 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 08 CRITERIOS DE ACEPTACIÓN VERIFICABLES -->
+<!-- 09 CRITERIOS DE ACEPTACIÓN VERIFICABLES -->
 <section id="criterios">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">08 · Control de Calidad</div>
+      <div class="kicker">09 · Control de Calidad</div>
       <h2>Los 7 criterios de aceptación verificables</h2>
       <p class="lead">
         Centro Radia no da por aceptado el proyecto hasta que cada uno de estos 7 puntos haya sido probado satisfactoriamente en el entorno de producción:
@@ -1660,11 +1772,11 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 09 DENTRO VS FUERA DEL ALCANCE (TRANSPARENCIA TOTAL) -->
+<!-- 10 DENTRO VS FUERA DEL ALCANCE (TRANSPARENCIA TOTAL) -->
 <section style="background:var(--bg-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">09 · Transparencia Total</div>
+      <div class="kicker">10 · Transparencia Total</div>
       <h2>Delimitación del alcance: lo incluido vs. fases futuras</h2>
       <p class="lead">
         Para proteger la inversión de Centro Radia y asegurar el cumplimiento en 14–18 semanas, delimitamos con absoluta claridad qué está dentro de los $20.000.000 COP y qué se cotiza por separado:
@@ -1691,7 +1803,7 @@ section { padding: 76px 0; position: relative; }
       <!-- Fuera del Alcance -->
       <div class="panel-box pad" style="border-top:4px solid var(--warning)">
         <h4 style="color:var(--warning);margin-bottom:14px;display:flex;align-items:center;gap:8px">
-          <span>⚠️</span> FUERA DEL ALCANCE (COTIZABLE EN FASES FUTURAS)
+          <span>Atención:</span> FUERA DEL ALCANCE (COTIZABLE EN FASES FUTURAS)
         </h4>
         <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;font-size:0.86rem;color:var(--fg-soft)">
           <li>— Diagnóstico automático o interpretación con Inteligencia Artificial.</li>
@@ -1707,11 +1819,11 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 10 GARANTÍA & SOPORTE -->
+<!-- 11 GARANTÍA & SOPORTE -->
 <section id="garantia">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">10 · Respaldo Continuo</div>
+      <div class="kicker">11 · Respaldo Continuo</div>
       <h2>Garantía incluida y opciones de soporte post-entrega</h2>
       <p class="lead">
         La plataforma cuenta con 3 meses de garantía sin costo. Para los meses siguientes, Centro Radia puede optar libremente por un plan preventivo o soporte por horas bajo demanda:
@@ -1749,7 +1861,7 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 11 SIGUIENTE PASO -->
+<!-- 12 SIGUIENTE PASO -->
 <section id="siguiente-paso" style="background:linear-gradient(180deg, var(--bg-soft) 0%, #ffffff 100%);border-top:1px solid var(--hairline)">
   <div class="wrap">
     <div class="panel-box pad" style="max-width:920px;margin:0 auto;text-align:center;padding:48px 36px">
@@ -1877,6 +1989,64 @@ function toggleSimInvalidate() {
     linkInvalidated = false;
   }
 }
+
+
+// Calculadora de ROI y Punto de Equilibrio
+function calculateROI() {
+  const studies = parseFloat(document.getElementById("roi-studies").value) || 0;
+  const price = parseFloat(document.getElementById("roi-price").value) || 0;
+  const cost = parseFloat(document.getElementById("roi-cost").value) || 0;
+  const monthlyExp = parseFloat(document.getElementById("roi-monthly-expense").value) || 0;
+  const investment = parseFloat(document.getElementById("roi-investment").value) || 20000000;
+  const extFee = parseFloat(document.getElementById("roi-license-per-study").value) || 0;
+
+  const netMarginPerStudy = Math.max(0, price - cost);
+  const monthlyGross = studies * price;
+  const monthlyCosts = (studies * cost) + monthlyExp;
+  const monthlyNet = Math.max(0, monthlyGross - monthlyCosts);
+
+  // Punto de equilibrio: cuántos estudios pagan la inversión total
+  const breakEvenStudies = netMarginPerStudy > 0 ? Math.ceil(investment / netMarginPerStudy) : 0;
+  const breakEvenPct = studies > 0 ? ((breakEvenStudies / studies) * 100).toFixed(1) : 0;
+
+  // Tiempo de recuperacion (Payback)
+  let timeStr = "—";
+  let monthsSub = "—";
+  if (monthlyNet > 0) {
+    const months = investment / monthlyNet;
+    const days = Math.round(months * 30);
+    if (days <= 30) {
+      timeStr = `~${days} días`;
+      monthsSub = `Equivalente a ${months.toFixed(2)} meses de operación`;
+    } else {
+      timeStr = `~${months.toFixed(1)} meses`;
+      monthsSub = `Equivalente a ~${days} días de operación`;
+    }
+  }
+
+  // Ahorro frente a licencias externas
+  const monthlySavings = studies * extFee;
+  const annualSavings = monthlySavings * 12;
+  const paybackSavingsMonths = monthlySavings > 0 ? (investment / monthlySavings).toFixed(1) : "—";
+
+  // Actualizar DOM
+  document.getElementById("roi-time-display").innerText = timeStr;
+  document.getElementById("roi-months-sub").innerText = monthsSub;
+  document.getElementById("roi-net-margin").innerText = "$" + netMarginPerStudy.toLocaleString("es-CO") + " COP";
+  document.getElementById("roi-break-even-studies").innerText = breakEvenStudies.toLocaleString("es-CO") + " estudios";
+  document.getElementById("roi-break-even-pct").innerText = breakEvenPct + " % de 1 mes";
+  document.getElementById("roi-monthly-net").innerText = "$" + Math.round(monthlyNet).toLocaleString("es-CO") + " COP";
+  document.getElementById("roi-monthly-savings").innerText = "$" + Math.round(monthlySavings).toLocaleString("es-CO") + " COP / mes";
+  document.getElementById("roi-annual-savings").innerText = "$" + Math.round(annualSavings).toLocaleString("es-CO") + " COP / año";
+  document.getElementById("roi-payback-savings").innerText = paybackSavingsMonths + " meses";
+  const conclEl = document.getElementById("roi-concl-studies");
+  if (conclEl) conclEl.innerText = breakEvenStudies.toLocaleString("es-CO");
+}
+
+// Inicializar al cargar
+document.addEventListener("DOMContentLoaded", function() {
+  calculateROI();
+});
 
 // Calculadora de almacenamiento cloud
 let currentRetentionMonths = 6;
