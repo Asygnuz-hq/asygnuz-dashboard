@@ -225,7 +225,9 @@ export async function exchangeInstagramLongLivedToken(
   return graphFetch(
     "/access_token",
     { grant_type: "ig_exchange_token", client_secret: appSecret, access_token: shortLivedToken },
-    GRAPH_INSTAGRAM_URL
+    // Este endpoint va sin versión: con /v21.0/access_token Meta responde
+    // "Unsupported request - method type: get".
+    "https://graph.instagram.com"
   );
 }
 
