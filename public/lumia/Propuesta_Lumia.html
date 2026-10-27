@@ -1589,6 +1589,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     <div class="wrap hero-grid">
       <div>
         <div class="kicker">Bloque 01 · Propuesta Comercial — ASYGNUZ × Lumia</div>
+        <div style="display:inline-flex;gap:8px;align-items:center;padding:5px 12px;background:rgba(37,99,235,0.08);border:1px solid var(--hairline-blue);border-radius:20px;font-size:0.78rem;margin-bottom:12px">
+          <span style="font-weight:600;color:var(--blue)">2 Modalidades Disponibles:</span>
+          <span class="muted">Fase 1 (Base reducida + % compartido) y Fase 2 (Tarifa Plena, 0% comisión)</span>
+        </div>
         <h1>Hoy saben cuánto cuesta un mensaje. Vamos a medir <span class="hl-blue">cuánto cuesta cada paciente.</span></h1>
         <p class="hero-lead">
           Estrategia de adquisición por perfil de paciente, administración de Meta Ads y Google Ads orientada a tratamientos de alto valor, producción audiovisual quincenal en clínica y trazabilidad completa desde el anuncio hasta el cierre.
@@ -1848,9 +1852,26 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <div class="kicker" id="sec3Kicker">03 — Tres Niveles de Servicio (Fase 1: Fijo + % · Fase 2: Fijo + $1M sin %)</div>
         <h2>Los 3 paquetes de operación mensual</h2>
         <p class="lead" id="sec3Lead">
-          Elige el alcance operativo para Lumia. Usa el selector de arriba para alternar entre la <b>Fase 1 (Mensualidad base + %)</b> y la <b>Fase 2 (+$1M al mes con 0% de comisión)</b>. Recomendamos el <b>Plan Integral</b>.
+          Elige el alcance operativo para Lumia. Alterna entre la <b>Fase 1 (Mensualidad base reducida + %)</b> y la <b>Fase 2 (+$1M al mes con 0% de comisión)</b> usando el selector de abajo. Recomendamos el <b>Plan Integral</b>.
         </p>
       </div>
+
+      <!-- Selector interactivo de Fases en Planes -->
+      <div class="phase-selector-wrap">
+        <div class="phase-selector" role="tablist" aria-label="Elegir modalidad en paquetes">
+          <button type="button" class="phase-tab" data-phase="fase1" aria-selected="true">
+            <span class="p-num">FASE 01 · ESQUEMA MIXTO</span>
+            <strong>Fijo Base Reducido + % por Tratamiento</strong>
+            <small>Planes desde $1,0M/mes + porcentaje (5 % a 10 %) en tratamientos ≥ $2.000.000 COP</small>
+          </button>
+          <button type="button" class="phase-tab" data-phase="fase2" aria-selected="false">
+            <span class="p-num">FASE 02 · TARIFA FIJA PLENA</span>
+            <strong>+$1.000.000 COP / mes · 0% Porcentaje de Cliente</strong>
+            <small>Planes desde $2,0M/mes · 0% comisión · El 100% de todo lo recaudado es para Lumia</small>
+          </button>
+        </div>
+      </div>
+
       <div class="plans" id="plans"></div>
       <div class="panel-box pad" style="margin-top:20px">
         <div class="chart" id="planChart"></div>

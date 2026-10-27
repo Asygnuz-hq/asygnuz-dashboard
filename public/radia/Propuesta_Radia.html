@@ -696,9 +696,58 @@ section { padding: 76px 0; position: relative; }
   border-color: var(--hairline-blue);
 }
 
+/* Selector de Modalidades / Fases */
+.phase-selector-wrap { margin-bottom: 24px; }
+.phase-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.phase-tab {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+.phase-tab:hover {
+  border-color: var(--hairline-mid);
+  transform: translateY(-1px);
+}
+.phase-tab.active, .phase-tab[aria-selected="true"] {
+  border-color: var(--hairline-blue);
+  background: rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.07);
+}
+.phase-tab .p-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+}
+.phase-tab strong {
+  font-size: 0.96rem;
+  color: var(--heading);
+  font-weight: 600;
+}
+.phase-tab small {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 /* Responsive */
 @media (max-width: 980px) {
   .hero-grid { grid-template-columns: 1fr; gap: 32px; }
+  .phase-selector { grid-template-columns: 1fr; }
   .cards-grid-3, .cards-grid-4, .sim-form-grid, .sim-secure-grid, .sim-fin-grid, .cards-grid-2 { grid-template-columns: 1fr; }
   .sim-viewer-grid { grid-template-columns: 1fr; }
   .exec-specs-list { grid-template-columns: 1fr; }
@@ -770,17 +819,34 @@ section { padding: 76px 0; position: relative; }
 <!-- HERO -->
 <section id="inicio" class="hero">
   <div class="wrap">
+    
+    <!-- Selector interactivo de Modalidades (Sociedad 50/50 vs Desarrollo Tradicional) -->
+    <div class="phase-selector-wrap">
+      <div class="phase-selector" role="tablist" aria-label="Elegir modalidad de propuesta">
+        <button type="button" class="phase-tab active" id="btn-mod-sociedad" onclick="setRadiaModality('sociedad')">
+          <span class="p-num">MODALIDAD 01 · ALIANZA Y CO-INVERSIÓN (RECOMENDADA)</span>
+          <strong>Alianza Comercial & Sociedad 50/50 ($15.000.000 COP)</strong>
+          <small>Entrada $15M · Soporte gratis de por vida · Módulos gratis · Pauta y comercialización incluida</small>
+        </button>
+        <button type="button" class="phase-tab" id="btn-mod-tradicional" onclick="setRadiaModality('tradicional')">
+          <span class="p-num">MODALIDAD 02 · DESARROLLO TRADICIONAL LLAVE EN MANO</span>
+          <strong>Desarrollo Exclusivo 100% Radia ($23.000.000 COP)</strong>
+          <small>Precio cerrado $23M · 100% ingresos y propiedad para la clínica · 0% sociedad</small>
+        </button>
+      </div>
+    </div>
+
     <div class="hero-grid">
       <div>
         <div class="hero-badge-wrap">
-          <span class="hero-badge highlight">Alianza Comercial & Sociedad 50/50</span>
+          <span class="hero-badge highlight" id="hero-badge-highlight">Modalidad 01: Alianza Comercial & Sociedad 50/50</span>
           <span class="hero-badge">Versión 4.0</span>
           <span class="hero-badge">27 de octubre de 2026</span>
         </div>
-        <h1>
+        <h1 id="hero-title">
           Plataforma propia, <strong>visor 2D/3D integrado</strong> y sociedad de crecimiento comercial.
         </h1>
-        <p class="lead">
+        <p class="lead" id="hero-lead">
           Desarrollamos la plataforma propia para <strong>Centro Radia</strong> por una inversión inicial de entrada de <strong>$15.000.000 COP</strong> bajo un modelo de <strong>sociedad comercial y tecnológica 50/50</strong>. Soporte técnico gratuito de por vida, actualizaciones continuas de módulos sin costo, pauta publicitaria en Meta/Google e implementación activa de estrategias de comercialización para multiplicar la red de doctores remitentes.
         </p>
 
@@ -791,8 +857,8 @@ section { padding: 76px 0; position: relative; }
           <a href="#simulador" class="btn btn-line" style="padding:11px 20px;font-size:0.92rem">
             Ver Simulador en la Propuesta
           </a>
-          <a href="#hitos" class="btn btn-line" style="padding:11px 18px;font-size:0.92rem">
-            5 Hitos ($15M COP)
+          <a href="#hitos" class="btn btn-line" id="hero-hitos-btn" style="padding:11px 18px;font-size:0.92rem">
+            Ver Hitos de Pago ($15M COP)
           </a>
         </div>
       </div>
@@ -802,11 +868,11 @@ section { padding: 76px 0; position: relative; }
         <div class="exec-price-box">
           <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:4px">
             <span style="font-family:var(--mono);font-size:0.76rem;color:var(--muted);text-decoration:line-through">Precio habitual: $30.000.000 COP</span>
-            <span style="font-family:var(--mono);font-size:0.72rem;background:var(--success-soft);color:var(--success);padding:2px 7px;border-radius:4px;font-weight:600">Ahorro como socio: −$15M COP</span>
+            <span id="hero-savings-pill" style="font-family:var(--mono);font-size:0.72rem;background:var(--success-soft);color:var(--success);padding:2px 7px;border-radius:4px;font-weight:600">Ahorro como socio: −$15M COP</span>
           </div>
-          <div class="exec-price-label">Inversión de Entrada (Sociedad 50/50)</div>
-          <div class="exec-price-value num">$15.000.000 <span style="font-size:1.1rem;font-weight:400;color:var(--muted)">COP</span></div>
-          <div class="exec-price-sub">Reparto 50/50 en beneficios · Soporte, módulos y pauta GRATIS</div>
+          <div class="exec-price-label" id="hero-price-label">Inversión de Entrada (Sociedad 50/50)</div>
+          <div class="exec-price-value num" id="hero-price-val">$15.000.000 <span style="font-size:1.1rem;font-weight:400;color:var(--muted)">COP</span></div>
+          <div class="exec-price-sub" id="hero-price-sub">Reparto 50/50 en beneficios · Soporte, módulos y pauta GRATIS</div>
         </div>
 
         <div class="exec-specs-list">
@@ -815,20 +881,20 @@ section { padding: 76px 0; position: relative; }
             <div class="exec-spec-val" style="color:var(--success)">Gratuita ($0)</div>
           </div>
           <div class="exec-spec-item">
-            <div class="exec-spec-label">Soporte y Módulos</div>
-            <div class="exec-spec-val" style="color:var(--blue)">$0 / mes (GRATUITO)</div>
+            <div class="exec-spec-label" id="hero-spec2-label">Soporte y Módulos</div>
+            <div class="exec-spec-val" id="hero-spec2-val" style="color:var(--blue)">$0 / mes (GRATUITO)</div>
           </div>
           <div class="exec-spec-item">
             <div class="exec-spec-label">Plazo de Desarrollo</div>
             <div class="exec-spec-val num">14–18 semanas</div>
           </div>
           <div class="exec-spec-item">
-            <div class="exec-spec-label">Pauta y Comercialización</div>
-            <div class="exec-spec-val" style="color:var(--success)">INCLUIDA (50/50)</div>
+            <div class="exec-spec-label" id="hero-spec4-label">Pauta y Comercialización</div>
+            <div class="exec-spec-val" id="hero-spec4-val" style="color:var(--success)">INCLUIDA (50/50)</div>
           </div>
         </div>
 
-        <div style="background:#f8fafc;border:1px solid var(--hairline);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:0.83rem;color:var(--fg-soft)">
+        <div id="hero-features-box" style="background:#f8fafc;border:1px solid var(--hairline);border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:0.83rem;color:var(--fg-soft)">
           ✓ <strong>Soporte técnico y mantenimiento gratuito</strong> de por vida.<br>
           ✓ <strong>Actualizaciones y nuevos módulos sin costo</strong> continuo.<br>
           ✓ <strong>Pauta publicitaria Meta/Google y comercialización</strong> gestionada por ASYGNUZ.<br>
@@ -877,6 +943,128 @@ section { padding: 76px 0; position: relative; }
         <p style="font-size:0.88rem;margin-top:8px">
           La plataforma es propiedad de Centro Radia. No existen licencias obligatorias recurrentes ni cobros por doctor registrado. La infraestructura en la nube (AWS / Cloudflare / GCP) se contrata directamente a nombre de Centro Radia a costo directo.
         </p>
+      </div>
+    </div>
+
+    <!-- COMPARATIVA DIRECTA DE AMBAS MODALIDADES -->
+    <div style="margin-top:40px">
+      <div style="text-align:center;max-width:700px;margin:0 auto 24px auto">
+        <div class="kicker" style="font-size:0.75rem">Comparativa Ejecutiva</div>
+        <h3 style="font-size:1.45rem">Dos modalidades de contratación disponibles</h3>
+        <p class="muted" style="font-size:0.88rem;margin-top:6px">
+          Ambas modalidades garantizan la plataforma propia, visor 2D/3D integrado y la Etapa 0 gratuita de 3–5 días de viabilidad:
+        </p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:980px;margin:0 auto">
+        
+        <!-- CARD MODALIDAD 01 -->
+        <div class="panel-box pad" style="border:2px solid var(--blue);background:#fff;position:relative">
+          <div style="position:absolute;top:-12px;right:20px;background:var(--blue);color:#fff;font-family:var(--mono);font-size:0.72rem;padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:0.04em">
+            RECOMENDADA · ALIANZA ESTRATÉGICA
+          </div>
+          <div class="kicker" style="font-size:0.75rem;margin-bottom:6px">Modalidad 01 · Co-Inversión</div>
+          <h3 style="font-size:1.35rem;margin-bottom:4px">Sociedad Comercial 50 / 50</h3>
+          <p class="muted" style="font-size:0.84rem;margin-bottom:16px">
+            Entramos como socios tecnológicos y comerciales: reducimos a la mitad la tarifa de entrada y nos encargamos de crecer la plataforma y atraer doctores remitentes.
+          </p>
+
+          <div style="background:var(--surface-active);border:1px solid var(--hairline-blue);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+            <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);text-decoration:line-through">Precio referencial de mercado: $30.000.000 COP</div>
+            <div style="font-size:1.9rem;font-weight:600;color:var(--heading);line-height:1.2" class="num">
+              $15.000.000 <span style="font-size:0.95rem;font-weight:400;color:var(--muted)">COP</span>
+            </div>
+            <div style="font-size:0.8rem;color:var(--success);font-weight:600;margin-top:2px">
+              50 % de descuento de entrada por acuerdo de sociedad
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:0.84rem">
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--success);font-weight:700">✓</span>
+              <div><strong>Reparto de Utilidades:</strong> 50 % Centro Radia / 50 % ASYGNUZ en la monetización y comercialización.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--success);font-weight:700">✓</span>
+              <div><strong>Soporte Técnico Continuo:</strong> <strong>$0 / mes (GRATIS de por vida)</strong> mientras mantengamos la sociedad.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--success);font-weight:700">✓</span>
+              <div><strong>Evolución y Nuevos Módulos:</strong> <strong>$0 COP</strong> continuos. Las mejoras y nuevas funcionalidades van por cuenta de la sociedad.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--success);font-weight:700">✓</span>
+              <div><strong>Pauta y Comercialización:</strong> Campañas en Meta/Google y estrategias comerciales gestionadas por ASYGNUZ (fee $0).</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--success);font-weight:700">✓</span>
+              <div><strong>Forma de Pago:</strong> 5 hitos verificables ($3M, $3M, $4.5M, $2.5M, $2M).</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--success);font-weight:700">✓</span>
+              <div><strong>Etapa 0 de Viabilidad:</strong> 3–5 días hábiles 100 % gratuita previa a cualquier pago.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--hairline)">
+            <button type="button" class="btn btn-primary" onclick="setRadiaModality('sociedad');document.getElementById('hitos').scrollIntoView({behavior:'smooth'})" style="width:100%;justify-content:center;background:#1d4ed8">
+              Seleccionar Sociedad 50/50 ($15M) →
+            </button>
+          </div>
+        </div>
+
+        <!-- CARD MODALIDAD 02 -->
+        <div class="panel-box pad" style="border:1px solid var(--hairline);background:#fff;position:relative">
+          <div class="kicker" style="font-size:0.75rem;margin-bottom:6px">Modalidad 02 · Llave en Mano</div>
+          <h3 style="font-size:1.35rem;margin-bottom:4px">Desarrollo Tradicional Exclusivo</h3>
+          <p class="muted" style="font-size:0.84rem;margin-bottom:16px">
+            Desarrollo por encargo a precio cerrado. Centro Radia conserva el 100% de los ingresos, con 0% de sociedad y sin comisiones de ninguna clase.
+          </p>
+
+          <div style="background:#f8fafc;border:1px solid var(--hairline);border-radius:10px;padding:14px 16px;margin-bottom:18px">
+            <div style="font-family:var(--mono);font-size:0.72rem;color:var(--muted);text-decoration:line-through">Precio referencial de mercado: $30.000.000 COP</div>
+            <div style="font-size:1.9rem;font-weight:600;color:var(--heading);line-height:1.2" class="num">
+              $23.000.000 <span style="font-size:0.95rem;font-weight:400;color:var(--muted)">COP</span>
+            </div>
+            <div style="font-size:0.8rem;color:var(--fg-soft);font-weight:500;margin-top:2px">
+              Precio cerrado llave en mano (Ahorro directo de $7M COP)
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:0.84rem">
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--blue);font-weight:700">✓</span>
+              <div><strong>Propiedad e Ingresos:</strong> <strong>100 % para Centro Radia</strong>. 0 % de sociedad y sin comisiones por estudio ni doctor.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--blue);font-weight:700">✓</span>
+              <div><strong>Garantía Técnica:</strong> 3 meses de garantía técnica y corrección de incidencias post-entrega incluida.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--muted);font-weight:700">•</span>
+              <div><strong>Soporte Posterior:</strong> Soporte evolutivo y correctivo posterior cotizable a demanda por horas o mensualidad.</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--muted);font-weight:700">•</span>
+              <div><strong>Pauta y Comercialización:</strong> No incluida en el desarrollo (cotizable por separado si Radia lo requiere).</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--blue);font-weight:700">✓</span>
+              <div><strong>Forma de Pago:</strong> 5 hitos verificables ($4M, $5M, $8M, $4M, $2M).</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <span style="color:var(--blue);font-weight:700">✓</span>
+              <div><strong>Etapa 0 de Viabilidad:</strong> 3–5 días hábiles 100 % gratuita previa a cualquier pago.</div>
+            </div>
+          </div>
+
+          <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--hairline)">
+            <button type="button" class="btn btn-line" onclick="setRadiaModality('tradicional');document.getElementById('hitos').scrollIntoView({behavior:'smooth'})" style="width:100%;justify-content:center">
+              Seleccionar Tradicional ($23M) →
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1412,23 +1600,49 @@ section { padding: 76px 0; position: relative; }
   </div>
 </section>
 
-<!-- 05 HITOS DE ENTRADA ($15.000.000 COP) -->
+<!-- 05 HITOS DE PAGO SEGÚN MODALIDAD -->
 <section id="hitos" style="background:var(--bg-soft);border-top:1px solid var(--hairline);border-bottom:1px solid var(--hairline)">
   <div class="wrap">
     <div class="sec-head">
-      <div class="kicker">05 · Plan Financiero de Entrada & Alianza 50/50</div>
-      <h2>Forma de pago por 5 hitos verificables ($15.000.000 COP)</h2>
-      <p class="lead">
-        La cuota única de desarrollo se distribuye por avance real demostrado. ASYGNUZ asume de por vida el soporte técnico, actualizaciones y comercialización bajo el acuerdo de sociedad al 50/50. Tarifa habitual de mercado: $30.000.000 COP.
+      <div class="kicker">05 · Plan Financiero & Hitos de Entrega</div>
+      <h2 id="hitos-title">Forma de pago por 5 hitos verificables</h2>
+      <p class="lead" id="hitos-lead">
+        El valor del proyecto se distribuye por avance real demostrado ante Centro Radia. Puedes alternar la tabla de hitos para consultar cualquiera de las dos modalidades:
       </p>
     </div>
 
-    <div class="panel-box pad" style="max-width:980px;margin:0 auto">
+    <!-- Selector interactivo de tabla de hitos -->
+    <div class="phase-selector-wrap" style="max-width:760px;margin:0 auto 28px auto">
+      <div class="phase-selector" role="tablist" aria-label="Elegir tabla de hitos">
+        <button type="button" class="phase-tab active" id="tab-hitos-sociedad" onclick="setRadiaModality('sociedad')">
+          <span class="p-num">MODALIDAD 01 · ALIANZA Y CO-INVERSIÓN</span>
+          <strong>Hitos Sociedad 50/50 ($15.000.000 COP)</strong>
+          <small>Entrada $15M · Soporte técnico y nuevos módulos gratis de por vida</small>
+        </button>
+        <button type="button" class="phase-tab" id="tab-hitos-tradicional" onclick="setRadiaModality('tradicional')">
+          <span class="p-num">MODALIDAD 02 · DESARROLLO TRADICIONAL</span>
+          <strong>Hitos Llave en Mano ($23.000.000 COP)</strong>
+          <small>Precio cerrado $23M · 100% ingresos y propiedad para Radia</small>
+        </button>
+      </div>
+    </div>
+
+    <!-- TABLA HITOS 01: SOCIEDAD ($15.000.000 COP) -->
+    <div id="hitos-panel-sociedad" class="panel-box pad" style="max-width:980px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div>
+          <span class="hero-badge highlight" style="font-size:0.75rem">Modalidad 01: Alianza Comercial 50/50</span>
+          <h4 style="margin-top:4px;font-size:1.15rem">5 Hitos de Entrada ($15.000.000 COP)</h4>
+        </div>
+        <div class="num" style="font-size:1.2rem;font-weight:600;color:var(--heading)">
+          Total: $15.000.000 COP <span style="font-size:0.8rem;color:var(--muted);font-weight:400">(Ref. Mercado: $30M)</span>
+        </div>
+      </div>
       <div class="tbl-scroll"><table class="custom-table">
         <thead>
           <tr>
             <th style="width:50px">#</th>
-            <th>Hito Verificable</th>
+            <th>Hito Verificable Demostrado</th>
             <th style="text-align:right">Valor (COP)</th>
             <th style="text-align:right">% Proyecto</th>
           </tr>
@@ -1472,10 +1686,77 @@ section { padding: 76px 0; position: relative; }
         </tbody>
       </table></div>
 
-      <div style="margin-top:24px;display:flex;gap:20px;background:#f8fafc;padding:16px;border-radius:10px;font-size:0.83rem;color:var(--fg-soft)">
+      <div style="margin-top:20px;display:flex;gap:16px;background:#f8fafc;padding:14px;border-radius:10px;font-size:0.83rem;color:var(--fg-soft)">
         <div style="flex-shrink:0;color:var(--blue)">Nota:</div>
         <div>
-          <strong>Validación transparente:</strong> Centro Radia dispone de <strong>cinco (5) días hábiles</strong> tras cada demostración para comunicar observaciones o ajustes pendientes; estos se corrigen antes de formalizar el acta del hito.
+          <strong>Condición de socio 50/50:</strong> Tras la puesta en marcha, el soporte técnico y las nuevas evoluciones no tienen costo mensual para Radia, quedando financiados con el 50/50 de la operación comercial y monetización conjunta.
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLA HITOS 02: TRADICIONAL ($23.000.000 COP) -->
+    <div id="hitos-panel-tradicional" class="panel-box pad" style="max-width:980px;margin:0 auto;display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+        <div>
+          <span class="hero-badge" style="font-size:0.75rem">Modalidad 02: Llave en Mano (100% Radia)</span>
+          <h4 style="margin-top:4px;font-size:1.15rem">5 Hitos de Entrega ($23.000.000 COP)</h4>
+        </div>
+        <div class="num" style="font-size:1.2rem;font-weight:600;color:var(--heading)">
+          Total: $23.000.000 COP <span style="font-size:0.8rem;color:var(--muted);font-weight:400">(Ref. Mercado: $30M)</span>
+        </div>
+      </div>
+      <div class="tbl-scroll"><table class="custom-table">
+        <thead>
+          <tr>
+            <th style="width:50px">#</th>
+            <th>Hito Verificable Demostrado</th>
+            <th style="text-align:right">Valor (COP)</th>
+            <th style="text-align:right">% Proyecto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono">H1</td>
+            <td><strong>Inicio del desarrollo y arquitectura base</strong> tras aprobar la etapa 0 gratuita</td>
+            <td style="text-align:right" class="num font-medium">$4.000.000</td>
+            <td style="text-align:right" class="muted num">17,4 %</td>
+          </tr>
+          <tr>
+            <td class="mono">H2</td>
+            <td><strong>Pacientes, órdenes, asignación y permisos RBAC</strong> demostrados</td>
+            <td style="text-align:right" class="num font-medium">$5.000.000</td>
+            <td style="text-align:right" class="muted num">21,7 %</td>
+          </tr>
+          <tr>
+            <td class="mono">H3</td>
+            <td><strong>Flujo de ingesta DICOM y visor 2D/3D integrado</strong> demostrados con muestras reales</td>
+            <td style="text-align:right" class="num font-medium" style="color:var(--blue)">$8.000.000</td>
+            <td style="text-align:right" class="muted num">34,8 %</td>
+          </tr>
+          <tr>
+            <td class="mono">H4</td>
+            <td><strong>Tarifas, convenios, cartera, dictámenes en PDF y enlaces de entrega 180d</strong> demostrados</td>
+            <td style="text-align:right" class="num font-medium">$4.000.000</td>
+            <td style="text-align:right" class="muted num">17,4 %</td>
+          </tr>
+          <tr>
+            <td class="mono">H5</td>
+            <td><strong>Puesta en producción, entrega de código fuente, capacitación y aceptación final</strong></td>
+            <td style="text-align:right" class="num font-medium">$2.000.000</td>
+            <td style="text-align:right" class="muted num">8,7 %</td>
+          </tr>
+          <tr class="total-row">
+            <td colspan="2" style="font-size:1.05rem">TOTAL PRECIO CERRADO TRADICIONAL (100% PARA RADIA)</td>
+            <td style="text-align:right;font-size:1.25rem" class="num">$23.000.000 COP</td>
+            <td style="text-align:right;font-size:1rem" class="num">100,0 %</td>
+          </tr>
+        </tbody>
+      </table></div>
+
+      <div style="margin-top:20px;display:flex;gap:16px;background:#f8fafc;padding:14px;border-radius:10px;font-size:0.83rem;color:var(--fg-soft)">
+        <div style="flex-shrink:0;color:var(--blue)">Nota:</div>
+        <div>
+          <strong>Propiedad y garantía:</strong> El 100% de la propiedad y recaudos pertenecen a Centro Radia (0% sociedad). Incluye 3 meses de garantía técnica post-entrega.
         </div>
       </div>
     </div>
@@ -1489,7 +1770,7 @@ section { padding: 76px 0; position: relative; }
       <div class="kicker">06 · Análisis Financiero &amp; Tiempo de Recuperación</div>
       <h2>Calculadora de retorno de inversión y tiempo de recuperación</h2>
       <p class="lead">
-        Coloca tus propios datos de operación en los 4 campos de abajo. La calculadora proyecta en tiempo real el valor mensual generado, cuántos estudios amortizan la plataforma y en cuánto tiempo recuperas los <strong>$15.000.000 COP</strong>:
+        Coloca tus propios datos de operación en los 4 campos de abajo. La calculadora proyecta en tiempo real el valor mensual generado, cuántos estudios amortizan la plataforma y en cuánto tiempo recuperas la inversión:
       </p>
     </div>
 
@@ -1497,9 +1778,19 @@ section { padding: 76px 0; position: relative; }
       <div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:36px;align-items:start">
         <!-- Formulario de 4 Inputs Directos -->
         <div>
-          <h4 style="margin-bottom:12px;display:flex;align-items:center;gap:8px">
-            <span style="color:var(--blue)">●</span> Ingresa tus datos de operación
-          </h4>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <h4 style="margin-bottom:0;display:flex;align-items:center;gap:8px">
+              <span style="color:var(--blue)">●</span> Ingresa tus datos de operación
+            </h4>
+            <div style="display:flex;gap:6px">
+              <button type="button" class="btn btn-primary" id="calc-btn-sociedad" onclick="setCalcInvestment(15000000)" style="font-size:0.75rem;padding:5px 10px;background:#1d4ed8">
+                Sociedad $15M
+              </button>
+              <button type="button" class="btn btn-line" id="calc-btn-tradicional" onclick="setCalcInvestment(23000000)" style="font-size:0.75rem;padding:5px 10px">
+                Tradicional $23M
+              </button>
+            </div>
+          </div>
           <p style="font-size:0.85rem;color:var(--muted);margin-bottom:20px">
             Modifica cualquiera de estos 4 valores para ver el cálculo de recuperación en tiempo real:
           </p>
@@ -1534,11 +1825,11 @@ section { padding: 76px 0; position: relative; }
 
             <div class="sim-input-group">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                <label class="sim-label" style="margin-bottom:0">4. Inversión de Entrada Sociedad (COP)</label>
+                <label class="sim-label" id="calc-inv-input-label" style="margin-bottom:0">4. Inversión de Entrada (COP)</label>
                 <span id="label-inv-disp" class="mono" style="font-size:0.8rem;color:var(--blue);font-weight:600">$15.000.000 COP</span>
               </div>
               <input type="number" id="calc-investment" class="sim-input num" value="15000000" min="1000000" step="1000000" oninput="runRecoveryCalc()">
-              <span style="font-size:0.75rem;color:var(--muted)">Cuota de entrada en la sociedad comercial 50/50 para Centro Radia.</span>
+              <span id="calc-inv-input-sub" style="font-size:0.75rem;color:var(--muted)">Inversión según la modalidad seleccionada ($15M Sociedad 50/50 ó $23M Tradicional).</span>
             </div>
           </div>
         </div>
@@ -1911,6 +2202,145 @@ section { padding: 76px 0; position: relative; }
 </footer>
 
 <script>
+// Alternar Modalidad en Radia (Sociedad 50/50 vs Tradicional 100% Radia)
+function setRadiaModality(mode) {
+  const isSociedad = mode === "sociedad";
+
+  // Botones del selector en Hero
+  const btnSoc = document.getElementById("btn-mod-sociedad");
+  const btnTrad = document.getElementById("btn-mod-tradicional");
+  if (btnSoc) btnSoc.classList.toggle("active", isSociedad);
+  if (btnTrad) btnTrad.classList.toggle("active", !isSociedad);
+
+  // Tabs de Hitos en Sección 05
+  const tabHitosSoc = document.getElementById("tab-hitos-sociedad");
+  const tabHitosTrad = document.getElementById("tab-hitos-tradicional");
+  if (tabHitosSoc) tabHitosSoc.classList.toggle("active", isSociedad);
+  if (tabHitosTrad) tabHitosTrad.classList.toggle("active", !isSociedad);
+
+  // Paneles de Hitos
+  const panelSoc = document.getElementById("hitos-panel-sociedad");
+  const panelTrad = document.getElementById("hitos-panel-tradicional");
+  if (panelSoc) panelSoc.style.display = isSociedad ? "block" : "none";
+  if (panelTrad) panelTrad.style.display = isSociedad ? "none" : "block";
+
+  // Botones de la Calculadora en Sección 06
+  const calcBtnSoc = document.getElementById("calc-btn-sociedad");
+  const calcBtnTrad = document.getElementById("calc-btn-tradicional");
+  if (calcBtnSoc) {
+    calcBtnSoc.className = isSociedad ? "btn btn-primary" : "btn btn-line";
+    calcBtnSoc.style.background = isSociedad ? "#1d4ed8" : "";
+  }
+  if (calcBtnTrad) {
+    calcBtnTrad.className = !isSociedad ? "btn btn-primary" : "btn btn-line";
+    calcBtnTrad.style.background = !isSociedad ? "#1d4ed8" : "";
+  }
+
+  // Hero badge, títulos y textos
+  const badge = document.getElementById("hero-badge-highlight");
+  const title = document.getElementById("hero-title");
+  const lead = document.getElementById("hero-lead");
+  const priceVal = document.getElementById("hero-price-val");
+  const priceLabel = document.getElementById("hero-price-label");
+  const priceSub = document.getElementById("hero-price-sub");
+  const savingsPill = document.getElementById("hero-savings-pill");
+  const spec2Label = document.getElementById("hero-spec2-label");
+  const spec2Val = document.getElementById("hero-spec2-val");
+  const spec4Label = document.getElementById("hero-spec4-label");
+  const spec4Val = document.getElementById("hero-spec4-val");
+  const featuresBox = document.getElementById("hero-features-box");
+  const hitosBtn = document.getElementById("hero-hitos-btn");
+  const calcInvLabel = document.getElementById("calc-inv-input-label");
+  const calcInvSub = document.getElementById("calc-inv-input-sub");
+
+  if (isSociedad) {
+    if (badge) {
+      badge.innerText = "Modalidad 01: Alianza Comercial & Sociedad 50/50";
+      badge.className = "hero-badge highlight";
+    }
+    if (title) title.innerHTML = "Plataforma propia, <strong>visor 2D/3D integrado</strong> y sociedad de crecimiento comercial.";
+    if (lead) lead.innerHTML = "Desarrollamos la plataforma propia para <strong>Centro Radia</strong> por una inversión inicial de entrada de <strong>$15.000.000 COP</strong> bajo un modelo de <strong>sociedad comercial y tecnológica 50/50</strong>. Soporte técnico gratuito de por vida, actualizaciones continuas de módulos sin costo, pauta publicitaria en Meta/Google e implementación activa de estrategias de comercialización para multiplicar la red de doctores remitentes.";
+    if (priceVal) priceVal.innerHTML = "$15.000.000 <span style=\"font-size:1.1rem;font-weight:400;color:var(--muted)\">COP</span>";
+    if (priceLabel) priceLabel.innerText = "Inversión de Entrada (Sociedad 50/50)";
+    if (priceSub) priceSub.innerText = "Reparto 50/50 en beneficios · Soporte, módulos y pauta GRATIS";
+    if (savingsPill) {
+      savingsPill.innerText = "Ahorro como socio: −$15M COP";
+      savingsPill.style.background = "var(--success-soft)";
+      savingsPill.style.color = "var(--success)";
+    }
+    if (spec2Label) spec2Label.innerText = "Soporte y Módulos";
+    if (spec2Val) {
+      spec2Val.innerText = "$0 / mes (GRATUITO)";
+      spec2Val.style.color = "var(--blue)";
+    }
+    if (spec4Label) spec4Label.innerText = "Pauta y Comercialización";
+    if (spec4Val) {
+      spec4Val.innerText = "INCLUIDA (50/50)";
+      spec4Val.style.color = "var(--success)";
+    }
+    if (featuresBox) {
+      featuresBox.innerHTML = `
+        ✓ <strong>Soporte técnico y mantenimiento gratuito</strong> de por vida.<br>
+        ✓ <strong>Actualizaciones y nuevos módulos sin costo</strong> continuo.<br>
+        ✓ <strong>Pauta publicitaria Meta/Google y comercialización</strong> gestionada por ASYGNUZ.<br>
+        ✓ <strong>Reparto 50 / 50</strong> en utilidades y monetización de la plataforma.
+      `;
+    }
+    if (hitosBtn) hitosBtn.innerText = "Ver Hitos de Pago ($15M COP)";
+    if (calcInvLabel) calcInvLabel.innerText = "4. Inversión de Entrada Sociedad (COP)";
+    if (calcInvSub) calcInvSub.innerText = "Cuota de entrada en la sociedad comercial 50/50 para Centro Radia.";
+  } else {
+    if (badge) {
+      badge.innerText = "Modalidad 02: Desarrollo Tradicional Llave en Mano";
+      badge.className = "hero-badge";
+    }
+    if (title) title.innerHTML = "Plataforma propia, <strong>visor 2D/3D integrado</strong> y 100% propiedad de Centro Radia.";
+    if (lead) lead.innerHTML = "Desarrollo a la medida de la plataforma para <strong>Centro Radia</strong> bajo precio cerrado de <strong>$23.000.000 COP</strong> (referencia habitual: $30.000.000 COP). <strong>100% de la propiedad, operación e ingresos para Centro Radia (0% sociedad, sin comisiones)</strong>. Incluye 3 meses de garantía técnica y corrección de bugs post-entrega.";
+    if (priceVal) priceVal.innerHTML = "$23.000.000 <span style=\"font-size:1.1rem;font-weight:400;color:var(--muted)\">COP</span>";
+    if (priceLabel) priceLabel.innerText = "Precio Cerrado Llave en Mano (100% Radia)";
+    if (priceSub) priceSub.innerText = "100% ingresos para Radia · 0% sociedad · 3 meses de garantía";
+    if (savingsPill) {
+      savingsPill.innerText = "Ahorro directo: −$7M COP";
+      savingsPill.style.background = "#e2e8f0";
+      savingsPill.style.color = "#334155";
+    }
+    if (spec2Label) spec2Label.innerText = "Garantía Técnica";
+    if (spec2Val) {
+      spec2Val.innerText = "3 meses incluida";
+      spec2Val.style.color = "var(--fg)";
+    }
+    if (spec4Label) spec4Label.innerText = "Pauta Publicitaria";
+    if (spec4Val) {
+      spec4Val.innerText = "Cotizable a demanda";
+      spec4Val.style.color = "var(--muted)";
+    }
+    if (featuresBox) {
+      featuresBox.innerHTML = `
+        ✓ <strong>100% de los ingresos y propiedad</strong> exclusivos para Centro Radia.<br>
+        ✓ <strong>0% de sociedad y sin comisiones</strong> por estudio ni doctor.<br>
+        ✓ <strong>3 meses de garantía técnica</strong> y corrección de incidencias post-entrega.<br>
+        ✓ <strong>Soporte evolutivo posterior y pauta</strong> cotizables por requerimiento.
+      `;
+    }
+    if (hitosBtn) hitosBtn.innerText = "Ver Hitos de Pago ($23M COP)";
+    if (calcInvLabel) calcInvLabel.innerText = "4. Precio Cerrado Tradicional (COP)";
+    if (calcInvSub) calcInvSub.innerText = "Desarrollo tradicional exclusivo con 100% de propiedad para Centro Radia.";
+  }
+
+  // Actualizar calculadora con la cifra de la modalidad
+  const invInput = document.getElementById("calc-investment");
+  if (invInput) {
+    invInput.value = isSociedad ? 15000000 : 23000000;
+  }
+  runRecoveryCalc();
+}
+
+function setCalcInvestment(amt) {
+  const invInput = document.getElementById("calc-investment");
+  if (invInput) invInput.value = amt;
+  setRadiaModality(amt === 15000000 ? "sociedad" : "tradicional");
+}
+
 // Lógica de Pestañas del Simulador
 function switchSimTab(tabId, btn) {
   document.querySelectorAll(".sim-tab-btn").forEach(b => b.classList.remove("active"));
