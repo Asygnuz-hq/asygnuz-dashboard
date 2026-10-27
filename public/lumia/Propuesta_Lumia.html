@@ -1250,7 +1250,53 @@ section { padding: 84px 0; position: relative; }
 .plan li::before { content: "✓"; color: var(--blue-soft); }
 .plan li.no { color: var(--muted); opacity: 0.4; }
 .plan li.no::before { content: "–"; color: var(--muted); }
-.plan .btn { margin-top: auto; }
+/* SELECTOR DE FASES / MODALIDADES LUMIA */
+.phase-selector-wrap { margin-bottom: 28px; }
+.phase-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.phase-tab {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  padding: 18px 22px;
+  border-radius: 12px;
+  border: 1px solid var(--hairline);
+  background: var(--surface);
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: left;
+}
+.phase-tab:hover {
+  border-color: var(--hairline-mid);
+  transform: translateY(-1px);
+}
+.phase-tab[aria-selected="true"] {
+  border-color: var(--hairline-blue);
+  background: rgba(37, 99, 235, 0.08);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.07);
+}
+.phase-tab .p-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+}
+.phase-tab strong {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--heading);
+}
+.phase-tab small {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
 
 /* COMISIÓN */
 .comm-grid {
@@ -1488,7 +1534,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   .topbar-in { justify-content: center; }
   .mode-switch { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .mode-btn { justify-content: center; padding: 8px 6px; font-size: 0.74rem; text-align: center; }
-  .three-captures-grid, .edit-pillars, .plans, .three, .reel-grid, .angles, .pillars-grid, .terms, .tiles, .ig-showcase { grid-template-columns: minmax(0, 1fr); }
+  .three-captures-grid, .edit-pillars, .plans, .three, .reel-grid, .angles, .pillars-grid, .terms, .tiles, .ig-showcase, .phase-selector { grid-template-columns: minmax(0, 1fr) !important; }
   .meta-line { grid-template-columns: minmax(0, 1fr); }
   .step-kpis-mini { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; }
   .step-kpis-mini div strong { font-size: 0.82rem; }
@@ -1651,78 +1697,145 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   <section id="comision">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">02 — Esquema Comercial: Valor Fijo Mensual + % por Tratamiento</div>
-        <h2>Claridad total antes de ver los planes: es la mensualidad fija MÁS el porcentaje que se defina por tratamiento cerrado</h2>
+        <div class="kicker">02 — Esquema Comercial: Dos Fases / Modalidades a Elegir</div>
+        <h2>Dos opciones de contratación: esquema con porcentaje compartido o tarifa fija plena</h2>
         <p class="lead">
-          No trabajamos bajo un modelo únicamente variable. Para que la operación funcione al nivel que requiere Lumia, nuestra propuesta integra todo el equipo de trabajo mes a mes y estructura la inversión en <b>dos componentes que se suman</b>:
+          Diseñamos dos modalidades para que Lumia elija la que mejor se adapte a su estructura financiera:
+          <b>Fase 1</b> (Mensualidad base reducida + porcentaje por tratamiento cerrado) o <b>Fase 2</b> (Sumar $1.000.000 COP a la mensualidad y <b>0% de porcentaje de cliente</b>, donde todo el recaudo es 100% para Lumia).
         </p>
       </div>
 
-      <!-- Cómo funciona la propuesta en la práctica (3 bloques operativos) -->
-      <div class="three" style="margin-bottom:24px">
-        <div class="panel-box pad">
-          <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">01 · Producción en Clínica</div>
-          <h3>Nosotros grabamos y editamos todo</h3>
-          <p style="font-size:0.88rem;margin-top:6px">Vamos a Lumia cada 15 días con guiones listos por perfil de paciente (implantes, diseño, Invisalign, turismo dental) y entregamos los anuncios y reels editados.</p>
-        </div>
-        <div class="panel-box pad">
-          <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">02 · Pauta de Alto Valor</div>
-          <h3>Meta Ads + Google Ads sin fugas</h3>
-          <p style="font-size:0.88rem;margin-top:6px">Reestructuramos las campañas por servicio rentable, corregimos el error 503 de la web y rotamos ganchos creativos para bajar el costo por paciente.</p>
-        </div>
-        <div class="panel-box pad">
-          <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">03 · Trazabilidad hasta el Cierre</div>
-          <h3>De mensaje en WhatsApp a tratamiento cobrado</h3>
-          <p style="font-size:0.88rem;margin-top:6px">Cada anuncio tiene un código e identificador propio para saber con exactitud qué pacientes agendaron valoración, quiénes cerraron tratamiento y cuánto facturaron.</p>
+      <!-- Selector interactivo de Fases (Sincronizado con los planes) -->
+      <div class="phase-selector-wrap">
+        <div class="phase-selector" role="tablist" aria-label="Elegir modalidad de contratación">
+          <button type="button" class="phase-tab" data-phase="fase1" aria-selected="true">
+            <span class="p-num">FASE 01 · ESQUEMA MIXTO</span>
+            <strong>Fijo Base Reducido + % por Tratamiento</strong>
+            <small>Planes desde $1,0M/mes + porcentaje (5 % a 10 %) en tratamientos ≥ $2.000.000 COP</small>
+          </button>
+          <button type="button" class="phase-tab" data-phase="fase2" aria-selected="false">
+            <span class="p-num">FASE 02 · TARIFA FIJA PLENA</span>
+            <strong>+$1.000.000 COP / mes · 0% Porcentaje de Cliente</strong>
+            <small>Planes desde $2,0M/mes · 0% comisión · El 100% de todo lo recaudado es para Lumia</small>
+          </button>
         </div>
       </div>
 
-      <!-- Fórmula visual explícita: Parte 1 + Parte 2 -->
-      <div class="panel-box pad" style="margin-bottom:28px;border-color:var(--hairline-blue);background:var(--surface-active)">
-        <div class="eq-grid-2" style="display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center">
-          <div>
-            <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);font-weight:500;margin-bottom:6px">Componente 01 · Dinero Fijo Mensual</div>
-            <h3 style="font-size:1.35rem">El Valor Mensual del Plan Elegido</h3>
-            <p style="font-size:0.9rem;margin-top:6px"><b>$1.000.000</b> (Plan Pauta), <b>$1.500.000</b> (Plan Contenido) o <b>$2.000.000 COP/mes</b> (Plan Integral). Garantiza el equipo, la producción quincenal, la edición y la administración continua.</p>
+      <!-- PANEL FASE 1: FIJO BASE + % POR TRATAMIENTO -->
+      <div id="panelFase1">
+        <!-- Cómo funciona la propuesta en la práctica (3 bloques operativos) -->
+        <div class="three" style="margin-bottom:24px">
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">01 · Producción en Clínica</div>
+            <h3>Nosotros grabamos y editamos todo</h3>
+            <p style="font-size:0.88rem;margin-top:6px">Vamos a Lumia cada 15 días con guiones listos por perfil de paciente (implantes, diseño, Invisalign, turismo dental) y entregamos los anuncios y reels editados.</p>
           </div>
-          <div style="font-family:var(--mono);font-size:2.4rem;color:var(--blue);font-weight:400;padding:0 10px">+</div>
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">02 · Pauta de Alto Valor</div>
+            <h3>Meta Ads + Google Ads sin fugas</h3>
+            <p style="font-size:0.88rem;margin-top:6px">Reestructuramos las campañas por servicio rentable, corregimos el error 503 de la web y rotamos ganchos creativos para bajar el costo por paciente.</p>
+          </div>
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">03 · Trazabilidad hasta el Cierre</div>
+            <h3>De mensaje en WhatsApp a tratamiento cobrado</h3>
+            <p style="font-size:0.88rem;margin-top:6px">Cada anuncio tiene un código e identificador propio para saber con exactitud qué pacientes agendaron valoración, quiénes cerraron tratamiento y cuánto facturaron.</p>
+          </div>
+        </div>
+
+        <!-- Fórmula visual explícita: Parte 1 + Parte 2 -->
+        <div class="panel-box pad" style="margin-bottom:28px;border-color:var(--hairline-blue);background:var(--surface-active)">
+          <div class="eq-grid-2" style="display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center">
+            <div>
+              <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);font-weight:500;margin-bottom:6px">Fase 01 · Dinero Fijo Mensual Base</div>
+              <h3 style="font-size:1.35rem">El Valor Mensual Base</h3>
+              <p style="font-size:0.9rem;margin-top:6px"><b>$1.000.000</b> (Plan Pauta), <b>$1.500.000</b> (Plan Contenido) o <b>$2.000.000 COP/mes</b> (Plan Integral). Garantiza el equipo, la producción quincenal, la edición y la administración continua.</p>
+            </div>
+            <div style="font-family:var(--mono);font-size:2.4rem;color:var(--blue);font-weight:400;padding:0 10px">+</div>
+            <div>
+              <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);font-weight:500;margin-bottom:6px">Componente Variable · % por Tratamiento Cerrado</div>
+              <h3 style="font-size:1.35rem">El % que se Defina por Tratamiento (5 % a 10 %)</h3>
+              <p style="font-size:0.9rem;margin-top:6px">Adicional a la mensualidad fija base, se suma el <b>porcentaje que definamos juntos (entre 5 % y 10 %)</b> por cada tratamiento cerrado igual o superior a <b>$2.000.000 COP</b>.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="comm-grid">
           <div>
-            <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);font-weight:500;margin-bottom:6px">Componente 02 · % por Tratamiento Cerrado</div>
-            <h3 style="font-size:1.35rem">El % que se Defina por Tratamiento (5 % a 10 %)</h3>
-            <p style="font-size:0.9rem;margin-top:6px">Adicional a la mensualidad fija, se suma el <b>porcentaje que definamos juntos (entre 5 % y 10 %)</b> por cada tratamiento cerrado igual o superior a <b>$2.000.000 COP</b>.</p>
+            <h3 style="margin-bottom:8px;font-size:1.22rem">Condiciones transparentes del porcentaje por tratamiento</h3>
+            <p class="muted" style="font-size:0.9rem">
+              Antes de iniciar dejamos acordado el porcentaje exacto (entre 5 % y 10 %) para cada línea de tratamiento de $2.000.000 COP o más.
+            </p>
+            <ul class="rules">
+              <li><b>1. Es la mensualidad fija base MÁS (+) el porcentaje:</b> el porcentaje por tratamiento cerrado se suma al valor fijo base del plan elegido.</li>
+              <li><b>2. Solo pacientes verificables de la pauta:</b> aplica únicamente a pacientes que llegan por un anuncio identificado (código en WhatsApp, UTM o formulario).</li>
+              <li><b>3. Sobre dinero efectivamente recaudado por Lumia:</b> se liquida a mes vencido sobre los pagos reales recibidos por la clínica. Si el paciente paga por cuotas, el porcentaje se liquida conforme ingresa el dinero.</li>
+              <li><b>4. Conciliación mensual conjunta:</b> cada fin de mes cruzamos el reporte de pacientes trazados con las hojas de cierre de Lumia antes de facturar el porcentaje.</li>
+            </ul>
+          </div>
+
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:10px;font-size:0.76rem">Simulador del % Adicional por Tratamiento (Fase 1)</div>
+            <label for="tval" style="display:block;font-size:0.88rem;color:var(--muted);margin-bottom:8px">Valor del tratamiento cerrado (≥ $2.000.000 COP)</label>
+            <input type="range" id="tval" min="2000000" max="20000000" step="100000" value="2500000" style="width:100%;accent-color:var(--blue)">
+            <div class="price num" style="font-size:2rem;margin-top:10px" id="tvalOut"></div>
+            <div class="calcout">
+              <div><small>Si se define 5 %</small><span class="num" id="c5"></span></div>
+              <div><small>Si se define 7,5 %</small><span class="num" id="c75"></span></div>
+              <div><small>Si se define 10 %</small><span class="num" id="c10"></span></div>
+            </div>
+            <p class="muted" style="font-size:0.8rem;margin-top:14px;padding-top:12px;border-top:1px solid var(--hairline)">
+              <b>Importante:</b> este valor es por cada tratamiento cerrado y <b>se suma a la mensualidad fija del plan elegido</b> ($1,0M, $1,5M o $2,0M COP/mes). Ejemplo base: Diseño de sonrisa desde $2.500.000 COP.
+            </p>
           </div>
         </div>
       </div>
 
-      <div class="comm-grid">
-        <div>
-          <h3 style="margin-bottom:8px;font-size:1.22rem">Condiciones transparentes del porcentaje por tratamiento</h3>
-          <p class="muted" style="font-size:0.9rem">
-            Antes de iniciar dejamos acordado el porcentaje exacto (entre 5 % y 10 %) para cada línea de tratamiento de $2.000.000 COP o más.
-          </p>
+      <!-- PANEL FASE 2: TARIFA FIJA PLENA (+ $1.000.000 COP · 0% PORCENTAJE) -->
+      <div id="panelFase2" hidden>
+        <div class="three" style="margin-bottom:24px">
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">01 · Producción en Clínica</div>
+            <h3>Grabación y edición completa</h3>
+            <p style="font-size:0.88rem;margin-top:6px">Dos jornadas de grabación al mes en Lumia con guiones por servicio, entregando todos los anuncios y reels editados sin recortar alcance.</p>
+          </div>
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">02 · Pauta de Alto Valor</div>
+            <h3>Meta Ads + Google Ads sin fugas</h3>
+            <p style="font-size:0.88rem;margin-top:6px">Campañas segmentadas por tratamiento de alto valor, corrección del error 503 y rotación continua de creativos para maximizar pacientes.</p>
+          </div>
+          <div class="panel-box pad">
+            <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">03 · 100% para Lumia</div>
+            <h3>Cero comisiones por paciente</h3>
+            <p style="font-size:0.88rem;margin-top:6px">Sin porcentajes variables ni conciliaciones de cierre. Todo lo que pague el paciente ingresa 100% a la clínica.</p>
+          </div>
+        </div>
+
+        <div class="panel-box pad" style="margin-bottom:28px;border-color:var(--hairline-blue);background:var(--surface-active)">
+          <div class="eq-grid-2" style="display:grid;grid-template-columns:1fr auto 1fr;gap:24px;align-items:center">
+            <div>
+              <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--blue);font-weight:500;margin-bottom:6px">Fase 02 · Tarifa Mensual Fija (+ $1.000.000 COP)</div>
+              <h3 style="font-size:1.35rem">Mensualidad Fija Plena</h3>
+              <p style="font-size:0.9rem;margin-top:6px"><b>$2.000.000</b> (Plan Pauta), <b>$2.500.000</b> (Plan Contenido) o <b>$3.000.000 COP/mes</b> (Plan Integral). Se suma $1.000.000 COP a la mensualidad para absorber la operación completa con una tarifa fija predecible.</p>
+            </div>
+            <div style="font-family:var(--mono);font-size:2.4rem;color:var(--success);font-weight:400;padding:0 10px">=</div>
+            <div>
+              <div style="font-family:var(--mono);font-size:0.78rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--success);font-weight:500;margin-bottom:6px">0% Porcentaje sobre Pacientes</div>
+              <h3 style="font-size:1.35rem">Cero Comisión por Tratamiento Cerrado</h3>
+              <p style="font-size:0.9rem;margin-top:6px">No hay porcentaje por paciente (0%). Si la clínica factura $50M o $100M en implantes, diseño de sonrisa o Invisalign, <b>el 100% del dinero es para Lumia</b>. Sin reportes de facturación ni conciliaciones a fin de mes.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-box pad">
+          <h3 style="margin-bottom:8px;font-size:1.22rem">Ventajas de elegir la Fase 2 (Tarifa Fija Plena)</h3>
           <ul class="rules">
-            <li><b>1. Es la mensualidad fija MÁS (+) el porcentaje:</b> no es un modelo solo variable; el porcentaje por tratamiento cerrado se suma al valor fijo mensual del plan elegido.</li>
-            <li><b>2. Solo pacientes verificables de la pauta:</b> aplica únicamente a pacientes que llegan por un anuncio identificado (código en WhatsApp, UTM o formulario) y quedan registrados en el seguimiento.</li>
-            <li><b>3. Sobre dinero efectivamente recaudado por Lumia:</b> se liquida a mes vencido sobre los pagos reales recibidos por la clínica. Si el paciente paga por cuotas, el porcentaje se liquida conforme ingresa el dinero.</li>
-            <li><b>4. Conciliación mensual conjunta:</b> cada fin de mes cruzamos el reporte de pacientes trazados con las hojas de cierre de Lumia antes de facturar el porcentaje correspondiente.</li>
+            <li><b>1. Previsibilidad financiera total:</b> la clínica sabe con exactitud cuánto invierte cada mes, facilitando el control presupuestal sin sorpresas.</li>
+            <li><b>2. Máxima rentabilidad en tratamientos de alto ticket:</b> casos de implantes múltiples, All-on-X o rehabilitaciones completas generan margen puro para Lumia sin retención variable.</li>
+            <li><b>3. Cero fricción operativa:</b> no requiere cruce mensual de historias clínicas o reportes de recaudo para liquidar comisiones.</li>
           </ul>
         </div>
-
-        <div class="panel-box pad">
-          <div class="kicker" style="margin-bottom:10px;font-size:0.76rem">Simulador del % Adicional por Tratamiento</div>
-          <label for="tval" style="display:block;font-size:0.88rem;color:var(--muted);margin-bottom:8px">Valor del tratamiento cerrado (≥ $2.000.000 COP)</label>
-          <input type="range" id="tval" min="2000000" max="20000000" step="100000" value="2500000" style="width:100%;accent-color:var(--blue)">
-          <div class="price num" style="font-size:2rem;margin-top:10px" id="tvalOut"></div>
-          <div class="calcout">
-            <div><small>Si se define 5 %</small><span class="num" id="c5"></span></div>
-            <div><small>Si se define 7,5 %</small><span class="num" id="c75"></span></div>
-            <div><small>Si se define 10 %</small><span class="num" id="c10"></span></div>
-          </div>
-          <p class="muted" style="font-size:0.8rem;margin-top:14px;padding-top:12px;border-top:1px solid var(--hairline)">
-            <b>Importante:</b> este valor es por cada tratamiento cerrado y <b>se suma a la mensualidad fija del plan elegido</b> ($1,0M, $1,5M o $2,0M COP/mes). Ejemplo base: Diseño de sonrisa desde $2.500.000 COP.
-          </p>
-        </div>
       </div>
+
     </div>
   </section>
 
@@ -1732,10 +1845,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   <section id="planes">
     <div class="wrap">
       <div class="sec-head">
-        <div class="kicker">03 — Tres Niveles de Servicio (Valor Mensual + % por Tratamiento)</div>
+        <div class="kicker" id="sec3Kicker">03 — Tres Niveles de Servicio (Fase 1: Fijo + % · Fase 2: Fijo + $1M sin %)</div>
         <h2>Los 3 paquetes de operación mensual</h2>
-        <p class="lead">
-          Elige el alcance operativo para Lumia. Todos los paquetes incluyen <b>su valor fijo mensual MÁS (+) el porcentaje que se defina (5 % a 10 %)</b> por tratamiento cerrado desde $2.000.000 COP. Recomendamos el <b>Plan Integral ($2.000.000/mes + %)</b>.
+        <p class="lead" id="sec3Lead">
+          Elige el alcance operativo para Lumia. Usa el selector de arriba para alternar entre la <b>Fase 1 (Mensualidad base + %)</b> y la <b>Fase 2 (+$1M al mes con 0% de comisión)</b>. Recomendamos el <b>Plan Integral</b>.
         </p>
       </div>
       <div class="plans" id="plans"></div>
@@ -1763,7 +1876,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       <div class="builder">
         <div id="groups"></div>
         <aside class="panel-box summary" aria-live="polite">
-          <div class="kicker" style="margin:0;font-size:0.76rem">Resumen: Mensualidad Fija + %</div>
+          <div class="kicker" style="margin:0;font-size:0.76rem" id="sumHeaderTitle">Resumen: Mensualidad Fija + %</div>
           <div class="sumrow"><span>Módulos seleccionados</span><span class="num" id="sCount"></span></div>
           <div class="meter"><i id="sMeter"></i></div>
           <div class="sumrow"><span>Suma por separado</span><span class="num" id="sSum"></span></div>
@@ -1773,11 +1886,11 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
           <div class="applied" id="sApplied"></div>
           <div class="save" id="sSave"></div>
 
-          <div style="padding:12px 14px;border-radius:8px;background:rgba(37,99,235,0.06);border:1px solid var(--hairline-blue);margin-top:4px">
-            <div style="font-family:var(--mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--blue);font-weight:500;margin-bottom:4px">
+          <div id="sumPhaseCard" style="padding:12px 14px;border-radius:8px;background:rgba(37,99,235,0.06);border:1px solid var(--hairline-blue);margin-top:4px;transition:all 0.2s ease">
+            <div id="sumPhaseTitle" style="font-family:var(--mono);font-size:0.72rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--blue);font-weight:500;margin-bottom:4px">
               2. + Porcentaje por tratamiento cerrado
             </div>
-            <p style="font-size:0.82rem;line-height:1.5;color:var(--fg)">
+            <p id="sumPhaseDesc" style="font-size:0.82rem;line-height:1.5;color:var(--fg)">
               <b>El dinero mensual de arriba + el % que se defina (5 % a 10 %)</b> por cada tratamiento cerrado desde $2.000.000 COP.
             </p>
           </div>
@@ -1829,10 +1942,10 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
         <h2>Términos de operación y arranque</h2>
       </div>
       <dl class="terms">
-        <div class="panel-box"><dt>1. Valor fijo mensual del plan</dt><dd>Plan Pauta $1.000.000/mes · Plan Contenido $1.500.000/mes · Plan Integral $2.000.000/mes (o suma de módulos). IVA no incluido.</dd></div>
-        <div class="panel-box"><dt>2. + % definido por tratamiento</dt><dd>Adicional a la mensualidad fija, se suma del 5 % al 10 % (según se defina por tratamiento) en cierres desde $2.000.000 COP de pacientes trazados.</dd></div>
+        <div class="panel-box"><dt>1. Valor mensual de la propuesta</dt><dd><b>Fase 1 (Mixta):</b> Plan Pauta $1.000.000/mes · Plan Contenido $1.500.000/mes · Plan Integral $2.000.000/mes.<br><b>Fase 2 (Fija Plena):</b> Plan Pauta $2.000.000/mes · Plan Contenido $2.500.000/mes · Plan Integral $3.000.000/mes (+ $1M fijo). IVA no incluido.</dd></div>
+        <div class="panel-box"><dt>2. Porcentaje sobre tratamientos</dt><dd><b>Fase 1:</b> 5 % al 10 % en tratamientos cerrados ≥ $2.000.000 COP de pacientes trazados.<br><b>Fase 2:</b> <b>0% comisión de ventas / sin porcentaje de cliente</b> (100% del recaudo es para Lumia).</dd></div>
         <div class="panel-box"><dt>Inversión publicitaria en medios</dt><dd>La paga Lumia directamente a Meta y Google (actualmente ~$6.000.000 en Meta y ~$1.200.000 en Google).</dd></div>
-        <div class="panel-box"><dt>Facturación y permanencia</dt><dd>Mes anticipado para la mensualidad fija del plan; mes vencido sobre dinero recaudado para el % por tratamiento. Permanencia mínima de 3 meses.</dd></div>
+        <div class="panel-box"><dt>Facturación y permanencia</dt><dd>Mes anticipado para la mensualidad fija del plan; mes vencido para la conciliación del % (solo en Fase 1). Permanencia mínima de 3 meses.</dd></div>
       </dl>
 
       <div class="panel-box pad" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;border-color:var(--hairline-blue)">
@@ -2759,6 +2872,7 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
   ];
   const sumOf = ids => ids.reduce((a, i) => a + MODS[i][3], 0);
   let sel = new Set(PLANS[2].mods);
+  let activePhase = "fase1"; // "fase1" (base + %) o "fase2" (+$1M fijo, 0% comisión)
   const groups = {};
   MODS.forEach((m, i) => (groups[m[0]] = groups[m[0]] || []).push(i));
 
@@ -2771,16 +2885,50 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     </div>
   `).join("");
 
-  document.getElementById("planbar").innerHTML = PLANS.map((p, j) =>
-    `<button class="planbtn" type="button" data-j="${j}" aria-pressed="false">${p.name} · ${fmt(p.price)}/mes + %</button>`
-  ).join("");
+  function renderPlans() {
+    const isFase2 = activePhase === "fase2";
+    const phaseAdd = isFase2 ? 1000000 : 0;
+
+    document.getElementById("planbar").innerHTML = PLANS.map((p, j) => {
+      const pr = p.price + phaseAdd;
+      const label = isFase2 ? `${p.name} · ${fmt(pr)}/mes (0% comisión)` : `${p.name} · ${fmt(pr)}/mes + %`;
+      return `<button class="planbtn" type="button" data-j="${j}" aria-pressed="false">${label}</button>`;
+    }).join("");
+
+    document.getElementById("plans").innerHTML = PLANS.map((p, j) => {
+      const pr = p.price + phaseAdd;
+      const phaseBadge = isFase2
+        ? `<div style="font-family:var(--mono);font-size:0.74rem;color:var(--success);padding:6px 10px;border-radius:6px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);margin:2px 0;font-weight:500">
+            ✓ Tarifa Fija Plena · 0% comisión · 100% para Lumia
+           </div>`
+        : `<div style="font-family:var(--mono);font-size:0.74rem;color:var(--blue);padding:6px 10px;border-radius:6px;background:rgba(37,99,235,0.06);border:1px solid var(--hairline-blue);margin:2px 0">
+            + % que se defina (5 % – 10 %) por tratamiento cerrado ≥ $2.000.000
+           </div>`;
+
+      return `
+        <div class="panel-box plan${p.rec ? " rec" : ""}">
+          ${p.rec ? '<span class="tag">Recomendado</span>' : ""}
+          <h3>${p.name}</h3>
+          <div class="pr num">${fmt(pr)} <small>/mes</small></div>
+          ${phaseBadge}
+          <div class="sep">Módulos por separado: ${fmt(sumOf(p.mods) + phaseAdd)}/mes</div>
+          <p class="muted" style="font-size:0.84rem">${p.desc}</p>
+          <ul>${MODS.map((m, i) => `<li class="${p.mods.includes(i) ? "" : "no"}">${m[1]}</li>`).join("")}</ul>
+          <a class="btn${p.rec ? "" : " btn-line"}" href="#plan" data-pick="${j}">Seleccionar ${p.name}</a>
+        </div>
+      `;
+    }).join("");
+  }
 
   function renderBuilder() {
+    const isFase2 = activePhase === "fase2";
+    const phaseAdd = isFase2 ? 1000000 : 0;
     const ids = [...sel];
-    const sum = sumOf(ids);
+    const sum = sumOf(ids) + (ids.length ? phaseAdd : 0);
     const fits = PLANS.filter(p => ids.every(i => p.mods.includes(i))).sort((a, b) => a.price - b.price);
-    const plan = fits[0] && fits[0].price < sum ? fits[0] : null;
-    const price = plan ? plan.price : sum;
+    const plan = fits[0] && (fits[0].price + phaseAdd) < sum ? fits[0] : null;
+    const price = plan ? (plan.price + phaseAdd) : sum;
+
     document.querySelectorAll(".tile").forEach(t => t.setAttribute("aria-pressed", sel.has(+t.dataset.i)));
     document.querySelectorAll(".planbtn").forEach(b => {
       const p = PLANS[+b.dataset.j];
@@ -2792,13 +2940,68 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     sS.textContent = fmt(sum);
     sS.classList.toggle("strike", !!plan);
     document.getElementById("sPrice").textContent = ids.length ? fmt(price) : "$0";
+
     const ap = document.getElementById("sApplied");
     ap.hidden = !ids.length;
-    ap.textContent = plan ? `Se aplica la tarifa fija del ${plan.name} (${fmt(plan.price)}/mes) + % definido por tratamiento.` : "Módulos sueltos: se cobra la suma mensual + % definido por tratamiento.";
+    if (isFase2) {
+      ap.textContent = plan 
+        ? `Se aplica la tarifa fija plena del ${plan.name} (${fmt(plan.price + phaseAdd)}/mes) · 0% comisión de ventas.` 
+        : `Módulos sueltos (+ $1M fijo): tarifa fija total de ${fmt(sum)}/mes · 0% comisión.`;
+    } else {
+      ap.textContent = plan 
+        ? `Se aplica la tarifa fija del ${plan.name} (${fmt(plan.price)}/mes) + % definido por tratamiento.` 
+        : `Módulos sueltos: se cobra la suma mensual + % definido por tratamiento.`;
+    }
+
     const sv = document.getElementById("sSave");
-    sv.textContent = plan ? `Ahorro mensual en el fijo: ${fmt(sum - price)} (${Math.round((sum - price) / sum * 100)} %)` : "";
+    sv.textContent = plan ? `Ahorro mensual en el paquete: ${fmt(sum - price)} (${Math.round((sum - price) / sum * 100)} %)` : "";
     sv.hidden = !plan;
+
+    // Actualizar bloque de porcentaje / 0% en el resumen lateral
+    const sumPhaseCard = document.getElementById("sumPhaseCard");
+    const sumPhaseTitle = document.getElementById("sumPhaseTitle");
+    const sumPhaseDesc = document.getElementById("sumPhaseDesc");
+    const sumHeaderTitle = document.getElementById("sumHeaderTitle");
+    if (sumPhaseCard && sumPhaseTitle && sumPhaseDesc) {
+      if (isFase2) {
+        if (sumHeaderTitle) sumHeaderTitle.textContent = "Resumen: Tarifa Fija Plena (0% Comisión)";
+        sumPhaseCard.style.background = "rgba(16,185,129,0.07)";
+        sumPhaseCard.style.borderColor = "rgba(16,185,129,0.3)";
+        sumPhaseTitle.style.color = "var(--success)";
+        sumPhaseTitle.textContent = "2. 0% Porcentaje sobre tratamientos · 100% para Lumia";
+        sumPhaseDesc.innerHTML = "<b>Tarifa 100% plana sin porcentaje de cliente.</b> Si la clínica factura $40M, $80M o más en implantes o diseño, el 100% del dinero es para Lumia. Cero conciliaciones a fin de mes.";
+      } else {
+        if (sumHeaderTitle) sumHeaderTitle.textContent = "Resumen: Mensualidad Fija + %";
+        sumPhaseCard.style.background = "rgba(37,99,235,0.06)";
+        sumPhaseCard.style.borderColor = "var(--hairline-blue)";
+        sumPhaseTitle.style.color = "var(--blue)";
+        sumPhaseTitle.textContent = "2. + Porcentaje por tratamiento cerrado";
+        sumPhaseDesc.innerHTML = "<b>El dinero mensual de arriba + el % que se defina (5 % a 10 %)</b> por cada tratamiento cerrado desde $2.000.000 COP.";
+      }
+    }
   }
+
+  function setPhase(phase) {
+    activePhase = phase;
+    document.querySelectorAll(".phase-tab").forEach(tab => {
+      tab.setAttribute("aria-selected", tab.dataset.phase === phase);
+    });
+    const p1 = document.getElementById("panelFase1");
+    const p2 = document.getElementById("panelFase2");
+    if (p1 && p2) {
+      p1.hidden = (phase !== "fase1");
+      p2.hidden = (phase !== "fase2");
+    }
+    renderPlans();
+    renderBuilder();
+    drawThemed();
+  }
+
+  document.querySelectorAll(".phase-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      setPhase(tab.dataset.phase);
+    });
+  });
 
   document.getElementById("groups").addEventListener("click", e => {
     const t = e.target.closest(".tile");
@@ -2807,32 +3010,21 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
     sel.has(i) ? sel.delete(i) : sel.add(i);
     renderBuilder();
   });
+
   document.getElementById("planbar").addEventListener("click", e => {
     const b = e.target.closest(".planbtn");
     if (!b) return;
     sel = new Set(PLANS[+b.dataset.j].mods);
     renderBuilder();
   });
-  renderBuilder();
 
-  document.getElementById("plans").innerHTML = PLANS.map((p, j) => `
-    <div class="panel-box plan${p.rec ? " rec" : ""}">
-      ${p.rec ? '<span class="tag">Recomendado</span>' : ""}
-      <h3>${p.name}</h3>
-      <div class="pr num">${fmt(p.price)} <small>/mes</small></div>
-      <div style="font-family:var(--mono);font-size:0.74rem;color:var(--blue);padding:6px 10px;border-radius:6px;background:rgba(37,99,235,0.06);border:1px solid var(--hairline-blue);margin:2px 0">
-        + % que se defina (5 % – 10 %) por tratamiento cerrado ≥ $2.000.000
-      </div>
-      <div class="sep">Módulos por separado: ${fmt(sumOf(p.mods))}/mes</div>
-      <p class="muted" style="font-size:0.84rem">${p.desc}</p>
-      <ul>${MODS.map((m, i) => `<li class="${p.mods.includes(i) ? "" : "no"}">${m[1]}</li>`).join("")}</ul>
-      <a class="btn${p.rec ? "" : " btn-line"}" href="#plan" data-pick="${j}">Seleccionar ${p.name}</a>
-    </div>
-  `).join("");
   document.getElementById("plans").addEventListener("click", e => {
     const a = e.target.closest("[data-pick]");
     if (a) { sel = new Set(PLANS[+a.dataset.pick].mods); renderBuilder(); }
   });
+
+  renderPlans();
+  renderBuilder();
 
   const tval = document.getElementById("tval");
   function calcComm() {
@@ -3048,13 +3240,15 @@ footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wr
       { name: "Mitos", v: 1, color: "#60a5fa" },
       { name: "Testimonio (apagado)", v: 1, color: "#f59e0b" }
     ], "8/10", "procedimiento");
+    const isFase2 = activePhase === "fase2";
+    const phaseAdd = isFase2 ? 1000000 : 0;
     vgroup(document.getElementById("planChart"), PLANS.map(p => p.name), [
-      { name: "Módulos por separado", data: PLANS.map(p => sumOf(p.mods)), color: "rgba(148, 163, 184, 0.35)" },
-      { name: "Valor en Plan ASYGNUZ", data: PLANS.map(p => p.price), color: "#3b82f6" }
+      { name: "Módulos por separado", data: PLANS.map(p => sumOf(p.mods) + phaseAdd), color: "rgba(148, 163, 184, 0.35)" },
+      { name: isFase2 ? "Valor Plan (Fase 2: Tarifa Plena)" : "Valor en Plan ASYGNUZ", data: PLANS.map(p => p.price + phaseAdd), color: isFase2 ? "#10b981" : "#3b82f6" }
     ], {
       axis: v => v ? "$" + (v / 1e6).toLocaleString("es-CO") + "M" : "0",
       fmt: v => "$" + (v / 1e6).toLocaleString("es-CO", { maximumFractionDigits: 2 }) + " M",
-      title: "Por separado vs. En el plan"
+      title: isFase2 ? "Por separado vs. En el plan (Fase 2: Tarifa Plena 0% Comisión)" : "Por separado vs. En el plan (Fase 1: Fijo + %)"
     });
   }
   drawThemed();
