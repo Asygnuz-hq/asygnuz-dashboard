@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Centro Radia × ASYGNUZ — Demostración Interactiva POC Plataforma de Estudios</title>
+<meta name="description" content="Entorno interactivo de prueba de concepto (POC) para Centro Radia: recepción, ingesta DICOM, visor 2D/3D integrado, reporte clínico, entrega 180 días y aislamiento de seguridad 403.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #fcfdff;
+  --bg-soft: #f4f7fb;
+  --bg-card: #ffffff;
+  --topbar-bg: rgba(255, 255, 255, 0.94);
+  --hairline: rgba(15, 23, 42, 0.08);
+  --hairline-mid: rgba(15, 23, 42, 0.16);
+  --hairline-blue: rgba(37, 99, 235, 0.3);
+  --heading: #090d16;
+  --fg: #0f172a;
+  --fg-soft: #334155;
+  --muted: #64748b;
+  --blue: #2563eb;
+  --blue-soft: #1d4ed8;
+  --blue-deep: #1e40af;
+  --blue-light: #eff6ff;
+  --teal: #0d9488;
+  --teal-light: #f0fdfa;
+  --danger: #e11d48;
+  --danger-light: #fff1f2;
+  --warning: #d97706;
+  --warning-light: #fefce8;
+  --success: #059669;
+  --success-light: #ecfdf5;
+  --shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.04);
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14.5px;
+  line-height: 1.6;
+  padding-bottom: 90px; /* Space for presentation bottom bar */
+}
+
+/* Contenedor */
+.container {
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Tipografía */
+h1, h2, h3, h4, h5 {
+  font-family: var(--sans);
+  letter-spacing: -0.025em;
+  color: var(--heading);
+}
+.mono { font-family: var(--mono); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Topbar */
+.demo-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--hairline);
+  padding: 12px 0;
+}
+.header-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-logo {
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: #000;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--blue);
+  border-radius: 2px;
+}
+.badge-poc {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  background: #eff6ff;
+  color: var(--blue-soft);
+  border: 1px solid var(--hairline-blue);
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: var(--sans);
+}
+.btn-primary {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22);
+}
+.btn-primary:hover {
+  background: var(--blue-soft);
+  transform: translateY(-1px);
+}
+.btn-outline {
+  background: #fff;
+  color: var(--fg-soft);
+  border-color: var(--hairline-mid);
+}
+.btn-outline:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.btn-danger {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: #fecdd3;
+}
+.btn-danger:hover {
+  background: #ffe4e6;
+}
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+.btn-success:hover {
+  background: #047857;
+}
+
+/* Role Switcher Banner */
+.role-bar {
+  background: #ffffff;
+  border-bottom: 1px solid var(--hairline);
+  padding: 10px 0;
+  box-shadow: var(--shadow-sm);
+}
+.role-bar-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.role-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.role-label {
+  font-size: 0.76rem;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.role-btn {
+  background: #f8fafc;
+  border: 1px solid var(--hairline-mid);
+  color: var(--fg-soft);
+  font-size: 0.8rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  transition: all 0.18s ease;
+}
+.role-btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.role-btn.active {
+  background: var(--blue-light);
+  border-color: var(--blue);
+  color: var(--blue-deep);
+  font-weight: 600;
+}
+.role-btn.negative {
+  border-color: #fca5a5;
+  background: #fff5f5;
+  color: var(--danger);
+}
+.role-btn.negative.active {
+  background: #fee2e2;
+  border-color: var(--danger);
+  color: #991b1b;
+  font-weight: 600;
+}
+.role-indicator {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+.role-btn.negative .role-indicator {
+  background: var(--danger);
+}
+
+/* Banner de Contexto de Rol */
+.role-context-banner {
+  background: #eff6ff;
+  border-left: 4px solid var(--blue);
+  padding: 10px 18px;
+  border-radius: 0 8px 8px 0;
+  margin: 18px 0 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  gap: 16px;
+}
+.role-context-banner.danger-mode {
+  background: #fff1f2;
+  border-left-color: var(--danger);
+  color: #9f1239;
+}
+
+/* Navegación por Módulos / Pestañas */
+.module-tabs {
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid var(--hairline-mid);
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+.module-tab {
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: all 0.18s ease;
+  font-family: var(--sans);
+}
+.module-tab:hover {
+  color: var(--heading);
+}
+.module-tab.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+  font-weight: 600;
+}
+.module-tab .step-badge {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  background: #e2e8f0;
+  color: var(--fg-soft);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.module-tab.active .step-badge {
+  background: var(--blue);
+  color: #fff;
+}
+
+/* Paneles */
+.panel {
+  display: none;
+  animation: fadeIn 0.22s ease-in-out;
+}
+.panel.active {
+  display: block;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 900px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--fg-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+  font-family: var(--mono);
+}
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  border: 1px solid var(--hairline-mid);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--fg);
+  font-family: var(--sans);
+  outline: none;
+  transition: border-color 0.16s ease;
+}
+.form-control:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+.form-control[readonly] {
+  background: #f8fafc;
+  color: var(--fg-soft);
+}
+
+/* Visor DICOM 2D/3D */
+.viewer-workspace {
+  background: #090d16;
+  border-radius: 12px;
+  border: 1px solid #1e293b;
+  overflow: hidden;
+  color: #f1f5f9;
+}
+.viewer-toolbar {
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.viewer-tools-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.v-tool-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono);
+  transition: all 0.15s ease;
+}
+.v-tool-btn:hover {
+  background: #334155;
+  color: #fff;
+}
+.v-tool-btn.active {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+.viewer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 240px 240px;
+  gap: 4px;
+  background: #020617;
+  padding: 4px;
+}
+@media (min-width: 1024px) {
+  .viewer-grid { grid-template-rows: 280px 280px; }
+}
+.viewport {
+  background: #0b1120;
+  border: 1px solid #1e293b;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  user-select: none;
+}
+.viewport-tag {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #38bdf8;
+  padding: 3px 8px;
+  border-radius: 4px;
+  z-index: 5;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+.viewport-info {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.7);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.viewport-crosshair {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.cross-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(56, 189, 248, 0.35);
+  border-top: 1px dashed rgba(56, 189, 248, 0.5);
+}
+.cross-v {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  height: 100%;
+  width: 1px;
+  background: rgba(56, 189, 248, 0.35);
+  border-left: 1px dashed rgba(56, 189, 248, 0.5);
+}
+
+/* Barra de Corte / Slice Slider */
+.slice-control-bar {
+  background: #0f172a;
+  border-top: 1px solid #1e293b;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.82rem;
+  color: #cbd5e1;
+}
+.slice-control-bar input[type="range"] {
+  flex: 1;
+  accent-color: var(--blue);
+  cursor: pointer;
+}
+
+/* Pantalla de Error 403 / Intrusión */
+.forbidden-screen {
+  background: #fff;
+  border: 2px solid #fda4af;
+  border-radius: 14px;
+  padding: 36px 28px;
+  text-align: center;
+  max-width: 760px;
+  margin: 20px auto;
+  box-shadow: 0 20px 40px rgba(225, 29, 72, 0.08);
+}
+.forbidden-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffe4e6;
+  color: #be123c;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+  border: 1px solid #fecdd3;
+}
+.audit-terminal {
+  background: #090d16;
+  color: #f1f5f9;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+  margin-top: 20px;
+  line-height: 1.6;
+  overflow-x: auto;
+  border: 1px solid #1e293b;
+}
+
+/* Barra de Presentación Inferior (Sticky Presenter Bar) */
+.presenter-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border-top: 1px solid var(--hairline-mid);
+  padding: 10px 24px;
+  z-index: 100;
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.presenter-steps {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.p-step-btn {
+  background: #f1f5f9;
+  border: 1px solid var(--hairline);
+  color: var(--fg-soft);
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+.p-step-btn:hover {
+  background: var(--blue-light);
+  color: var(--blue);
+  border-color: var(--blue);
+}
+.p-step-btn.current {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+
+/* Modal simulado */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 14px;
+  max-width: 650px;
+  width: 100%;
+  padding: 28px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.2);
+  position: relative;
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR PRINCIPAL -->
+<header class="demo-header">
+  <div class="container header-in">
+    <div class="brand-group">
+      <a href="/radia" class="brand-logo">
+        <span class="brand-dot"></span>
+        <span>ASYGNUZ</span>
+      </a>
+      <span style="color:var(--hairline-mid)">/</span>
+      <span style="font-weight:600;font-size:0.9rem;color:var(--heading)">Centro Radia</span>
+      <span class="badge-poc">POC EN VIVO · FASE 0 & BASE EVOLUTIVA</span>
+    </div>
+
+    <div class="header-actions">
+      <a href="/radia" class="btn btn-outline" style="font-size:0.8rem">
+        ← Volver a Propuesta Comercial ($23M)
+      </a>
+      <a href="/radia/Propuesta_ASYGNUZ_Centro_Radia.pdf" target="_blank" class="btn btn-primary" style="font-size:0.8rem">
+        Descargar Propuesta PDF
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- SELECTOR DE ROL EN VIVO (SIMULADOR RBAC) -->
+<div class="role-bar">
+  <div class="container role-bar-in">
+    <div class="role-selector-group">
+      <span class="role-label">Simular Sesión Activa:</span>
+      <button class="role-btn active" id="btn-role-admin" onclick="switchRole('admin')">
+        <span class="role-indicator"></span>
+        <span>Administrador (HQ Centro Radia)</span>
+      </button>
+      <button class="role-btn" id="btn-role-dr-gomez" onclick="switchRole('dr-gomez')">
+        <span class="role-indicator"></span>
+        <span>Dr. Alejandro Gómez (Asignado)</span>
+      </button>
+      <button class="role-btn negative" id="btn-role-dr-martinez" onclick="switchRole('dr-martinez')">
+        <span class="role-indicator"></span>
+        <span>Dra. Claudia Martínez (No Asignada · Test 403)</span>
+      </button>
+    </div>
+
+    <div class="mono" style="font-size:0.75rem;color:var(--muted)">
+      RBAC Status: <strong id="rbac-status" style="color:var(--blue)">SUPER_ADMIN</strong>
+    </div>
+  </div>
+</div>
+
+<!-- CONTENEDOR PRINCIPAL -->
+<main class="container" style="margin-top: 20px;">
+
+  <!-- BANNER DINÁMICO DE CONTEXTO DE ROL -->
+  <div id="role-context" class="role-context-banner">
+    <div>
+      <strong id="role-banner-title">Sesión: Administrador de Centro Radia</strong>
+      <p id="role-banner-desc" style="font-size:0.8rem;color:var(--fg-soft);margin-top:2px">
+        Control total: recepción de pacientes, creación de órdenes, asignación de doctores remitentes, ingesta DICOM, dictamen y revocación de enlaces.
+      </p>
+    </div>
+    <span class="mono" style="font-size:0.72rem;background:#ffffff;padding:4px 8px;border-radius:4px;border:1px solid var(--hairline-blue);white-space:nowrap">
+      Permiso: Acceso Completo (Lectura + Escritura)
+    </span>
+  </div>
+
+  <!-- PESTAÑAS DE FLUJO CLÍNICO -->
+  <nav class="module-tabs" id="main-tabs">
+    <button class="module-tab active" onclick="switchModule('tab-recepcion')">
+      <span class="step-badge">01</span>
+      <span>Recepción & Pacientes</span>
+    </button>
+    <button class="module-tab" onclick="switchModule('tab-ingesta')">
+      <span class="step-badge">02</span>
+      <span>Ingesta DICOM / Orthanc</span>
+    </button>
+    <button class="module-tab" onclick="switchModule('tab-visor')">
+      <span class="step-badge">03</span>
+      <span>Visor Multiplanar 2D/3D</span>
+    </button>
+    <button class="module-tab" onclick="switchModule('tab-reporte')">
+      <span class="step-badge">04</span>
+      <span>Reporte Clínico & Enlace 180d</span>
+    </button>
+    <button class="module-tab" onclick="switchModule('tab-seguridad')">
+      <span class="step-badge">05</span>
+      <span style="color:var(--danger)">Aislamiento & Prueba 403</span>
+    </button>
+  </nav>
+
+  <!-- ========================================== -->
+  <!-- MÓDULO 1: RECEPCIÓN & BÚSQUEDA ANTI-DUPLICADOS -->
+  <!-- ========================================== -->
+  <section id="tab-recepcion" class="panel active">
+    <div class="grid-2">
+      <!-- Columna 1: Búsqueda y Validación de Paciente -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:1.05rem">Búsqueda y Prevención de Duplicados</h3>
+          <span class="mono" style="font-size:0.72rem;background:#f1f5f9;padding:3px 8px;border-radius:4px">PostgreSQL Index CC</span>
+        </div>
+
+        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:16px">
+          El sistema exige buscar primero por número de documento para prevenir historiales médicos fragmentados o duplicados:
+        </p>
+
+        <div class="form-group">
+          <label class="form-label">Tipo y Número de Identificación</label>
+          <div style="display:flex;gap:8px">
+            <select class="form-control" style="width:110px">
+              <option value="CC" selected>C.C.</option>
+              <option value="TI">T.I.</option>
+              <option value="CE">C.E.</option>
+              <option value="PAS">Pasaporte</option>
+            </select>
+            <input type="text" id="input-doc" class="form-control mono" value="1053829471" placeholder="Ej: 1053829471">
+            <button class="btn btn-primary" onclick="searchPatientDoc()">Buscar</button>
+          </div>
+        </div>
+
+        <!-- Ficha de Validación en Vivo -->
+        <div id="patient-card" style="background:#f8fafc;border:1px solid var(--hairline-mid);border-radius:10px;padding:16px;margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <strong style="font-size:0.95rem;color:var(--heading)">Camilo Andrés Restrepo Mejía</strong>
+              <div class="mono" style="font-size:0.75rem;color:var(--muted)">C.C. 1.053.829.471 · 38 años · Medellín</div>
+            </div>
+            <span style="font-size:0.72rem;background:var(--success-light);color:var(--success);padding:4px 8px;border-radius:6px;font-weight:600">
+              HISTORIAL UNIFICADO
+            </span>
+          </div>
+
+          <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--hairline-mid);font-size:0.78rem;color:var(--fg-soft)">
+            <div><strong>Antecedentes:</strong> Sin alergias descritas · Hipertensión controlada</div>
+            <div style="margin-top:4px"><strong>Historial previo en Centro Radia:</strong></div>
+            <ul style="margin-left:18px;margin-top:4px;color:var(--muted)">
+              <li>14/02/2026 — Panorámica Digital HD (#RAD-2026-0112 · FINALIZADA)</li>
+              <li>22/10/2025 — Periapicales Serie Completa (#RAD-2025-0988 · FINALIZADA)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna 2: Creación de la Orden Clínica -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:1.05rem">Nueva Orden de Estudio</h3>
+          <span class="mono" style="font-size:0.72rem;color:var(--blue);font-weight:600">ORDEN #RAD-2026-0842</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Doctor Remitente Asignado</label>
+          <select id="select-doctor" class="form-control" onchange="calculateOrderTotal()">
+            <option value="dr-gomez" selected>Dr. Alejandro Gómez (Clínica Norte — Convenio Especial 15%)</option>
+            <option value="dr-restrepo">Dr. Juan Carlos Restrepo (Consultorio Particular — Tarifa Plena)</option>
+            <option value="dra-martinez">Dra. Claudia Martínez (Odontología Especializada — 10% desc)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Estudio Solicitado</label>
+          <select id="select-study" class="form-control" onchange="calculateOrderTotal()">
+            <option value="cbct-bimax" selected>Tomografía Cone Beam (CBCT) Bimaxilar Alta Resolución + 3D</option>
+            <option value="cbct-mandibula">Tomografía CBCT Mandíbula y Conducto Dentario</option>
+            <option value="panoramica">Radiografía Panorámica Digital HD</option>
+          </select>
+        </div>
+
+        <!-- Desglose Financiero de Convenio -->
+        <div style="background:#f8fafc;border:1px solid var(--hairline);border-radius:8px;padding:14px;margin-bottom:16px;font-size:0.82rem">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span class="muted">Tarifa de catálogo base:</span>
+            <span class="num font-medium" id="order-base-price">$280.000 COP</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;color:var(--success)">
+            <span>Descuento de convenio aplicado:</span>
+            <span class="num font-medium" id="order-discount">−$42.000 COP (15%)</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span class="muted">Condición de pago:</span>
+            <span style="font-weight:500">Crédito mensual corte 30 días</span>
+          </div>
+          <div style="height:1px;background:var(--hairline-mid);margin:8px 0"></div>
+          <div style="display:flex;justify-content:space-between;font-weight:600;font-size:0.95rem">
+            <span>Total Liquidado:</span>
+            <span class="num" id="order-total-price" style="color:var(--blue-deep)">$238.000 COP</span>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+          <div>
+            <span class="form-label" style="margin-bottom:2px">Estado de la Orden:</span>
+            <span id="order-status-badge" style="background:var(--warning-light);color:var(--warning);padding:3px 8px;border-radius:4px;font-weight:600;font-size:0.75rem">
+              EN PROGRESO
+            </span>
+          </div>
+          <button class="btn btn-primary" onclick="proceedToIngesta()">
+            Guardar y Pasar a Ingesta DICOM →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- MÓDULO 2: INGESTA DE ESTUDIOS (ORTHANC / S3) -->
+  <!-- ========================================== -->
+  <section id="tab-ingesta" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div>
+          <h3 style="font-size:1.1rem">Ingesta de Estudios DICOM / CBCT y Documentos Adjuntos</h3>
+          <p style="font-size:0.84rem;color:var(--muted)">
+            Asociación de series DICOM, imágenes fotográficas y PDF a la orden activa #RAD-2026-0842.
+          </p>
+        </div>
+        <span class="mono" style="font-size:0.74rem;background:#f1f5f9;padding:4px 10px;border-radius:6px">
+          Servidor DICOMweb: Orthanc / S3 Vault
+        </span>
+      </div>
+
+      <!-- Zona de Simulación de Carga -->
+      <div style="border:2px dashed var(--hairline-mid);border-radius:12px;padding:32px 24px;text-align:center;background:#fcfdff;margin-bottom:20px">
+        <div style="max-width:540px;margin:0 auto">
+          <div class="mono" style="font-size:0.8rem;color:var(--blue);font-weight:600;margin-bottom:6px">
+            ARCHIVOS SELECCIONADOS PARA ESTUDIO #RAD-2026-0842
+          </div>
+          <p style="font-size:0.84rem;color:var(--fg-soft);margin-bottom:16px">
+            Se detectaron 3 archivos para ingesta e indexación médica:
+          </p>
+
+          <div style="display:flex;flex-direction:column;gap:8px;text-align:left;font-size:0.82rem;margin-bottom:20px">
+            <div style="display:flex;justify-content:space-between;background:#fff;padding:10px 14px;border-radius:6px;border:1px solid var(--hairline)">
+              <span><strong>CBCT_RESTREPO_BIMAXILAR_DICOM.zip</strong> (480 cortes DICOM)</span>
+              <span class="num mono text-muted">248.4 MB</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;background:#fff;padding:10px 14px;border-radius:6px;border:1px solid var(--hairline)">
+              <span><strong>Fotografia_Panoramica_Control.png</strong> (Foto clínica)</span>
+              <span class="num mono text-muted">8.2 MB</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;background:#fff;padding:10px 14px;border-radius:6px;border:1px solid var(--hairline)">
+              <span><strong>Orden_Remision_Firmada_Gomez.pdf</strong></span>
+              <span class="num mono text-muted">1.4 MB</span>
+            </div>
+          </div>
+
+          <button id="btn-start-upload" class="btn btn-primary" onclick="simulateDicomIngest()" style="padding:10px 24px">
+            Comenzar Ingesta en Servidor Orthanc e Indexar Metadatos
+          </button>
+        </div>
+      </div>
+
+      <!-- Barra de Progreso y Metadatos DICOM Extraídos -->
+      <div id="ingest-progress-box" style="display:none;background:#f8fafc;border:1px solid var(--hairline);border-radius:10px;padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="mono" id="ingest-status-text" style="font-size:0.8rem;font-weight:600;color:var(--blue)">
+            Subiendo a almacenamiento S3 y extrayendo tags DICOM...
+          </span>
+          <span class="mono num" id="ingest-percent" style="font-size:0.8rem;font-weight:600">0%</span>
+        </div>
+        <div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin-bottom:16px">
+          <div id="ingest-progress-bar" style="width:0%;height:100%;background:var(--blue);transition:width 0.2s ease"></div>
+        </div>
+
+        <!-- Terminal de Tags DICOM Parseados -->
+        <div class="audit-terminal" id="dicom-tags-box" style="display:none;font-size:0.75rem">
+[ORTHANC DICOMWEB INGESTION LOG]
+> PatientName: RESTREPO^CAMILO^ANDRES
+> PatientID: 1053829471
+> StudyInstanceUID: 1.2.840.113619.2.55.3.2831154.1698192038
+> SeriesInstanceUID: 1.2.840.113619.2.55.3.2831154.1698192040.1
+> Modality: CT (Cone Beam Computed Tomography)
+> SlicesCount: 480 axial slices (0.25 mm spacing)
+> KVp: 90.0 kV | TubeCurrent: 10.0 mA | WindowWidth: 3000 | WindowCenter: 700
+> S3 Vault: s3://radia-dicom-vault/2026/10/rad-0842/ (Encrypted AES-256)
+> Status: SUCCESS (DICOMweb endpoint ready for OHIF / Cornerstone viewer)
+        </div>
+
+        <div id="ingest-ready-actions" style="display:none;margin-top:16px;text-align:right">
+          <button class="btn btn-success" onclick="proceedToViewer()">
+            Abrir Visor 2D/3D Integrado con este Estudio →
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- MÓDULO 3: VISOR RADIOLÓGICO 2D / MPR / 3D -->
+  <!-- ========================================== -->
+  <section id="tab-visor" class="panel">
+    <div class="viewer-workspace">
+      <!-- Toolbar Superior del Visor -->
+      <div class="viewer-toolbar">
+        <div class="viewer-tools-group">
+          <span class="mono" style="font-size:0.75rem;color:#38bdf8;font-weight:700">CENTRO RADIA VISOR 3D</span>
+          <span style="color:#475569">|</span>
+          <button class="v-tool-btn active" id="tool-ruler" onclick="setViewerTool('ruler')">
+            Regla (mm)
+          </button>
+          <button class="v-tool-btn" id="tool-angle" onclick="setViewerTool('angle')">
+            Ángulo
+          </button>
+          <button class="v-tool-btn" id="tool-implant" onclick="setViewerTool('implant')">
+            Marcador Implante
+          </button>
+          <button class="v-tool-btn" id="tool-snapshot" onclick="takeSnapshotForReport()">
+            Insertar en Reporte
+          </button>
+        </div>
+
+        <!-- Presets de Ventana -->
+        <div class="viewer-tools-group">
+          <span class="mono" style="font-size:0.72rem;color:#94a3b8">VENTANA:</span>
+          <button class="v-tool-btn active" id="win-bone" onclick="setWindowPreset('bone')">Hueso Dental</button>
+          <button class="v-tool-btn" id="win-soft" onclick="setWindowPreset('soft')">Tejido Blando</button>
+          <button class="v-tool-btn" id="win-enamel" onclick="setWindowPreset('enamel')">Esmalte</button>
+        </div>
+
+        <div class="mono" style="font-size:0.74rem;color:#94a3b8">
+          Estudio: <strong style="color:#fff">RESTREPO, CAMILO (CBCT)</strong>
+        </div>
+      </div>
+
+      <!-- Cuadrantes Multiplanares (Axial, Sagital, Coronal, 3D) -->
+      <div class="viewer-grid">
+        <!-- Cuadrante 1: Axial -->
+        <div class="viewport" id="vp-axial">
+          <span class="viewport-tag">AXIAL (Transversal)</span>
+          <div class="viewport-crosshair"><div class="cross-h"></div><div class="cross-v"></div></div>
+          
+          <!-- Dibujo SVG Dinámico Anatómico -->
+          <svg width="220" height="220" viewBox="0 0 200 200" fill="none" style="filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.15));">
+            <!-- Hueso Mandíbula en herradura -->
+            <path id="axial-bone" d="M 40 150 C 35 100, 50 40, 100 40 C 150 40, 165 100, 160 150 C 155 130, 140 100, 100 100 C 60 100, 45 130, 40 150 Z" 
+                  fill="#1e293b" stroke="#38bdf8" stroke-width="2"/>
+            <!-- Dientes -->
+            <circle cx="100" cy="55" r="5" fill="#f8fafc"/>
+            <circle cx="85" cy="60" r="5" fill="#f8fafc"/>
+            <circle cx="115" cy="60" r="5" fill="#f8fafc"/>
+            <circle cx="70" cy="75" r="6" fill="#f8fafc"/>
+            <circle cx="130" cy="75" r="6" fill="#f8fafc"/>
+            <circle cx="55" cy="100" r="7" fill="#f8fafc"/>
+            <circle cx="145" cy="100" r="7" fill="#f8fafc"/>
+            <!-- Medición en vivo -->
+            <g id="ruler-group" style="display:block">
+              <line x1="55" y1="100" x2="55" y2="135" stroke="#4ade80" stroke-width="2" stroke-dasharray="3 2"/>
+              <circle cx="55" cy="100" r="3" fill="#4ade80"/>
+              <circle cx="55" cy="135" r="3" fill="#4ade80"/>
+              <text x="62" y="120" fill="#4ade80" font-size="10" font-family="JetBrains Mono" font-weight="bold">11.42 mm</text>
+            </g>
+          </svg>
+
+          <div class="viewport-info">
+            Corte: <span id="axial-slice-num" class="num">240</span> / 480 · Z: <span id="axial-z-mm" class="num">-12.5</span> mm
+          </div>
+        </div>
+
+        <!-- Cuadrante 2: Sagital -->
+        <div class="viewport" id="vp-sagital">
+          <span class="viewport-tag">SAGITAL (Perfil Lateral)</span>
+          <div class="viewport-crosshair"><div class="cross-h"></div><div class="cross-v"></div></div>
+          
+          <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
+            <!-- Reborde molar y canal mandibular -->
+            <path d="M 40 80 Q 80 75 140 85 L 140 160 Q 80 165 40 150 Z" fill="#1e293b" stroke="#60a5fa" stroke-width="2"/>
+            <!-- Canal mandibular nervioso -->
+            <path d="M 50 135 Q 90 140 135 130" stroke="#f43f5e" stroke-width="3" stroke-dasharray="4 2"/>
+            <!-- Diente molar 36 -->
+            <path d="M 75 80 L 75 55 Q 85 50 95 55 L 95 80 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+            <!-- Simulación de Implante Dental -->
+            <g id="implant-group" style="display:none">
+              <rect x="78" y="80" width="14" height="42" rx="2" fill="#3b82f6" opacity="0.85" stroke="#93c5fd" stroke-width="1.5"/>
+              <text x="70" y="135" fill="#93c5fd" font-size="9" font-family="JetBrains Mono">Ø 3.75 × 11.5 mm</text>
+            </g>
+          </svg>
+
+          <div class="viewport-info">
+            Canal Mandibular: <strong style="color:#f43f5e">Visible</strong>
+          </div>
+        </div>
+
+        <!-- Cuadrante 3: Coronal -->
+        <div class="viewport" id="vp-coronal">
+          <span class="viewport-tag">CORONAL (Frontal)</span>
+          <div class="viewport-crosshair"><div class="cross-h"></div><div class="cross-v"></div></div>
+          
+          <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
+            <!-- Senos Maxilares bilaterales -->
+            <path d="M 50 70 Q 75 60 90 85 Q 75 110 50 95 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <path d="M 150 70 Q 125 60 110 85 Q 125 110 150 95 Z" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+            <!-- Tabique Nasal -->
+            <line x1="100" y1="50" x2="100" y2="120" stroke="#cbd5e1" stroke-width="2"/>
+            <!-- Reborde inferior -->
+            <path d="M 60 140 Q 100 155 140 140" stroke="#60a5fa" stroke-width="3"/>
+          </svg>
+
+          <div class="viewport-info">
+            Senos Maxilares: <strong style="color:#4ade80">Permeables</strong>
+          </div>
+        </div>
+
+        <!-- Cuadrante 4: Reconstrucción 3D (Volume Rendering) -->
+        <div class="viewport" id="vp-3d" style="background:#020617">
+          <span class="viewport-tag" style="background:rgba(37, 99, 235, 0.35);color:#93c5fd;border-color:rgba(37, 99, 235, 0.5)">
+            RECONSTRUCCIÓN 3D (VR)
+          </span>
+          
+          <div style="text-align:center">
+            <svg id="svg-3d-model" width="170" height="170" viewBox="0 0 160 160" fill="none" style="transition:transform 0.3s ease">
+              <!-- Modelo 3D Isométrico de Maxilar -->
+              <polygon points="80,20 140,55 140,115 80,145 20,115 20,55" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+              <line x1="80" y1="20" x2="80" y2="145" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <line x1="140" y1="55" x2="80" y2="90" stroke="#38bdf8" stroke-width="1.5"/>
+              <line x1="20" y1="55" x2="80" y2="90" stroke="#38bdf8" stroke-width="1.5"/>
+              <circle cx="80" cy="90" r="12" fill="#38bdf8" opacity="0.3"/>
+            </svg>
+            <div style="margin-top:6px;display:flex;justify-content:center;gap:6px">
+              <button class="v-tool-btn" onclick="rotate3D(-30)">↺ Rotar Izq</button>
+              <button class="v-tool-btn" onclick="rotate3D(30)">Rotar Der ↻</button>
+            </div>
+          </div>
+
+          <div class="viewport-info">
+            Modo: <span style="color:#38bdf8">ISO Surface 3D</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra Inferior de Control de Cortes (Slice Navigation) -->
+      <div class="slice-control-bar">
+        <span class="mono" style="font-size:0.75rem;white-space:nowrap">Navegar Cortes (1–480):</span>
+        <input type="range" id="slice-slider" min="1" max="480" value="240" oninput="onSliceChange(this.value)">
+        <span class="mono" style="font-size:0.75rem;min-width:120px;text-align:right">
+          Corte <strong id="lbl-slice-val" class="num" style="color:#38bdf8">240</strong> / 480
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- MÓDULO 4: REPORTE CLÍNICO & ENLACE 180 DÍAS -->
+  <!-- ========================================== -->
+  <section id="tab-reporte" class="panel">
+    <div class="grid-2">
+      <!-- Columna 1: Editor del Reporte Radiológico -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:1.05rem">Dictamen Radiológico Estructurado</h3>
+          <span class="mono" style="font-size:0.72rem;background:#f1f5f9;padding:3px 8px;border-radius:4px">Plantilla Oficial</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Especialista Radiólogo que Firma</label>
+          <input type="text" class="form-control" value="Dra. Laura Vélez · Radióloga Oral y Maxilofacial (R.M. 45892-COL)" readonly>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Hallazgos e Informe Descriptivo</label>
+          <textarea id="report-text" class="form-control" rows="8" style="font-size:0.83rem;line-height:1.5">1. REBORDE ALVEOLAR: Zona posteroinferior izquierda edéntula (sector 36) presenta altura ósea remanente de 11.42 mm hasta el techo del canal mandibular, con ancho vestibulolingual adecuado (7.8 mm) para fijación protésica.
+2. SENOS MAXILARES: Adecuada neumatización bilateral, sin engrosamiento mucoso significativo ni signos de sinusitis maxilar.
+3. PIEZAS RETENIDAS: Piezas 38 y 48 retenidas en posición mesioangular, con íntima relación de los ápices radiculares con el conducto dentario inferior sin evidencia de resorción radicular de molares adyacentes.
+4. ARTICULACIÓN TEMPOROMANDIBULAR: Cóndilos mandibulares centrados con superficie cortical íntegra.</textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn btn-primary" onclick="publishReport()">
+            Firmar Dictamen y Publicar Orden (Finalizar)
+          </button>
+        </div>
+      </div>
+
+      <!-- Columna 2: Enlace Tokenizado Paciente (180 Días) & Estado -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:1.05rem">Entrega Segura al Paciente (180 Días)</h3>
+          <span id="link-badge" style="font-size:0.72rem;background:var(--success-light);color:var(--success);padding:3px 8px;border-radius:4px;font-weight:600">
+            ENLACE ACTIVO
+          </span>
+        </div>
+
+        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:14px">
+          El paciente recibe un correo con enlace individual tokenizado. <strong>Solo descarga el reporte PDF</strong> (sin acceso a visor completo ni a la plataforma):
+        </p>
+
+        <!-- Caja de Enlace Tokenizado -->
+        <div style="background:#f8fafc;border:1px dashed var(--hairline-mid);border-radius:8px;padding:14px;margin-bottom:14px">
+          <div class="mono" style="font-size:0.75rem;word-break:break-all;color:var(--fg);background:#fff;padding:8px 10px;border-radius:6px;border:1px solid var(--hairline);margin-bottom:10px">
+            https://app.centroradia.com/entrega/tkn_8f93a109cb42?exp=180d
+          </div>
+
+          <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--muted)">
+            <span>Vigencia restante: <strong id="link-countdown" style="color:var(--heading)">179 días, 23 horas</strong></span>
+            <span>Descargas realizadas: <strong class="num">1</strong></span>
+          </div>
+        </div>
+
+        <!-- Botones de Acción de Entrega -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-outline" onclick="simulatePatientView()" style="justify-content:flex-start">
+            Ver lo que ve el Paciente (Descarga Oficial PDF)
+          </button>
+
+          <button id="btn-revoke-link" class="btn btn-danger" onclick="revokePatientLink()" style="justify-content:flex-start">
+            Invalidar / Revocar Enlace Inmediatamente
+          </button>
+        </div>
+
+        <!-- Explicación de Seguridad -->
+        <div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:8px;font-size:0.76rem;color:var(--fg-soft);line-height:1.5">
+          <strong>Protección de Privacidad:</strong> La invalidación administrativa revoca el token al instante en la base de datos. Si el paciente o un tercero intenta abrir el link, recibirá error HTTP 410 (Enlace caducado).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================== -->
+  <!-- MÓDULO 5: PRUEBA DE AISLAMIENTO Y 403 -->
+  <!-- ========================================== -->
+  <section id="tab-seguridad" class="panel">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div>
+          <h3 style="font-size:1.15rem;color:var(--danger)">Prueba de Aislamiento Negativo (Violación de Acceso 403)</h3>
+          <p style="font-size:0.84rem;color:var(--muted)">
+            Verificación técnica de que un doctor jamás puede ver los estudios o datos de pacientes asignados a otro profesional.
+          </p>
+        </div>
+        <span class="mono" style="font-size:0.72rem;background:#fee2e2;color:#991b1b;padding:4px 8px;border-radius:4px;font-weight:700">
+          NEGATIVE SECURITY TEST
+        </span>
+      </div>
+
+      <!-- Explicación de la Prueba -->
+      <div style="background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;padding:16px;margin-bottom:20px;font-size:0.85rem;color:#9f1239">
+        <strong>Escenario simulado:</strong> La <strong>Dra. Claudia Martínez</strong> ha iniciado sesión en su cuenta. Intenta forzar el acceso a la orden confidencial <code>#RAD-2026-0842</code> (asignada únicamente al <strong>Dr. Alejandro Gómez</strong>) o acceder directamente a la URL de sus cortes DICOM en Orthanc.
+      </div>
+
+      <div style="text-align:center;margin-bottom:24px">
+        <button class="btn btn-primary" onclick="runNegativeSecurityTest()" style="background:var(--danger);border-color:var(--danger)">
+          Ejecutar Prueba de Intrusión (Dra. Claudia Martínez → Orden del Dr. Gómez)
+        </button>
+      </div>
+
+      <!-- Pantalla de Error 403 Simulado -->
+      <div id="forbidden-result" style="display:none">
+        <div class="forbidden-screen">
+          <div class="forbidden-badge">HTTP 403 FORBIDDEN · ACCESO DENEGADO</div>
+          <h2 style="font-size:1.35rem;color:var(--heading);margin-bottom:10px">
+            Estudio Confidencial Asignado a Otro Profesional
+          </h2>
+          <p style="font-size:0.88rem;color:var(--fg-soft);max-width:540px;margin:0 auto">
+            Usted ha iniciado sesión como <strong>Dra. Claudia Martínez</strong>. No cuenta con autorización médica ni consentimiento para acceder a la orden <strong>#RAD-2026-0842</strong> ni a las series radiológicas del paciente <strong>Camilo Andrés Restrepo</strong>.
+          </p>
+
+          <div class="audit-terminal">
+[SECURITY AUDIT LOG — SUPABASE ROW LEVEL SECURITY (RLS) & BETTER AUTH]
+Timestamp: <span id="audit-ts" class="num">2026-10-26T20:00:14.281Z</span>
+Event: SEC_UNAUTHORIZED_CROSS_DOCTOR_ACCESS_ATTEMPT
+Requestor: dra.martinez@odontoclinic.com (ID: usr_cm_8492)
+Role: DOCTOR_REMITENTE
+Target Resource: /api/orders/RAD-2026-0842/dicomweb
+Target Assigned Doctor: dr.gomez@clinicanorte.com (ID: usr_ag_1120)
+Action Taken: REQUEST_TERMINATED_403
+Notification Sent: Sí (Alerta a Auditoría de Seguridad de Centro Radia HQ)
+Compliance: Ley Estatutaria 1581 de 2012 / Resolución 1995 de 1999 (Historia Clínica Reservada)
+          </div>
+
+          <div style="margin-top:20px">
+            <button class="btn btn-outline" onclick="switchRole('admin')">
+              Restaurar Sesión de Administrador HQ
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- MODAL SIMULADO DE DESCARGA PDF PACIENTE -->
+<div class="modal-overlay" id="modal-patient-download" onclick="if(event.target===this)closeModal()">
+  <div class="modal-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--hairline);padding-bottom:12px;margin-bottom:16px">
+      <div>
+        <strong style="font-size:1rem;color:var(--heading)">Centro Radia — Portal de Descarga de Resultados</strong>
+        <div class="mono" style="font-size:0.74rem;color:var(--muted)">Entrega Segura al Paciente</div>
+      </div>
+      <button onclick="closeModal()" style="background:none;border:none;font-size:1.2rem;cursor:pointer">✕</button>
+    </div>
+
+    <div style="background:#f8fafc;padding:16px;border-radius:8px;font-size:0.84rem;margin-bottom:18px">
+      <div><strong>Paciente:</strong> Camilo Andrés Restrepo Mejía</div>
+      <div><strong>Documento:</strong> C.C. 1.053.829.471</div>
+      <div><strong>Estudio:</strong> Tomografía Cone Beam Bimaxilar + Reconstrucción 3D</div>
+      <div><strong>Fecha de emisión:</strong> 24 de Octubre de 2026</div>
+      <div><strong>Especialista firmante:</strong> Dra. Laura Vélez (Radiología Oral)</div>
+    </div>
+
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:18px">
+      Este enlace es personal e intransferible. Solo permite la visualización y descarga del reporte oficial en formato PDF. Vigencia autorizada: 180 días.
+    </p>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <a href="/radia/Propuesta_ASYGNUZ_Centro_Radia.pdf" target="_blank" class="btn btn-primary">
+        Descargar Reporte Radiológico (PDF Oficial)
+      </a>
+      <button class="btn btn-outline" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- BARRA DE PRESENTACIÓN INFERIOR (STICKY) -->
+<aside class="presenter-bar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <span class="mono" style="font-size:0.75rem;font-weight:700;color:var(--blue);text-transform:uppercase">
+      Guía de Demostración:
+    </span>
+    <div class="presenter-steps">
+      <button class="p-step-btn current" id="p-step-1" onclick="jumpToStep(1)">1. Recepción</button>
+      <button class="p-step-btn" id="p-step-2" onclick="jumpToStep(2)">2. Ingesta DICOM</button>
+      <button class="p-step-btn" id="p-step-3" onclick="jumpToStep(3)">3. Visor 3D</button>
+      <button class="p-step-btn" id="p-step-4" onclick="jumpToStep(4)">4. Reporte & 180d</button>
+      <button class="p-step-btn" id="p-step-5" onclick="jumpToStep(5)">5. Seguridad 403</button>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px">
+    <span class="mono" style="font-size:0.75rem;color:var(--muted)">Inversión Proyecto: <strong>$23.000.000 COP</strong></span>
+    <a href="/radia" class="btn btn-primary" style="font-size:0.78rem;padding:6px 12px">
+      Ver Propuesta Comercial Completa →
+    </a>
+  </div>
+</aside>
+
+<!-- JAVASCRIPT INTERACTIVO DEL ENTORNO POC -->
+<script>
+let currentRole = 'admin';
+let currentStep = 1;
+let rotation3D = 0;
+let isLinkRevoked = false;
+
+// 1. Selector de Rol RBAC
+function switchRole(role) {
+  currentRole = role;
+  document.getElementById('btn-role-admin').classList.toggle('active', role === 'admin');
+  document.getElementById('btn-role-dr-gomez').classList.toggle('active', role === 'dr-gomez');
+  document.getElementById('btn-role-dr-martinez').classList.toggle('active', role === 'dr-martinez');
+
+  const banner = document.getElementById('role-context');
+  const bannerTitle = document.getElementById('role-banner-title');
+  const bannerDesc = document.getElementById('role-banner-desc');
+  const rbacStatus = document.getElementById('rbac-status');
+
+  if (role === 'admin') {
+    banner.className = 'role-context-banner';
+    bannerTitle.textContent = 'Sesión: Administrador de Centro Radia HQ';
+    bannerDesc.textContent = 'Control total: recepción de pacientes, creación de órdenes, asignación de doctores remitentes, ingesta DICOM, dictamen y revocación de enlaces.';
+    rbacStatus.textContent = 'SUPER_ADMIN';
+    rbacStatus.style.color = 'var(--blue)';
+    document.getElementById('forbidden-result').style.display = 'none';
+  } else if (role === 'dr-gomez') {
+    banner.className = 'role-context-banner';
+    bannerTitle.textContent = 'Sesión: Dr. Alejandro Gómez (Doctor Remitente Asignado)';
+    bannerDesc.textContent = 'Filtro activo: Únicamente visualiza los estudios asignados a su cuenta (Orden #RAD-2026-0842). Acceso al visor multiplanar e informe final.';
+    rbacStatus.textContent = 'DOCTOR_AUTORIZADO';
+    rbacStatus.style.color = 'var(--success)';
+    document.getElementById('forbidden-result').style.display = 'none';
+    jumpToStep(3); // Directo al visor
+  } else if (role === 'dr-martinez') {
+    banner.className = 'role-context-banner danger-mode';
+    bannerTitle.textContent = 'Sesión: Dra. Claudia Martínez (Doctora No Asignada · Test 403)';
+    bannerDesc.textContent = 'Intento de intrusión: Al intentar acceder a la orden o estudio del Dr. Gómez se activará el bloqueo por Row Level Security (RLS).';
+    rbacStatus.textContent = 'ACCESS_RESTRICTED';
+    rbacStatus.style.color = 'var(--danger)';
+    jumpToStep(5); // Directo al módulo de seguridad 403
+    runNegativeSecurityTest();
+  }
+}
+
+// 2. Control de Pestañas / Módulos
+function switchModule(panelId) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
+
+  const targetPanel = document.getElementById(panelId);
+  if (targetPanel) targetPanel.classList.add('active');
+
+  const tabBtns = document.querySelectorAll('.module-tab');
+  if (panelId === 'tab-recepcion') { tabBtns[0].classList.add('active'); updatePresenterBar(1); }
+  if (panelId === 'tab-ingesta') { tabBtns[1].classList.add('active'); updatePresenterBar(2); }
+  if (panelId === 'tab-visor') { tabBtns[2].classList.add('active'); updatePresenterBar(3); }
+  if (panelId === 'tab-reporte') { tabBtns[3].classList.add('active'); updatePresenterBar(4); }
+  if (panelId === 'tab-seguridad') { tabBtns[4].classList.add('active'); updatePresenterBar(5); }
+}
+
+function jumpToStep(step) {
+  currentStep = step;
+  if (step === 1) switchModule('tab-recepcion');
+  if (step === 2) switchModule('tab-ingesta');
+  if (step === 3) switchModule('tab-visor');
+  if (step === 4) switchModule('tab-reporte');
+  if (step === 5) switchModule('tab-seguridad');
+}
+
+function updatePresenterBar(step) {
+  for (let i = 1; i <= 5; i++) {
+    const btn = document.getElementById('p-step-' + i);
+    if (btn) btn.classList.toggle('current', i === step);
+  }
+}
+
+// 3. Módulo 1: Búsqueda y Liquidación
+function searchPatientDoc() {
+  const doc = document.getElementById('input-doc').value.trim();
+  const card = document.getElementById('patient-card');
+  if (doc === '1053829471') {
+    card.style.display = 'block';
+    alert('✓ Paciente localizado en la base de datos: Camilo Andrés Restrepo Mejía. Se enlaza historial previo sin crear registros duplicados.');
+  } else {
+    alert('Documento nuevo. El sistema permite registrar una nueva ficha clínica sin duplicar.');
+  }
+}
+
+function calculateOrderTotal() {
+  const doc = document.getElementById('select-doctor').value;
+  const study = document.getElementById('select-study').value;
+
+  let basePrice = 280000;
+  if (study === 'cbct-mandibula') basePrice = 220000;
+  if (study === 'panoramica') basePrice = 95000;
+
+  let discountPct = 0;
+  if (doc === 'dr-gomez') discountPct = 0.15;
+  if (doc === 'dra-martinez') discountPct = 0.10;
+
+  const discountVal = basePrice * discountPct;
+  const finalVal = basePrice - discountVal;
+
+  document.getElementById('order-base-price').textContent = '$' + basePrice.toLocaleString('es-CO') + ' COP';
+  document.getElementById('order-discount').textContent = '−$' + discountVal.toLocaleString('es-CO') + ' COP (' + (discountPct * 100) + '%)';
+  document.getElementById('order-total-price').textContent = '$' + finalVal.toLocaleString('es-CO') + ' COP';
+}
+
+function proceedToIngesta() {
+  jumpToStep(2);
+}
+
+// 4. Módulo 2: Ingesta DICOM
+function simulateDicomIngest() {
+  const btn = document.getElementById('btn-start-upload');
+  btn.disabled = true;
+  btn.textContent = 'Ingestando en Orthanc...';
+
+  const box = document.getElementById('ingest-progress-box');
+  box.style.display = 'block';
+
+  const bar = document.getElementById('ingest-progress-bar');
+  const pct = document.getElementById('ingest-percent');
+  const txt = document.getElementById('ingest-status-text');
+
+  let p = 0;
+  const interval = setInterval(() => {
+    p += 10;
+    if (p > 100) p = 100;
+    bar.style.width = p + '%';
+    pct.textContent = p + '%';
+
+    if (p === 40) txt.textContent = 'Calculando checksum SHA-256 e indexando cortes...';
+    if (p === 80) txt.textContent = 'Registrando serie DICOMweb en Orthanc y bucket S3...';
+
+    if (p >= 100) {
+      clearInterval(interval);
+      txt.textContent = '✓ Ingesta y parseo DICOM completados exitosamente.';
+      document.getElementById('dicom-tags-box').style.display = 'block';
+      document.getElementById('ingest-ready-actions').style.display = 'block';
+      btn.textContent = 'Ingesta Finalizada';
+    }
+  }, 140);
+}
+
+function proceedToViewer() {
+  jumpToStep(3);
+}
+
+// 5. Módulo 3: Visor 2D/3D Multiplanar
+function onSliceChange(val) {
+  document.getElementById('lbl-slice-val').textContent = val;
+  document.getElementById('axial-slice-num').textContent = val;
+  const zMm = ((val - 240) * 0.25).toFixed(2);
+  document.getElementById('axial-z-mm').textContent = zMm;
+
+  // Pequeña escala dinámica simulando profundidad en SVG
+  const scale = 0.9 + (val / 480) * 0.2;
+  const bone = document.getElementById('axial-bone');
+  if (bone) bone.setAttribute('transform', `scale(${scale}) translate(${(1-scale)*50}, ${(1-scale)*50})`);
+}
+
+function setViewerTool(tool) {
+  document.querySelectorAll('.v-tool-btn').forEach(b => {
+    if (['tool-ruler', 'tool-angle', 'tool-implant'].includes(b.id)) b.classList.remove('active');
+  });
+
+  const ruler = document.getElementById('ruler-group');
+  const implant = document.getElementById('implant-group');
+
+  if (tool === 'ruler') {
+    document.getElementById('tool-ruler').classList.add('active');
+    if (ruler) ruler.style.display = 'block';
+    if (implant) implant.style.display = 'none';
+  } else if (tool === 'implant') {
+    document.getElementById('tool-implant').classList.add('active');
+    if (ruler) ruler.style.display = 'none';
+    if (implant) implant.style.display = 'block';
+  } else {
+    document.getElementById('tool-angle').classList.add('active');
+    if (ruler) ruler.style.display = 'none';
+    if (implant) implant.style.display = 'none';
+  }
+}
+
+function setWindowPreset(preset) {
+  document.getElementById('win-bone').classList.toggle('active', preset === 'bone');
+  document.getElementById('win-soft').classList.toggle('active', preset === 'soft');
+  document.getElementById('win-enamel').classList.toggle('active', preset === 'enamel');
+
+  const bone = document.getElementById('axial-bone');
+  if (preset === 'bone') {
+    bone.setAttribute('fill', '#1e293b');
+    bone.setAttribute('stroke', '#38bdf8');
+  } else if (preset === 'soft') {
+    bone.setAttribute('fill', '#475569');
+    bone.setAttribute('stroke', '#94a3b8');
+  } else if (preset === 'enamel') {
+    bone.setAttribute('fill', '#0f172a');
+    bone.setAttribute('stroke', '#ffffff');
+  }
+}
+
+function rotate3D(delta) {
+  rotation3D += delta;
+  document.getElementById('svg-3d-model').style.transform = `rotateY(${rotation3D}deg) rotateX(${rotation3D/4}deg)`;
+}
+
+function takeSnapshotForReport() {
+  alert('✓ Captura de corte axial y reconstrucción 3D insertada exitosamente en el reporte radiológico.');
+  jumpToStep(4);
+}
+
+// 6. Módulo 4: Reporte & Enlace 180 Días
+function publishReport() {
+  document.getElementById('order-status-badge').textContent = 'FINALIZADA';
+  document.getElementById('order-status-badge').style.background = 'var(--success-light)';
+  document.getElementById('order-status-badge').style.color = 'var(--success)';
+
+  alert('✓ Dictamen firmado digitalmente por la Dra. Laura Vélez.\n✓ Orden #RAD-2026-0842 pasa al estado: FINALIZADA.\n✓ Se notificó al Dr. Alejandro Gómez y se activó el enlace de entrega al paciente.');
+}
+
+function simulatePatientView() {
+  if (isLinkRevoked) {
+    alert('ERROR HTTP 410: Este enlace de entrega fue revocado administrativamente por Centro Radia por razones de seguridad.');
+    return;
+  }
+  document.getElementById('modal-patient-download').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-patient-download').style.display = 'none';
+}
+
+function revokePatientLink() {
+  if (!confirm('¿Desea invalidar inmediatamente este enlace de 180 días? El paciente ya no podrá descargar el reporte hasta que se emita un nuevo token.')) return;
+
+  isLinkRevoked = true;
+  const badge = document.getElementById('link-badge');
+  badge.textContent = 'REVOCADO POR ADMINISTRACIÓN';
+  badge.style.background = '#fee2e2';
+  badge.style.color = '#991b1b';
+
+  document.getElementById('link-countdown').textContent = '0 días (Token Invalidado)';
+  document.getElementById('link-countdown').style.color = 'var(--danger)';
+
+  const btn = document.getElementById('btn-revoke-link');
+  btn.textContent = 'Enlace Revocado Exitosamente';
+  btn.disabled = true;
+
+  alert('✓ El token fue revocado en la base de datos Supabase/PostgreSQL. Cualquier intento posterior de descarga mostrará 410 Gone.');
+}
+
+// 7. Módulo 5: Prueba de Aislamiento y Error 403
+function runNegativeSecurityTest() {
+  document.getElementById('audit-ts').textContent = new Date().toISOString();
+  document.getElementById('forbidden-result').style.display = 'block';
+  document.getElementById('forbidden-result').scrollIntoView({ behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
