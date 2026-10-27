@@ -26,6 +26,8 @@ const nextConfig: NextConfig = {
       { source: "/lumia/resultados", destination: "/lumia/Resultados_Lumia.html" },
       { source: "/lumia/analisis", destination: "/lumia/Analisis_Lumia.html" },
       { source: "/radia/demo", destination: "/radia/Demo_Radia.html" },
+      { source: "/radia/visor", destination: "/radia/visor/index.html" },
+      { source: "/radia/visor/:path*", destination: "/radia/visor/index.html" },
       { source: "/radia", destination: "/radia/Propuesta_Radia.html" },
       { source: "/radia/propuesta", destination: "/radia/Propuesta_Radia.html" },
     ];

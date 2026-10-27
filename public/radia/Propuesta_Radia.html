@@ -704,6 +704,27 @@ section { padding: 76px 0; position: relative; }
   .exec-specs-list { grid-template-columns: 1fr; }
   .nav-links { display: none; }
 }
+
+/* Responsive móvil */
+.tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 4px; }
+.tbl-scroll .custom-table { margin-top: 0; min-width: 640px; }
+@media (max-width: 980px) {
+  [style*="grid-template-columns:1.1fr 0.9fr"], [style*="grid-template-columns:1.2fr 0.8fr"] { grid-template-columns: 1fr !important; gap: 20px !important; }
+  .calc-box { padding: 20px; }
+}
+@media (max-width: 640px) {
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  [style*="display:flex;gap:12px"], [style*="display:flex;gap:10px"], [style*="justify-content:space-between"] { flex-wrap: wrap; gap: 8px; }
+  .btn { white-space: normal; text-align: center; }
+  .sim-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .sim-tab-btn { white-space: nowrap; flex-shrink: 0; }
+  .panel-box.pad, .calc-box { padding: 18px; }
+  [style*="padding:48px 36px"] { padding: 28px 18px !important; }
+  .topbar-in { gap: 10px; flex-wrap: nowrap; justify-content: space-between; }
+  .client-pill { display: none; }
+  .nav-actions .btn { white-space: nowrap; padding: 8px 12px; font-size: 0.8rem; }
+  .nav-actions .btn:not(:first-child) { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1340,7 +1361,7 @@ section { padding: 76px 0; position: relative; }
     </div>
 
     <div class="panel-box pad">
-      <table class="custom-table">
+      <div class="tbl-scroll"><table class="custom-table">
         <thead>
           <tr>
             <th>Etapa</th>
@@ -1381,7 +1402,7 @@ section { padding: 76px 0; position: relative; }
             <td>Hito 5 ($2M tras aceptación final)</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div style="margin-top:20px;font-size:0.83rem;color:var(--muted)">
         * Las etapas son iterativas y pueden solaparse para optimizar los tiempos de entrega. El cronograma cuenta con la entrega oportuna de muestras, tarifas e insumos por parte de Centro Radia.
@@ -1402,7 +1423,7 @@ section { padding: 76px 0; position: relative; }
     </div>
 
     <div class="panel-box pad" style="max-width:980px;margin:0 auto">
-      <table class="custom-table">
+      <div class="tbl-scroll"><table class="custom-table">
         <thead>
           <tr>
             <th style="width:50px">#</th>
@@ -1448,7 +1469,7 @@ section { padding: 76px 0; position: relative; }
             <td style="text-align:right;font-size:1rem" class="num">100,0 %</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
 
       <div style="margin-top:24px;display:flex;gap:20px;background:#f8fafc;padding:16px;border-radius:10px;font-size:0.83rem;color:var(--fg-soft)">
         <div style="flex-shrink:0;color:var(--blue)">Nota:</div>
@@ -1650,7 +1671,7 @@ section { padding: 76px 0; position: relative; }
     </div>
 
     <div class="panel-box pad">
-      <table class="custom-table">
+      <div class="tbl-scroll"><table class="custom-table">
         <thead>
           <tr>
             <th>Funcionalidad / Módulo</th>
@@ -1697,7 +1718,7 @@ section { padding: 76px 0; position: relative; }
             <td style="text-align:center;color:var(--muted)">— Sujeto a caducidad</td>
           </tr>
         </tbody>
-      </table>
+      </table></div>
     </div>
   </div>
 </section>

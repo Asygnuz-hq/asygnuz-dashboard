@@ -9,44 +9,45 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
 <style>
 :root {
-  --bg-deep: #07090e;
-  --bg-app: #0b0e14;
-  --bg-sidebar: #0e121b;
-  --bg-card: #131824;
-  --bg-card-hover: #171e2e;
-  --bg-input: #0f131d;
-  
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-medium: rgba(255, 255, 255, 0.12);
+  --bg-deep: #e9eef5;
+  --bg-app: #f4f7fb;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f1f5f9;
+  --bg-input: #f8fafc;
+
+  --border-subtle: rgba(15, 23, 42, 0.08);
+  --border-medium: rgba(15, 23, 42, 0.16);
   --border-active: #2563eb;
-  
-  --cyan: #00d2ff;
+
+  --cyan: #0e7490;
   --blue: #2563eb;
-  --blue-light: #3b82f6;
-  --blue-glow: rgba(37, 99, 235, 0.25);
-  
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
+  --blue-light: #1d4ed8;
+  --blue-glow: rgba(37, 99, 235, 0.18);
+
+  --text-main: #0f172a;
+  --text-muted: #475569;
   --text-dim: #64748b;
-  
-  --emerald: #10b981;
+
+  --emerald: #047857;
   --emerald-bg: rgba(16, 185, 129, 0.12);
-  --amber: #f59e0b;
-  --amber-bg: rgba(245, 158, 11, 0.12);
-  --rose: #f43f5e;
-  --rose-bg: rgba(244, 63, 94, 0.12);
-  
+  --amber: #b45309;
+  --amber-bg: rgba(245, 158, 11, 0.14);
+  --rose: #be123c;
+  --rose-bg: rgba(244, 63, 94, 0.10);
+
   --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --mono: "JetBrains Mono", monospace;
-  
-  --shadow-lg: 0 20px 45px rgba(0, 0, 0, 0.6);
-  --shadow-glow: 0 0 30px rgba(0, 210, 255, 0.15);
+
+  --shadow-lg: 0 20px 45px rgba(15, 23, 42, 0.18);
+  --shadow-glow: 0 0 30px rgba(37, 99, 235, 0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
   width: 100%;
   height: 100%;
+  height: 100dvh;
   background: var(--bg-deep);
   color: var(--text-main);
   font-family: var(--sans);
@@ -80,7 +81,7 @@ html, body {
 .btn-primary {
   background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
   color: #fff;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 .btn-primary:hover {
@@ -89,13 +90,13 @@ html, body {
   transform: translateY(-1px);
 }
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.04);
   border-color: var(--border-medium);
   color: var(--text-main);
 }
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(15, 23, 42, 0.08);
+  border-color: rgba(15, 23, 42, 0.28);
 }
 .btn-danger {
   background: var(--rose-bg);
@@ -106,12 +107,12 @@ html, body {
   background: rgba(244, 63, 94, 0.22);
 }
 .btn-cyan {
-  background: rgba(0, 210, 255, 0.12);
-  border-color: rgba(0, 210, 255, 0.3);
+  background: rgba(14, 116, 144, 0.08);
+  border-color: rgba(14, 116, 144, 0.3);
   color: var(--cyan);
 }
 .btn-cyan:hover {
-  background: rgba(0, 210, 255, 0.22);
+  background: rgba(14, 116, 144, 0.16);
 }
 
 /* ======================================================== */
@@ -121,7 +122,8 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 999;
-  background: radial-gradient(circle at 50% 20%, #141c2e 0%, #07090e 65%);
+  background: radial-gradient(circle at 50% 20%, #dbeafe 0%, #e9eef5 65%);
+  overflow-y: auto;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -165,7 +167,7 @@ html, body {
   font-size: 1.4rem;
   font-weight: 800;
   letter-spacing: 0.12em;
-  color: #fff;
+  color: var(--text-main);
 }
 .login-logo-sub {
   font-size: 0.72rem;
@@ -220,7 +222,7 @@ html, body {
 }
 .quick-pill {
   width: 100%;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(15, 23, 42, 0.02);
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 9px 12px;
@@ -294,11 +296,11 @@ html, body {
   font-size: 1.15rem;
   font-weight: 800;
   letter-spacing: 0.12em;
-  color: #fff;
+  color: var(--text-main);
 }
 .brand-ver {
   font-size: 0.65rem;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.07);
   padding: 2px 6px;
   border-radius: 4px;
   color: var(--text-muted);
@@ -334,19 +336,19 @@ html, body {
   user-select: none;
 }
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(15, 23, 42, 0.05);
   color: var(--text-main);
 }
 .nav-link.active {
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.22), rgba(37, 99, 235, 0.06));
-  color: #fff;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0.04));
+  color: var(--blue-light);
   border-left: 3px solid var(--cyan);
   font-weight: 600;
 }
 .nav-badge {
   font-size: 0.68rem;
   font-family: var(--mono);
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.07);
   padding: 2px 6px;
   border-radius: 4px;
   color: var(--text-muted);
@@ -359,7 +361,7 @@ html, body {
 .sidebar-user {
   padding: 14px 16px;
   border-top: 1px solid var(--border-subtle);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.03);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -446,7 +448,7 @@ html, body {
 .search-kbd {
   font-family: var(--mono);
   font-size: 0.65rem;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.07);
   padding: 2px 6px;
   border-radius: 4px;
 }
@@ -565,11 +567,11 @@ html, body {
 }
 .table-tab-btn:hover {
   color: var(--text-main);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(15, 23, 42, 0.05);
 }
 .table-tab-btn.active {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--blue-light);
 }
 
 .data-table {
@@ -579,7 +581,7 @@ html, body {
   text-align: left;
 }
 .data-table th {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.04);
   color: var(--text-dim);
   font-size: 0.7rem;
   font-weight: 700;
@@ -619,116 +621,21 @@ html, body {
 }
 
 /* ======================================================== */
-/* 3. VISOR RADIOLÓGICO PRO 2D/3D (FULL SCREEN SAAS) */
+/* 3. VISOR OHIF (LANZADOR) */
 /* ======================================================== */
-.pacs-viewer-screen {
-  background: #020408;
-  border: 1px solid var(--border-medium);
-  border-radius: 12px;
-  height: calc(100vh - 120px);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.pacs-toolbar {
-  height: 48px;
-  background: #0b0e17;
-  border-bottom: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  gap: 12px;
-}
-.pacs-tools {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.pacs-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  font-size: 0.74rem;
-  padding: 5px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-family: var(--mono);
-  transition: all 0.12s ease;
-}
-.pacs-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-.pacs-btn.active {
-  background: var(--blue);
-  border-color: var(--cyan);
-  color: #fff;
-  box-shadow: 0 0 12px rgba(0, 210, 255, 0.3);
-}
-
-.pacs-viewport-grid {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 2px;
-  background: #000;
-  padding: 2px;
-}
-.pacs-quad {
-  background: #060911;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  user-select: none;
-}
-.pacs-quad-tag {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--cyan);
-  background: rgba(0, 0, 0, 0.8);
-  border: 1px solid rgba(0, 210, 255, 0.3);
-  padding: 3px 8px;
-  border-radius: 4px;
-  z-index: 5;
-}
-.pacs-quad-info {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--text-dim);
-  background: rgba(0, 0, 0, 0.7);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.pacs-slider-bar {
-  height: 44px;
-  background: #0b0e17;
-  border-top: 1px solid var(--border-subtle);
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  gap: 16px;
-  font-size: 0.78rem;
-  font-family: var(--mono);
-  color: var(--text-muted);
-}
-.pacs-slider-bar input[type="range"] {
-  flex: 1;
-  accent-color: var(--cyan);
-  cursor: pointer;
-}
+.viewer-card { padding: 24px; margin-bottom: 20px; }
+.viewer-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.viewer-head h3 { font-size: 1.15rem; font-weight: 700; margin: 6px 0 4px; }
+.viewer-head p { font-size: 0.82rem; color: var(--text-muted); max-width: 620px; }
+.viewer-tag { font-family: var(--mono); font-size: 0.68rem; font-weight: 700; color: var(--cyan); background: rgba(14,116,144,0.08); border: 1px solid rgba(14,116,144,0.25); padding: 3px 8px; border-radius: 4px; }
+.viewer-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+.viewer-step { background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 16px; }
+.viewer-step b { display: inline-flex; width: 24px; height: 24px; border-radius: 50%; align-items: center; justify-content: center; background: var(--blue); color: #fff; font-size: 0.75rem; margin-bottom: 8px; }
+.viewer-step strong { display: block; font-size: 0.86rem; margin-bottom: 4px; }
+.viewer-step span { font-size: 0.78rem; color: var(--text-muted); }
+.viewer-caps { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.viewer-caps span { font-family: var(--mono); font-size: 0.7rem; padding: 4px 10px; border-radius: 999px; background: rgba(15,23,42,0.05); color: var(--text-muted); }
+.viewer-note { font-size: 0.76rem; color: var(--text-dim); border-top: 1px solid var(--border-subtle); padding-top: 14px; }
 
 /* ======================================================== */
 /* 4. MODALES (NUEVA ORDEN, 403 AUDIT, REPORTE) */
@@ -737,7 +644,7 @@ html, body {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(8px);
   z-index: 1000;
   align-items: center;
@@ -774,7 +681,7 @@ html, body {
 .modal-foot {
   padding: 16px 24px;
   border-top: 1px solid var(--border-subtle);
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.03);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -792,6 +699,77 @@ html, body {
   color: #a5f3fc;
   line-height: 1.6;
   overflow-x: auto;
+}
+
+/* ======================================================== */
+/* 5. RESPONSIVE */
+/* ======================================================== */
+.menu-toggle { display: none; }
+.sidebar-backdrop { display: none; }
+.data-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.data-scroll .data-table th, .data-scroll .data-table td { white-space: nowrap; }
+.view-panel [style*="justify-content:space-between"] { flex-wrap: wrap; gap: 10px; }
+.search-bar { width: 320px; max-width: 100%; min-width: 0; }
+.topbar-left, .topbar-right { min-width: 0; }
+
+@media (max-width: 1180px) {
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .search-bar { width: 240px; }
+  .server-badge span:last-child { display: none; }
+}
+
+@media (max-width: 900px) {
+  .viewer-steps { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 820px) {
+  #screen-app { height: 100dvh; }
+  .menu-toggle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: var(--bg-input); border: 1px solid var(--border-medium);
+    border-radius: 8px; color: var(--text-main); font-size: 1.1rem; cursor: pointer;
+  }
+  .app-sidebar {
+    position: fixed; top: 0; bottom: 0; left: 0; z-index: 900;
+    width: 280px; max-width: 85vw;
+    transform: translateX(-100%); transition: transform 0.22s ease;
+    box-shadow: var(--shadow-lg);
+  }
+  #screen-app.nav-open .app-sidebar { transform: translateX(0); }
+  #screen-app.nav-open .sidebar-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 850; background: rgba(15, 23, 42, 0.45);
+  }
+  .app-topbar { padding: 0 12px; gap: 10px; height: auto; min-height: 56px; }
+  .topbar-left { flex: 1; gap: 10px; }
+  .search-bar { flex: 1; width: auto; }
+  .search-kbd, .topbar-right { display: none; }
+  #btn-top-new-order { padding: 6px 10px !important; white-space: nowrap; }
+  .view-container { padding: 14px; }
+  .kpi-card { padding: 14px 16px; }
+  .kpi-val { font-size: 1.3rem; }
+  .table-header-tools { padding: 12px 14px; }
+  .table-tabs { flex-wrap: wrap; }
+  .viewer-card { padding: 18px; }
+  #view-report .table-card[style*="padding:24px"] { padding: 16px !important; }
+  #view-report .terminal-block { font-size: 0.68rem; }
+  .view-panel div[style*="display:flex;gap:"] { flex-wrap: wrap; }
+  .view-panel .btn { white-space: normal; text-align: center; }
+  .modal-overlay { padding: 12px; align-items: flex-end; }
+  .modal-window { max-height: 94dvh; display: flex; flex-direction: column; }
+  .modal-body { padding: 16px; flex: 1; }
+  .modal-head, .modal-foot { padding: 12px 16px; }
+  .modal-foot { flex-wrap: wrap; }
+  .modal-foot .btn { flex: 1; }
+}
+
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px; }
+  .login-card { padding: 26px 20px; }
+  #screen-login { padding: 14px; align-items: flex-start; }
+  .quick-pill { flex-wrap: wrap; gap: 4px; }
+  .quick-profiles-label { flex-wrap: wrap; gap: 4px; }
+  .modal-foot .btn { flex-basis: 100%; }
 }
 </style>
 </head>
@@ -869,6 +847,7 @@ html, body {
 <!-- 2. APLICACIÓN SAAS PRINCIPAL (VISTA INTERIOR DESDE ADENTRO) -->
 <!-- ============================================================== -->
 <div id="screen-app">
+  <div class="sidebar-backdrop" onclick="toggleSidebar(false)"></div>
 
   <!-- SIDEBAR LATERAL -->
   <aside class="app-sidebar">
@@ -891,8 +870,8 @@ html, body {
         <span class="nav-badge" id="badge-total-orders">14</span>
       </div>
       <div class="nav-link" id="nav-viewer" onclick="navigateTo('view-viewer')">
-        <span>Visor 3D / DICOMweb</span>
-        <span class="nav-badge" style="color:var(--cyan)">CBCT</span>
+        <span>Visor DICOM (OHIF)</span>
+        <span class="nav-badge" style="color:var(--cyan)">OHIF</span>
       </div>
       <div class="nav-link" id="nav-report" onclick="navigateTo('view-report')">
         <span>Dictámenes & Entrega 180d</span>
@@ -929,6 +908,7 @@ html, body {
     <!-- TOPBAR SUPERIOR -->
     <header class="app-topbar">
       <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()" aria-label="Abrir menú">☰</button>
         <div class="search-bar">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           <input type="text" placeholder="Buscar paciente por cédula o código de orden..." id="global-search" oninput="handleGlobalSearch(this.value)">
@@ -947,7 +927,7 @@ html, body {
         </div>
 
         <!-- Indicador de Sesión Actual -->
-        <span id="badge-current-role-top" class="mono" style="font-size:0.72rem;background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:6px;color:var(--cyan)">
+        <span id="badge-current-role-top" class="mono" style="font-size:0.72rem;background:rgba(15,23,42,0.06);padding:4px 10px;border-radius:6px;color:var(--cyan)">
           SEDE CENTRAL · MEDELLÍN
         </span>
       </div>
@@ -995,11 +975,11 @@ html, body {
             </div>
 
             <div style="font-size:0.76rem;color:var(--text-dim)">
-              Mostrando <strong style="color:#fff">14 de 14</strong> estudios indexados
+              Mostrando <strong style="color:var(--text-main)">14 de 14</strong> estudios indexados
             </div>
           </div>
 
-          <table class="data-table">
+          <div class="data-scroll"><table class="data-table">
             <thead>
               <tr>
                 <th>ID Orden</th>
@@ -1088,152 +1068,36 @@ html, body {
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
       <!-- ======================================================== -->
-      <!-- VISTA 2: VISOR RADIOLÓGICO PRO 2D/3D (PACS FULL SCREEN) -->
+      <!-- VISTA 2: VISOR DICOM (OHIF VIEWERS) -->
       <!-- ======================================================== -->
       <div id="view-viewer" class="view-panel">
-        <div class="pacs-viewer-screen">
-          
-          <!-- Toolbar Superior PACS -->
-          <div class="pacs-toolbar">
-            <div class="pacs-tools">
-              <span class="mono" style="font-size:0.75rem;font-weight:700;color:var(--cyan);margin-right:8px">
-                RADIA 3D VISOR
-              </span>
-              <button class="pacs-btn active" id="pacs-tool-ruler" onclick="selectViewerTool('ruler')">
-                Regla mm
-              </button>
-              <button class="pacs-btn" id="pacs-tool-implant" onclick="selectViewerTool('implant')">
-                Implante Ø 3.75
-              </button>
-              <button class="pacs-btn" id="pacs-tool-angle" onclick="selectViewerTool('angle')">
-                Ángulo
-              </button>
-              <button class="pacs-btn" onclick="captureSliceToReport()">
-                📸 Captura a Dictamen
-              </button>
-            </div>
-
-            <!-- Presets de Ventana -->
-            <div class="pacs-tools">
-              <span class="mono" style="font-size:0.7rem;color:var(--text-dim)">VENTANA:</span>
-              <button class="pacs-btn active" id="pacs-win-bone" onclick="setViewerWindow('bone')">Hueso W:3000</button>
-              <button class="pacs-btn" id="pacs-win-soft" onclick="setViewerWindow('soft')">Blando W:400</button>
-              <button class="pacs-btn" id="pacs-win-enamel" onclick="setViewerWindow('enamel')">Esmalte W:4000</button>
-            </div>
-
-            <div class="mono" style="font-size:0.75rem;color:var(--text-muted)">
-              Paciente: <strong style="color:#fff">RESTREPO, CAMILO (#RAD-0842)</strong>
-            </div>
-          </div>
-
-          <!-- Cuadrantes Multiplanares (Axial, Sagital, Coronal, 3D) -->
-          <div class="pacs-viewport-grid">
-            
-            <!-- Cuadrante 1: Axial -->
-            <div class="pacs-quad">
-              <span class="pacs-quad-tag">AXIAL (Transversal)</span>
-              
-              <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
-                <!-- Hueso Maxilar/Mandíbula -->
-                <path id="svg-bone-axial" d="M 40 150 C 35 100, 50 40, 100 40 C 150 40, 165 100, 160 150 C 155 130, 140 100, 100 100 C 60 100, 45 130, 40 150 Z" 
-                      fill="#162032" stroke="#00d2ff" stroke-width="2"/>
-                <!-- Piezas dentales -->
-                <circle cx="100" cy="55" r="5" fill="#f8fafc"/>
-                <circle cx="85" cy="60" r="5" fill="#f8fafc"/>
-                <circle cx="115" cy="60" r="5" fill="#f8fafc"/>
-                <circle cx="70" cy="75" r="6" fill="#f8fafc"/>
-                <circle cx="130" cy="75" r="6" fill="#f8fafc"/>
-                <circle cx="55" cy="100" r="7" fill="#f8fafc"/>
-                <circle cx="145" cy="100" r="7" fill="#f8fafc"/>
-                <!-- Regla de Medición Activa -->
-                <g id="pacs-ruler-svg" style="display:block">
-                  <line x1="55" y1="100" x2="55" y2="135" stroke="#10b981" stroke-width="2" stroke-dasharray="3 2"/>
-                  <circle cx="55" cy="100" r="3" fill="#10b981"/>
-                  <circle cx="55" cy="135" r="3" fill="#10b981"/>
-                  <text x="62" y="122" fill="#10b981" font-size="11" font-family="JetBrains Mono" font-weight="bold">11.42 mm</text>
-                </g>
-              </svg>
-
-              <div class="pacs-quad-info">
-                Corte <span id="axial-slice-indicator">240</span> / 480 · Z: -12.5 mm
+        <div style="max-width:980px;margin:0 auto">
+          <div class="table-card viewer-card">
+            <div class="viewer-head">
+              <div>
+                <span class="viewer-tag">OHIF VIEWERS · MIT · DICOMweb</span>
+                <h3>Visor de imágenes diagnósticas</h3>
+                <p>Visor web estándar de la industria (OHIF) integrado en el mismo dominio: sin programas externos, con MPR, mediciones y presets de ventana sobre estudios DICOM reales.</p>
               </div>
+              <a class="btn btn-primary" href="/radia/visor/" target="_blank" rel="noopener">Abrir visor OHIF ↗</a>
             </div>
 
-            <!-- Cuadrante 2: Sagital -->
-            <div class="pacs-quad">
-              <span class="pacs-quad-tag">SAGITAL (Perfil)</span>
-              
-              <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
-                <path d="M 40 80 Q 80 75 140 85 L 140 160 Q 80 165 40 150 Z" fill="#162032" stroke="#3b82f6" stroke-width="2"/>
-                <!-- Conducto Dentario Mandibular -->
-                <path d="M 50 135 Q 90 140 135 130" stroke="#f43f5e" stroke-width="3" stroke-dasharray="4 2"/>
-                <!-- Corona Molar -->
-                <path d="M 75 80 L 75 55 Q 85 50 95 55 L 95 80 Z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
-                <!-- Marcador de Implante Dental -->
-                <g id="pacs-implant-svg" style="display:none">
-                  <rect x="78" y="80" width="14" height="42" rx="2" fill="#00d2ff" opacity="0.8" stroke="#fff" stroke-width="1.5"/>
-                  <text x="70" y="135" fill="#00d2ff" font-size="9" font-family="JetBrains Mono">Ø 3.75 × 11.5 mm</text>
-                </g>
-              </svg>
-
-              <div class="pacs-quad-info">
-                Canal Mandibular: <strong style="color:var(--rose)">Identificado</strong>
-              </div>
+            <div class="viewer-steps">
+              <div class="viewer-step"><b>1</b><strong>Abrir el visor</strong><span>Se abre en una pestaña nueva del mismo dominio, como en producción.</span></div>
+              <div class="viewer-step"><b>2</b><strong>Subir un estudio real</strong><span>Arrastre archivos o la carpeta .dcm del estudio (TC, CBCT, panorámica) a la zona de carga.</span></div>
+              <div class="viewer-step"><b>3</b><strong>Revisar y medir</strong><span>Doble clic en el estudio, luego "Basic Viewer": zoom, ventana, reglas, ángulos y cortes MPR.</span></div>
             </div>
 
-            <!-- Cuadrante 3: Coronal -->
-            <div class="pacs-quad">
-              <span class="pacs-quad-tag">CORONAL (Frontal)</span>
-              
-              <svg width="220" height="220" viewBox="0 0 200 200" fill="none">
-                <path d="M 50 70 Q 75 60 90 85 Q 75 110 50 95 Z" fill="#162032" stroke="#00d2ff" stroke-width="1.5"/>
-                <path d="M 150 70 Q 125 60 110 85 Q 125 110 150 95 Z" fill="#162032" stroke="#00d2ff" stroke-width="1.5"/>
-                <line x1="100" y1="50" x2="100" y2="120" stroke="#94a3b8" stroke-width="2"/>
-                <path d="M 60 140 Q 100 155 140 140" stroke="#3b82f6" stroke-width="3"/>
-              </svg>
-
-              <div class="pacs-quad-info">
-                Senos Maxilares: <strong style="color:var(--emerald)">Permeables</strong>
-              </div>
+            <div class="viewer-caps">
+              <span>2D · Stack</span><span>MPR axial / sagital / coronal</span><span>Zoom · Pan · W/L</span><span>Regla · Ángulo · ROI</span><span>DICOM SR (medidas)</span>
             </div>
 
-            <!-- Cuadrante 4: Reconstrucción 3D Isométrica -->
-            <div class="pacs-quad" style="background:#02050b">
-              <span class="pacs-quad-tag" style="background:rgba(37,99,235,0.4);border-color:var(--blue)">
-                VR 3D RECONSTRUCTION
-              </span>
-              
-              <div style="text-align:center">
-                <svg id="svg-volume-3d" width="160" height="160" viewBox="0 0 160 160" fill="none" style="transition:transform 0.25s ease">
-                  <polygon points="80,20 140,55 140,115 80,145 20,115 20,55" fill="#0e1526" stroke="#00d2ff" stroke-width="2"/>
-                  <line x1="80" y1="20" x2="80" y2="145" stroke="#00d2ff" stroke-width="1.5" stroke-dasharray="3 3"/>
-                  <line x1="140" y1="55" x2="80" y2="90" stroke="#00d2ff" stroke-width="1.5"/>
-                  <line x1="20" y1="55" x2="80" y2="90" stroke="#00d2ff" stroke-width="1.5"/>
-                  <circle cx="80" cy="90" r="10" fill="#00d2ff" opacity="0.4"/>
-                </svg>
-
-                <div style="margin-top:6px;display:flex;justify-content:center;gap:6px">
-                  <button class="pacs-btn" onclick="rotateVolume3D(-30)">↺ Rotar</button>
-                  <button class="pacs-btn" onclick="rotateVolume3D(30)">Rotar ↻</button>
-                </div>
-              </div>
-
-              <div class="pacs-quad-info">
-                Voxel: 0.25 mm³
-              </div>
-            </div>
-          </div>
-
-          <!-- Slider de Navegación de Cortes -->
-          <div class="pacs-slider-bar">
-            <span>Navegador de Cortes (1 a 480):</span>
-            <input type="range" min="1" max="480" value="240" oninput="onPacsSlider(this.value)">
-            <span>Corte <strong id="lbl-pacs-slice" style="color:var(--cyan)">240</strong> / 480</span>
+            <p class="viewer-note">En esta demo los archivos se procesan solo en el navegador y no se envían a ningún servidor. En producción el visor consume el servidor DICOM (Orthanc) por DICOMweb y cada solicitud se autoriza por estudio asignado. El visor requiere un equipo de escritorio.</p>
           </div>
         </div>
       </div>
@@ -1289,7 +1153,7 @@ html, body {
 
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
               <div style="font-size:0.78rem;color:var(--text-muted)">
-                Vigencia: <strong id="pacs-link-timer" style="color:#fff">179 días, 23 horas</strong> · Descargas: <strong>1</strong>
+                Vigencia: <strong id="pacs-link-timer" style="color:var(--text-main)">179 días, 23 horas</strong> · Descargas: <strong>1</strong>
               </div>
 
               <div style="display:flex;gap:10px">
@@ -1313,7 +1177,7 @@ html, body {
             <span class="mono" style="font-size:0.75rem;color:var(--cyan)">CORTE MENSUAL: OCTUBRE 2026</span>
           </div>
 
-          <table class="data-table">
+          <div class="data-scroll"><table class="data-table">
             <thead>
               <tr>
                 <th>Profesional / Clínica</th>
@@ -1353,7 +1217,7 @@ html, body {
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -1383,7 +1247,7 @@ html, body {
 <div class="modal-overlay" id="modal-new-order" onclick="if(event.target===this)closeNewOrderModal()">
   <div class="modal-window">
     <div class="modal-head">
-      <strong style="font-size:1rem;color:#fff">Crear Nueva Orden de Estudio</strong>
+      <strong style="font-size:1rem;color:var(--text-main)">Crear Nueva Orden de Estudio</strong>
       <button onclick="closeNewOrderModal()" style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div class="modal-body">
@@ -1398,7 +1262,7 @@ html, body {
 
       <div id="modal-patient-hit" style="background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.8rem">
         <div style="display:flex;justify-content:space-between">
-          <strong style="color:#fff">Camilo Andrés Restrepo Mejía</strong>
+          <strong style="color:var(--text-main)">Camilo Andrés Restrepo Mejía</strong>
           <span style="color:var(--emerald);font-weight:700">✓ PACIENTE LOCALIZADO</span>
         </div>
         <div style="color:var(--text-muted);font-size:0.75rem;margin-top:4px">
@@ -1455,7 +1319,7 @@ html, body {
       <button onclick="close403Modal()" style="background:none;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer">✕</button>
     </div>
     <div class="modal-body">
-      <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:8px;color:#fff">
+      <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:8px;color:var(--text-main)">
         Estudio Confidencial Asignado a Otro Profesional
       </h3>
       <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:16px">
@@ -1487,7 +1351,6 @@ Compliance: Ley 1581 de 2012 / Res 1995 de 1999
 <!-- ============================================================== -->
 <script>
 let currentRole = 'admin';
-let rotation3D = 0;
 let isLinkRevoked = false;
 
 // 1. Manejo de Login y Perfiles
@@ -1543,6 +1406,7 @@ function logoutApp() {
 
 // 2. Navegación Interna por Vistas
 function navigateTo(viewId) {
+  toggleSidebar(false);
   document.querySelectorAll('.view-panel').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 
@@ -1607,63 +1471,9 @@ function openStudyViewer(orderId) {
   navigateTo('view-viewer');
 }
 
-function selectViewerTool(tool) {
-  document.querySelectorAll('.pacs-btn').forEach(b => {
-    if (['pacs-tool-ruler', 'pacs-tool-implant', 'pacs-tool-angle'].includes(b.id)) b.classList.remove('active');
-  });
-
-  const ruler = document.getElementById('pacs-ruler-svg');
-  const implant = document.getElementById('pacs-implant-svg');
-
-  if (tool === 'ruler') {
-    document.getElementById('pacs-tool-ruler').classList.add('active');
-    ruler.style.display = 'block';
-    implant.style.display = 'none';
-  } else if (tool === 'implant') {
-    document.getElementById('pacs-tool-implant').classList.add('active');
-    ruler.style.display = 'none';
-    implant.style.display = 'block';
-  } else {
-    document.getElementById('pacs-tool-angle').classList.add('active');
-    ruler.style.display = 'none';
-    implant.style.display = 'none';
-  }
-}
-
-function setViewerWindow(w) {
-  document.getElementById('pacs-win-bone').classList.toggle('active', w === 'bone');
-  document.getElementById('pacs-win-soft').classList.toggle('active', w === 'soft');
-  document.getElementById('pacs-win-enamel').classList.toggle('active', w === 'enamel');
-
-  const bone = document.getElementById('svg-bone-axial');
-  if (w === 'bone') {
-    bone.setAttribute('fill', '#162032');
-    bone.setAttribute('stroke', '#00d2ff');
-  } else if (w === 'soft') {
-    bone.setAttribute('fill', '#334155');
-    bone.setAttribute('stroke', '#64748b');
-  } else if (w === 'enamel') {
-    bone.setAttribute('fill', '#0b0e14');
-    bone.setAttribute('stroke', '#ffffff');
-  }
-}
-
-function onPacsSlider(val) {
-  document.getElementById('lbl-pacs-slice').textContent = val;
-  document.getElementById('axial-slice-indicator').textContent = val;
-  const scale = 0.9 + (val / 480) * 0.2;
-  const bone = document.getElementById('svg-bone-axial');
-  if (bone) bone.setAttribute('transform', `scale(${scale}) translate(${(1-scale)*50}, ${(1-scale)*50})`);
-}
-
-function rotateVolume3D(delta) {
-  rotation3D += delta;
-  document.getElementById('svg-volume-3d').style.transform = `rotateY(${rotation3D}deg) rotateX(${rotation3D/5}deg)`;
-}
-
-function captureSliceToReport() {
-  alert('✓ Corte axial y medición de 11.42 mm transferidos al dictamen radiológico.');
-  navigateTo('view-report');
+function toggleSidebar(force) {
+  const app = document.getElementById('screen-app');
+  app.classList.toggle('nav-open', typeof force === 'boolean' ? force : !app.classList.contains('nav-open'));
 }
 
 // 5. Dictamen y Entrega 180 Días

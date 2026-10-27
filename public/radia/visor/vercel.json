@@ -1,0 +1,1 @@
+{ "rewrites": [{ "source": "/radia/visor/:path*", "destination": "/radia/visor/index.html" }] }
