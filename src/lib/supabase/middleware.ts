@@ -12,6 +12,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/agenda") ||
     request.nextUrl.pathname.startsWith("/lumia") ||
     request.nextUrl.pathname.startsWith("/radia") ||
+    request.nextUrl.pathname.startsWith("/onestar") ||
+    request.nextUrl.pathname.startsWith("/one-star") ||
     request.nextUrl.pathname.startsWith("/r/") ||
     // Páginas legales que exige Meta para la app (públicas).
     request.nextUrl.pathname === "/privacidad" ||
