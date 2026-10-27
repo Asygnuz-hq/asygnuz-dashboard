@@ -103,16 +103,31 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
     }
   }
 
+  // Los botones de abajo llaman a la API sin try/catch propio: si fallaba
+  // (URL sin https://, 403, etc.) el error se perdía y el botón parecía muerto.
+  // Esto lo muestra en el aviso fijo de arriba.
+  function avisarError(err: unknown, porDefecto: string) {
+    setMessage(err instanceof Error ? err.message : porDefecto);
+  }
+
   async function agregarPilar(icono: string, titulo: string, texto: string) {
-    const data = await api(`/api/portal-admin/clientes/${tenantId}/pilares`, {
-      method: "POST",
-      body: JSON.stringify({ icono, titulo, texto }),
-    });
-    setPilares((prev) => [...prev, data.pilar]);
+    try {
+      const data = await api(`/api/portal-admin/clientes/${tenantId}/pilares`, {
+        method: "POST",
+        body: JSON.stringify({ icono, titulo, texto }),
+      });
+      setPilares((prev) => [...prev, data.pilar]);
+    } catch (err) {
+      avisarError(err, "No se pudo agregar el pilar.");
+    }
   }
   async function borrarPilar(id: string) {
-    await api(`/api/portal-admin/clientes/${tenantId}/pilares/${id}`, { method: "DELETE" });
-    setPilares((prev) => prev.filter((p) => p.id !== id));
+    try {
+      await api(`/api/portal-admin/clientes/${tenantId}/pilares/${id}`, { method: "DELETE" });
+      setPilares((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      avisarError(err, "No se pudo borrar el pilar.");
+    }
   }
 
   async function vincular(email: string) {
@@ -128,27 +143,45 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
   }
 
   async function agregarEnlace(titulo: string, url: string) {
-    const data = await api(`/api/portal-admin/clientes/${tenantId}/enlaces`, {
-      method: "POST",
-      body: JSON.stringify({ titulo, url }),
-    });
-    setEnlaces((prev) => [...prev, data.enlace]);
+    // "valentinamkt.online" sin esquema no pasa la validación de URL: se completa.
+    const urlCompleta = /^[a-z][a-z0-9+.-]*:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`;
+    try {
+      const data = await api(`/api/portal-admin/clientes/${tenantId}/enlaces`, {
+        method: "POST",
+        body: JSON.stringify({ titulo, url: urlCompleta }),
+      });
+      setEnlaces((prev) => [...prev, data.enlace]);
+    } catch (err) {
+      avisarError(err, "No se pudo agregar el enlace.");
+    }
   }
   async function borrarEnlace(id: string) {
-    await api(`/api/portal-admin/clientes/${tenantId}/enlaces/${id}`, { method: "DELETE" });
-    setEnlaces((prev) => prev.filter((e) => e.id !== id));
+    try {
+      await api(`/api/portal-admin/clientes/${tenantId}/enlaces/${id}`, { method: "DELETE" });
+      setEnlaces((prev) => prev.filter((e) => e.id !== id));
+    } catch (err) {
+      avisarError(err, "No se pudo borrar el enlace.");
+    }
   }
 
   async function agregarReunion(titulo: string, fecha: string, notas: string) {
-    const data = await api(`/api/portal-admin/clientes/${tenantId}/reuniones`, {
-      method: "POST",
-      body: JSON.stringify({ titulo, fecha, notas }),
-    });
-    setReuniones((prev) => [data.reunion, ...prev]);
+    try {
+      const data = await api(`/api/portal-admin/clientes/${tenantId}/reuniones`, {
+        method: "POST",
+        body: JSON.stringify({ titulo, fecha, notas }),
+      });
+      setReuniones((prev) => [data.reunion, ...prev]);
+    } catch (err) {
+      avisarError(err, "No se pudo agregar la reunión.");
+    }
   }
   async function borrarReunion(id: string) {
-    await api(`/api/portal-admin/clientes/${tenantId}/reuniones/${id}`, { method: "DELETE" });
-    setReuniones((prev) => prev.filter((r) => r.id !== id));
+    try {
+      await api(`/api/portal-admin/clientes/${tenantId}/reuniones/${id}`, { method: "DELETE" });
+      setReuniones((prev) => prev.filter((r) => r.id !== id));
+    } catch (err) {
+      avisarError(err, "No se pudo borrar la reunión.");
+    }
   }
 
   // Agregar/editar/borrar contenido ahora vive en /portal-admin/[tenantId]/parrilla
@@ -185,7 +218,7 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
       </div>
 
       {message && (
-        <div className="rounded-lg border border-border bg-surface-alt px-4 py-2 text-sm text-muted">{message}</div>
+        <div className="sticky top-2 z-20 rounded-lg border border-border bg-surface-alt px-4 py-2 text-sm text-foreground shadow-md">{message}</div>
       )}
 
       <TarjetaSeccion icono="🔑" titulo="Acceso del cliente">
