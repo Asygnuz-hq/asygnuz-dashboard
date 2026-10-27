@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+<script>if(location.pathname.startsWith("/onestar")||location.pathname.startsWith("/one-star")){var b=document.createElement("base");b.href="/onestar/";document.head.appendChild(b);}</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASYGNUZ × One Star — Propuesta Comercial & Resultados</title>
+<meta name="description" content="Propuesta de adquisición digital, Meta Ads, Google Ads, contenido audiovisual para calzado y medición de ROAS para One Star. Plan integral por $1.500.000 COP/mes.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root, :root[data-theme="light"] {
+  --bg: #fcfdff;
+  --bg-soft: #f3f6fb;
+  --bg-grad:
+    radial-gradient(900px 440px at 50% -140px, rgba(37, 99, 235, 0.06), transparent 72%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 48%, #f1f5f9 100%);
+  --topbar-bg: rgba(255, 255, 255, 0.92);
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-hover: rgba(255, 255, 255, 1);
+  --surface-subtle: rgba(15, 23, 42, 0.025);
+  --surface-active: linear-gradient(180deg, rgba(239, 246, 255, 0.95) 0%, rgba(255, 255, 255, 0.99) 100%);
+  --stage-chrome: rgba(248, 250, 252, 0.98);
+  --hairline: rgba(15, 23, 42, 0.085);
+  --hairline-mid: rgba(15, 23, 42, 0.15);
+  --hairline-blue: rgba(37, 99, 235, 0.36);
+  --heading: #090d16;
+  --fg: #0f172a;
+  --fg-soft: #334155;
+  --muted: #64748b;
+  --blue: #2563eb;
+  --blue-soft: #1d4ed8;
+  --blue-deep: #1e40af;
+  --danger: #e11d48;
+  --danger-soft: #be123c;
+  --warning: #d97706;
+  --success: #059669;
+  --one-red: #E31C23;
+  --shadow: 0 18px 42px rgba(15, 23, 42, 0.065);
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html {
+  scroll-behavior: smooth;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg);
+  background-image: var(--bg-grad);
+  background-attachment: fixed;
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.68;
+  overflow-x: hidden;
+}
+
+.wrap {
+  max-width: 1220px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--sans);
+  font-weight: 400;
+  letter-spacing: -0.032em;
+  color: var(--heading);
+  text-wrap: balance;
+}
+h1 { font-size: clamp(2.35rem, 4.5vw, 3.9rem); line-height: 1.07; font-weight: 300; }
+h1 strong, h2 strong { font-weight: 500; color: var(--heading); }
+h2 { font-size: clamp(1.95rem, 3.3vw, 2.75rem); line-height: 1.13; font-weight: 300; }
+h3 { font-size: 1.18rem; line-height: 1.36; font-weight: 400; color: var(--heading); }
+h4 { font-size: 1rem; line-height: 1.4; font-weight: 500; color: var(--heading); }
+p { color: var(--fg-soft); font-weight: 300; }
+b, strong { font-weight: 500; color: var(--fg); }
+.muted { color: var(--muted); }
+.num { font-variant-numeric: tabular-nums; }
+
+.hl-blue {
+  color: var(--blue-soft);
+  font-weight: 400;
+}
+
+.rule {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--hairline-mid) 20%, var(--hairline-mid) 80%, transparent);
+}
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--blue);
+  margin-bottom: 16px;
+}
+.sec-head .kicker {
+  font-size: 0.92rem;
+  letter-spacing: 0.11em;
+}
+.kicker::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+  flex-shrink: 0;
+}
+.kicker::after {
+  content: "";
+  height: 1px;
+  width: 56px;
+  background: linear-gradient(90deg, var(--hairline-blue), transparent);
+}
+
+.sec-head { margin-bottom: 42px; }
+.sec-head .lead {
+  font-size: 1.08rem;
+  color: var(--fg-soft);
+  max-width: 74ch;
+  margin-top: 14px;
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+section { padding: 84px 0; position: relative; }
+
+.panel-box {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: border-color 0.25s ease, background 0.25s ease, transform 0.25s ease;
+}
+.panel-box:hover { border-color: var(--hairline-mid); }
+.pad { padding: 28px; }
+.pad-sm { padding: 20px; }
+
+/* Barra superior */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  padding: 14px 0;
+  background: var(--topbar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--hairline);
+}
+.topbar-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.asy-logo {
+  display: block;
+  width: 86px;
+  aspect-ratio: 487 / 292;
+  background: var(--heading);
+  -webkit-mask: url(media/asygnuz-logo.png) center / contain no-repeat;
+  mask: url(media/asygnuz-logo.png) center / contain no-repeat;
+}
+.brand-sep {
+  font-family: var(--mono);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 300;
+}
+.brand-onestar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.brand-onestar img {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+.brand-onestar-txt {
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--heading);
+  text-transform: uppercase;
+}
+.brand-onestar-txt span {
+  color: var(--one-red);
+}
+
+/* Conmutador de 2 vistas */
+.mode-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+  gap: 2px;
+}
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 7px 16px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.mode-btn span.idx {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--blue-soft);
+  opacity: 0.85;
+}
+.mode-btn[aria-selected="true"] {
+  background: rgba(59, 130, 246, 0.13);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+  font-weight: 500;
+}
+.mode-btn:hover:not([aria-selected="true"]) { color: var(--fg); }
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: 0.84rem;
+  letter-spacing: -0.01em;
+  padding: 9px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  border-color: rgba(147, 197, 253, 0.65);
+  filter: brightness(1.06);
+}
+.btn-line {
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline-mid);
+  color: var(--fg-soft);
+}
+.btn-line:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: var(--hairline-blue);
+  color: var(--heading);
+}
+.btn-red {
+  background: linear-gradient(180deg, #e11d48 0%, #be123c 100%);
+  border-color: rgba(225, 29, 72, 0.4);
+  color: #ffffff;
+}
+.btn-red:hover {
+  filter: brightness(1.08);
+}
+
+/* HERO */
+.hero { padding: 72px 0 64px; }
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.32fr) minmax(0, 0.88fr);
+  gap: 36px;
+  align-items: stretch;
+}
+.hero-lead {
+  font-size: 1.08rem;
+  color: var(--muted);
+  margin-top: 20px;
+  max-width: 60ch;
+  font-weight: 300;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+.meta-line {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 36px;
+  padding-top: 22px;
+  border-top: 1px solid var(--hairline);
+}
+.meta-line small {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.meta-line span {
+  font-size: 0.86rem;
+  color: var(--fg-soft);
+  font-weight: 300;
+}
+
+/* Resumen lateral en Hero */
+.audit-summary {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  border-color: var(--hairline-blue);
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.55) 0%, rgba(255, 255, 255, 0.96) 38%);
+}
+.exec-block-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.exec-block-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 13px 15px;
+  border-radius: 11px;
+  background: #ffffff;
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--sans);
+}
+.exec-block-card:hover {
+  border-color: var(--hairline-blue);
+  background: rgba(239, 246, 255, 0.55);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.06);
+}
+.exec-block-card.is-current {
+  border-color: var(--hairline-blue);
+  background: rgba(239, 246, 255, 0.72);
+  cursor: default;
+}
+.exec-block-card.is-current:hover {
+  transform: none;
+}
+.exec-block-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+.exec-block-num {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--blue);
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 6px;
+  padding: 4px 7px;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.exec-block-info strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--heading);
+  line-height: 1.3;
+}
+.exec-block-info span {
+  display: block;
+  font-size: 0.77rem;
+  color: var(--muted);
+  font-weight: 300;
+  line-height: 1.4;
+  margin-top: 2px;
+}
+.exec-block-pill {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--hairline-mid);
+  background: var(--surface-subtle);
+  color: var(--fg);
+  transition: all 0.2s ease;
+}
+.exec-block-card:hover .exec-block-pill {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #ffffff;
+}
+.exec-block-card.is-current .exec-block-pill {
+  border-color: rgba(37, 99, 235, 0.28);
+  background: rgba(37, 99, 235, 0.1);
+  color: var(--blue);
+}
+.exec-mini-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+.exec-mini-kpi {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid var(--hairline);
+}
+.exec-mini-kpi strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--heading);
+}
+.exec-mini-kpi span {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+/* 8 PILARES DE INTERVENCIÓN */
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.pillar-item {
+  padding: 24px 26px;
+  display: grid;
+  grid-template-columns: 38px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+.pillar-num {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--blue-soft);
+  padding-top: 2px;
+}
+.pillar-item h4 {
+  font-size: 1.02rem;
+  font-weight: 500;
+  color: var(--heading);
+  margin-bottom: 6px;
+}
+.pillar-item p { font-size: 0.86rem; color: var(--muted); line-height: 1.55; }
+
+/* PLAN ÚNICO INTEGRAL $1.5M */
+.single-plan-hero {
+  border: 1px solid var(--hairline-blue);
+  background: linear-gradient(180deg, rgba(239, 246, 255, 0.8) 0%, rgba(255, 255, 255, 0.98) 25%);
+  border-radius: 16px;
+  padding: 40px;
+  box-shadow: 0 24px 50px rgba(37, 99, 235, 0.07);
+}
+.single-plan-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--hairline);
+}
+.plan-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid var(--hairline-blue);
+  padding: 5px 12px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+.plan-price-block {
+  text-align: right;
+}
+.plan-price-main {
+  font-family: var(--sans);
+  font-size: clamp(2.6rem, 4.2vw, 3.4rem);
+  font-weight: 300;
+  letter-spacing: -0.04em;
+  color: var(--heading);
+  line-height: 1;
+}
+.plan-price-main small {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 300;
+  letter-spacing: normal;
+}
+.plan-price-sub {
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.plan-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 32px;
+}
+.plan-box-item {
+  background: #ffffff;
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+.plan-box-item:hover {
+  border-color: var(--hairline-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.05);
+}
+.plan-box-kicker {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--blue);
+  margin-bottom: 6px;
+  display: block;
+}
+.plan-box-item h3 {
+  font-size: 1.15rem;
+  margin-bottom: 12px;
+  color: var(--heading);
+}
+.plan-box-item ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+}
+.plan-box-item li {
+  font-size: 0.86rem;
+  color: var(--fg-soft);
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 8px;
+  line-height: 1.45;
+}
+.plan-box-item li::before {
+  content: "✓";
+  color: var(--blue);
+  font-weight: 600;
+}
+
+.plan-footer-action {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+/* 3 TARJETAS COMPLEMENTARIAS HOUSE OF DEV */
+.three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* TÉRMINOS Y CONDICIONES */
+.terms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.terms .panel-box { padding: 22px 24px; }
+.terms dt { font-weight: 500; font-size: 0.95rem; color: var(--heading); margin-bottom: 4px; }
+.terms dd { font-size: 0.85rem; color: var(--muted); margin: 0; }
+
+/* =========================================================================
+   ESTILOS DE RESULTADOS Y AUDITORÍA DE PAUTA
+   ========================================================================= */
+.scroll-account-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.32fr) minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+}
+
+.sticky-account-stage {
+  position: sticky;
+  top: 82px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--hairline-mid);
+  box-shadow: var(--shadow);
+}
+
+.stage-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 16px;
+  background: var(--stage-chrome);
+  border-bottom: 1px solid var(--hairline);
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+.stage-bar .live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--fg-soft);
+}
+.stage-bar .live-indicator::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.account-window {
+  position: relative;
+  height: 520px;
+  overflow: hidden;
+  background: #f8fafc;
+  cursor: crosshair;
+}
+.account-window.zoom-cols {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  cursor: grab;
+}
+.account-track {
+  position: relative;
+  width: 100%;
+  will-change: transform;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.account-window.zoom-cols .account-track {
+  width: 195%;
+  min-width: 760px;
+}
+.account-track img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.row-focus-band {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: rgba(37, 99, 235, 0.16);
+  border-top: 1.5px solid var(--blue);
+  border-bottom: 1.5px solid var(--blue);
+  pointer-events: none;
+  transition: top 0.45s ease, height 0.45s ease;
+  z-index: 5;
+}
+.row-focus-band::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  background: var(--blue);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.loupe {
+  position: absolute;
+  width: 240px;
+  height: 150px;
+  border-radius: 10px;
+  border: 2px solid var(--blue);
+  background-repeat: no-repeat;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.28);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+  background-color: #fff;
+}
+
+.stage-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--stage-chrome);
+  border-top: 1px solid var(--hairline);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.measure-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.measure-step {
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.measure-step:hover {
+  border-color: var(--hairline-mid);
+  transform: translateY(-1px);
+}
+.measure-step.active {
+  border-color: var(--hairline-blue);
+  background: var(--surface-active);
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.06);
+}
+.step-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.step-tag {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--blue-soft);
+}
+.step-metric {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--heading);
+}
+.measure-step h4 {
+  font-size: 1.05rem;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.measure-step p {
+  font-size: 0.84rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.step-kpis-mini {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+}
+.step-kpis-mini div strong {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--heading);
+}
+.step-kpis-mini div span {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.step-crop-preview {
+  margin-top: 10px;
+  height: 74px;
+  border-radius: 8px;
+  border: 1px solid var(--hairline-blue);
+  background-image: url("media/ads-escala-full.png");
+  background-repeat: no-repeat;
+  background-size: 165% auto;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.12);
+}
+.step-crop-preview::after {
+  content: "Recorte directo de la fila (Resultados · Impresiones · Costo · Gastado)";
+  position: absolute;
+  right: 8px;
+  bottom: 4px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: #fff;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* 3 Capturas */
+.three-captures-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 24px;
+}
+.cap-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.cap-img-wrap {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  background: #0f172a;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.cap-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.cap-img-wrap:hover img {
+  transform: scale(1.04);
+}
+.zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.cap-body {
+  padding: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.cap-kicker {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--blue-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.cap-body h4 { font-size: 0.98rem; margin: 4px 0 10px; }
+.cap-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--hairline);
+}
+.cap-kpis span { font-family: var(--mono); font-size: 1.1rem; font-weight: 500; color: var(--heading); display: block; }
+.cap-kpis small { font-size: 0.72rem; color: var(--muted); }
+.cap-rows-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.76rem;
+  margin-top: auto;
+}
+.cap-row-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: 1px dashed var(--hairline);
+}
+.cap-row-item .r-name { color: var(--muted); }
+.cap-row-item .r-val { font-family: var(--mono); font-weight: 500; color: var(--fg); }
+
+/* Instagram & CRM */
+.ig-crm-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+.ig-showcase {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 22px;
+  align-items: center;
+}
+.ig-shot {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  cursor: zoom-in;
+}
+.ig-shot img { width: 100%; height: auto; display: block; }
+.big-number {
+  font-family: var(--sans);
+  font-size: 2.8rem;
+  font-weight: 300;
+  line-height: 1;
+  color: var(--heading);
+  letter-spacing: -0.03em;
+}
+.stat-row-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--hairline);
+}
+.stat-row-3 .v { font-family: var(--mono); font-size: 1.15rem; font-weight: 500; color: var(--heading); }
+.stat-row-3 .l { font-size: 0.72rem; color: var(--muted); }
+.crm-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.crm-cell {
+  background: var(--surface-subtle);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.crm-cell .v { font-family: var(--mono); font-size: 1.15rem; font-weight: 500; color: var(--heading); }
+.crm-cell .l { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+/* Pilares de edición de video */
+.edit-pillars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+.edit-pillar { padding: 22px; }
+.step-num { font-family: var(--mono); font-size: 0.72rem; color: var(--blue-soft); text-transform: uppercase; margin-bottom: 6px; display: block; }
+.edit-pillar h3 { font-size: 1rem; margin-bottom: 6px; }
+.edit-pillar p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+/* Grilla de videos reels */
+.reel-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+.reel-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.reel-video-wrap {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  background: #060911;
+  overflow: hidden;
+}
+.reel-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.reel-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(15, 23, 42, 0.82);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.reel-play {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: grid;
+  place-items: center;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+.reel-info {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.reel-info .client { font-family: var(--mono); font-size: 0.66rem; color: var(--blue-soft); text-transform: uppercase; letter-spacing: 0.1em; }
+.reel-info h4 { font-size: 0.95rem; font-weight: 400; color: var(--heading); }
+.reel-info p { font-size: 0.8rem; color: var(--muted); }
+.reel-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; }
+.reel-tags span { font-family: var(--mono); font-size: 0.64rem; padding: 3px 7px; border-radius: 4px; background: var(--surface-subtle); color: var(--muted); border: 1px solid var(--hairline); }
+
+/* Galería de fotografía */
+.stills-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.still-card {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  background: #060911;
+  position: relative;
+  aspect-ratio: 4 / 5;
+  cursor: zoom-in;
+}
+.still-card img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
+.still-card:hover img { transform: scale(1.03); }
+.still-card figcaption {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 24px 12px 10px;
+  background: linear-gradient(transparent, rgba(2, 3, 6, 0.9));
+  font-size: 0.75rem;
+  color: #cbd5e1;
+}
+.still-card figcaption span { display: block; font-size: 0.84rem; color: #f8fafc; font-weight: 400; }
+
+/* Lightbox */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(6, 9, 17, 0.92);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.lightbox[hidden] { display: none !important; }
+.lightbox-inner {
+  max-width: 1080px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lightbox-inner img {
+  width: 100%;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+footer {
+  padding: 36px 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 980px) {
+  .hero-grid, .scroll-account-layout, .ig-crm-grid, .plan-grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .sticky-account-stage { position: static; }
+  .account-window { height: 320px; }
+  .three-captures-grid, .edit-pillars, .three, .reel-grid, .stills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .wrap { padding: 0 16px; }
+  .topbar-in { justify-content: center; }
+  .mode-switch { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-btn { justify-content: center; padding: 8px 6px; font-size: 0.76rem; text-align: center; }
+  .three-captures-grid, .edit-pillars, .three, .reel-grid, .pillars-grid, .terms, .ig-showcase { grid-template-columns: minmax(0, 1fr); }
+  .meta-line { grid-template-columns: minmax(0, 1fr); }
+  .step-kpis-mini { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px; }
+  .step-kpis-mini div strong { font-size: 0.82rem; }
+  .step-crop-preview { height: 68px; background-size: 210% auto; }
+  .single-plan-hero { padding: 24px; }
+  .single-plan-head { flex-direction: column; align-items: flex-start; }
+  .plan-price-block { text-align: left; }
+  section { padding: 48px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- BARRA SUPERIOR -->
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <div class="brand-lockup">
+      <span class="asy-logo" role="img" aria-label="ASYGNUZ"></span>
+      <span class="brand-sep">×</span>
+      <div class="brand-onestar">
+        <img src="media/onestar-iso.svg" alt="One Star Logo">
+        <span class="brand-onestar-txt">ONE <span>STAR</span></span>
+      </div>
+    </div>
+
+    <div class="mode-switch" role="tablist" aria-label="Bloques del documento">
+      <button class="mode-btn" type="button" role="tab" id="modePropuestaBtn" aria-selected="true" data-mode="propuesta">
+        <span class="idx">01</span> Propuesta
+      </button>
+      <button class="mode-btn" type="button" role="tab" id="modeResultadosBtn" aria-selected="false" data-mode="resultados">
+        <span class="idx">02</span> Resultados y Pauta
+      </button>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="#plan-unico" id="ctaTopBtn">Plan Integral ($1.5M/mes)</a>
+    </div>
+  </div>
+</header>
+
+<!-- ===================================================================== -->
+<!-- BLOQUE 01: PROPUESTA COMERCIAL                                        -->
+<!-- ===================================================================== -->
+<main id="view-propuesta">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <div class="kicker">Bloque 01 · Propuesta Comercial — ASYGNUZ × One Star</div>
+        <h1>Estrategia de adquisición digital, pauta y contenido para <span class="hl-blue">escalar las ventas de One Star.</span></h1>
+        <p class="hero-lead">
+          Administración avanzada de Meta Ads y Google Ads enfocada en conversión directa a compra (Purchase) y catálogo dinámico, producción continua de creativos en video e imagen para calzado urbano y sneakers, y medición de ROAS de punta a punta.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-red" href="#plan-unico">Ver Plan Integral ($1.500.000 COP/mes)</a>
+          <button class="btn btn-line" type="button" data-goto-mode="resultados">
+            02 · Ver Resultados de Pauta →
+          </button>
+        </div>
+        <div class="meta-line">
+          <div><small>Preparado para</small><span>Equipo Directivo · One Star</span></div>
+          <div><small>Preparado por</small><span>Juan Manuel Marín · ASYGNUZ</span></div>
+          <div><small>Fecha y vigencia</small><span>27 oct 2026 · Válida por 15 días</span></div>
+        </div>
+      </div>
+
+      <!-- Mapa Ejecutivo de los 2 Bloques -->
+      <aside class="panel-box pad audit-summary">
+        <div>
+          <div class="kicker" style="margin-bottom:8px;font-size:0.74rem">Estructura del Documento</div>
+          <h3 style="font-size:1.22rem">Explora cada parte de la propuesta</h3>
+          <p class="muted" style="font-size:0.84rem;margin-top:4px">
+            Toca cualquiera de los dos bloques para cambiar de vista al instante:
+          </p>
+
+          <div class="exec-block-list">
+            <div class="exec-block-card is-current">
+              <div class="exec-block-left">
+                <span class="exec-block-num">01</span>
+                <div class="exec-block-info">
+                  <strong>Propuesta Comercial One Star</strong>
+                  <span>Hoja de ruta, alcance completo y Plan Integral $1.5M/mes</span>
+                </div>
+              </div>
+              <span class="exec-block-pill">● Estás aquí</span>
+            </div>
+
+            <button type="button" class="exec-block-card" data-goto-mode="resultados">
+              <div class="exec-block-left">
+                <span class="exec-block-num">02</span>
+                <div class="exec-block-info">
+                  <strong>Resultados, Pauta y Edición</strong>
+                  <span>$180k USD en Meta Ads · 842k IG · Videos y fotos</span>
+                </div>
+              </div>
+              <span class="exec-block-pill">Abrir 02 →</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="exec-mini-kpis">
+            <div class="exec-mini-kpi"><strong class="num">$1.500.000</strong><span>Plan único integral</span></div>
+            <div class="exec-mini-kpi"><strong class="num">ROAS & CPA</strong><span>Compras web reales</span></div>
+            <div class="exec-mini-kpi"><strong class="num">Converse, Vans, Hoka</strong><span>Catálogo dinámico</span></div>
+            <div class="exec-mini-kpi"><strong class="num">En 48 horas</strong><span>Arranque operativo</span></div>
+          </div>
+          <a class="btn" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20revisamos%20la%20propuesta%20de%20ASYGNUZ%20para%20One%20Star" target="_blank" rel="noopener" style="margin-top:14px;width:100%;justify-content:center">
+            Hablar con Juan Manuel por WhatsApp →
+          </a>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 01 DE PROPUESTA: HOJA DE RUTA EN 8 PILARES -->
+  <section id="mejoras">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">01 — Hoja de Ruta para One Star</div>
+        <h2>Las 8 intervenciones que ejecutaremos desde el primer mes</h2>
+        <p class="lead">
+          Un sistema integrado de adquisición y contenido diseñado específicamente para el mercado de calzado y sneakers en Colombia.
+        </p>
+      </div>
+      <div class="pillars-grid">
+        <div class="panel-box pillar-item"><span class="pillar-num">01</span><div><h4>Campañas de Conversión a Compra (Purchase) en Meta Ads</h4><p>Configuración de campañas Advantage+ Shopping y estructuras segmentadas orientadas a ventas reales en tienda online, no a likes ni clics vacíos.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">02</span><div><h4>Catálogo Dinámico de Productos (DPA) con Stock Real</h4><p>Anuncios automáticos sincronizados con el inventario de One Star que muestran a cada usuario el calzado exacto que vio, la talla disponible o modelos afines.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">03</span><div><h4>Google Ads de Alta Intención (Search & Shopping)</h4><p>Captura activa de clientes listos para comprar tenis ("comprar converse chuck 70 colombia", "vans knu skool originales", "tenis hoka running").</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">04</span><div><h4>Medición Técnica Avanzada (Píxel + CAPI + Google Tag Manager)</h4><p>Trazabilidad con API de Conversiones por servidor para superar bloqueos de iOS y medir con exactitud el ticket promedio y el retorno de inversión (ROAS).</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">05</span><div><h4>Producción Continua de Creativos de Sneakers</h4><p>Formulación de guiones y edición de videos verticales (reels/TikTok/ads) y piezas estáticas de catálogo: unboxing, comparativas de siluetas y estilo urbano.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">06</span><div><h4>Estrategia por Temporadas y Lanzamientos</h4><p>Calendario comercial sincronizado con novedades de producto (Hoka, Vans, Converse, Skechers), ofertas flash, Black Friday y temporada decembrina.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">07</span><div><h4>Retargeting Dinámico y Recuperación de Carritos</h4><p>Embudos específicos para rescatar usuarios que agregaron al carrito sin finalizar compra y campañas de recompra para clientes que ya compraron.</p></div></div>
+        <div class="panel-box pillar-item"><span class="pillar-num">08</span><div><h4>Comité y Reporte Ejecutivo Mensual</h4><p>Tablero de control mensual con inversión en medios, pedidos generados, costo por adquisición (CPA) y ROAS consolidado para toma de decisiones.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 02 DE PROPUESTA: PLAN INTEGRAL ÚNICO ($1.500.000 COP) -->
+  <section id="plan-unico">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">02 — Propuesta Comercial Todo Incluido</div>
+        <h2>Un único plan integral con todo el equipo y alcance necesario</h2>
+        <p class="lead">
+          Sin paquetes recortados ni cotizaciones confusas. Unificamos toda la operación digital en una sola tarifa mensual transparente de <b>$1.500.000 COP/mes</b> que incluye estrategia, pauta, creativos, medición y acompañamiento continuo.
+        </p>
+      </div>
+
+      <div class="single-plan-hero">
+        <div class="single-plan-head">
+          <div>
+            <span class="plan-badge">Propuesta Única Todo en Uno</span>
+            <h2 style="font-size:2rem;margin-bottom:6px">Plan Integral de Crecimiento Digital</h2>
+            <p style="font-size:0.95rem;max-width:58ch">
+              Estrategia, pauta en Meta y Google, catálogo dinámico, edición continua de creativos en video e imagen, y analítica de ventas para One Star.
+            </p>
+          </div>
+          <div class="plan-price-block">
+            <div class="plan-price-main num">$1.500.000 <small>COP / mes</small></div>
+            <div class="plan-price-sub">Valor fijo mensual · IVA no incluido</div>
+            <div style="font-family:var(--mono);font-size:0.75rem;color:var(--success);margin-top:6px;font-weight:500">
+              ✓ Todo el alcance incluido sin costos sorpresa
+            </div>
+          </div>
+        </div>
+
+        <div class="plan-grid-4">
+          <!-- Columna 1 -->
+          <div class="plan-box-item">
+            <span class="plan-box-kicker">01 · Pauta Digital & Medios</span>
+            <h3>Meta Ads & Google Ads</h3>
+            <ul>
+              <li>Administración y optimización continua de Meta Ads (Facebook & Instagram).</li>
+              <li>Campañas de conversión directa a compra (Purchase) y retargeting dinámico.</li>
+              <li>Sincronización y pauta con catálogo dinámico (DPA) por marcas y categorías.</li>
+              <li>Administración de Google Ads (Búsqueda transaccional de alta intención y Shopping).</li>
+            </ul>
+          </div>
+
+          <!-- Columna 2 -->
+          <div class="plan-box-item">
+            <span class="plan-box-kicker">02 · Creativos & Contenido</span>
+            <h3>Producción & Edición Audiovisual</h3>
+            <ul>
+              <li>Edición mensual de videos verticales de alto impacto (anuncios & reels).</li>
+              <li>Diseño de piezas estáticas y carruseles para catálogo y lanzamientos.</li>
+              <li>Estructura de ganchos en los primeros 3 segundos para detener el scroll.</li>
+              <li>Variaciones semanales de copys y llamadas a la acción para testear rendimiento.</li>
+            </ul>
+          </div>
+
+          <!-- Columna 3 -->
+          <div class="plan-box-item">
+            <span class="plan-box-kicker">03 · Medición & Analítica</span>
+            <h3>Trazabilidad de Ventas & ROAS</h3>
+            <ul>
+              <li>Implementación y mantenimiento del Píxel de Meta con API de Conversiones (CAPI).</li>
+              <li>Google Tag Manager y eventos de e-commerce (Purchase, AddToCart, ViewContent).</li>
+              <li>Medición rigurosa de ROAS (retorno de inversión) y costo por adquisición (CPA).</li>
+              <li>Auditoría permanente de embudos para detectar fricciones en el checkout.</li>
+            </ul>
+          </div>
+
+          <!-- Columna 4 -->
+          <div class="plan-box-item">
+            <span class="plan-box-kicker">04 · Estrategia & Acompañamiento</span>
+            <h3>Comité Comercial & Informes</h3>
+            <ul>
+              <li>Plan comercial mensual alineado a lanzamientos, stock y fechas especiales.</li>
+              <li>Monitoreo semanal y reasignación ágil de presupuestos hacia anuncios ganadores.</li>
+              <li>Informe mensual ejecutivo con métricas de ventas y retorno financiero.</li>
+              <li>Acompañamiento directo y comunicación continua con Juan Manuel Marín.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="plan-footer-action">
+          <div>
+            <strong style="display:block;font-size:0.95rem;color:var(--heading)">Inversión publicitaria en medios</strong>
+            <p style="font-size:0.84rem;color:var(--muted);margin-top:2px">
+              Se paga directamente a Meta y Google desde la tarjeta de crédito de One Star.
+            </p>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            <a class="btn btn-red" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20revisamos%20la%20propuesta%20de%20ASYGNUZ%20para%20One%20Star%20por%20%241.500.000%20COP%2Fmes" target="_blank" rel="noopener">
+              Confirmar este plan por WhatsApp →
+            </a>
+            <button class="btn btn-line" type="button" data-goto-mode="resultados">
+              Ver Resultados de Pauta →
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 03 DE PROPUESTA: HOUSE OF DEV (OPCIONAL) -->
+  <section id="desarrollo">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">03 — ASYGNUZ House of Dev (Opcional)</div>
+        <h2>Módulos de desarrollo de software e inteligencia artificial</h2>
+        <p class="lead">Activos tecnológicos construidos por nuestra casa de software para cuando la operación lo requiera:</p>
+      </div>
+      <div class="three">
+        <div class="panel-box pad">
+          <div class="kicker" style="margin-bottom:8px">Landings</div>
+          <h3>Páginas de drops y lanzamientos</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:6px">Landings de alta velocidad optimizadas para lanzamientos de siluetas exclusivas o promociones relámpago.</p>
+        </div>
+        <div class="panel-box pad">
+          <div class="kicker" style="margin-bottom:8px">Automatizaciones</div>
+          <h3>Recuperación de carritos por WhatsApp</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:6px">Flujos automáticos para notificar al comprador que dejó un par en carrito o enviar guías de rastreo de despacho.</p>
+        </div>
+        <div class="panel-box pad">
+          <div class="kicker" style="margin-bottom:8px">Agente de IA</div>
+          <h3>Asistente de tallas y catálogo 24/7</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:6px">Responde al instante en WhatsApp o la web sobre tallas disponibles, equivalencias US/EU y tiempos de entrega.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- SECCIÓN 04 DE PROPUESTA: CONDICIONES Y CONTACTO -->
+  <section id="condiciones">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">04 — Condiciones Comerciales y Arranque</div>
+        <h2>Términos de operación y puesta en marcha</h2>
+      </div>
+      <dl class="terms">
+        <div class="panel-box"><dt>1. Valor fijo mensual del plan</dt><dd><b>$1.500.000 COP / mes</b>. Incluye la totalidad de los 4 frentes operativos (pauta, creativos, medición y estrategia). IVA no incluido.</dd></div>
+        <div class="panel-box"><dt>2. Presupuesto publicitario en medios</dt><dd>Lo paga One Star directamente a Meta y Google. Recomendamos un presupuesto base acorde con los objetivos de venta.</dd></div>
+        <div class="panel-box"><dt>3. Facturación y acompañamiento</dt><dd>Facturación mensual anticipada. Sugerimos un horizonte de 3 meses para consolidar el aprendizaje de los algoritmos y las audiencias.</dd></div>
+        <div class="panel-box"><dt>4. Inicio en 48 horas</dt><dd>Con la confirmación y entrega de accesos a las cuentas publicitarias y catálogo, iniciamos de inmediato la configuración técnica.</dd></div>
+      </dl>
+
+      <div class="panel-box pad" style="margin-top:24px;display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;border-color:var(--hairline-blue)">
+        <div>
+          <h3>Inicio de operación en 48 horas</h3>
+          <p class="muted" style="font-size:0.86rem;margin-top:4px">Validamos accesos, auditamos la configuración de eventos y estructuramos las primeras campañas.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <a class="btn btn-red" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20revisamos%20la%20propuesta%20de%20ASYGNUZ%20para%20One%20Star%20por%20%241.500.000%20COP%2Fmes" target="_blank" rel="noopener">Escribir a Juan Manuel por WhatsApp</a>
+          <button class="btn btn-line" id="copyMail" type="button">juan.marin@asygnuz.com</button>
+          <button class="btn btn-line" type="button" data-goto-mode="resultados">Ir a 02 · Resultados y Pauta →</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================================================================== -->
+<!-- BLOQUE 02: RESULTADOS DE PAUTA, ORGÁNICO Y PORTAFOLIO DE EDICIÓN      -->
+<!-- ===================================================================== -->
+<main id="view-resultados" hidden>
+
+  <section class="hero" style="padding-bottom:40px">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap">
+        <div>
+          <div class="kicker">Bloque 02 — Evidencia Real en Pauta, Orgánico y Edición</div>
+          <h1>Resultados auditados en Meta Ads <span class="hl-blue">($180.121 USD)</span>, Instagram y Portafolio Audiovisual</h1>
+          <p class="hero-lead">
+            Recorrido fila por fila de nuestras cuentas administradas, análisis de las 3 capturas de pauta descargadas, crecimiento en Instagram y muestras reales de edición de video y fotografía.
+          </p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-line" type="button" data-goto-mode="propuesta">← 01 · Propuesta Comercial</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid-4" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:36px">
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">$180.121 USD</div><span class="muted" style="font-size:0.78rem">Inversión auditada en cuenta Meta Ads (+$750M COP)</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">44,4 M</div><span class="muted" style="font-size:0.78rem">Impresiones entregadas en 219 campañas</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem;color:var(--blue)">$66 COP</div><span class="muted" style="font-size:0.78rem">Costo por clic en Colombia (19.003 clics) y $7 COP ThruPlay</span></div>
+        <div class="panel-box pad-sm"><div class="price num" style="font-size:1.85rem">842,5 mil</div><span class="muted" style="font-size:0.78rem">Visualizaciones orgánicas en Instagram en 30 días</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <section id="resultados">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">01 — Recorrido de Cuenta Meta Ads (Celular & Computador)</div>
+        <h2>La cuenta va bajando medida por medida con recorte directo a las cifras</h2>
+        <p class="lead">
+          Cada tarjeta incluye el <b>recorte ampliado de las columnas de Resultados, Impresiones, Costo e Importe Gastado</b> para que en celular se lean los números con total nitidez sin necesidad de hacer zoom manual.
+        </p>
+      </div>
+
+      <!-- LA CUENTA DE META ADS QUE VA BAJANDO CON CADA MEDIDA -->
+      <div class="scroll-account-layout">
+
+        <!-- Visor Sticky -->
+        <div class="sticky-account-stage">
+          <div class="stage-bar">
+            <span class="live-indicator" id="stageHeaderLabel">CUENTA AUDITADA · META ADS (219 CAMPAÑAS)</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn-line" type="button" id="toggleColZoomBtn" style="padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:0.68rem;cursor:pointer;color:var(--blue);border-color:var(--hairline-blue)">
+                🔍 Enfocar Cifras
+              </button>
+              <button class="btn-line" type="button" id="openFullAccountBtn" style="padding:4px 10px;border-radius:5px;font-family:var(--mono);font-size:0.68rem;cursor:pointer">
+                ⤢ Pantalla completa
+              </button>
+            </div>
+          </div>
+
+          <div class="account-window" id="accWindow">
+            <div class="account-track" id="accTrack">
+              <img id="accTrackImg" src="media/ads-escala-full.png" alt="Administrador de anuncios de Meta — Recorrido completo de cuenta">
+              <div class="row-focus-band" id="rowBand" data-label="FILA SELECCIONADA"></div>
+            </div>
+            <div class="loupe" id="accLoupe"></div>
+          </div>
+
+          <div class="stage-footer">
+            <span id="stageStepIndicator">Recorrido de cuenta: Medida 01 de 06</span>
+            <span>En celular: desliza la tabla lateralmente o mira el recorte en cada tarjeta</span>
+          </div>
+        </div>
+
+        <!-- Pasos de Medida -->
+        <div class="measure-steps" id="measureSteps">
+          <article class="measure-step active" data-step="0">
+            <div class="step-head">
+              <span class="step-tag">Medida 01 · Captación en Frío (Captura 1)</span>
+              <span class="step-metric num">3.675 registros · $1,68 USD</span>
+            </div>
+            <h4>Volumen sostenido con costo por registro controlado</h4>
+            <p>En la parte superior de la cuenta ($6.182,47 USD invertidos y 912.918 impresiones), el sistema genera 3.675 registros completados a $1,68 USD manteniendo el costo estable a gran escala.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">3.675</strong><span>Registros</span></div>
+              <div><strong class="num" style="color:var(--blue)">$1,68 USD</strong><span>Costo / registro</span></div>
+              <div><strong class="num">$6.182 USD</strong><span>912.918 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-1.png" data-cap="Medida 01 — 3.675 registros completados a $1,68 USD ($6.182,47 USD invertidos)" style="background-position: 98% 17%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="1">
+            <div class="step-head">
+              <span class="step-tag">Medida 02 · Conversión Directa en Web (Captura 1)</span>
+              <span class="step-metric num">193 compras · $27,17 USD</span>
+            </div>
+            <h4>Atribución de compras reales mediante Píxel y API de Conversiones</h4>
+            <p>Justo debajo ($5.244,25 USD invertidos), la campaña optimiza directamente por transacciones en el sitio web (193 compras), exactamente la infraestructura que habilitamos para One Star al conectar GTM, Píxel y CAPI.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">193</strong><span>Compras en web</span></div>
+              <div><strong class="num" style="color:var(--blue)">$27,17 USD</strong><span>Costo / compra</span></div>
+              <div><strong class="num">$5.244 USD</strong><span>471.400 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-1.png" data-cap="Medida 02 — 193 compras directas en web a $27,17 USD ($5.244,25 USD invertidos)" style="background-position: 98% 23%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="2">
+            <div class="step-head">
+              <span class="step-tag">Medida 03 · Escala de Clientes Potenciales (Captura 1)</span>
+              <span class="step-metric num">4.113 leads · $1,07 USD</span>
+            </div>
+            <h4>Más de 1,58 millones de impresiones a $1,07 USD por cliente potencial</h4>
+            <p>Al bajar al bloque central de la primera captura ($4.393,97 USD), una sola estructura con rotación de ángulos produce 4.113 clientes potenciales a $1,07 USD (~$4.400 COP) y otra suma 2.621 leads a $1,86 USD.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">4.113</strong><span>Leads Meta</span></div>
+              <div><strong class="num" style="color:var(--blue)">$1,07 USD</strong><span>Costo / lead (~$4,4k)</span></div>
+              <div><strong class="num">$4.393 USD</strong><span>1.584.996 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-1.png" data-cap="Medida 03 — 4.113 clientes potenciales a $1,07 USD con 1.584.996 impresiones" style="background-position: 98% 40%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="3">
+            <div class="step-head">
+              <span class="step-tag">Medida 04 · Optimización Sub-$1 USD (Captura 2)</span>
+              <span class="step-metric num">2.050 leads · $0,92 USD</span>
+            </div>
+            <h4>Bajando a la segunda captura: adquisición por debajo de $1 USD</h4>
+            <p>Desplazando la cuenta hacia abajo ($1.892,51 USD y 1.051.854 impresiones), el costo por cliente potencial cae hasta $0,92 USD (~$3.800 COP) gracias a aislar los anuncios ganadores en su propio presupuesto.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">2.050</strong><span>Leads Meta</span></div>
+              <div><strong class="num" style="color:var(--blue)">$0,92 USD</strong><span>Costo sub-$1 USD</span></div>
+              <div><strong class="num">$1.892 USD</strong><span>1.051.854 imp.</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-2.png" data-cap="Medida 04 — 2.050 clientes potenciales a $0,92 USD ($1.892,51 USD invertidos)" style="background-position: 98% 63.5%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="4">
+            <div class="step-head">
+              <span class="step-tag">Medida 05 · Consistencia Multi-Campaña (Captura 2)</span>
+              <span class="step-metric num">5.023 leads · $1,13 – $1,74 USD</span>
+            </div>
+            <h4>Cinco campañas consecutivas replicando el mismo resultado</h4>
+            <p>En la parte media-baja de la segunda captura se observan 5 campañas seguidas entregando 1.255 registros ($1,41), 934 registros ($1,74), 1.399 registros ($1,16), 1.435 registros ($1,13) y 64 compras de remarketing ($22,01).</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">5.023</strong><span>Leads en 5 filas</span></div>
+              <div><strong class="num" style="color:var(--blue)">$1,13 – $1,74</strong><span>Rango por lead</span></div>
+              <div><strong class="num">64 compras</strong><span>Remarketing $22 USD</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-2.png" data-cap="Medida 05 — 5 campañas consecutivas sosteniendo costos entre $1,13 y $1,74 USD" style="background-position: 98% 76%;"></div>
+          </article>
+
+          <article class="measure-step" data-step="5">
+            <div class="step-head">
+              <span class="step-tag">Medida 06 · Consolidado Histórico de Cuenta</span>
+              <span class="step-metric num">$180.121,41 USD · 44,4M imp.</span>
+            </div>
+            <h4>Más de $750 millones COP ejecutados con trazabilidad de punta a punta</h4>
+            <p>En el cierre de la tabla se consolida la operación completa: $180.121,41 USD invertidos y 44.446.047 impresiones administradas a través de 219 campañas estructuradas.</p>
+            <div class="step-kpis-mini">
+              <div><strong class="num">$180.121 USD</strong><span>Inversión total</span></div>
+              <div><strong class="num" style="color:var(--blue)">44.446.047</strong><span>Impresiones</span></div>
+              <div><strong class="num">219</strong><span>Campañas medidas</span></div>
+            </div>
+            <div class="step-crop-preview" data-full="media/ads-escala-full.png" data-cap="Medida 06 — Consolidado de 219 campañas: $180.121,41 USD invertidos y 44.446.047 impresiones" style="background-position: 98% 97.5%;"></div>
+          </article>
+        </div>
+      </div>
+
+      <!-- LAS 3 CAPTURAS DE PAUTA DESCARGADAS -->
+      <div style="margin-top:56px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">02 — Las 3 Capturas de Pauta Descargadas</div>
+            <h2>Análisis individual de los 3 pantallazos con desglose de cifras para celular</h2>
+          </div>
+          <span class="muted" style="font-size:0.84rem">Toca cualquier captura para abrirla en pantalla completa</span>
+        </div>
+
+        <div class="three-captures-grid">
+          <!-- Captura 1 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-escala-1.png" data-cap="Captura 01 — Top Campañas por Inversión ($180.121,41 USD acumulados y 44,4M impresiones)">
+              <img src="media/ads-escala-1.png" alt="Captura 1 Meta Ads Manager USD">
+              <span class="zoom-hint">⤢ Tocar para ampliar captura 01</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 01 · Top Campañas (USD)</span>
+              <h4>Escala masiva y compras en sitio web</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$180.121 USD</span><small>Inversión total en cuenta</small></div>
+                <div><span class="num">44,4 M</span><small>Impresiones totales</small></div>
+              </div>
+              <div class="cap-rows-mini">
+                <div class="cap-row-item"><span class="r-name">Campaña Registros Web</span><span class="r-val">3.675 reg. · $1,68 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Compras Web</span><span class="r-val">193 compras · $27,17 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Clientes Potenciales</span><span class="r-val">4.113 leads · $1,07 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Leads Escala 2</span><span class="r-val">2.621 leads · $1,86 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Campaña Tráfico Calificado</span><span class="r-val">27.086 clics · $0,13 USD</span></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Captura 2 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-escala-2.png" data-cap="Captura 02 — Bloques de Escala y Consistencia de Costo por Lead ($0,92 a $1,74 USD)">
+              <img src="media/ads-escala-2.png" alt="Captura 2 Meta Ads Manager USD continuación">
+              <span class="zoom-hint">⤢ Tocar para ampliar captura 02</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 02 · Bloques de Escala (USD)</span>
+              <h4>Consistencia de leads entre $0,92 y $1,74 USD</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$0,92 USD</span><small>Costo mínimo (2.050 leads)</small></div>
+                <div><span class="num">8.645+</span><small>Leads en este bloque</small></div>
+              </div>
+              <div class="cap-rows-mini">
+                <div class="cap-row-item"><span class="r-name">Bloque Ganadores Sub-$1</span><span class="r-val">2.050 leads · $0,92 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Escala Leads Bloque A</span><span class="r-val">1.435 leads · $1,13 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Escala Leads Bloque B</span><span class="r-val">1.399 leads · $1,16 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Escala Leads Bloque C</span><span class="r-val">1.255 leads · $1,41 USD</span></div>
+                <div class="cap-row-item"><span class="r-name">Cierres Remarketing Web</span><span class="r-val">64 compras · $22,01 USD</span></div>
+              </div>
+            </div>
+          </article>
+
+          <!-- Captura 3 -->
+          <article class="panel-box cap-card">
+            <div class="cap-img-wrap" data-full="media/ads-eficiencia-cop.png" data-cap="Captura 03 — Eficiencia de Tráfico, Visitas al Perfil y Retención de Video en COP">
+              <img src="media/ads-eficiencia-cop.png" alt="Captura 3 Meta Ads Manager COP">
+              <span class="zoom-hint">⤢ Tocar para ampliar captura 03</span>
+            </div>
+            <div class="cap-body">
+              <span class="cap-kicker">Captura 03 · Eficiencia en Colombia (COP)</span>
+              <h4>Tráfico a $66 COP y retención de video a $7 COP</h4>
+              <div class="cap-kpis">
+                <div><span class="num">$66 COP</span><small>Por clic (19.003 clics)</small></div>
+                <div><span class="num">$7 – $8 COP</span><small>Por ThruPlay (34.968 vistas)</small></div>
+              </div>
+              <div class="cap-rows-mini">
+                <div class="cap-row-item"><span class="r-name">Tráfico a Enlace / Web</span><span class="r-val">19.003 clics · $66 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Visitas al Perfil de IG</span><span class="r-val">2.109 visitas · $100 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Retención Video (ThruPlay 1)</span><span class="r-val">21.370 vistas · $7 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Retención Video (ThruPlay 2)</span><span class="r-val">13.598 vistas · $8 COP</span></div>
+                <div class="cap-row-item"><span class="r-name">Inversión Total Captura 3</span><span class="r-val">$1.954.687 COP</span></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <!-- INSTAGRAM & EMBUDO DE CONVERSIÓN -->
+      <div style="margin-top:56px">
+        <div class="sec-head" style="margin-bottom:24px">
+          <div class="kicker">03 — Crecimiento Orgánico en Instagram & Conversión Web</div>
+          <h2>842,5 mil visualizaciones en 30 días y embudo de retención</h2>
+        </div>
+
+        <div class="ig-crm-grid" style="margin-top:0">
+          <div class="panel-box pad ig-showcase">
+            <div class="ig-shot" data-full="media/valentina-stats.jpg" data-cap="Panel Profesional de Instagram — 842,5 mil visualizaciones y 53,0 mil interacciones en 30 días">
+              <img src="media/valentina-stats.jpg" alt="Panel profesional de Instagram — 842,5 mil visualizaciones">
+            </div>
+            <div>
+              <div class="kicker" style="margin-bottom:8px">Resultado en Instagram · 30 Días</div>
+              <div class="big-number num">842,5 mil</div>
+              <p class="muted" style="font-size:0.88rem;margin-top:4px">
+                Visualizaciones orgánicas y de contenido en 30 días (13 jun – 12 jul · Panel Profesional de Instagram)
+              </p>
+              <div class="stat-row-3">
+                <div><div class="v num">53,0 mil</div><div class="l">Interacciones totales</div></div>
+                <div><div class="v num">+4,2 mil</div><div class="l">Seguidores nuevos</div></div>
+                <div><div class="v num">6,3 %</div><div class="l">Tasa de interacción</div></div>
+              </div>
+              <p class="muted" style="font-size:0.8rem;margin-top:14px">
+                Cuando los videos tienen estructura de retención, el alcance orgánico construye deseo de marca y nutre los anuncios de retargeting.
+              </p>
+            </div>
+          </div>
+
+          <div class="panel-box pad" style="display:flex;flex-direction:column;justify-content:space-between">
+            <div>
+              <div class="kicker" style="margin-bottom:8px">Embudo de E-commerce · Medición Conectada</div>
+              <h3>Trazabilidad de punta a punta: Anuncio → Visita → Carrito → Compra</h3>
+              <p class="muted" style="font-size:0.85rem;margin-top:4px">
+                Resultados de conectar pauta, catálogo dinámico y analítica centralizada:
+              </p>
+              <div class="crm-grid-6">
+                <div class="crm-cell"><div class="v num">1.340</div><div class="l">Usuarios en retención</div></div>
+                <div class="crm-cell"><div class="v num">44 %</div><div class="l">CTR a ficha de producto</div></div>
+                <div class="crm-cell"><div class="v num">200+</div><div class="l">Pedidos trazados</div></div>
+                <div class="crm-cell"><div class="v num">100 %</div><div class="l">Eventos CAPI validados</div></div>
+                <div class="crm-cell"><div class="v num">6</div><div class="l">Integraciones activas</div></div>
+                <div class="crm-cell"><div class="v num">1.800</div><div class="l">Sesiones cualificadas</div></div>
+              </div>
+            </div>
+            <p class="muted" style="font-size:0.78rem;margin-top:14px">
+              Esta misma arquitectura es la que conectará los anuncios de One Star con las ventas reales y el ROAS de la tienda.
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="rule"></div>
+
+  <!-- NUESTRA PROPUESTA DE EDICIÓN Y PORTAFOLIO AUDIOVISUAL -->
+  <section id="contenido">
+    <div class="wrap">
+      <div class="sec-head">
+        <div class="kicker">04 — Nuestra Propuesta de Edición & Dirección Visual</div>
+        <h2>Edición diseñada para retener la atención y detonar el deseo de compra</h2>
+        <p class="lead">
+          En calzado urbano y sneakers el usuario compra por identidad y estilo visual. Nuestro sistema de edición combina cuatro capas en cada pieza:
+        </p>
+      </div>
+
+      <div class="edit-pillars">
+        <div class="panel-box edit-pillar">
+          <span class="step-num">01 · Segundos 0 a 3</span>
+          <h3>Gancho visual y tipográfico</h3>
+          <p>Apertura en acción con primeros planos del calzado y titulares limpios que detienen el scroll desde el segundo uno.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">02 · Segundos 3 a 25</span>
+          <h3>Cortes de ritmo y retención</h3>
+          <p>Eliminación de silencios, cambios de ángulo dinámicos y transiciones al compás que sostienen tasas de retención altas.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">03 · Respaldo de producto</span>
+          <h3>Detalle de materiales (B-Roll)</h3>
+          <p>Costuras, suela, textura de cuero o lona, confort y movimiento en uso real que transmiten autenticidad y calidad.</p>
+        </div>
+        <div class="panel-box edit-pillar">
+          <span class="step-num">04 · Escalabilidad</span>
+          <h3>Doble salida: Redes + Pauta</h3>
+          <p>Cada pieza se optimiza con formatos y llamadas a la acción directas tanto para publicaciones orgánicas como para anuncios pagos.</p>
+        </div>
+      </div>
+
+      <!-- Muestras de Video Interactivas -->
+      <div class="sec-head" style="margin-top:40px;margin-bottom:18px">
+        <h3>Muestras de Edición y Dirección de Ritmo en Video</h3>
+        <p class="lead" style="font-size:0.95rem;margin-top:6px">
+          Toca cualquier video para reproducir o pausar. Observa el uso de ganchos rápidos, motion graphics sincronizados y subtitulado editorial:
+        </p>
+      </div>
+
+      <div class="reel-grid" id="reelGrid"></div>
+
+      <!-- Galería de Fotografía Editorial y de Producto -->
+      <div style="margin-top:52px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="kicker" style="margin-bottom:8px">Fotografía de Estudio, Producto & Lifestyle</div>
+            <h3>Muestras de dirección de arte, iluminación y composición editorial</h3>
+          </div>
+          <span class="muted" style="font-size:0.8rem">Toca cualquier fotografía para verla en pantalla completa</span>
+        </div>
+        <div class="stills-grid" id="stillsGrid"></div>
+      </div>
+
+      <div style="margin-top:42px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+        <button class="btn btn-line" type="button" data-goto-mode="propuesta">← Volver a 01 · Propuesta Comercial</button>
+        <a class="btn btn-red" href="https://wa.me/573135375069?text=Hola%20Juan%20Manuel%2C%20revisamos%20los%20resultados%20y%20la%20propuesta%20de%20One%20Star" target="_blank" rel="noopener">Confirmar Plan con Juan Manuel →</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true" aria-label="Vista ampliada">
+  <div class="lightbox-inner">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span class="kicker" id="lbCaption" style="margin:0;color:#93c5fd">Vista en Alta Resolución</span>
+      <button class="btn btn-line" type="button" id="closeLightboxBtn" style="color:#fff;border-color:rgba(255,255,255,0.2)">✕ Cerrar (Esc)</button>
+    </div>
+    <img id="lbImg" src="" alt="Vista ampliada">
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span>ASYGNUZ · Growth & House of Dev · Manizales, Colombia</span>
+    <span>Propuesta Comercial & Resultados para One Star · Octubre 2026</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  /* 1. Conmutador entre 2 Bloques: Propuesta y Resultados */
+  const viewPropuesta = document.getElementById("view-propuesta");
+  const viewResultados = document.getElementById("view-resultados");
+  const modeBtns = document.querySelectorAll(".mode-btn");
+  const ctaTopBtn = document.getElementById("ctaTopBtn");
+
+  function setMode(mode, scroll = true) {
+    viewPropuesta.hidden = mode !== "propuesta";
+    viewResultados.hidden = mode !== "resultados";
+    modeBtns.forEach(b => b.setAttribute("aria-selected", b.dataset.mode === mode));
+    ctaTopBtn.textContent = mode === "propuesta" ? "Plan Integral ($1.5M/mes)" : "Ver Propuesta ($1.5M)";
+    if (mode === "resultados") {
+      setTimeout(() => applyStep(activeStepIdx), 60);
+    }
+    if (scroll) window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  modeBtns.forEach(b => b.addEventListener("click", () => setMode(b.dataset.mode)));
+  document.querySelectorAll("[data-goto-mode]").forEach(b => b.addEventListener("click", () => setMode(b.dataset.gotoMode)));
+  
+  ctaTopBtn.addEventListener("click", e => {
+    if (viewPropuesta.hidden) {
+      e.preventDefault();
+      setMode("propuesta");
+      setTimeout(() => {
+        const el = document.getElementById("plan-unico");
+        if (el) el.scrollIntoView({ behavior: "smooth" });
+      }, 80);
+    }
+  });
+
+  if (location.search.includes("resultados") || location.hash === "#resultados") {
+    setMode("resultados", false);
+  } else {
+    setMode("propuesta", false);
+  }
+
+  /* 2. RECORRIDO DE CUENTA META ADS */
+  const STEPS = [
+    { bandTop: 15.5, bandH: 5.8, label: "3.675 REGISTROS · $1,68 USD", ind: "Recorrido de cuenta: Medida 01 de 06 (Parte superior · Captura 1)" },
+    { bandTop: 21.3, bandH: 5.8, label: "193 COMPRAS WEB · $27,17 USD", ind: "Recorrido de cuenta: Medida 02 de 06 (Compras en web · Captura 1)" },
+    { bandTop: 38.0, bandH: 6.0, label: "4.113 LEADS · $1,07 USD", ind: "Recorrido de cuenta: Medida 03 de 06 (Escala 1,58M imp. · Captura 1)" },
+    { bandTop: 61.5, bandH: 5.5, label: "2.050 LEADS · $0,92 USD", ind: "Recorrido de cuenta: Medida 04 de 06 (Bajando a Captura 2 · Sub-$1 USD)" },
+    { bandTop: 67.0, bandH: 20.5, label: "5 CAMPAÑAS · $1,13 A $1,74 USD", ind: "Recorrido de cuenta: Medida 05 de 06 (Consistencia multi-campaña · Captura 2)" },
+    { bandTop: 92.5, bandH: 6.8, label: "TOTAL: $180.121,41 USD · 44,4M IMP.", ind: "Recorrido de cuenta: Medida 06 de 06 (Total acumulado al final de la cuenta)" }
+  ];
+
+  const accWindow = document.getElementById("accWindow");
+  const accTrack = document.getElementById("accTrack");
+  const accTrackImg = document.getElementById("accTrackImg");
+  const rowBand = document.getElementById("rowBand");
+  const accLoupe = document.getElementById("accLoupe");
+  const stageStepIndicator = document.getElementById("stageStepIndicator");
+  const toggleColZoomBtn = document.getElementById("toggleColZoomBtn");
+  const stepCards = [...document.querySelectorAll(".measure-step")];
+  let activeStepIdx = 0;
+
+  function setColZoom(enable) {
+    accWindow.classList.toggle("zoom-cols", enable);
+    if (toggleColZoomBtn) {
+      toggleColZoomBtn.textContent = enable ? "↔ Ver tabla completa" : "🔍 Enfocar Cifras";
+    }
+    setTimeout(() => {
+      if (enable) {
+        accWindow.scrollLeft = accWindow.scrollWidth;
+      } else {
+        accWindow.scrollLeft = 0;
+      }
+      applyStep(activeStepIdx);
+    }, 50);
+  }
+  if (toggleColZoomBtn) {
+    toggleColZoomBtn.addEventListener("click", () => {
+      setColZoom(!accWindow.classList.contains("zoom-cols"));
+    });
+  }
+  if (window.innerWidth <= 980) {
+    setColZoom(true);
+  }
+
+  function applyStep(idx) {
+    activeStepIdx = idx;
+    const s = STEPS[idx];
+    stepCards.forEach((c, i) => c.classList.toggle("active", i === idx));
+    rowBand.style.top = s.bandTop + "%";
+    rowBand.style.height = s.bandH + "%";
+    rowBand.setAttribute("data-label", s.label);
+    stageStepIndicator.textContent = s.ind;
+
+    const imgH = accTrackImg.clientHeight || 900;
+    const winH = accWindow.clientHeight || 520;
+    const maxShift = Math.max(0, imgH - winH);
+    const targetCenterY = ((s.bandTop + s.bandH / 2) / 100) * imgH;
+    const desiredShift = Math.min(maxShift, Math.max(0, targetCenterY - winH * 0.48));
+    accTrack.style.transform = `translateY(${-desiredShift}px)`;
+  }
+
+  stepCards.forEach((card, i) => {
+    card.addEventListener("click", () => applyStep(i));
+    card.addEventListener("pointerenter", () => applyStep(i));
+  });
+
+  const stepObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const idx = +entry.target.dataset.step;
+        applyStep(idx);
+      }
+    });
+  }, { rootMargin: "-32% 0px -48% 0px", threshold: 0.1 });
+  stepCards.forEach(c => stepObserver.observe(c));
+
+  accTrackImg.addEventListener("load", () => applyStep(0));
+  window.addEventListener("resize", () => applyStep(activeStepIdx));
+  setTimeout(() => applyStep(0), 120);
+
+  accLoupe.style.backgroundImage = "url(media/ads-escala-full.png)";
+  accWindow.addEventListener("pointermove", e => {
+    const winRect = accWindow.getBoundingClientRect();
+    const imgRect = accTrackImg.getBoundingClientRect();
+    const wx = e.clientX - winRect.left;
+    const wy = e.clientY - winRect.top;
+    const ix = e.clientX - imgRect.left;
+    const iy = e.clientY - imgRect.top;
+    const xp = Math.max(0, Math.min(100, (ix / imgRect.width) * 100));
+    const yp = Math.max(0, Math.min(100, (iy / imgRect.height) * 100));
+    accLoupe.style.opacity = 1;
+    accLoupe.style.left = Math.min(Math.max(10, wx - 120), winRect.width - 250) + "px";
+    accLoupe.style.top = Math.min(Math.max(10, wy - 155), winRect.height - 155) + "px";
+    accLoupe.style.backgroundSize = `${imgRect.width * 2.15}px auto`;
+    accLoupe.style.backgroundPosition = `${xp}% ${yp}%`;
+  });
+  accWindow.addEventListener("pointerleave", () => { accLoupe.style.opacity = 0; });
+
+  /* 3. LIGHTBOX */
+  const lightbox = document.getElementById("lightbox");
+  const lbImg = document.getElementById("lbImg");
+  const lbCaption = document.getElementById("lbCaption");
+  function openLightbox(src, cap) {
+    lbImg.src = src;
+    lbCaption.textContent = cap || "Vista en Alta Resolución";
+    lightbox.hidden = false;
+  }
+  document.getElementById("openFullAccountBtn").addEventListener("click", () => {
+    openLightbox("media/ads-escala-full.png", "Recorrido Completo de Cuenta Meta Ads ($180.121,41 USD · 44,4M Impresiones)");
+  });
+  document.querySelectorAll("[data-full]").forEach(node => {
+    node.addEventListener("click", () => openLightbox(node.dataset.full, node.dataset.cap));
+  });
+  document.getElementById("closeLightboxBtn").addEventListener("click", () => { lightbox.hidden = true; });
+  lightbox.addEventListener("click", e => { if (e.target === lightbox) lightbox.hidden = true; });
+  window.addEventListener("keydown", e => { if (e.key === "Escape") lightbox.hidden = true; });
+
+  /* 4. REELS Y PORTAFOLIO */
+  const REELS = [
+    {
+      id: "claudia-acciones",
+      client: "Dirección de Gancho",
+      badge: "Hook 0–3s + Titular",
+      title: "Apertura dinámica en locación y titular editorial",
+      desc: "Estructura de corte rápido con titular de alto contraste y cifra visual en los primeros 2 segundos.",
+      tags: ["Hook 0–3s", "Ritmo Dinámico", "Subtítulo Editorial"]
+    },
+    {
+      id: "claudia-sp500",
+      client: "Retención de Atención",
+      badge: "Data Storytelling",
+      title: "Capas gráficas y motion sincronizado con el mensaje",
+      desc: "Refuerzo visual en pantalla que sostiene el interés del usuario y eleva el valor percibido.",
+      tags: ["Motion Graphics", "Capas Gráficas", "Alta Retención"]
+    },
+    {
+      id: "claudia-despido",
+      client: "Ángulo de Curiosidad",
+      badge: "Pregunta Controversial",
+      title: "Planteamiento de objeción directa y desarrollo",
+      desc: "Gancho estructurado para detener el desplazamiento y conducir a la acción.",
+      tags: ["Ángulo Creativo", "Storytelling", "Conversión"]
+    },
+    {
+      id: "claudia-rentabilidad",
+      client: "Prueba Social",
+      badge: "Demostración de Producto",
+      title: "Muestra real en pantalla e indicadores numéricos",
+      desc: "Demostración directa de valor con planos cerrados y ritmo constante.",
+      tags: ["B-Roll", "Demostración", "Pauta Paga"]
+    }
+  ];
+
+  const reelGrid = document.getElementById("reelGrid");
+  reelGrid.innerHTML = REELS.map(r => `
+    <article class="panel-box reel-card">
+      <div class="reel-video-wrap">
+        <video src="media/${r.id}.mp4" poster="media/${r.id}.jpg" muted loop playsinline preload="metadata" autoplay></video>
+        <span class="reel-badge">${r.badge}</span>
+        <button type="button" class="reel-play" aria-label="Pausar o reproducir">❚❚</button>
+      </div>
+      <div class="reel-info">
+        <span class="client">${r.client}</span>
+        <h4>${r.title}</h4>
+        <p>${r.desc}</p>
+        <div class="reel-tags">${r.tags.map(t => `<span>${t}</span>`).join("")}</div>
+      </div>
+    </article>
+  `).join("");
+
+  reelGrid.querySelectorAll(".reel-card").forEach(card => {
+    const v = card.querySelector("video");
+    const b = card.querySelector(".reel-play");
+    const sync = () => { b.textContent = v.paused ? "▶" : "❚❚"; };
+    b.addEventListener("click", () => { v.paused ? v.play().catch(()=>{}) : v.pause(); });
+    v.addEventListener("click", () => { v.paused ? v.play().catch(()=>{}) : v.pause(); });
+    v.addEventListener("play", sync);
+    v.addEventListener("pause", sync);
+  });
+
+  const STILLS = [
+    { file: "mariana-1", title: "Detalle de Producto y Textura", sub: "Iluminación de estudio · Enfoque macro" },
+    { file: "mariana-2", title: "Composición de Fondo Oscuro", sub: "Dirección de arte de alto contraste" },
+    { file: "mariana-estudio-1", title: "Retrato Editorial de Marca", sub: "Estilo lifestyle urbano contemporáneo" },
+    { file: "mariana-estudio-2", title: "Dirección de Arte y Pose", sub: "Producción fotográfica profesional" }
+  ];
+  const stillsGrid = document.getElementById("stillsGrid");
+  stillsGrid.innerHTML = STILLS.map(s => `
+    <figure class="still-card" data-full="media/${s.file}.jpg" data-cap="${s.title} — ${s.sub}">
+      <img src="media/${s.file}.jpg" alt="${s.title}" loading="lazy">
+      <figcaption><span>${s.title}</span>${s.sub}</figcaption>
+    </figure>
+  `).join("");
+  stillsGrid.addEventListener("click", e => {
+    const fig = e.target.closest(".still-card");
+    if (fig) openLightbox(fig.dataset.full, fig.dataset.cap);
+  });
+
+  /* Copiar correo */
+  const copyBtn = document.getElementById("copyMail");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText("juan.marin@asygnuz.com").then(() => {
+        const orig = copyBtn.textContent;
+        copyBtn.textContent = "✓ Correo copiado";
+        setTimeout(() => { copyBtn.textContent = orig; }, 2000);
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>

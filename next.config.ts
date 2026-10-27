@@ -30,6 +30,12 @@ const nextConfig: NextConfig = {
       { source: "/radia/visor/:path*", destination: "/radia/visor/index.html" },
       { source: "/radia", destination: "/radia/Propuesta_Radia.html" },
       { source: "/radia/propuesta", destination: "/radia/Propuesta_Radia.html" },
+      { source: "/onestar", destination: "/onestar/Propuesta_One_Star.html" },
+      { source: "/onestar/propuesta", destination: "/onestar/Propuesta_One_Star.html" },
+      { source: "/onestar/resultados", destination: "/onestar/Resultados_One_Star.html" },
+      { source: "/one-star", destination: "/onestar/Propuesta_One_Star.html" },
+      { source: "/one-star/propuesta", destination: "/onestar/Propuesta_One_Star.html" },
+      { source: "/one-star/resultados", destination: "/onestar/Resultados_One_Star.html" },
     ];
   },
 };
