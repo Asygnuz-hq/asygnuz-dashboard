@@ -1,12 +1,29 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { slugUtm } from "@/lib/bandeja/texto";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+// Agrega las UTMs del flujo a la URL de destino sin pisar las que ya traiga.
+function conUtms(
+  destino: string,
+  utms: Record<string, string | null | undefined>
+): string {
+  try {
+    const url = new URL(destino);
+    for (const [clave, valor] of Object.entries(utms)) {
+      if (valor && !url.searchParams.has(clave)) url.searchParams.set(clave, valor);
+    }
+    return url.toString();
+  } catch {
+    return destino;
+  }
+}
+
 // Redirección interna para seguimiento de clics (/r/[id]).
 // Pública, segura y sin datos personales en la URL.
-// Registra el clic en ig_links_tracking de forma atómica y redirige a url_destino.
+// Registra el clic (contador atómico + una fila en ig_clics) y redirige a url_destino con UTMs.
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -20,7 +37,7 @@ export async function GET(
     const supabase = createAdminClient();
     const { data: link, error } = await supabase
       .from("ig_links_tracking")
-      .select("id, url_destino")
+      .select("id, url_destino, flujo_id, conexion_id, tenant_id, media_id, palabra_clave")
       .eq("id", id)
       .maybeSingle();
 
@@ -28,11 +45,38 @@ export async function GET(
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Incremento atómico en base de datos sin condición de carrera
-    await supabase.rpc("incrementar_clic_link", { p_link_id: id });
+    let nombreFlujo: string | null = null;
+    if (link.flujo_id) {
+      const { data: flujo } = await supabase
+        .from("ig_flujos")
+        .select("nombre")
+        .eq("id", link.flujo_id)
+        .maybeSingle();
+      nombreFlujo = flujo?.nombre ?? null;
+    }
+
+    // Incremento atómico en base de datos sin condición de carrera + historial por clic.
+    // Un fallo del historial no debe impedir la redirección.
+    await Promise.all([
+      supabase.rpc("incrementar_clic_link", { p_link_id: id }),
+      supabase.from("ig_clics").insert({
+        link_id: link.id,
+        flujo_id: link.flujo_id,
+        conexion_id: link.conexion_id,
+        tenant_id: link.tenant_id,
+        media_id: link.media_id,
+      }),
+    ]);
+
+    const destino = conUtms(link.url_destino, {
+      utm_source: "instagram",
+      utm_medium: "dm",
+      utm_campaign: slugUtm(nombreFlujo ?? link.palabra_clave ?? "") || null,
+      utm_content: link.media_id,
+    });
 
     // Redirección temporal 307 para evitar que el navegador cachee permanentemente el destino
-    return NextResponse.redirect(link.url_destino, 307);
+    return NextResponse.redirect(destino, 307);
   } catch {
     return NextResponse.redirect(new URL("/", request.url));
   }

@@ -60,7 +60,8 @@ export async function PATCH(
 
   // 2. Si se modificaron botones, actualizar o sincronizar ig_links_tracking
   if (data.botones) {
-    await supabase.from("ig_links_tracking").delete().eq("flujo_id", id);
+    // Solo los links base: los de envíos anteriores conservan su historial de clics
+    await supabase.from("ig_links_tracking").delete().eq("flujo_id", id).eq("por_envio", false);
     if (data.botones.length > 0) {
       const nuevosLinks = data.botones.map((b) => ({
         flujo_id: id,

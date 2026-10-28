@@ -89,14 +89,19 @@ export async function verificarLimitePorHora(
 function armarTextoConBotones(
   textoBase: string,
   botones: BotonFlujo[] | undefined,
-  linksTracking: { id: string; url_destino: string; titulo: string | null }[]
+  linksTracking: { id: string; url_destino: string; titulo: string | null }[],
+  dominioLinks?: string | null
 ): string {
   if (!botones || botones.length === 0) return textoBase;
 
-  const baseUrl =
+  // Dominio propio de la cuenta (ej. https://valentinamkt.online) si lo tiene
+  // configurado; si no, el del dashboard.
+  const baseUrl = (
+    dominioLinks ||
     process.env.APP_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    "https://app.asygnuz.com";
+    "https://app.asygnuz.com"
+  ).replace(/\/+$/, "");
 
   const mapLinks = new Map(linksTracking.map((l) => [l.url_destino, l.id]));
 
@@ -107,6 +112,52 @@ function armarTextoConBotones(
   });
 
   return `${textoBase}\n\n${lineasBotones.join("\n")}`;
+}
+
+/**
+ * Crea un link de seguimiento propio para este envío (con la publicación y la palabra
+ * clave que lo originó) a partir de los links base del flujo. Si falla, usa los base:
+ * el clic igual se cuenta, solo sin detalle de publicación.
+ */
+async function crearLinksEnvio(
+  supabase: ReturnType<typeof createAdminClient>,
+  flujo: IgFlujo,
+  conexionId: string,
+  tenantId: string | null,
+  mediaId: string | null,
+  palabraClave: string | null
+): Promise<{ id: string; url_destino: string; titulo: string | null }[]> {
+  if (!flujo.botones || flujo.botones.length === 0) return [];
+
+  const { data: base } = await supabase
+    .from("ig_links_tracking")
+    .select("id, url_destino, titulo")
+    .eq("flujo_id", flujo.id)
+    .eq("por_envio", false);
+
+  if (!base || base.length === 0) return [];
+
+  const { data: nuevos, error } = await supabase
+    .from("ig_links_tracking")
+    .insert(
+      base.map((l) => ({
+        flujo_id: flujo.id,
+        conexion_id: conexionId,
+        tenant_id: tenantId,
+        url_destino: l.url_destino,
+        titulo: l.titulo,
+        por_envio: true,
+        media_id: mediaId,
+        palabra_clave: palabraClave,
+      }))
+    )
+    .select("id, url_destino, titulo");
+
+  if (error || !nuevos) {
+    console.error("[Bandeja] Error creando links por envío:", error);
+    return base;
+  }
+  return nuevos;
 }
 
 export interface ResultadoProcesamiento {
@@ -159,13 +210,15 @@ export async function procesarEventoWebhook(
     // 1. Identificar la conexión en base de datos
     const { data: conexion, error: conxErr } = await supabase
       .from("meta_conexiones")
-      .select("id, instagram_business_id, instagram_user_id, instagram_access_token, instagram_username, cliente_nombre")
+      .select("id, instagram_business_id, instagram_user_id, instagram_access_token, instagram_username, cliente_nombre, dominio_links")
       // entry.id de los webhooks es el id de cuenta profesional (instagram_user_id);
       // el sondeo usa el de Instagram Login (instagram_business_id). Ver
       // supabase/schema-instagram-user-id.sql.
       .or(`instagram_business_id.eq.${instagramBusinessId},instagram_user_id.eq.${instagramBusinessId}`)
       .limit(1)
-      .maybeSingle<MetaConexion & { instagram_user_id: string | null }>();
+      .maybeSingle<
+        MetaConexion & { instagram_user_id: string | null; dominio_links: string | null }
+      >();
 
     if (conxErr || !conexion) {
       console.warn(
@@ -314,10 +367,13 @@ export async function procesarEventoWebhook(
         .eq("activo", true);
 
       let flujoCoincidente: IgFlujo | null = null;
+      let palabraCoincidente: string | null = null;
       for (const f of (flujos ?? []) as IgFlujo[]) {
         if (f.aplica_a === "comentarios") continue; // Este flujo solo aplica a comentarios
-        if (coincidePalabraClave(textoMensaje, f.palabras_clave)) {
+        const palabra = coincidePalabraClave(textoMensaje, f.palabras_clave);
+        if (palabra) {
           flujoCoincidente = f;
+          palabraCoincidente = palabra;
           break;
         }
       }
@@ -340,16 +396,21 @@ export async function procesarEventoWebhook(
           continue;
         }
 
-        // Cargar links de tracking del flujo
-        const { data: links } = await supabase
-          .from("ig_links_tracking")
-          .select("id, url_destino, titulo")
-          .eq("flujo_id", flujoCoincidente.id);
+        // Un link de tracking propio para este envío (sin publicación: es un DM directo)
+        const links = await crearLinksEnvio(
+          supabase,
+          flujoCoincidente,
+          conexion.id,
+          tenantId,
+          null,
+          palabraCoincidente
+        );
 
         const textoFinal = armarTextoConBotones(
           flujoCoincidente.respuesta_privada,
           flujoCoincidente.botones,
-          links ?? []
+          links,
+          conexion.dominio_links
         );
 
         try {
@@ -579,10 +640,13 @@ export async function procesarEventoWebhook(
         .eq("activo", true);
 
       let flujoCoincidente: IgFlujo | null = null;
+      let palabraCoincidente: string | null = null;
       for (const f of (flujos ?? []) as IgFlujo[]) {
         if (f.aplica_a === "mensajes") continue; // Este flujo solo aplica a DMs
-        if (coincidePalabraClave(textoComentario, f.palabras_clave)) {
+        const palabra = coincidePalabraClave(textoComentario, f.palabras_clave);
+        if (palabra) {
           flujoCoincidente = f;
+          palabraCoincidente = palabra;
           break;
         }
       }
@@ -629,15 +693,20 @@ export async function procesarEventoWebhook(
 
         // 2. Respuesta privada al comentario si está configurada
         if (flujoCoincidente.respuesta_privada) {
-          const { data: links } = await supabase
-            .from("ig_links_tracking")
-            .select("id, url_destino, titulo")
-            .eq("flujo_id", flujoCoincidente.id);
+          const links = await crearLinksEnvio(
+            supabase,
+            flujoCoincidente,
+            conexion.id,
+            tenantId,
+            mediaId,
+            palabraCoincidente
+          );
 
           const textoFinal = armarTextoConBotones(
             flujoCoincidente.respuesta_privada,
             flujoCoincidente.botones,
-            links ?? []
+            links,
+            conexion.dominio_links
           );
 
           try {

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { DiagramaFlujoVisual } from "@/components/bandeja/DiagramaFlujoVisual";
 import { ModalFlujo } from "@/components/bandeja/ModalFlujo";
 import { MetricasBandejaComponent } from "@/components/bandeja/MetricasBandeja";
+import { ReporteFlujos } from "@/components/bandeja/ReporteFlujos";
 import type { IgFlujo, IgBienvenida, BotonFlujo } from "@/lib/bandeja/tipos";
 import type { MetaConexion } from "@/lib/meta/client";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
@@ -21,7 +22,10 @@ export default function FlujosBandejaPage() {
 
   const [modalAbierto, setModalAbierto] = useState(false);
   const [flujoEnEdicion, setFlujoEnEdicion] = useState<IgFlujo | null>(null);
-  const [seccionActiva, setSeccionActiva] = useState<"flujos" | "metricas">("flujos");
+  const [seccionActiva, setSeccionActiva] = useState<"flujos" | "metricas" | "reporte">("flujos");
+  const [dominioLinks, setDominioLinks] = useState("");
+  const [guardandoDominio, setGuardandoDominio] = useState(false);
+  const [errorDominio, setErrorDominio] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Cargar conexiones
@@ -62,6 +66,7 @@ export default function FlujosBandejaPage() {
           const data = await res.json();
           if (activo) {
             setFlujos(data.flujos ?? []);
+            setDominioLinks(data.dominio_links ?? "");
             if (data.bienvenida) {
               setBienvenida(data.bienvenida);
               setMensajeBienvenida(data.bienvenida.mensaje);
@@ -108,6 +113,33 @@ export default function FlujosBandejaPage() {
       console.error("Error guardando bienvenida:", err);
     } finally {
       setGuardandoBienvenida(false);
+    }
+  }
+
+  // Guardar el dominio con el que se arman los links de los DMs de la cuenta
+  async function handleGuardarDominio(e: React.FormEvent) {
+    e.preventDefault();
+    if (!conexionSeleccionadaId) return;
+    setGuardandoDominio(true);
+    setErrorDominio(null);
+    try {
+      const res = await fetch("/api/bandeja/dominio", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          conexion_id: conexionSeleccionadaId,
+          dominio_links: dominioLinks.trim().replace(/\/+$/, ""),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setErrorDominio(data?.error ?? "No se pudo guardar el dominio");
+      }
+    } catch (err) {
+      console.error("Error guardando dominio:", err);
+      setErrorDominio("No se pudo guardar el dominio");
+    } finally {
+      setGuardandoDominio(false);
     }
   }
 
@@ -235,6 +267,16 @@ export default function FlujosBandejaPage() {
           >
             📊 Métricas 360°
           </button>
+          <button
+            onClick={() => setSeccionActiva("reporte")}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+              seccionActiva === "reporte"
+                ? "bg-foreground/15 text-foreground shadow-xs"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            📈 Reporte
+          </button>
         </div>
       </div>
 
@@ -262,6 +304,36 @@ export default function FlujosBandejaPage() {
       {/* CONTENIDO DE PESTAÑA: FLUJOS */}
       {seccionActiva === "flujos" && (
         <div className="flex flex-col gap-6">
+          {/* Dominio de los links de esta cuenta */}
+          <form
+            onSubmit={handleGuardarDominio}
+            className="glass rounded-2xl p-5 border border-border flex flex-col gap-2"
+          >
+            <h4 className="text-sm font-bold text-foreground">Dominio de los enlaces</h4>
+            <p className="text-xs text-muted">
+              Los links de los DMs usan este dominio en vez de app.asygnuz.com (ej.
+              https://valentinamkt.online). La web del cliente debe reenviar /r/:id al dashboard.
+              Vacío = dominio del dashboard.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <input
+                type="text"
+                value={dominioLinks}
+                onChange={(e) => setDominioLinks(e.target.value)}
+                placeholder="https://tu-dominio.com"
+                className="flex-1 px-3 py-2 text-xs rounded-xl bg-surface-alt border border-border text-foreground focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={guardandoDominio}
+                className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-surface-alt hover:bg-foreground/15 border border-border text-foreground transition-all"
+              >
+                {guardandoDominio ? "Guardando..." : "Guardar dominio"}
+              </button>
+            </div>
+            {errorDominio && <p className="text-xs text-red-400">{errorDominio}</p>}
+          </form>
+
           {/* Tarjeta de Mensaje de Bienvenida */}
           <div className="glass rounded-2xl p-5 border border-border flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -355,6 +427,11 @@ export default function FlujosBandejaPage() {
           conexionId={conexionSeleccionadaId}
           esVistaInterna={true}
         />
+      )}
+
+      {/* CONTENIDO DE PESTAÑA: REPORTE */}
+      {seccionActiva === "reporte" && conexionSeleccionadaId && (
+        <ReporteFlujos conexionId={conexionSeleccionadaId} />
       )}
 
       {/* Modal para Crear / Editar Flujo */}

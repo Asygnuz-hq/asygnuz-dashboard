@@ -43,6 +43,20 @@ export function coincidePalabraClave(textoMensaje: string, palabrasClave: string
 }
 
 /**
+ * Convierte un nombre en un valor seguro para utm_campaign: minúsculas, sin tildes
+ * y con guiones ("Info Precios" → "info-precios").
+ */
+export function slugUtm(texto: string): string {
+  return texto
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 50);
+}
+
+/**
  * Calcula el estado de la ventana de 24 horas de Meta a partir de la fecha
  * del último mensaje recibido del usuario.
  */

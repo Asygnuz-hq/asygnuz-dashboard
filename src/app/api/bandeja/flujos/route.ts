@@ -72,17 +72,38 @@ export async function GET(request: Request) {
   const { data: links } = flujoIds.length > 0
     ? await supabase
         .from("ig_links_tracking")
-        .select("id, flujo_id, url_destino, titulo, clics_count")
+        .select("id, flujo_id, url_destino, titulo, clics_count, por_envio")
         .in("flujo_id", flujoIds)
+        // Los links por envío solo importan si tuvieron clics (se suman al botón base).
+        .or("por_envio.eq.false,clics_count.gt.0")
     : { data: [] };
 
-  const linksMap = new Map<string, typeof links>();
-  (links ?? []).forEach((l) => {
-    if (!l.flujo_id) return;
-    const curr = linksMap.get(l.flujo_id) ?? [];
-    curr.push(l);
-    linksMap.set(l.flujo_id, curr);
-  });
+  // Un renglón por botón: los clics de los links por envío se suman al link base.
+  type LinkFlujo = {
+    id: string;
+    flujo_id: string | null;
+    url_destino: string;
+    titulo: string | null;
+    clics_count: number;
+    por_envio: boolean;
+  };
+  const linksMap = new Map<string, LinkFlujo[]>();
+  (links ?? [])
+    .filter((l) => !l.por_envio)
+    .forEach((l) => {
+      if (!l.flujo_id) return;
+      const curr = linksMap.get(l.flujo_id) ?? [];
+      curr.push({ ...l });
+      linksMap.set(l.flujo_id, curr);
+    });
+  (links ?? [])
+    .filter((l) => l.por_envio)
+    .forEach((l) => {
+      const base = l.flujo_id
+        ? linksMap.get(l.flujo_id)?.find((b) => b.url_destino === l.url_destino)
+        : undefined;
+      if (base) base.clics_count += l.clics_count;
+    });
 
   const flujosConStats = (flujos ?? []).map((f) => {
     const s = statsMap.get(f.id) ?? { total: 0, exito: 0, error: 0 };
@@ -106,7 +127,18 @@ export async function GET(request: Request) {
     bienvenida = bData;
   }
 
-  return Response.json({ flujos: flujosConStats, bienvenida });
+  // Dominio propio para los links de los DMs de esta cuenta
+  let dominioLinks: string | null = null;
+  if (conexionId) {
+    const { data: cData } = await supabase
+      .from("meta_conexiones")
+      .select("dominio_links")
+      .eq("id", conexionId)
+      .maybeSingle();
+    dominioLinks = cData?.dominio_links ?? null;
+  }
+
+  return Response.json({ flujos: flujosConStats, bienvenida, dominio_links: dominioLinks });
 }
 
 // POST /api/bandeja/flujos
