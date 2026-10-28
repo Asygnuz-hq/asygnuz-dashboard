@@ -19,13 +19,17 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: headersDeSeguridad }];
   },
+  async redirects() {
+    return [
+      { source: "/radia/demo", destination: "/radia", permanent: false },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/lumia", destination: "/lumia/Propuesta_Lumia.html" },
       { source: "/lumia/propuesta", destination: "/lumia/Propuesta_Lumia.html" },
       { source: "/lumia/resultados", destination: "/lumia/Resultados_Lumia.html" },
       { source: "/lumia/analisis", destination: "/lumia/Analisis_Lumia.html" },
-      { source: "/radia/demo", destination: "/radia/Demo_Radia.html" },
       { source: "/radia/visor", destination: "/radia/visor/index.html" },
       { source: "/radia/visor/:path*", destination: "/radia/visor/index.html" },
       { source: "/radia", destination: "/radia/Propuesta_Radia.html" },
