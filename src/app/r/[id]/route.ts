@@ -5,6 +5,19 @@ import { slugUtm } from "@/lib/bandeja/texto";
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+// Vistas previas y rastreadores que abren el link sin una persona detrás. Se guardan
+// marcados y no cuentan en el reporte. "Instagram" no va aquí: es el navegador interno
+// con el que la gente sí abre los links.
+// shortcut: lista por user-agent, un bot que se disfrace de navegador pasa; revisar si el reporte vuelve a inflarse.
+const BOT_REGEX =
+  /bot|crawl|spider|facebookexternalhit|facebot|meta-external|slurp|preview|headless|curl|wget|python|axios|go-http|java\//i;
+
+function esBot(request: Request): boolean {
+  const ua = request.headers.get("user-agent") ?? "";
+  const proposito = `${request.headers.get("purpose") ?? ""}${request.headers.get("sec-purpose") ?? ""}`;
+  return !ua || BOT_REGEX.test(ua) || /prefetch|prerender/i.test(proposito);
+}
+
 // Agrega las UTMs del flujo a la URL de destino sin pisar las que ya traiga.
 function conUtms(
   destino: string,
@@ -56,15 +69,18 @@ export async function GET(
     }
 
     // Incremento atómico en base de datos sin condición de carrera + historial por clic.
-    // Un fallo del historial no debe impedir la redirección.
+    // Un fallo del historial no debe impedir la redirección. Los bots se guardan marcados
+    // pero no suman al contador.
+    const bot = esBot(request);
     await Promise.all([
-      supabase.rpc("incrementar_clic_link", { p_link_id: id }),
+      bot ? null : supabase.rpc("incrementar_clic_link", { p_link_id: id }),
       supabase.from("ig_clics").insert({
         link_id: link.id,
         flujo_id: link.flujo_id,
         conexion_id: link.conexion_id,
         tenant_id: link.tenant_id,
         media_id: link.media_id,
+        es_bot: bot,
       }),
     ]);
 

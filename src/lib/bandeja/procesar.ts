@@ -125,7 +125,8 @@ async function crearLinksEnvio(
   conexionId: string,
   tenantId: string | null,
   mediaId: string | null,
-  palabraClave: string | null
+  palabraClave: string | null,
+  eventoId: string | null
 ): Promise<{ id: string; url_destino: string; titulo: string | null }[]> {
   if (!flujo.botones || flujo.botones.length === 0) return [];
 
@@ -149,6 +150,7 @@ async function crearLinksEnvio(
         por_envio: true,
         media_id: mediaId,
         palabra_clave: palabraClave,
+        evento_id: eventoId,
       }))
     )
     .select("id, url_destino, titulo");
@@ -403,7 +405,8 @@ export async function procesarEventoWebhook(
           conexion.id,
           tenantId,
           null,
-          palabraCoincidente
+          palabraCoincidente,
+          eventoGuardado.id
         );
 
         const textoFinal = armarTextoConBotones(
@@ -699,7 +702,8 @@ export async function procesarEventoWebhook(
             conexion.id,
             tenantId,
             mediaId,
-            palabraCoincidente
+            palabraCoincidente,
+            eventoGuardado.id
           );
 
           const textoFinal = armarTextoConBotones(

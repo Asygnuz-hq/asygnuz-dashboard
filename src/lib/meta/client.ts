@@ -583,6 +583,41 @@ export async function fetchInstagramMedia(conexion: MetaConexion, limite = 50): 
   return conMetricas;
 }
 
+// Datos básicos (texto, miniatura, enlace) de publicaciones concretas, sin pedir
+// métricas. Las que Meta no devuelva (borradas, historias vencidas) se omiten.
+export async function fetchInstagramMediaBasico(
+  conexion: MetaConexion,
+  mediaIds: string[]
+): Promise<Record<string, { caption: string | null; permalink: string | null; imagenUrl: string | null }>> {
+  const token = conexion.instagram_access_token;
+  if (!token || mediaIds.length === 0) return {};
+  const out: Record<string, { caption: string | null; permalink: string | null; imagenUrl: string | null }> = {};
+  await Promise.all(
+    mediaIds.map(async (id) => {
+      try {
+        const m = await graphFetch<{
+          caption?: string;
+          permalink?: string;
+          thumbnail_url?: string;
+          media_url?: string;
+        }>(
+          `/${id}`,
+          { access_token: token, fields: "caption,permalink,thumbnail_url,media_url" },
+          GRAPH_INSTAGRAM_URL
+        );
+        out[id] = {
+          caption: m.caption ?? null,
+          permalink: m.permalink ?? null,
+          imagenUrl: m.thumbnail_url ?? m.media_url ?? null,
+        };
+      } catch {
+        // publicación no disponible: el reporte la muestra solo con su id
+      }
+    })
+  );
+  return out;
+}
+
 // Historias activas ahora mismo (últimas 24h) — es la única ventana en la
 // que la Graph API las expone, no hay forma de ver historias ya vencidas.
 export async function fetchInstagramStoriesActivas(conexion: MetaConexion): Promise<InstagramMedia[]> {

@@ -1,8 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
+import { fetchInstagramMediaBasico, type MetaConexion } from "@/lib/meta/client";
 
 const FECHA_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const DIA_MS = 24 * 60 * 60 * 1000;
+const MAX_PUBLICACIONES = 20;
 
 interface FilaReporte {
   flujo_id: string;
@@ -14,6 +16,14 @@ interface FilaReporte {
   errores: number;
   limites: number;
   clics: number;
+  clics_unicos: number;
+}
+
+interface Totales {
+  comentarios: number;
+  disparos: number;
+  dms: number;
+  clicsUnicos: number;
 }
 
 function celdaCsv(valor: string | number): string {
@@ -21,9 +31,15 @@ function celdaCsv(valor: string | number): string {
   return /[",\n]/.test(texto) ? `"${texto.replace(/"/g, '""')}"` : texto;
 }
 
+// Una persona = un DM = un link, así que los clics únicos nunca superan los DMs enviados.
+function tasaClic(unicos: number, dms: number): string {
+  return dms > 0 ? `${((unicos / dms) * 100).toFixed(1)}%` : "";
+}
+
 // GET /api/bandeja/reporte?conexion_id=...&desde=YYYY-MM-DD&hasta=YYYY-MM-DD[&formato=csv]
-// Reporte por flujo y publicación de una cuenta. Las fechas son días de Colombia (UTC-5),
-// ambas inclusivas. Con formato=csv responde un archivo descargable.
+// Reporte de una cuenta: tabla por flujo y publicación, serie diaria, embudo, leads y
+// comparación con el periodo anterior de la misma duración. Las fechas son días de
+// Colombia (UTC-5), ambas inclusivas. Con formato=csv responde solo la tabla como archivo.
 export async function GET(request: Request) {
   const auth = await requireAsygnuzAdmin();
   if (auth instanceof Response) return auth;
@@ -47,16 +63,16 @@ export async function GET(request: Request) {
   }
 
   const supabase = createAdminClient();
-  const { data, error } = await supabase.rpc("bandeja_reporte", {
+  const rango = (a: Date, b: Date) => ({
     p_conexion_id: conexionId,
-    p_desde: inicio.toISOString(),
-    p_hasta: fin.toISOString(),
+    p_desde: a.toISOString(),
+    p_hasta: b.toISOString(),
   });
 
+  const { data, error } = await supabase.rpc("bandeja_reporte", rango(inicio, fin));
   if (error) {
     return Response.json({ error: error.message }, { status: 500 });
   }
-
   const filas = (data ?? []) as FilaReporte[];
 
   if (searchParams.get("formato") === "csv") {
@@ -68,8 +84,9 @@ export async function GET(request: Request) {
       "Respuestas públicas",
       "Errores",
       "Límites alcanzados",
-      "Clics",
-      "Tasa de clic",
+      "Clics totales",
+      "Clics únicos",
+      "Tasa de clic (únicos / DMs)",
     ];
     const lineas = filas.map((f) =>
       [
@@ -81,7 +98,8 @@ export async function GET(request: Request) {
         f.errores,
         f.limites,
         f.clics,
-        f.dms_enviados > 0 ? `${((f.clics / f.dms_enviados) * 100).toFixed(1)}%` : "",
+        f.clics_unicos,
+        tasaClic(f.clics_unicos, f.dms_enviados),
       ]
         .map(celdaCsv)
         .join(",")
@@ -96,5 +114,44 @@ export async function GET(request: Request) {
     });
   }
 
-  return Response.json({ filas });
+  // Periodo anterior de la misma duración, para las variaciones de las tarjetas
+  const inicioPrev = new Date(inicio.getTime() - (fin.getTime() - inicio.getTime()));
+
+  const [dias, entrantes, leads, filasPrev, entrantesPrev, conexion] = await Promise.all([
+    supabase.rpc("bandeja_reporte_dias", rango(inicio, fin)),
+    supabase.rpc("bandeja_entrantes", rango(inicio, fin)),
+    supabase.rpc("bandeja_leads", { ...rango(inicio, fin), p_limite: 200 }),
+    supabase.rpc("bandeja_reporte", rango(inicioPrev, inicio)),
+    supabase.rpc("bandeja_entrantes", rango(inicioPrev, inicio)),
+    supabase.from("meta_conexiones").select("*").eq("id", conexionId).maybeSingle(),
+  ]);
+
+  const sumar = (f: FilaReporte[], comentarios: number): Totales => ({
+    comentarios,
+    disparos: f.reduce((s, x) => s + x.disparos, 0),
+    dms: f.reduce((s, x) => s + x.dms_enviados, 0),
+    clicsUnicos: f.reduce((s, x) => s + x.clics_unicos, 0),
+  });
+  const ent = (entrantes.data as { comentarios: number; mensajes: number }[] | null)?.[0];
+  const entPrev = (entrantesPrev.data as { comentarios: number }[] | null)?.[0];
+
+  // Texto, miniatura y enlace de las publicaciones que aparecen en la tabla (tope para no
+  // lanzar decenas de llamadas a Meta). Si Meta falla, el reporte sale igual con los ids.
+  const mediaIds = Array.from(new Set(filas.map((f) => f.media_id).filter(Boolean))).slice(
+    0,
+    MAX_PUBLICACIONES
+  );
+  const publicaciones = conexion.data
+    ? await fetchInstagramMediaBasico(conexion.data as MetaConexion, mediaIds).catch(() => ({}))
+    : {};
+
+  return Response.json({
+    filas,
+    dias: dias.data ?? [],
+    entrantes: { comentarios: ent?.comentarios ?? 0, mensajes: ent?.mensajes ?? 0 },
+    leads: leads.data ?? [],
+    publicaciones,
+    actual: sumar(filas, ent?.comentarios ?? 0),
+    anterior: sumar((filasPrev.data ?? []) as FilaReporte[], entPrev?.comentarios ?? 0),
+  });
 }
