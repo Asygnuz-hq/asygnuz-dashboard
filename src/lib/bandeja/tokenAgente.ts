@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { denegarEnBandeja, denegarEnPortal } from "@/lib/agente/permisos";
+import { denegarEnBandeja, denegarEnPortal, tokenVencido } from "@/lib/agente/permisos";
 
 export function generarTokenAgente(): { rawToken: string; prefix: string; hash: string } {
   const bytes = crypto.randomBytes(32).toString("hex");
@@ -39,12 +39,16 @@ async function buscarToken(request: Request): Promise<TokenValido | { valido: fa
 
   const { data: tokenRow, error: tokenErr } = await supabase
     .from("tokens_agente")
-    .select("id, user_id, nombre, revocado, tenant_id, puede_escribir")
+    .select("id, user_id, nombre, revocado, tenant_id, puede_escribir, expira_en")
     .eq("token_hash", hash)
     .maybeSingle();
 
   if (tokenErr || !tokenRow || tokenRow.revocado) {
     return { valido: false, error: "Token inválido o revocado", status: 401 };
+  }
+
+  if (tokenVencido(tokenRow.expira_en)) {
+    return { valido: false, error: "Token vencido: genera uno nuevo en /portal-admin", status: 401 };
   }
 
   // Verificar que el usuario del token tenga permiso de gestionar portales

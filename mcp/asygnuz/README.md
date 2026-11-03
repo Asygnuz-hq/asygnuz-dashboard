@@ -17,7 +17,7 @@ cd mcp/asygnuz && npm install
 claude mcp add asygnuz --env ASYGNUZ_AGENTE_TOKEN=asg_ag_tu_token -- node "$PWD/server.mjs"
 ```
 
-`ASYGNUZ_API_URL` es opcional (por defecto `https://app.asygnuz.com`). Para revocar el acceso, usa "Revocar" en `/portal-admin`.
+`ASYGNUZ_API_URL` es opcional (por defecto `https://app.asygnuz.com`). El token vence al año: cuando pase, genera otro en `/portal-admin` y vuelve a registrarlo. Para quitar el acceso antes, usa "Revocar".
 
 ## Pruebas
 ```bash

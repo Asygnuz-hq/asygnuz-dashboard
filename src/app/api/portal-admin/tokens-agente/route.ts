@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
 import { bodyValido } from "@/lib/api/validarBody";
 import { generarTokenAgente } from "@/lib/bandeja/tokenAgente";
+import { DURACION_TOKEN_PORTAL_MS } from "@/lib/agente/permisos";
 
 const SchemaCrearToken = z.object({
   nombre: z.string().min(1, "El nombre del token es requerido").max(60),
@@ -20,7 +21,7 @@ export async function GET() {
   const supabase = createAdminClient();
   const { data: tokens, error } = await supabase
     .from("tokens_agente")
-    .select("id, nombre, token_prefix, revocado, creado_en, ultimo_uso_en, tenant_id, puede_escribir")
+    .select("id, nombre, token_prefix, revocado, creado_en, ultimo_uso_en, tenant_id, puede_escribir, expira_en")
     .order("creado_en", { ascending: false });
 
   if (error) {
@@ -54,8 +55,9 @@ export async function POST(request: Request) {
       revocado: false,
       tenant_id: tenantId ?? null,
       puede_escribir: Boolean(tenantId) && puedeEscribir,
+      expira_en: tenantId ? new Date(Date.now() + DURACION_TOKEN_PORTAL_MS).toISOString() : null,
     })
-    .select("id, nombre, token_prefix, revocado, creado_en, tenant_id, puede_escribir")
+    .select("id, nombre, token_prefix, revocado, creado_en, tenant_id, puede_escribir, expira_en")
     .single();
 
   if (error) {

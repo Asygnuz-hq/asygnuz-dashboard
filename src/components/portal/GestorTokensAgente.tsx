@@ -215,6 +215,7 @@ export function GestorTokensAgente() {
                     : "Bandeja · "}
                   Prefijo: {t.token_prefix} · Creado: {formatearHoraAmigable(t.creado_en)}
                   {t.ultimo_uso_en ? ` · Último uso: ${formatearHoraAmigable(t.ultimo_uso_en)}` : " · Sin usar"}
+                  {t.expira_en ? ` · Vence: ${new Date(t.expira_en).toLocaleDateString("es-CO")}` : ""}
                 </p>
               </div>
 

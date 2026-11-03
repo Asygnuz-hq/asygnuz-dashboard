@@ -111,6 +111,7 @@ export interface TokenAgente {
   ultimo_uso_en: string | null;
   tenant_id: string | null;
   puede_escribir: boolean;
+  expira_en: string | null;
 }
 
 export interface MetricasBandeja {
