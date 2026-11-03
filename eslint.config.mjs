@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Paquete aparte, con sus propias dependencias.
+    "mcp/**",
   ]),
 ]);
 

@@ -3,6 +3,7 @@ import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
 import { tenantIdValido } from "@/lib/portal/tenantId";
 import { bodyValido } from "@/lib/api/validarBody";
 import { actualizarContenidoSchema } from "@/lib/portal/schemas";
+import { columnasContenido } from "@/lib/portal/contenido";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ tenantId: string; id: string }> }) {
   const { tenantId, id } = await params;
@@ -14,22 +15,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ tena
 
   const validado = await bodyValido(request, actualizarContenidoSchema);
   if (validado instanceof Response) return validado;
-  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link, hora, pilar, copy, linkDrive } =
-    validado.data;
-
-  const cambios: Record<string, unknown> = { actualizado_en: new Date().toISOString() };
-  if (titulo !== undefined) cambios.titulo = titulo;
-  if (tipo !== undefined) cambios.tipo = tipo || null;
-  if (plataforma !== undefined) cambios.plataforma = plataforma || null;
-  if (fechaPublicacion !== undefined) cambios.fecha_publicacion = fechaPublicacion || null;
-  if (estado !== undefined) cambios.estado = estado;
-  if (notas !== undefined) cambios.notas = notas || null;
-  if (linkReferencia !== undefined) cambios.link_referencia = linkReferencia || null;
-  if (link !== undefined) cambios.link = link || null;
-  if (hora !== undefined) cambios.hora = hora || null;
-  if (pilar !== undefined) cambios.pilar = pilar || null;
-  if (copy !== undefined) cambios.copy = copy || null;
-  if (linkDrive !== undefined) cambios.link_drive = linkDrive || null;
+  const cambios = { ...columnasContenido(validado.data), actualizado_en: new Date().toISOString() };
 
   const admin = createAdminClient();
   const { data, error } = await admin

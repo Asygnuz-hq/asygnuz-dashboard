@@ -3,6 +3,7 @@ import { requireAsygnuzAdmin } from "@/lib/portal/adminAuth";
 import { tenantIdValido } from "@/lib/portal/tenantId";
 import { bodyValido } from "@/lib/api/validarBody";
 import { crearContenidoSchema } from "@/lib/portal/schemas";
+import { columnasContenido } from "@/lib/portal/contenido";
 
 export async function POST(request: Request, { params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = await params;
@@ -12,9 +13,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ ten
 
   const validado = await bodyValido(request, crearContenidoSchema);
   if (validado instanceof Response) return validado;
-  const { titulo, tipo, plataforma, fechaPublicacion, estado, notas, linkReferencia, link, hora, pilar, copy, linkDrive } =
-    validado.data;
-
   const admin = createAdminClient();
   const { count } = await admin
     .from("portal_contenido")
@@ -25,18 +23,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ten
     .from("portal_contenido")
     .insert({
       tenant_id: tenantId,
-      titulo,
-      tipo: tipo || null,
-      plataforma: plataforma || null,
-      fecha_publicacion: fechaPublicacion || null,
-      estado,
-      notas: notas || null,
-      link_referencia: linkReferencia || null,
-      link: link || null,
-      hora: hora || null,
-      pilar: pilar || null,
-      copy: copy || null,
-      link_drive: linkDrive || null,
+      ...columnasContenido(validado.data),
       orden: count ?? 0,
     })
     .select()

@@ -109,6 +109,9 @@ export interface TokenAgente {
   revocado: boolean;
   creado_en: string;
   ultimo_uso_en: string | null;
+  tenant_id: string | null;
+  puede_escribir: boolean;
+  expira_en: string | null;
 }
 
 export interface MetricasBandeja {

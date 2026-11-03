@@ -7,8 +7,12 @@ import { formatearHoraAmigable } from "@/lib/bandeja/texto";
 export function GestorTokensAgente() {
   const [tokens, setTokens] = useState<TokenAgente[]>([]);
   const [nombre, setNombre] = useState("");
+  const [portales, setPortales] = useState<{ id: string; nombre: string }[]>([]);
+  const [tenantId, setTenantId] = useState("");
+  const [puedeEscribir, setPuedeEscribir] = useState(false);
   const [creando, setCreando] = useState(false);
   const [tokenCreadoSecreto, setTokenCreadoSecreto] = useState<string | null>(null);
+  const [tokenEsPortal, setTokenEsPortal] = useState(false);
   const [copiado, setCopiado] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +37,13 @@ export function GestorTokensAgente() {
     };
   }, [recargarTrigger]);
 
+  useEffect(() => {
+    fetch("/api/portal-admin/clientes")
+      .then((res) => (res.ok ? res.json() : { clientes: [] }))
+      .then((data) => setPortales(data.clientes ?? []))
+      .catch((err) => console.error("Error cargando portales:", err));
+  }, []);
+
   function cargarTokens() {
     setRecargarTrigger((prev) => prev + 1);
   }
@@ -47,12 +58,15 @@ export function GestorTokensAgente() {
       const res = await fetch("/api/portal-admin/tokens-agente", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre: nombre.trim() }),
+        body: JSON.stringify({ nombre: nombre.trim(), ...(tenantId ? { tenantId, puedeEscribir } : {}) }),
       });
       const data = await res.json();
       if (res.ok && data.token_secreto) {
         setTokenCreadoSecreto(data.token_secreto);
+        setTokenEsPortal(Boolean(data.token?.tenant_id));
         setNombre("");
+        setTenantId("");
+        setPuedeEscribir(false);
         await cargarTokens();
       } else {
         setError(data.error || "Error creando token");
@@ -118,7 +132,8 @@ export function GestorTokensAgente() {
             </button>
           </div>
           <p className="text-[11px] text-amber-300/80">
-            Guárdalo en tu variable de entorno: <code className="font-mono">export ASYGNUZ_BANDEJA_TOKEN=&quot;...&quot;</code>
+            Guárdalo en tu variable de entorno:{" "}
+            <code className="font-mono">export {tokenEsPortal ? "ASYGNUZ_AGENTE_TOKEN" : "ASYGNUZ_BANDEJA_TOKEN"}=&quot;...&quot;</code>
           </p>
           <button
             type="button"
@@ -135,7 +150,7 @@ export function GestorTokensAgente() {
       )}
 
       {/* Formulario crear token */}
-      <form onSubmit={handleCrear} className="flex items-center gap-2">
+      <form onSubmit={handleCrear} className="flex flex-wrap items-center gap-2">
         <input
           type="text"
           value={nombre}
@@ -143,6 +158,28 @@ export function GestorTokensAgente() {
           placeholder="Nombre del token (ej. Claude Code JM Mac)"
           className="flex-1 p-2 text-xs rounded-xl bg-surface-alt border border-border text-foreground focus:outline-none"
         />
+        <select
+          value={tenantId}
+          onChange={(e) => {
+            setTenantId(e.target.value);
+            if (!e.target.value) setPuedeEscribir(false);
+          }}
+          aria-label="Alcance del token"
+          className="p-2 text-xs rounded-xl bg-surface-alt border border-border text-foreground focus:outline-none"
+        >
+          <option value="">Bandeja (todas las cuentas)</option>
+          {portales.map((p) => (
+            <option key={p.id} value={p.id}>
+              MCP: {p.nombre}
+            </option>
+          ))}
+        </select>
+        {tenantId && (
+          <label className="flex items-center gap-1.5 text-xs text-muted">
+            <input type="checkbox" checked={puedeEscribir} onChange={(e) => setPuedeEscribir(e.target.checked)} />
+            Puede editar la parrilla
+          </label>
+        )}
         <button
           type="submit"
           disabled={!nombre.trim() || creando}
@@ -173,8 +210,12 @@ export function GestorTokensAgente() {
                   )}
                 </p>
                 <p className="text-[11px] text-muted font-mono mt-0.5">
+                  {t.tenant_id
+                    ? `MCP: ${portales.find((p) => p.id === t.tenant_id)?.nombre ?? "portal"} (${t.puede_escribir ? "lectura y edición" : "solo lectura"}) · `
+                    : "Bandeja · "}
                   Prefijo: {t.token_prefix} · Creado: {formatearHoraAmigable(t.creado_en)}
                   {t.ultimo_uso_en ? ` · Último uso: ${formatearHoraAmigable(t.ultimo_uso_en)}` : " · Sin usar"}
+                  {t.expira_en ? ` · Vence: ${new Date(t.expira_en).toLocaleDateString("es-CO")}` : ""}
                 </p>
               </div>
 
