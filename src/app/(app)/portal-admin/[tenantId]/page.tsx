@@ -293,6 +293,9 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
         <Link href={`/portal-admin/${tenantId}/parrilla`} className="text-sm underline w-fit">
           Gestionar parrilla completa →
         </Link>
+        <Link href={`/portal-admin/${tenantId}/leads`} className="text-sm underline w-fit">
+          Ver leads de la web →
+        </Link>
       </TarjetaSeccion>
 
       <TarjetaSeccion icono="🔗" titulo="Enlaces">
