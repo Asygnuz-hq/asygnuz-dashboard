@@ -1,0 +1,11 @@
+{
+  "name": "asygnuz-mcp",
+  "private": true,
+  "type": "module",
+  "bin": { "asygnuz-mcp": "server.mjs" },
+  "scripts": { "test": "node test.mjs" },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.0",
+    "zod": "^3.25.76"
+  }
+}
