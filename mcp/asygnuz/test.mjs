@@ -27,7 +27,7 @@ await cliente.connect(
 
 const { tools } = await cliente.listTools();
 assert.deepEqual(tools.map((t) => t.name).sort(), [
-  "actualizar_pieza", "contexto", "crear_pieza", "listar_flujos", "listar_parrilla", "ver_avance",
+  "actualizar_flujo", "actualizar_pieza", "contexto", "crear_flujo", "crear_pieza", "listar_flujos", "listar_parrilla", "ver_avance",
 ]);
 assert.equal(tools.some((t) => /borrar|eliminar|publicar_/.test(t.name)), false);
 
@@ -43,6 +43,18 @@ v = vistas.at(-1);
 assert.equal(v.metodo, "PATCH");
 assert.equal(v.url, `/api/agente/parrilla/${id}`);
 assert.deepEqual(JSON.parse(v.cuerpo), { estado: "programado" }); // el id va en la URL y no pisa campos
+
+await cliente.callTool({ name: "actualizar_flujo", arguments: { id, activo: false } });
+v = vistas.at(-1);
+assert.equal(v.metodo, "PATCH");
+assert.equal(v.url, `/api/agente/flujos/${id}`);
+assert.deepEqual(JSON.parse(v.cuerpo), { activo: false });
+
+await cliente.callTool({ name: "crear_flujo", arguments: { nombre: "Guía", palabras_clave: ["GUIA"], respuesta_privada: "Hola" } });
+v = vistas.at(-1);
+assert.equal(v.metodo, "POST");
+assert.equal(v.url, "/api/agente/flujos");
+assert.equal("activo" in JSON.parse(v.cuerpo), false); // apagado lo decide la API, no este servidor
 
 const negado = await cliente.callTool({ name: "crear_pieza", arguments: { titulo: "solo-lectura" } });
 assert.equal(negado.isError, true);
