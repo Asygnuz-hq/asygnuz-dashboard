@@ -177,7 +177,7 @@ export function GestorTokensAgente() {
         {tenantId && (
           <label className="flex items-center gap-1.5 text-xs text-muted">
             <input type="checkbox" checked={puedeEscribir} onChange={(e) => setPuedeEscribir(e.target.checked)} />
-            Puede editar la parrilla
+            Puede editar la parrilla y los flujos automáticos
           </label>
         )}
         <button

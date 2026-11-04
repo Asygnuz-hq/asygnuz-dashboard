@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const conexionIds = (vinculos ?? []).map((v) => v.conexion_id);
   // Lista cerrada de columnas: meta_conexiones también guarda los tokens de Meta.
   const { data: cuentas } = conexionIds.length
-    ? await admin.from("meta_conexiones").select("cliente_nombre, instagram_username, guia_marca").in("id", conexionIds)
+    ? await admin.from("meta_conexiones").select("id, cliente_nombre, instagram_username, guia_marca").in("id", conexionIds)
     : { data: [] };
 
   return Response.json({ portal: tenant, puede_escribir: auth.puedeEscribir, pilares: pilares ?? [], cuentas: cuentas ?? [] });

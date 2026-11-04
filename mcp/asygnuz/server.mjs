@@ -106,6 +106,48 @@ server.registerTool(
   () => llamar("GET", "flujos")
 );
 
+// Mismos campos que los schemas de src/lib/agente/flujos.ts; la validación completa la hace la API.
+const CAMPOS_FLUJO = {
+  aplica_a: z.enum(["todas", "comentarios", "mensajes"]).optional().describe("Dónde escucha la palabra clave. Por defecto, todas"),
+  respuesta_publica: z.array(z.string()).optional().describe("Respuestas al comentario; el motor elige una al azar en cada caso"),
+  botones: z.array(z.object({ titulo: z.string(), url: z.string() })).optional().describe("Enlaces https que se agregan al DM, con rastreo de clics"),
+};
+const AVISO_FLUJO = "Pide aprobación explícita a la persona antes de usarla.";
+
+server.registerTool(
+  "crear_flujo",
+  {
+    description: `Crea un flujo: palabra clave → respuesta pública rotativa → DM con enlaces. Nace apagado salvo activo: true, y un flujo activo responde solo a personas reales. ${AVISO_FLUJO}`,
+    inputSchema: {
+      nombre: z.string(),
+      palabras_clave: z.array(z.string()),
+      respuesta_privada: z.string().describe("Texto del DM"),
+      ...CAMPOS_FLUJO,
+      conexion_id: z.string().uuid().optional().describe("Solo si el portal tiene varias cuentas (ver contexto)"),
+      activo: z.boolean().optional(),
+    },
+    annotations: escritura,
+  },
+  (body) => llamar("POST", "flujos", { body })
+);
+
+server.registerTool(
+  "actualizar_flujo",
+  {
+    description: `Cambia solo los campos enviados de un flujo. activo: true hace que responda solo a personas reales; activo: false lo apaga. ${AVISO_FLUJO}`,
+    inputSchema: {
+      id: z.string().uuid(),
+      nombre: z.string().optional(),
+      palabras_clave: z.array(z.string()).optional(),
+      respuesta_privada: z.string().optional(),
+      ...CAMPOS_FLUJO,
+      activo: z.boolean().optional(),
+    },
+    annotations: { ...escritura, idempotentHint: true },
+  },
+  ({ id, ...body }) => llamar("PATCH", `flujos/${id}`, { body })
+);
+
 server.registerTool(
   "ver_avance",
   {
