@@ -69,6 +69,7 @@ const sections: NavSection[] = [
     modulo: "marketing_pauta",
     items: [
       { href: "/marketing", label: "Marketing" },
+      { href: "/marketing/recursos", label: "Recursos gratuitos" },
       { href: "/metricas/clientes", label: "Meta Ads por Cliente" },
       { href: "/metricas/clientes/ranking", label: "Ranking entre Clientes" },
     ],
