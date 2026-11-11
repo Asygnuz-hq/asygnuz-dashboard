@@ -121,7 +121,9 @@ export async function updateSession(request: NextRequest) {
         // /analitica embebe un dashboard de PostHog con el uso de TODOS los
         // tenants: es una herramienta interna de ASYGNUZ, no un módulo que se
         // le venda a un cliente. Exige un flag propio, aparte de "financiero".
-        if (modulos && pathname.startsWith("/analitica") && modulos.analitica !== true) {
+        // /marketing/recursos muestra los leads de recursos gratuitos de ASYGNUZ:
+        // también interna, aunque cuelgue del módulo marketing_pauta.
+        if (modulos && (pathname.startsWith("/analitica") || pathname.startsWith("/marketing/recursos")) && modulos.analitica !== true) {
           const url = request.nextUrl.clone();
           url.pathname = "/";
           url.search = "";
