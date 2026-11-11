@@ -1,5 +1,6 @@
-// Cliente de solo lectura contra la API de EspoCRM. Corre siempre en servidor
-// (route handlers) — la API key nunca debe llegar al navegador.
+// Cliente contra la API de EspoCRM. Corre siempre en servidor (route
+// handlers) — la API key nunca debe llegar al navegador. Solo /crm/prospeccion
+// escribe (etapa y pauta de un lead); el resto es lectura.
 
 export type EspoLead = {
   id: string;
@@ -29,9 +30,11 @@ export type EspoOpportunity = {
 // entorno globales (Kaneo #34).
 export type EspoConfig = { apiUrl: string; apiKey: string };
 
-async function espoFetch<T>(config: EspoConfig, path: string): Promise<T> {
+export async function espoFetch<T>(config: EspoConfig, path: string, init?: { method: "PUT"; body: unknown }): Promise<T> {
   const res = await fetch(`${config.apiUrl}${path}`, {
-    headers: { "X-Api-Key": config.apiKey },
+    method: init?.method ?? "GET",
+    body: init ? JSON.stringify(init.body) : undefined,
+    headers: { "X-Api-Key": config.apiKey, ...(init ? { "Content-Type": "application/json" } : {}) },
     // Datos operativos: no cachear entre requests.
     cache: "no-store",
   });
@@ -45,7 +48,7 @@ async function espoFetch<T>(config: EspoConfig, path: string): Promise<T> {
 // EspoCRM pagina de a 200 por defecto; los volúmenes actuales (decenas/cientos
 // de leads) caben en un par de vueltas. Se trae todo para agregar en memoria,
 // igual que el cliente de Kaneo.
-async function fetchAll<T>(config: EspoConfig, entity: string, select: string): Promise<T[]> {
+export async function fetchAll<T>(config: EspoConfig, entity: string, select: string): Promise<T[]> {
   const pageSize = 200;
   let offset = 0;
   const out: T[] = [];

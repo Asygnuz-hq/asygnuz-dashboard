@@ -104,7 +104,10 @@ const sections: NavSection[] = [
     etiqueta: "CRM",
     Icono: IconoCrm,
     modulo: "crm",
-    items: [{ href: "/crm", label: "Leads y Pipeline" }],
+    items: [
+      { href: "/crm/prospeccion", label: "Prospección" },
+      { href: "/crm", label: "Leads y Pipeline" },
+    ],
   },
   {
     title: "Operación",
@@ -219,6 +222,7 @@ export function Sidebar() {
       visibles: s.items
         // /marketing/recursos es interna (leads de ASYGNUZ): mismo flag que /analitica.
         .filter((item) => (item.href !== "/analitica" && item.href !== "/marketing/recursos") || modulos?.analitica === true)
+        .filter((item) => item.href !== "/crm/prospeccion" || modulos?.prospeccion === true)
         .filter((item) => item.href !== "/portal-admin" || gestionaPortales),
     }))
     .filter((s) => s.visibles.length > 0);

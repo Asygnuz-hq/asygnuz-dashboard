@@ -130,6 +130,15 @@ export async function updateSession(request: NextRequest) {
           return redirigir(url);
         }
 
+        // /crm/prospeccion trabaja sobre los leads de ASYGNUZ en EspoCRM:
+        // flag propio, aparte de "crm" (que también puede tener un cliente).
+        if (modulos && pathname.startsWith("/crm/prospeccion") && modulos.prospeccion !== true) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/crm";
+          url.search = "";
+          return NextResponse.redirect(url);
+        }
+
         // /portal-admin es la gestión de portales de clientes de Growth —
         // acotada A LA PERSONA (gestiona_portales), no a todo el tenant
         // ASYGNUZ: JM no quiere que cualquier admin del equipo la vea.
