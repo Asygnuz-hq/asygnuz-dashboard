@@ -92,6 +92,7 @@ const sections: NavSection[] = [
     modulo: "marketing_pauta",
     items: [
       { href: "/marketing", label: "Marketing" },
+      { href: "/marketing/recursos", label: "Recursos gratuitos" },
       { href: "/bandeja", label: "Bandeja Instagram" },
       { href: "/bandeja/flujos", label: "Flujos Automáticos" },
       { href: "/metricas/clientes", label: "Meta Ads por Cliente" },
@@ -216,7 +217,8 @@ export function Sidebar() {
       // /analitica exige el flag del tenant; /portal-admin exige un permiso
       // de la PERSONA (gestiona_portales), no del tenant entero.
       visibles: s.items
-        .filter((item) => item.href !== "/analitica" || modulos?.analitica === true)
+        // /marketing/recursos es interna (leads de ASYGNUZ): mismo flag que /analitica.
+        .filter((item) => (item.href !== "/analitica" && item.href !== "/marketing/recursos") || modulos?.analitica === true)
         .filter((item) => item.href !== "/portal-admin" || gestionaPortales),
     }))
     .filter((s) => s.visibles.length > 0);
