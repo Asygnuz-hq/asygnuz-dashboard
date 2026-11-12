@@ -106,6 +106,7 @@ const sections: NavSection[] = [
     modulo: "crm",
     items: [
       { href: "/crm/prospeccion", label: "Prospección" },
+      { href: "/crm/casos-negocio", label: "Casos de negocio" },
       { href: "/crm", label: "Leads y Pipeline" },
     ],
   },
@@ -223,6 +224,7 @@ export function Sidebar() {
         // /marketing/recursos es interna (leads de ASYGNUZ): mismo flag que /analitica.
         .filter((item) => (item.href !== "/analitica" && item.href !== "/marketing/recursos") || modulos?.analitica === true)
         .filter((item) => item.href !== "/crm/prospeccion" || modulos?.prospeccion === true)
+        .filter((item) => item.href !== "/crm/casos-negocio" || modulos?.casos_negocio === true)
         .filter((item) => item.href !== "/portal-admin" || gestionaPortales),
     }))
     .filter((s) => s.visibles.length > 0);

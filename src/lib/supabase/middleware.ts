@@ -132,7 +132,12 @@ export async function updateSession(request: NextRequest) {
 
         // /crm/prospeccion trabaja sobre los leads de ASYGNUZ en EspoCRM:
         // flag propio, aparte de "crm" (que también puede tener un cliente).
-        if (modulos && pathname.startsWith("/crm/prospeccion") && modulos.prospeccion !== true) {
+        // /crm/casos-negocio guarda costos internos (sueldos): mismo criterio.
+        if (
+          modulos &&
+          ((pathname.startsWith("/crm/prospeccion") && modulos.prospeccion !== true) ||
+            (pathname.startsWith("/crm/casos-negocio") && modulos.casos_negocio !== true))
+        ) {
           const url = request.nextUrl.clone();
           url.pathname = "/crm";
           url.search = "";
