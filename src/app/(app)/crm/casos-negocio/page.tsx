@@ -1,29 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { PageHeader } from "@/components/PageHeader";
-import { formatCOP, formatDate } from "@/lib/format";
-import { PLANTILLA } from "@/lib/casos/modelo";
+import { KpiCard } from "@/components/KpiCard";
+import { formatCOP, formatDate, formatPercent } from "@/lib/format";
+import { PLANTILLA, indicadores, type Supuestos } from "@/lib/casos/modelo";
+import { ETAPA, ETAPAS, esGanado, probDe, type EtapaId } from "@/lib/casos/etapas";
 
-type Fila = { id: string; nombre: string; cliente: string | null; precio: number; actualizado_en: string };
+type Fila = {
+  id: string;
+  nombre: string;
+  cliente: string | null;
+  precio: number;
+  supuestos: Supuestos;
+  etapa: EtapaId;
+  prob_cierre: number | null;
+  fecha_cierre: string | null;
+  responsable: string | null;
+  actualizado_en: string;
+};
 
-export default function CasosNegocioPage() {
+const millones = (x: number) => `${(x / 1e6).toLocaleString("es-CO", { maximumFractionDigits: 1 })} M`;
+const CHIP = "text-xs rounded-full border px-2.5 py-1";
+
+export default function NegociosPage() {
   const router = useRouter();
   const [casos, setCasos] = useState<Fila[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nombre, setNombre] = useState("");
   const [cliente, setCliente] = useState("");
   const [creando, setCreando] = useState(false);
+  const [filtro, setFiltro] = useState<"abiertos" | "todos" | EtapaId>("abiertos");
 
   useEffect(() => {
     createClient()
       .from("casos_negocio")
-      .select("id, nombre, cliente, precio, actualizado_en")
+      .select("id, nombre, cliente, precio, supuestos, etapa, prob_cierre, fecha_cierre, responsable, actualizado_en")
       .order("actualizado_en", { ascending: false })
-      .then(({ data, error }) => (error ? setError(error.message) : setCasos(data as Fila[])));
+      .then(({ data, error }) =>
+        error
+          ? setError(error.message)
+          : setCasos(
+              (data ?? []).map((c) => ({
+                ...c,
+                precio: Number(c.precio),
+                prob_cierre: c.prob_cierre === null ? null : Number(c.prob_cierre),
+                supuestos: { ...PLANTILLA, ...c.supuestos },
+              })) as Fila[],
+            ),
+      );
   }, []);
 
   async function crear(e: React.FormEvent) {
@@ -32,7 +60,7 @@ export default function CasosNegocioPage() {
     setCreando(true);
     const { data, error } = await createClient()
       .from("casos_negocio")
-      .insert({ nombre: nombre.trim(), cliente: cliente.trim() || null, precio: 0, supuestos: PLANTILLA })
+      .insert({ nombre: nombre.trim(), cliente: cliente.trim() || null, precio: 0, supuestos: PLANTILLA, etapa: "diagnostico" })
       .select("id")
       .single();
     setCreando(false);
@@ -40,14 +68,96 @@ export default function CasosNegocioPage() {
     router.push(`/crm/casos-negocio/${data.id}`);
   }
 
+  async function moverEtapa(id: string, etapa: EtapaId) {
+    const ahora = new Date().toISOString();
+    const antes = casos;
+    setCasos((cs) => cs?.map((c) => (c.id === id ? { ...c, etapa, actualizado_en: ahora } : c)) ?? cs);
+    const { error } = await createClient()
+      .from("casos_negocio")
+      .update({ etapa, etapa_desde: ahora, actualizado_en: ahora })
+      .eq("id", id);
+    if (error) {
+      setCasos(antes);
+      setError(error.message);
+    }
+  }
+
+  // Margen del flujo probable (sin azar) al precio cotizado: barato de calcular para toda la lista.
+  const filas = useMemo(
+    () =>
+      (casos ?? []).map((c) => {
+        const prob = probDe(c.etapa, c.prob_cierre);
+        const margen = c.precio > 0 ? indicadores(c.supuestos, "probable", c.precio).margen : null;
+        return { ...c, prob, ponderado: c.precio * prob, margen };
+      }),
+    [casos],
+  );
+
+  const kpis = useMemo(() => {
+    const abiertos = filas.filter((f) => ETAPA[f.etapa]?.abierta);
+    const ganados = filas.filter((f) => esGanado(f.etapa));
+    const perdidos = filas.filter((f) => f.etapa === "perdido");
+    const cerrados = ganados.length + perdidos.length;
+    return {
+      enJuego: abiertos.reduce((a, f) => a + f.precio, 0),
+      ponderado: abiertos.reduce((a, f) => a + f.ponderado, 0),
+      nAbiertos: abiertos.length,
+      ganado: ganados.reduce((a, f) => a + f.precio, 0),
+      nGanados: ganados.length,
+      tasa: cerrados ? ganados.length / cerrados : null,
+      cerrados,
+    };
+  }, [filas]);
+
+  const porEtapa = useMemo(
+    () => ETAPAS.map((e) => ({ ...e, n: filas.filter((f) => f.etapa === e.id).length, valor: filas.filter((f) => f.etapa === e.id).reduce((a, f) => a + f.precio, 0) })),
+    [filas],
+  );
+
+  const visibles = filas
+    .filter((f) => (filtro === "todos" ? true : filtro === "abiertos" ? ETAPA[f.etapa]?.abierta : f.etapa === filtro))
+    .sort((a, b) => ETAPAS.findIndex((e) => e.id === a.etapa) - ETAPAS.findIndex((e) => e.id === b.etapa));
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        title="Casos de negocio"
-        subtitle="Cuánto cobrar por un proyecto, con qué margen y qué tan probable es perder plata. Simulación Monte Carlo de 10.000 escenarios."
+        title="Negocios"
+        subtitle="En qué va cada proyecto, cuánto vale y cuánto cobrar. Cada negocio tiene su caso: precio sugerido, margen y riesgo con 10.000 simulaciones."
       />
 
       {error && <p className="text-sm text-danger">{error}</p>}
+
+      {!!casos?.length && (
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <KpiCard label="En juego" value={millones(kpis.enJuego)} hint={`${kpis.nAbiertos} negocios abiertos, a su precio cotizado`} />
+          <KpiCard label="Ponderado" value={millones(kpis.ponderado)} hint="En juego × probabilidad de cierre de cada uno" />
+          <KpiCard label="Ganado" value={millones(kpis.ganado)} hint={`${kpis.nGanados} negocios (ganado, en desarrollo o entregado)`} />
+          <KpiCard
+            label="Tasa de cierre"
+            value={kpis.tasa === null ? "—" : formatPercent(kpis.tasa)}
+            hint={kpis.cerrados ? `Ganados sobre ${kpis.cerrados} cerrados (ganados + perdidos)` : "Aún no hay negocios cerrados"}
+          />
+        </section>
+      )}
+
+      {!!casos?.length && (
+        <section className="glass rounded-2xl border p-4 flex flex-col gap-3">
+          <h2 className="font-display text-lg">Embudo</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2">
+            {porEtapa.map((e) => (
+              <button
+                key={e.id}
+                onClick={() => setFiltro(filtro === e.id ? "abiertos" : e.id)}
+                className={`rounded-xl border p-3 text-left hover:bg-surface-alt ${filtro === e.id ? "border-accent" : "border-border"}`}
+              >
+                <div className="text-xs text-muted">{e.nombre}</div>
+                <div className="text-lg font-semibold">{e.n}</div>
+                <div className="text-xs text-muted">{e.valor ? millones(e.valor) : "—"}</div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       <form onSubmit={crear} className="glass rounded-2xl border p-4 flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
@@ -59,39 +169,72 @@ export default function CasosNegocioPage() {
           <input value={cliente} onChange={(e) => setCliente(e.target.value)} />
         </label>
         <button disabled={creando} className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright disabled:opacity-50">
-          {creando ? "Creando…" : "Nuevo caso"}
+          {creando ? "Creando…" : "Nuevo negocio"}
         </button>
-        <p className="text-xs text-muted w-full">Arranca con la plantilla del Excel (Senior + Medium + Claude Code y 5 riesgos); luego ajústala.</p>
+        <p className="text-xs text-muted w-full">Entra en Diagnóstico con la plantilla del Excel (Senior + Medium + Claude Code y 5 riesgos); luego ajusta el caso.</p>
       </form>
 
       {!casos && !error && <p className="text-sm text-muted">Cargando…</p>}
-      {casos?.length === 0 && <p className="text-sm text-muted">Todavía no hay casos.</p>}
+      {casos?.length === 0 && <p className="text-sm text-muted">Todavía no hay negocios.</p>}
       {!!casos?.length && (
-        <section className="glass rounded-2xl border p-4 overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
-                <th className="px-3 py-2">Proyecto</th>
-                <th className="px-3 py-2">Cliente</th>
-                <th className="text-right px-3 py-2">Precio propuesto</th>
-                <th className="text-right px-3 py-2">Actualizado</th>
-              </tr>
-            </thead>
-            <tbody>
-              {casos.map((c) => (
-                <tr key={c.id} className="border-b border-border">
-                  <td className="px-3 py-2">
-                    <Link href={`/crm/casos-negocio/${c.id}`} className="text-accent underline">
-                      {c.nombre}
-                    </Link>
-                  </td>
-                  <td className="px-3 py-2">{c.cliente ?? "—"}</td>
-                  <td className="text-right px-3 py-2">{c.precio ? formatCOP(c.precio) : "Sin definir"}</td>
-                  <td className="text-right px-3 py-2">{formatDate(c.actualizado_en.slice(0, 10))}</td>
+        <section className="glass rounded-2xl border p-4 flex flex-col gap-3 overflow-x-auto">
+          <div className="flex flex-wrap gap-2">
+            {(["abiertos", "todos"] as const).map((f) => (
+              <button key={f} onClick={() => setFiltro(f)} className={`${CHIP} ${filtro === f ? "border-accent text-accent" : "border-border"}`}>
+                {f === "abiertos" ? "Abiertos" : "Todos"}
+              </button>
+            ))}
+            {filtro !== "abiertos" && filtro !== "todos" && <span className={`${CHIP} border-accent text-accent`}>{ETAPA[filtro].nombre}</span>}
+          </div>
+          {visibles.length === 0 ? (
+            <p className="text-sm text-muted">No hay negocios en este filtro.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-muted border-b border-border">
+                  <th className="px-3 py-2">Proyecto</th>
+                  <th className="px-3 py-2">Cliente</th>
+                  <th className="px-3 py-2">Etapa</th>
+                  <th className="text-right px-3 py-2">Precio cotizado</th>
+                  <th className="text-right px-3 py-2">Prob.</th>
+                  <th className="text-right px-3 py-2">Ponderado</th>
+                  <th className="text-right px-3 py-2">Margen probable</th>
+                  <th className="px-3 py-2">Cierre est.</th>
+                  <th className="px-3 py-2">Responsable</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibles.map((c) => (
+                  <tr key={c.id} className="border-b border-border">
+                    <td className="px-3 py-2">
+                      <Link href={`/crm/casos-negocio/${c.id}`} className="text-accent underline">
+                        {c.nombre}
+                      </Link>
+                    </td>
+                    <td className="px-3 py-2">{c.cliente ?? "—"}</td>
+                    <td className="px-3 py-2">
+                      <select value={c.etapa} onChange={(e) => moverEtapa(c.id, e.target.value as EtapaId)} className="text-sm">
+                        {ETAPAS.map((e) => (
+                          <option key={e.id} value={e.id}>{e.nombre}</option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="text-right px-3 py-2">{c.precio ? formatCOP(c.precio) : "Sin definir"}</td>
+                    <td className="text-right px-3 py-2">{formatPercent(c.prob)}</td>
+                    <td className="text-right px-3 py-2">{c.precio ? millones(c.ponderado) : "—"}</td>
+                    <td className={`text-right px-3 py-2 ${c.margen !== null && c.margen < 0 ? "text-danger" : ""}`}>
+                      {c.margen === null ? "—" : formatPercent(c.margen)}
+                    </td>
+                    <td className="px-3 py-2">{c.fecha_cierre ? formatDate(c.fecha_cierre) : "—"}</td>
+                    <td className="px-3 py-2">{c.responsable ?? "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <p className="text-xs text-muted">
+            Margen probable: escenario probable sin azar, al precio cotizado. Para el riesgo completo abre el negocio. La probabilidad sale de la etapa salvo que el negocio tenga una propia.
+          </p>
         </section>
       )}
     </div>

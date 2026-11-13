@@ -14,8 +14,13 @@ import {
   curvaPrecios, desglose, indicadores, preciosSugeridos, resumen, sensibilidad, simular,
   type Escenario, type Momento, type Rango, type Supuestos, type Vista,
 } from "@/lib/casos/modelo";
+import { ETAPA, ETAPAS, type EtapaId } from "@/lib/casos/etapas";
 
-type Caso = { nombre: string; cliente: string | null; precio: number; supuestos: Supuestos };
+type Caso = {
+  nombre: string; cliente: string | null; precio: number; supuestos: Supuestos;
+  etapa: EtapaId; prob_cierre: number | null; fecha_cierre: string | null; responsable: string | null;
+  proyecto_kaneo: string | null; notas: string | null; motivo_perdida: string | null;
+};
 
 const BTN = "text-sm rounded-md border border-border px-3 py-1.5 hover:bg-surface-alt disabled:opacity-50";
 const BTN_PRIMARIO = "text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright disabled:opacity-50";
@@ -44,16 +49,23 @@ export default function CasoNegocioPage() {
   const [caso, setCaso] = useState<Caso | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [estado, setEstado] = useState<"guardado" | "cambios" | "guardando">("guardado");
+  const [etapaGuardada, setEtapaGuardada] = useState<EtapaId | null>(null);
 
   useEffect(() => {
     createClient()
       .from("casos_negocio")
-      .select("nombre, cliente, precio, supuestos")
+      .select("nombre, cliente, precio, supuestos, etapa, prob_cierre, fecha_cierre, responsable, proyecto_kaneo, notas, motivo_perdida")
       .eq("id", id)
       .single()
       .then(({ data, error }) => {
         if (error) return setError(error.message);
-        setCaso({ ...data, precio: Number(data.precio), supuestos: { ...PLANTILLA, ...data.supuestos } });
+        setCaso({
+          ...data,
+          precio: Number(data.precio),
+          prob_cierre: data.prob_cierre === null ? null : Number(data.prob_cierre),
+          supuestos: { ...PLANTILLA, ...data.supuestos },
+        });
+        setEtapaGuardada(data.etapa);
       });
   }, [id]);
 
@@ -71,14 +83,16 @@ export default function CasoNegocioPage() {
   async function guardar() {
     if (!caso) return;
     setEstado("guardando");
+    const ahora = new Date().toISOString();
     const { error } = await createClient()
       .from("casos_negocio")
-      .update({ ...caso, actualizado_en: new Date().toISOString() })
+      .update({ ...caso, actualizado_en: ahora, ...(caso.etapa !== etapaGuardada ? { etapa_desde: ahora } : {}) })
       .eq("id", id);
     if (error) {
       setError(error.message);
       return setEstado("cambios");
     }
+    setEtapaGuardada(caso.etapa);
     setEstado("guardado");
   }
 
@@ -107,13 +121,64 @@ export default function CasoNegocioPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <PageHeader title={caso.nombre} subtitle={caso.cliente ? `Cliente: ${caso.cliente}` : "Caso de negocio"} />
         <div className="flex items-center gap-2">
-          <Link href="/crm/casos-negocio" className={BTN}>Volver</Link>
+          <Link href="/crm/casos-negocio" className={BTN}>Volver a negocios</Link>
           <button className={BTN_PRIMARIO} disabled={estado !== "cambios"} onClick={guardar}>
             {estado === "guardando" ? "Guardando…" : estado === "guardado" ? "Guardado" : "Guardar cambios"}
           </button>
         </div>
       </div>
       {error && <p className="text-sm text-danger">{error}</p>}
+
+      <section className="glass rounded-2xl border p-4 flex flex-col gap-3">
+        <h2 className="font-display text-lg">Seguimiento</h2>
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex flex-col gap-1 text-sm">
+            Etapa
+            <select value={caso.etapa} onChange={(e) => cambiar((c) => void (c.etapa = e.target.value as EtapaId))}>
+              {ETAPAS.map((e) => (
+                <option key={e.id} value={e.id}>{e.nombre}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Prob. de cierre (%)
+            <input
+              type="number"
+              min={0}
+              max={100}
+              className="w-24 text-right"
+              placeholder={String(Math.round((ETAPA[caso.etapa]?.prob ?? 0) * 100))}
+              value={caso.prob_cierre === null ? "" : Math.round(caso.prob_cierre * 100)}
+              onChange={(e) =>
+                cambiar((c) => void (c.prob_cierre = e.target.value === "" ? null : Math.min(1, Math.max(0, Number(e.target.value) / 100))))
+              }
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Cierre estimado
+            <input type="date" value={caso.fecha_cierre ?? ""} onChange={(e) => cambiar((c) => void (c.fecha_cierre = e.target.value || null))} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Responsable
+            <input value={caso.responsable ?? ""} onChange={(e) => cambiar((c) => void (c.responsable = e.target.value || null))} />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            Proyecto en Kaneo
+            <input value={caso.proyecto_kaneo ?? ""} placeholder="Link o nombre" onChange={(e) => cambiar((c) => void (c.proyecto_kaneo = e.target.value || null))} />
+          </label>
+        </div>
+        {caso.etapa === "perdido" && (
+          <label className="flex flex-col gap-1 text-sm">
+            Por qué se perdió
+            <input value={caso.motivo_perdida ?? ""} placeholder="Precio, alcance, eligió otro proveedor…" onChange={(e) => cambiar((c) => void (c.motivo_perdida = e.target.value || null))} />
+          </label>
+        )}
+        <label className="flex flex-col gap-1 text-sm">
+          Notas
+          <textarea rows={2} value={caso.notas ?? ""} onChange={(e) => cambiar((c) => void (c.notas = e.target.value || null))} />
+        </label>
+        <p className="text-xs text-muted">Si dejas la probabilidad vacía, se usa la de la etapa. Los cambios se guardan con &quot;Guardar cambios&quot;.</p>
+      </section>
 
       <section className="flex flex-col gap-3">
         <h2 className="font-display text-lg">Cuánto cobrar</h2>

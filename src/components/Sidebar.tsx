@@ -106,7 +106,7 @@ const sections: NavSection[] = [
     modulo: "crm",
     items: [
       { href: "/crm/prospeccion", label: "Prospección" },
-      { href: "/crm/casos-negocio", label: "Casos de negocio" },
+      { href: "/crm/casos-negocio", label: "Negocios" },
       { href: "/crm", label: "Leads y Pipeline" },
     ],
   },
