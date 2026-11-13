@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { KpiCard } from "@/components/KpiCard";
 import { formatCOP, formatDate, formatPercent } from "@/lib/format";
 import { PLANTILLA, indicadores, type Supuestos } from "@/lib/casos/modelo";
+import { PLANTILLA_MENSUALIDAD, margenMesTipico, type SupuestosMensualidad } from "@/lib/casos/mensualidad";
+import { TIPOS, type TipoNegocio } from "@/components/casos/ui";
 import { ETAPA, ETAPAS, esGanado, probDe, type EtapaId } from "@/lib/casos/etapas";
 
 type Fila = {
@@ -15,7 +17,8 @@ type Fila = {
   nombre: string;
   cliente: string | null;
   precio: number;
-  supuestos: Supuestos;
+  tipo: TipoNegocio;
+  supuestos: Supuestos | SupuestosMensualidad;
   etapa: EtapaId;
   prob_cierre: number | null;
   fecha_cierre: string | null;
@@ -26,19 +29,29 @@ type Fila = {
 const millones = (x: number) => `${(x / 1e6).toLocaleString("es-CO", { maximumFractionDigits: 1 })} M`;
 const CHIP = "text-xs rounded-full border px-2.5 py-1";
 
+// Valor del negocio: proyecto = su precio; mensualidad = fee × meses mínimos + montaje (lo que asegura el contrato).
+function valorYMargen(c: Fila) {
+  if (c.tipo === "mensualidad") {
+    const s = c.supuestos as SupuestosMensualidad;
+    return { valor: c.precio * s.mesesMinimo + s.montaje.cobro, margen: margenMesTipico(s, c.precio) };
+  }
+  return { valor: c.precio, margen: c.precio > 0 ? indicadores(c.supuestos as Supuestos, "probable", c.precio).margen : null };
+}
+
 export default function NegociosPage() {
   const router = useRouter();
   const [casos, setCasos] = useState<Fila[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [nombre, setNombre] = useState("");
   const [cliente, setCliente] = useState("");
+  const [tipo, setTipo] = useState<TipoNegocio>("proyecto");
   const [creando, setCreando] = useState(false);
   const [filtro, setFiltro] = useState<"abiertos" | "todos" | EtapaId>("abiertos");
 
   useEffect(() => {
     createClient()
       .from("casos_negocio")
-      .select("id, nombre, cliente, precio, supuestos, etapa, prob_cierre, fecha_cierre, responsable, actualizado_en")
+      .select("id, nombre, cliente, precio, tipo, supuestos, etapa, prob_cierre, fecha_cierre, responsable, actualizado_en")
       .order("actualizado_en", { ascending: false })
       .then(({ data, error }) =>
         error
@@ -48,7 +61,8 @@ export default function NegociosPage() {
                 ...c,
                 precio: Number(c.precio),
                 prob_cierre: c.prob_cierre === null ? null : Number(c.prob_cierre),
-                supuestos: { ...PLANTILLA, ...c.supuestos },
+                tipo: c.tipo === "mensualidad" ? "mensualidad" : "proyecto",
+                supuestos: { ...(c.tipo === "mensualidad" ? PLANTILLA_MENSUALIDAD : PLANTILLA), ...c.supuestos },
               })) as Fila[],
             ),
       );
@@ -60,7 +74,14 @@ export default function NegociosPage() {
     setCreando(true);
     const { data, error } = await createClient()
       .from("casos_negocio")
-      .insert({ nombre: nombre.trim(), cliente: cliente.trim() || null, precio: 0, supuestos: PLANTILLA, etapa: "diagnostico" })
+      .insert({
+        nombre: nombre.trim(),
+        cliente: cliente.trim() || null,
+        precio: 0,
+        tipo,
+        supuestos: tipo === "mensualidad" ? PLANTILLA_MENSUALIDAD : PLANTILLA,
+        etapa: "diagnostico",
+      })
       .select("id")
       .single();
     setCreando(false);
@@ -82,13 +103,13 @@ export default function NegociosPage() {
     }
   }
 
-  // Margen del flujo probable (sin azar) al precio cotizado: barato de calcular para toda la lista.
+  // Margen sin azar (flujo probable o mes típico) al precio cotizado: barato de calcular para toda la lista.
   const filas = useMemo(
     () =>
       (casos ?? []).map((c) => {
         const prob = probDe(c.etapa, c.prob_cierre);
-        const margen = c.precio > 0 ? indicadores(c.supuestos, "probable", c.precio).margen : null;
-        return { ...c, prob, ponderado: c.precio * prob, margen };
+        const { valor, margen } = valorYMargen(c);
+        return { ...c, prob, valor, ponderado: valor * prob, margen };
       }),
     [casos],
   );
@@ -99,10 +120,10 @@ export default function NegociosPage() {
     const perdidos = filas.filter((f) => f.etapa === "perdido");
     const cerrados = ganados.length + perdidos.length;
     return {
-      enJuego: abiertos.reduce((a, f) => a + f.precio, 0),
+      enJuego: abiertos.reduce((a, f) => a + f.valor, 0),
       ponderado: abiertos.reduce((a, f) => a + f.ponderado, 0),
       nAbiertos: abiertos.length,
-      ganado: ganados.reduce((a, f) => a + f.precio, 0),
+      ganado: ganados.reduce((a, f) => a + f.valor, 0),
       nGanados: ganados.length,
       tasa: cerrados ? ganados.length / cerrados : null,
       cerrados,
@@ -110,7 +131,7 @@ export default function NegociosPage() {
   }, [filas]);
 
   const porEtapa = useMemo(
-    () => ETAPAS.map((e) => ({ ...e, n: filas.filter((f) => f.etapa === e.id).length, valor: filas.filter((f) => f.etapa === e.id).reduce((a, f) => a + f.precio, 0) })),
+    () => ETAPAS.map((e) => ({ ...e, n: filas.filter((f) => f.etapa === e.id).length, valor: filas.filter((f) => f.etapa === e.id).reduce((a, f) => a + f.valor, 0) })),
     [filas],
   );
 
@@ -129,7 +150,7 @@ export default function NegociosPage() {
 
       {!!casos?.length && (
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <KpiCard label="En juego" value={millones(kpis.enJuego)} hint={`${kpis.nAbiertos} negocios abiertos, a su precio cotizado`} />
+          <KpiCard label="En juego" value={millones(kpis.enJuego)} hint={`${kpis.nAbiertos} abiertos. Mensualidades: fee × meses mínimos + montaje`} />
           <KpiCard label="Ponderado" value={millones(kpis.ponderado)} hint="En juego × probabilidad de cierre de cada uno" />
           <KpiCard label="Ganado" value={millones(kpis.ganado)} hint={`${kpis.nGanados} negocios (ganado, en desarrollo o entregado)`} />
           <KpiCard
@@ -168,10 +189,18 @@ export default function NegociosPage() {
           Cliente (opcional)
           <input value={cliente} onChange={(e) => setCliente(e.target.value)} />
         </label>
+        <label className="flex flex-col gap-1 text-sm">
+          Tipo
+          <select value={tipo} onChange={(e) => setTipo(e.target.value as TipoNegocio)}>
+            {(Object.keys(TIPOS) as TipoNegocio[]).map((t) => (
+              <option key={t} value={t}>{TIPOS[t]}</option>
+            ))}
+          </select>
+        </label>
         <button disabled={creando} className="text-sm rounded-md bg-accent text-accent-foreground px-3 py-1.5 hover:bg-accent-bright disabled:opacity-50">
           {creando ? "Creando…" : "Nuevo negocio"}
         </button>
-        <p className="text-xs text-muted w-full">Entra en Diagnóstico con la plantilla del Excel (Senior + Medium + Claude Code y 5 riesgos); luego ajusta el caso.</p>
+        <p className="text-xs text-muted w-full">Entra en Diagnóstico. Proyecto: plantilla del Excel (Senior + Medium + Claude Code y 5 riesgos). Mensualidad: estratega, diseñadora y community; luego ajústala.</p>
       </form>
 
       {!casos && !error && <p className="text-sm text-muted">Cargando…</p>}
@@ -196,6 +225,7 @@ export default function NegociosPage() {
                   <th className="px-3 py-2">Cliente</th>
                   <th className="px-3 py-2">Etapa</th>
                   <th className="text-right px-3 py-2">Precio cotizado</th>
+                  <th className="text-right px-3 py-2">Valor</th>
                   <th className="text-right px-3 py-2">Prob.</th>
                   <th className="text-right px-3 py-2">Ponderado</th>
                   <th className="text-right px-3 py-2">Margen probable</th>
@@ -210,6 +240,7 @@ export default function NegociosPage() {
                       <Link href={`/crm/casos-negocio/${c.id}`} className="text-accent underline">
                         {c.nombre}
                       </Link>
+                      <div className="text-xs text-muted">{TIPOS[c.tipo]}</div>
                     </td>
                     <td className="px-3 py-2">{c.cliente ?? "—"}</td>
                     <td className="px-3 py-2">
@@ -219,9 +250,12 @@ export default function NegociosPage() {
                         ))}
                       </select>
                     </td>
-                    <td className="text-right px-3 py-2">{c.precio ? formatCOP(c.precio) : "Sin definir"}</td>
+                    <td className="text-right px-3 py-2">
+                      {c.precio ? `${formatCOP(c.precio)}${c.tipo === "mensualidad" ? " /mes" : ""}` : "Sin definir"}
+                    </td>
+                    <td className="text-right px-3 py-2">{c.valor ? millones(c.valor) : "—"}</td>
                     <td className="text-right px-3 py-2">{formatPercent(c.prob)}</td>
-                    <td className="text-right px-3 py-2">{c.precio ? millones(c.ponderado) : "—"}</td>
+                    <td className="text-right px-3 py-2">{c.valor ? millones(c.ponderado) : "—"}</td>
                     <td className={`text-right px-3 py-2 ${c.margen !== null && c.margen < 0 ? "text-danger" : ""}`}>
                       {c.margen === null ? "—" : formatPercent(c.margen)}
                     </td>
@@ -233,7 +267,7 @@ export default function NegociosPage() {
             </table>
           )}
           <p className="text-xs text-muted">
-            Margen probable: escenario probable sin azar, al precio cotizado. Para el riesgo completo abre el negocio. La probabilidad sale de la etapa salvo que el negocio tenga una propia.
+            Margen probable: proyecto, escenario probable sin azar; mensualidad, margen de un mes típico. Para el riesgo completo abre el negocio. La probabilidad sale de la etapa salvo que el negocio tenga una propia.
           </p>
         </section>
       )}

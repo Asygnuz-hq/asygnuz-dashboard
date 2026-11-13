@@ -3,6 +3,8 @@
 // equipo y herramientas como listas, riesgos con su momento, anticipo, administración y costos sobre el precio
 // (comisión, ICA, 4x1000). Sin dependencias ni imports: corre igual en el navegador y en Node.
 
+import type { Valor } from "./valor";
+
 export const ESCENARIOS = ["pesimista", "probable", "optimista"] as const;
 export type Escenario = (typeof ESCENARIOS)[number];
 export type Vista = Escenario | "ponderado";
@@ -29,6 +31,7 @@ export type Supuestos = {
   pctSobrePrecio: number; // % del precio que se va al cobrar: comisión de venta, ICA, 4x1000
   anticipo: number; // % del precio que se cobra en la semana 1; el resto al entregar + rezago
   semanasPorMes: number; // el Excel usa 4 (sobrecosto ~8 %); lo real es 52/12
+  valor?: Valor; // valor para el cliente (opcional), ver valor.ts
 };
 
 // Plantilla = el Excel "Libro 1" (Senior + Medium + Claude Code, 5 riesgos), con la semana real de 52/12.
