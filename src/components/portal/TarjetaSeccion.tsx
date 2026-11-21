@@ -1,5 +1,6 @@
-// Bloque visual compartido entre /portal y /portal-admin.
-// Acepta ícono ReactNode (@phosphor-icons/react) o string (compatibilidad).
+// Bloque visual compartido entre /portal (tema claro arquitectónico) y
+// /portal-admin (tema del dashboard). Usa tokens semánticos (--surface,
+// --surface-alt, --border, --foreground, --muted) para verse impecable en ambos.
 
 import type { ReactNode } from "react";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
@@ -19,17 +20,19 @@ export function TarjetaSeccion({
   acento?: string;
   children: ReactNode;
 }) {
+  const acentoInk = acento ? `color-mix(in srgb, ${acento} 76%, var(--foreground))` : "var(--foreground)";
+
   return (
     <section className="portal-card rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-white/[0.07] bg-white/[0.02]">
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border bg-surface-alt/65">
         <div className="flex items-center gap-2.5 min-w-0">
           <span
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm"
             style={{
               backgroundColor: acento
-                ? `color-mix(in srgb, ${acento} 15%, transparent)`
-                : "rgba(255,255,255,0.06)",
-              color: acento || "var(--foreground)",
+                ? `color-mix(in srgb, ${acento} 14%, transparent)`
+                : "var(--surface)",
+              color: acentoInk,
             }}
             aria-hidden
           >
@@ -37,7 +40,7 @@ export function TarjetaSeccion({
           </span>
           <div className="min-w-0">
             <h2
-              className="text-sm font-semibold tracking-wide truncate"
+              className="text-sm font-semibold tracking-tight text-foreground truncate"
               style={{ fontFamily: FUENTE_DISPLAY }}
             >
               {titulo}
@@ -71,12 +74,12 @@ export const ESTADO_LABEL: Record<string, string> = {
 };
 
 export const ESTADO_COLOR: Record<string, string> = {
-  idea: "var(--muted)",
-  grabacion: "#94a3b8",
-  edicion: "var(--accent-bright)",
-  revision: "var(--warning)",
-  programado: "#a78bfa",
-  publicado: "var(--success)",
+  idea: "#64748b",
+  grabacion: "#475569",
+  edicion: "#2563eb",
+  revision: "#b45309",
+  programado: "#7c3aed",
+  publicado: "#0f766e",
 };
 
 export const APROBACION_LABEL: Record<string, string> = {
@@ -86,7 +89,7 @@ export const APROBACION_LABEL: Record<string, string> = {
 };
 
 export const APROBACION_COLOR: Record<string, string> = {
-  pendiente: "#8b93a6",
-  aprobado: "#1d9e75",
-  cambios: "#d97706",
+  pendiente: "#64748b",
+  aprobado: "#0f766e",
+  cambios: "#b45309",
 };

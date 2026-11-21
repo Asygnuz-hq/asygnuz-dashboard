@@ -461,17 +461,59 @@ textarea:focus {
 }
 
 .portal-card {
-  background: linear-gradient(180deg, rgba(20, 22, 28, 0.86) 0%, rgba(12, 13, 18, 0.92) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
   transition: border-color 180ms ease, transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms ease;
+}
+
+/* Tema arquitectónico luminoso para todos los portales de clientes
+   (Cold Luxury / Clinical Editorial White). Independiente del tema oscuro
+   del dashboard interno de ASYGNUZ. */
+.portal-light {
+  --background: #f6f7f9;
+  --surface: #ffffff;
+  --surface-alt: #f1f4f8;
+  --border: #e2e8f0;
+  --foreground: #0f172a;
+  --muted: #64748b;
+  --accent: #0f172a;
+  --accent-bright: #334155;
+  --accent-foreground: #ffffff;
+  --danger: #dc2626;
+  --warning: #b45309;
+  --success: #0f766e;
+  --portal-ink-accent: color-mix(in srgb, var(--portal-accent, #c9a45c) 72%, #1e293b);
+  color: var(--foreground);
+  background-color: var(--background);
+}
+
+.portal-light input,
+.portal-light select,
+.portal-light textarea {
+  background: #ffffff;
+  border: 1px solid #d5dce6;
+  color: #0f172a;
+}
+
+.portal-light input:focus,
+.portal-light select:focus,
+.portal-light textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--portal-accent, #c9a45c) 45%, transparent);
+  border-color: var(--portal-ink-accent, #9a742b);
+}
+
+.portal-light .glass {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 10px 28px rgba(15, 23, 42, 0.05);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .portal-card-interactive:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--portal-accent, #C9A45C) 38%, rgba(255, 255, 255, 0.1));
-    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.46), 0 0 28px color-mix(in srgb, var(--portal-accent, #C9A45C) 14%, transparent);
+    border-color: color-mix(in srgb, var(--portal-accent, #c9a45c) 48%, #cbd5e1);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09), 0 0 0 1px color-mix(in srgb, var(--portal-accent, #c9a45c) 18%, transparent);
   }
 }
 

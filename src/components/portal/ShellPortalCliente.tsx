@@ -40,6 +40,7 @@ export function ShellPortalCliente({
   const pathname = usePathname();
   const router = useRouter();
   const acento = tenant.colorAcento || "#C9A45C";
+  const acentoInk = `color-mix(in srgb, ${acento} 72%, #1e293b)`;
 
   async function salir() {
     const supabase = createClient();
@@ -50,14 +51,13 @@ export function ShellPortalCliente({
 
   return (
     <div
-      className="min-h-[100dvh] flex flex-col"
+      className="portal-light min-h-[100dvh] flex flex-col"
       style={
         {
           "--portal-accent": acento,
-          backgroundColor: "#07080B",
-          backgroundImage: `radial-gradient(880px circle at 12% -8%, color-mix(in srgb, ${acento} 14%, transparent), transparent 62%), radial-gradient(620px circle at 92% 6%, color-mix(in srgb, ${acento} 8%, transparent), transparent 60%)`,
+          backgroundColor: "#F6F7F9",
+          backgroundImage: `radial-gradient(960px circle at 10% -8%, color-mix(in srgb, ${acento} 10%, transparent), transparent 58%), radial-gradient(680px circle at 92% 0%, color-mix(in srgb, ${acento} 7%, transparent), transparent 55%)`,
           backgroundAttachment: "fixed",
-          color: "#F3F2EE",
         } as React.CSSProperties
       }
     >
@@ -71,8 +71,8 @@ export function ShellPortalCliente({
         />
       )}
 
-      {/* Barra superior minimalista boutique */}
-      <header className="print:hidden sticky top-0 z-40 border-b border-white/[0.07] bg-[#07080B]/75 backdrop-blur-xl">
+      {/* Topbar luminosa estilo estudio editorial */}
+      <header className="print:hidden sticky top-0 z-40 border-b border-slate-200/80 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5 sm:px-8">
           <Link href="/portal" className="flex items-center gap-3 shrink-0">
             {tenant.logoUrl ? (
@@ -80,11 +80,11 @@ export function ShellPortalCliente({
               <img
                 src={tenant.logoUrl}
                 alt={tenant.nombre}
-                className="h-8 w-auto max-w-[150px] object-contain"
+                className="h-9 w-auto max-w-[160px] object-contain"
               />
             ) : (
               <span
-                className="text-base font-semibold tracking-tight text-white"
+                className="text-base font-semibold tracking-tight text-slate-900"
                 style={{ fontFamily: FUENTE_DISPLAY }}
               >
                 {tenant.nombre}
@@ -99,21 +99,25 @@ export function ShellPortalCliente({
                 <Link
                   key={href}
                   href={href}
-                  className="flex items-center gap-2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors"
+                  className="flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-xs font-semibold transition-colors"
                   style={
                     activo
                       ? {
-                          backgroundColor: `color-mix(in srgb, ${acento} 18%, transparent)`,
-                          color: "#FFFFFF",
-                          border: `1px solid color-mix(in srgb, ${acento} 42%, transparent)`,
+                          backgroundColor: `color-mix(in srgb, ${acento} 14%, #ffffff)`,
+                          color: "#0F172A",
+                          border: `1px solid color-mix(in srgb, ${acento} 42%, #e2e8f0)`,
                         }
                       : {
-                          color: "rgba(243, 242, 238, 0.62)",
+                          color: "#64748B",
                           border: "1px solid transparent",
                         }
                   }
                 >
-                  <Icon size={15} weight={activo ? "regular" : "light"} style={activo ? { color: acento } : undefined} />
+                  <Icon
+                    size={15}
+                    weight={activo ? "regular" : "light"}
+                    style={activo ? { color: acentoInk } : undefined}
+                  />
                   <span>{label}</span>
                 </Link>
               );
@@ -121,16 +125,16 @@ export function ShellPortalCliente({
           </nav>
 
           <div className="flex items-center gap-3 shrink-0">
-            <span className="hidden md:inline text-xs text-white/45 truncate max-w-[180px]">
+            <span className="hidden md:inline text-xs text-slate-500 truncate max-w-[180px]">
               {usuarioLabel}
             </span>
             <button
               type="button"
               onClick={salir}
-              className="flex items-center gap-1.5 rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/70 hover:border-white/25 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-xs font-medium text-slate-600 hover:border-slate-300 hover:text-slate-900 transition-colors cursor-pointer"
               title="Cerrar sesión"
             >
-              <SignOut size={14} weight="light" />
+              <SignOut size={14} weight="regular" />
               <span className="hidden sm:inline">Salir</span>
             </button>
           </div>
@@ -141,8 +145,8 @@ export function ShellPortalCliente({
         {children}
       </main>
 
-      <footer className="print:hidden border-t border-white/[0.05] py-5 text-center">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-white/25">
+      <footer className="print:hidden border-t border-slate-200/70 bg-white/60 py-5 text-center">
+        <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
           {tenant.nombre} · Portal privado · ASYGNUZ
         </p>
       </footer>

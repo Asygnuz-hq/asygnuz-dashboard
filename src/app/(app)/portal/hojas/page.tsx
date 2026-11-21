@@ -41,12 +41,12 @@ function HojasClienteContenido() {
       <div>
         <Link
           href="/portal"
-          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground"
         >
           <ArrowLeft size={13} />
           <span>Volver al resumen</span>
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-white" style={{ fontFamily: FUENTE_DISPLAY }}>
+        <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-foreground" style={{ fontFamily: FUENTE_DISPLAY }}>
           Hojas de trabajo
         </h1>
         <p className="text-sm text-muted mt-1">

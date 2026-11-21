@@ -5,7 +5,7 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { ArrowRight, LockSimple, ShieldCheck } from "@phosphor-icons/react";
 import { createClient } from "@/lib/supabase/client";
-import { colorTextoSobreAcento, type BrandingPortal } from "@/lib/portal/subdominio";
+import type { BrandingPortal } from "@/lib/portal/subdominio";
 import { AperturaLogo } from "@/components/portal/AperturaLogo";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
 
@@ -14,7 +14,7 @@ declare global {
     turnstile?: {
       render: (
         container: HTMLElement,
-        options: { sitekey: string; callback: (token: string) => void }
+        options: { sitekey: string; theme?: "light" | "dark" | "auto"; callback: (token: string) => void }
       ) => string;
     };
   }
@@ -53,6 +53,7 @@ export function LoginClient({ branding }: { branding: BrandingPortal | null }) {
     turnstileRef.current.innerHTML = "";
     window.turnstile.render(turnstileRef.current, {
       sitekey: TURNSTILE_SITE_KEY,
+      theme: branding ? "light" : "auto",
       callback: (token: string) => setCaptchaToken(token),
     });
   }
@@ -132,20 +133,22 @@ export function LoginClient({ branding }: { branding: BrandingPortal | null }) {
   }
 
   // ------------------------------------------------------------------
-  // Portal exclusivo white-label por subdominio (ej. lumia.asygnuz.com)
+  // Portal exclusivo white-label en modo Light Editorial (Cold Luxury)
   // ------------------------------------------------------------------
   if (branding) {
     const acento = branding.colorAcento || "#C9A45C";
-    const textoBoton = colorTextoSobreAcento(acento);
+    const acentoInk = `color-mix(in srgb, ${acento} 72%, #1e293b)`;
 
     return (
       <div
-        className="relative flex min-h-[100dvh] flex-1 flex-col items-center justify-center overflow-hidden px-5 py-10"
-        style={{
-          backgroundColor: "#060608",
-          backgroundImage: `radial-gradient(680px circle at 50% 0%, color-mix(in srgb, ${acento} 18%, transparent), transparent 62%), radial-gradient(480px circle at 85% 92%, color-mix(in srgb, ${acento} 10%, transparent), transparent 65%)`,
-          color: "#F4F3EF",
-        }}
+        className="portal-light relative flex min-h-[100dvh] flex-1 flex-col items-center justify-center overflow-hidden px-5 py-10"
+        style={
+          {
+            "--portal-accent": acento,
+            backgroundColor: "#F6F7F9",
+            backgroundImage: `radial-gradient(760px circle at 50% -12%, color-mix(in srgb, ${acento} 16%, transparent), transparent 62%), radial-gradient(520px circle at 90% 95%, color-mix(in srgb, ${acento} 9%, transparent), transparent 65%)`,
+          } as React.CSSProperties
+        }
       >
         {branding.splashHabilitado && (
           <AperturaLogo
@@ -157,40 +160,47 @@ export function LoginClient({ branding }: { branding: BrandingPortal | null }) {
           />
         )}
 
-        <div className="relative z-10 flex w-full max-w-[400px] flex-col items-center gap-8">
-          {/* Marca del cliente */}
+        <div className="relative z-10 flex w-full max-w-[420px] flex-col items-center gap-7">
+          {/* Logo del cliente protagonista */}
           <div className="flex flex-col items-center gap-3 text-center">
             {branding.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={branding.logoUrl}
                 alt={branding.nombre}
-                className="max-h-16 w-auto max-w-[260px] object-contain"
+                className="max-h-16 sm:max-h-20 w-auto max-w-[270px] object-contain"
               />
             ) : (
-              <h1 className="text-3xl font-semibold tracking-tight" style={{ fontFamily: FUENTE_DISPLAY }}>
+              <h1
+                className="text-3xl font-semibold tracking-tight text-slate-900"
+                style={{ fontFamily: FUENTE_DISPLAY }}
+              >
                 {branding.nombre}
               </h1>
             )}
             {branding.taglinePortal && (
-              <p className="text-xs text-white/55 tracking-wide max-w-xs">{branding.taglinePortal}</p>
+              <p className="text-xs text-slate-500 tracking-wide max-w-xs">{branding.taglinePortal}</p>
             )}
           </div>
 
           {factorId ? (
             <form
               onSubmit={handleVerify}
-              className="portal-card w-full rounded-2xl p-7 flex flex-col gap-5"
-              style={{ borderColor: `color-mix(in srgb, ${acento} 24%, rgba(255,255,255,0.08))` }}
+              className="w-full rounded-3xl border border-slate-200/90 bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.07)] flex flex-col gap-5"
             >
-              <div className="flex items-center gap-2.5">
-                <ShieldCheck size={20} weight="light" style={{ color: acento }} />
+              <div className="flex items-center gap-3">
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: `color-mix(in srgb, ${acento} 14%, transparent)`, color: acentoInk }}
+                >
+                  <ShieldCheck size={20} weight="regular" />
+                </span>
                 <div>
-                  <p className="text-sm font-medium text-white">Verificación en dos pasos</p>
-                  <p className="text-xs text-white/55">Ingresa el código de 6 dígitos de tu autenticador.</p>
+                  <p className="text-sm font-semibold text-slate-900">Verificación en dos pasos</p>
+                  <p className="text-xs text-slate-500">Ingresa el código de 6 dígitos de tu autenticador.</p>
                 </div>
               </div>
-              <label className="flex flex-col gap-2 text-xs text-white/75">
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-700">
                 Código de seguridad
                 <input
                   type="text"
@@ -200,21 +210,15 @@ export function LoginClient({ branding }: { branding: BrandingPortal | null }) {
                   maxLength={6}
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-                  className="w-full rounded-lg px-3 py-2.5 text-center text-base tracking-[0.5em]"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.04)",
-                    borderColor: "rgba(255,255,255,0.12)",
-                    color: "#FFFFFF",
-                  }}
+                  className="w-full rounded-xl px-3.5 py-2.5 text-center text-base tracking-[0.5em]"
                   autoFocus
                 />
               </label>
-              {error && <p className="text-xs text-red-400">{error}</p>}
+              {error && <p className="text-xs font-medium text-red-600">{error}</p>}
               <button
                 type="submit"
                 disabled={loading || code.length !== 6}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-                style={{ backgroundColor: acento, color: textoBoton }}
+                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 {loading ? "Verificando..." : "Confirmar acceso"}
               </button>
@@ -222,49 +226,48 @@ export function LoginClient({ branding }: { branding: BrandingPortal | null }) {
           ) : (
             <form
               onSubmit={handleSubmit}
-              className="portal-card w-full rounded-2xl p-7 flex flex-col gap-5"
-              style={{ borderColor: `color-mix(in srgb, ${acento} 24%, rgba(255,255,255,0.08))` }}
+              className="relative w-full overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-8 shadow-[0_20px_50px_rgba(15,23,42,0.07)] flex flex-col gap-5"
             >
-              <div className="flex items-center justify-between border-b border-white/8 pb-4">
+              <div
+                className="absolute inset-x-0 top-0 h-[3px]"
+                style={{ background: `linear-gradient(90deg, ${acento}, color-mix(in srgb, ${acento} 35%, transparent))` }}
+                aria-hidden
+              />
+              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
                 <div>
-                  <p className="text-base font-medium text-white" style={{ fontFamily: FUENTE_DISPLAY }}>
+                  <p className="text-lg font-semibold text-slate-900" style={{ fontFamily: FUENTE_DISPLAY }}>
                     Acceso privado
                   </p>
-                  <p className="text-xs text-white/50 mt-0.5">Ingresa tus credenciales de cliente</p>
+                  <p className="text-xs text-slate-500 mt-0.5">Ingresa con las credenciales de tu marca</p>
                 </div>
-                <LockSimple size={18} weight="light" style={{ color: acento }} />
+                <span
+                  className="flex h-9 w-9 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: `color-mix(in srgb, ${acento} 14%, transparent)`, color: acentoInk }}
+                >
+                  <LockSimple size={18} weight="regular" />
+                </span>
               </div>
 
-              <label className="flex flex-col gap-1.5 text-xs text-white/75">
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-700">
                 Correo electrónico
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-lg px-3.5 py-2.5 text-sm"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.04)",
-                    borderColor: "rgba(255,255,255,0.12)",
-                    color: "#FFFFFF",
-                  }}
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm"
                   autoComplete="email"
                 />
               </label>
 
-              <label className="flex flex-col gap-1.5 text-xs text-white/75">
+              <label className="flex flex-col gap-1.5 text-xs font-medium text-slate-700">
                 Contraseña
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded-lg px-3.5 py-2.5 text-sm"
-                  style={{
-                    backgroundColor: "rgba(255,255,255,0.04)",
-                    borderColor: "rgba(255,255,255,0.12)",
-                    color: "#FFFFFF",
-                  }}
+                  className="w-full rounded-xl px-3.5 py-2.5 text-sm"
                   autoComplete="current-password"
                 />
               </label>
@@ -279,21 +282,20 @@ export function LoginClient({ branding }: { branding: BrandingPortal | null }) {
                 </>
               )}
 
-              {error && <p className="text-xs text-red-400">{error}</p>}
+              {error && <p className="text-xs font-medium text-red-600">{error}</p>}
 
               <button
                 type="submit"
                 disabled={loading || (Boolean(TURNSTILE_SITE_KEY) && !captchaToken)}
-                className="mt-1 flex w-full items-center justify-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition-transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
-                style={{ backgroundColor: acento, color: textoBoton }}
+                className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800 transition-transform active:scale-[0.98] disabled:opacity-50 cursor-pointer"
               >
                 <span>{loading ? "Ingresando..." : "Entrar al portal"}</span>
-                {!loading && <ArrowRight size={16} weight="bold" />}
+                {!loading && <ArrowRight size={16} weight="bold" style={{ color: acento }} />}
               </button>
             </form>
           )}
 
-          <p className="text-[11px] uppercase tracking-[0.22em] text-white/30">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-slate-400">
             Powered by ASYGNUZ
           </p>
         </div>

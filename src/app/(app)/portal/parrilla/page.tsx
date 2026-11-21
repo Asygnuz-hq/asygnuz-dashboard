@@ -70,12 +70,12 @@ export default function ParrillaClientePage() {
       <div>
         <Link
           href="/portal"
-          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-white"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground"
         >
           <ArrowLeft size={13} />
           <span>Volver al resumen</span>
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-white" style={{ fontFamily: FUENTE_DISPLAY }}>
+        <h1 className="text-2xl sm:text-3xl font-semibold mt-2 text-foreground" style={{ fontFamily: FUENTE_DISPLAY }}>
           Parrilla de contenido
         </h1>
         <p className="text-sm text-muted mt-1">
@@ -84,7 +84,7 @@ export default function ParrillaClientePage() {
       </div>
 
       {aviso && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-white">
+        <div className="rounded-xl border border-border bg-surface px-4 py-2 text-xs text-foreground">
           {aviso}
         </div>
       )}

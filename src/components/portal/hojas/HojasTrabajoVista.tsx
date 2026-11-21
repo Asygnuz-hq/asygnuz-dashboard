@@ -1,9 +1,8 @@
 "use client";
 
-// Módulo "Hojas de Trabajo" tipo Excel (workbook por pestañas) compartido
-// entre /portal/hojas (cliente, solo hojas con visible_cliente = true) y
-// /portal-admin/[tenantId]/hojas (ASYGNUZ, edición completa tipo hoja de
-// cálculo + importación/exportación .xlsx + botón "Pasar idea a Parrilla").
+// Módulo "Hojas de Trabajo" tipo Excel (workbook por pestañas).
+// Usa tokens semánticos para lucir limpio estilo Airtable/Notion Light en
+// el portal cliente (.portal-light) y adaptarse también a /portal-admin.
 
 import { useMemo, useRef, useState, type CSSProperties } from "react";
 import * as XLSX from "xlsx";
@@ -58,8 +57,8 @@ function tinte(color: string): CSSProperties {
   return {
     borderRadius: 999,
     padding: "2px 10px",
-    background: `color-mix(in srgb, ${color} 18%, transparent)`,
-    color,
+    background: `color-mix(in srgb, ${color} 14%, transparent)`,
+    color: `color-mix(in srgb, ${color} 80%, var(--foreground))`,
     borderColor: "transparent",
   };
 }
@@ -89,6 +88,7 @@ export function HojasTrabajoVista({
   onPasarIdeaAParrilla,
 }: Props) {
   const acento = colorAcento || "#C9A45C";
+  const acentoInk = `color-mix(in srgb, ${acento} 74%, var(--foreground))`;
   const [activaId, setActivaId] = useState<string>(() => {
     if (hojaInicialId && hojas.some((h) => h.id === hojaInicialId)) return hojaInicialId;
     return hojas[0]?.id ?? "";
@@ -105,7 +105,6 @@ export function HojasTrabajoVista({
     [hojas, activaId]
   );
 
-  // Bloques disponibles si la hoja es de tipo "tomas"
   const bloques = useMemo(() => {
     if (!hoja || hoja.tipo !== "tomas") return [];
     return Array.from(new Set(hoja.filas.map((f) => String(f.bloque ?? "")).filter(Boolean)));
@@ -121,7 +120,6 @@ export function HojasTrabajoVista({
     });
   }, [hoja, busqueda, filtroBloque]);
 
-  // Métricas de progreso para hojas de tipo "tomas"
   const progresoTomas = useMemo(() => {
     if (!hoja || hoja.tipo !== "tomas") return null;
     const esenciales = hoja.filas.filter((f) => String(f.prioridad ?? "").toUpperCase() === "E");
@@ -196,7 +194,6 @@ export function HojasTrabajoVista({
         if (/^gu[ií]a$/i.test(nombreHoja.trim())) continue;
         const ws = wb.Sheets[nombreHoja];
         const matriz = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "" });
-        // Encontrar fila de headers: primera fila con >= 3 celdas con texto corto
         const idxHeader = matriz.findIndex((row) => {
           const noVacias = row.filter((c) => {
             const s = String(c ?? "").trim();
@@ -306,8 +303,8 @@ export function HojasTrabajoVista({
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Pestañas estilo workbook de Excel */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.08] pb-3">
+      {/* Pestañas estilo workbook */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
         <div className="flex flex-wrap items-center gap-2">
           {hojas.map((h) => {
             const activa = hoja?.id === h.id;
@@ -320,29 +317,29 @@ export function HojasTrabajoVista({
                   setFiltroBloque("");
                   setBusqueda("");
                 }}
-                className="inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
                 style={
                   activa
                     ? {
-                        backgroundColor: `color-mix(in srgb, ${acento} 20%, transparent)`,
-                        color: "#FFFFFF",
-                        border: `1px solid color-mix(in srgb, ${acento} 48%, transparent)`,
+                        backgroundColor: `color-mix(in srgb, ${acento} 15%, var(--surface))`,
+                        color: "var(--foreground)",
+                        border: `1px solid color-mix(in srgb, ${acento} 48%, var(--border))`,
                       }
                     : {
-                        backgroundColor: "rgba(255,255,255,0.03)",
-                        color: "rgba(255,255,255,0.62)",
-                        border: "1px solid rgba(255,255,255,0.08)",
+                        backgroundColor: "var(--surface)",
+                        color: "var(--muted)",
+                        border: "1px solid var(--border)",
                       }
                 }
               >
                 {editable &&
                   (h.visible_cliente ? (
-                    <Eye size={13} style={{ color: acento }} />
+                    <Eye size={13} style={{ color: acentoInk }} />
                   ) : (
-                    <EyeSlash size={13} className="text-white/40" />
+                    <EyeSlash size={13} className="text-muted" />
                   ))}
                 <span>{h.titulo}</span>
-                <span className="text-[10px] opacity-60">{h.filas.length}</span>
+                <span className="text-[10px] opacity-65 tabular-nums">{h.filas.length}</span>
               </button>
             );
           })}
@@ -352,22 +349,22 @@ export function HojasTrabajoVista({
               <button
                 type="button"
                 onClick={() => setMenuNueva((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-full border border-dashed border-white/25 px-3 py-1.5 text-xs text-muted hover:text-white hover:border-white/45 cursor-pointer"
+                className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-3.5 py-1.5 text-xs font-medium text-muted hover:text-foreground hover:border-foreground/40 cursor-pointer"
               >
                 <Plus size={13} />
                 <span>Nueva hoja</span>
               </button>
               {menuNueva && (
-                <div className="portal-card absolute left-0 top-10 z-30 w-56 rounded-xl p-1.5 shadow-2xl">
+                <div className="portal-card absolute left-0 top-10 z-30 w-56 rounded-xl p-1.5 shadow-xl bg-surface">
                   {(Object.keys(PLANTILLAS_HOJA) as TipoHoja[]).map((tipo) => (
                     <button
                       key={tipo}
                       type="button"
                       onClick={() => crearDesdePlantilla(tipo)}
-                      className="block w-full rounded-lg px-3 py-2 text-left text-xs text-white/85 hover:bg-white/[0.07] cursor-pointer"
+                      className="block w-full rounded-lg px-3 py-2 text-left text-xs text-foreground hover:bg-surface-alt cursor-pointer"
                     >
-                      <span className="font-medium block">{ETIQUETA_TIPO_HOJA[tipo]}</span>
-                      <span className="text-[11px] text-white/45">{PLANTILLAS_HOJA[tipo].titulo}</span>
+                      <span className="font-semibold block">{ETIQUETA_TIPO_HOJA[tipo]}</span>
+                      <span className="text-[11px] text-muted">{PLANTILLAS_HOJA[tipo].titulo}</span>
                     </button>
                   ))}
                 </div>
@@ -389,7 +386,7 @@ export function HojasTrabajoVista({
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white hover:border-white/30 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-surface-alt cursor-pointer"
               >
                 <UploadSimple size={14} />
                 <span>Subir .xlsx</span>
@@ -400,9 +397,9 @@ export function HojasTrabajoVista({
             <button
               type="button"
               onClick={exportarHojaActual}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/12 px-3 py-1.5 text-xs text-muted hover:text-white cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-alt cursor-pointer"
             >
-              <FileXls size={14} />
+              <FileXls size={14} style={{ color: acentoInk }} />
               <span>Exportar .xlsx</span>
             </button>
           )}
@@ -410,7 +407,7 @@ export function HojasTrabajoVista({
       </div>
 
       {aviso && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-foreground">
+        <div className="rounded-xl border border-border bg-surface px-4 py-2 text-xs text-foreground">
           {aviso}
         </div>
       )}
@@ -425,14 +422,17 @@ export function HojasTrabajoVista({
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2.5">
-                <h2 className="text-lg font-semibold text-white" style={{ fontFamily: FUENTE_DISPLAY }}>
+                <h2
+                  className="text-lg font-semibold text-foreground"
+                  style={{ fontFamily: FUENTE_DISPLAY }}
+                >
                   {hoja.titulo}
                 </h2>
                 <span
                   className="rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
                   style={{
-                    backgroundColor: `color-mix(in srgb, ${acento} 15%, transparent)`,
-                    color: acento,
+                    backgroundColor: `color-mix(in srgb, ${acento} 15%, var(--surface-alt))`,
+                    color: acentoInk,
                   }}
                 >
                   {ETIQUETA_TIPO_HOJA[hoja.tipo]}
@@ -448,7 +448,7 @@ export function HojasTrabajoVista({
                   value={busqueda}
                   onChange={(e) => setBusqueda(e.target.value)}
                   placeholder="Filtrar filas…"
-                  className="rounded-full pl-8 pr-3 py-1.5 text-xs w-44"
+                  className="rounded-full pl-8 pr-3 py-1.5 text-xs w-48"
                 />
               </div>
 
@@ -456,16 +456,17 @@ export function HojasTrabajoVista({
                 <button
                   type="button"
                   onClick={alternarVisibilidad}
-                  className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs font-semibold cursor-pointer"
                   style={
                     hoja.visible_cliente
                       ? {
-                          borderColor: `color-mix(in srgb, ${acento} 45%, transparent)`,
-                          backgroundColor: `color-mix(in srgb, ${acento} 14%, transparent)`,
-                          color: acento,
+                          borderColor: `color-mix(in srgb, ${acento} 48%, var(--border))`,
+                          backgroundColor: `color-mix(in srgb, ${acento} 14%, var(--surface))`,
+                          color: acentoInk,
                         }
                       : {
-                          borderColor: "rgba(255,255,255,0.12)",
+                          borderColor: "var(--border)",
+                          backgroundColor: "var(--surface)",
                           color: "var(--muted)",
                         }
                   }
@@ -482,7 +483,7 @@ export function HojasTrabajoVista({
                     if (!confirm(`¿Eliminar la hoja "${hoja.titulo}"?`)) return;
                     await onBorrarHoja(hoja.id);
                   }}
-                  className="rounded-full border border-white/10 p-1.5 text-muted hover:text-danger cursor-pointer"
+                  className="rounded-full border border-border bg-surface p-1.5 text-muted hover:text-danger cursor-pointer"
                   title="Eliminar hoja"
                 >
                   <Trash size={14} />
@@ -496,9 +497,9 @@ export function HojasTrabajoVista({
             <div className="portal-card rounded-2xl p-4 flex flex-col gap-3">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap items-center gap-5 text-xs">
-                  <span>
-                    <strong className="text-white">Esenciales:</strong>{" "}
-                    <span style={{ color: acento }}>
+                  <span className="text-foreground">
+                    <strong>Esenciales:</strong>{" "}
+                    <span className="font-semibold" style={{ color: acentoInk }}>
                       {progresoTomas.esencialesHechas} / {progresoTomas.esencialesTotal}
                     </span>{" "}
                     ({progresoTomas.esencialesPct}%)
@@ -512,8 +513,8 @@ export function HojasTrabajoVista({
                     <button
                       type="button"
                       onClick={() => setFiltroBloque("")}
-                      className={`rounded-full px-2.5 py-0.5 text-[11px] cursor-pointer ${
-                        filtroBloque === "" ? "bg-white/15 text-white" : "text-muted hover:text-white"
+                      className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium cursor-pointer ${
+                        filtroBloque === "" ? "bg-foreground text-background" : "text-muted hover:text-foreground"
                       }`}
                     >
                       Todos
@@ -523,8 +524,8 @@ export function HojasTrabajoVista({
                         key={b}
                         type="button"
                         onClick={() => setFiltroBloque(b)}
-                        className={`rounded-full px-2.5 py-0.5 text-[11px] cursor-pointer ${
-                          filtroBloque === b ? "bg-white/15 text-white" : "text-muted hover:text-white"
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-medium cursor-pointer ${
+                          filtroBloque === b ? "bg-foreground text-background" : "text-muted hover:text-foreground"
                         }`}
                       >
                         {b.split("(")[0].trim()}
@@ -533,7 +534,7 @@ export function HojasTrabajoVista({
                   </div>
                 )}
               </div>
-              <div className="h-1.5 w-full rounded-full bg-white/[0.08] overflow-hidden">
+              <div className="h-1.5 w-full rounded-full bg-surface-alt overflow-hidden">
                 <div
                   className="h-full rounded-full transition-[width] duration-300"
                   style={{ width: `${progresoTomas.esencialesPct}%`, backgroundColor: acento }}
@@ -546,18 +547,18 @@ export function HojasTrabajoVista({
           <div className="portal-card rounded-2xl overflow-x-auto">
             <table className="w-full text-sm min-w-[780px]">
               <thead>
-                <tr className="text-left text-[11px] uppercase tracking-wider text-muted border-b border-white/[0.08] bg-white/[0.02]">
+                <tr className="text-left text-[11px] uppercase tracking-wider text-muted border-b border-border bg-surface-alt/75">
                   {hoja.columnas.map((col) => (
                     <th
                       key={col.key}
-                      className="px-3 py-3 font-semibold whitespace-nowrap"
+                      className="px-3.5 py-3 font-semibold whitespace-nowrap"
                       style={col.ancho ? { width: col.ancho } : undefined}
                     >
                       {col.label}
                     </th>
                   ))}
                   {editable && (hoja.tipo === "ideas" || onGuardarHoja) && (
-                    <th className="px-3 py-3 text-right font-semibold whitespace-nowrap">Acciones</th>
+                    <th className="px-3.5 py-3 text-right font-semibold whitespace-nowrap">Acciones</th>
                   )}
                 </tr>
               </thead>
@@ -575,21 +576,22 @@ export function HojasTrabajoVista({
                   filasFiltradas.map((fila) => (
                     <tr
                       key={fila.id}
-                      className="border-b border-white/[0.05] hover:bg-white/[0.03] align-middle"
+                      className="border-b border-border/60 hover:bg-surface-alt/55 align-middle transition-colors"
                     >
                       {hoja.columnas.map((col) => (
-                        <td key={col.key} className="px-3 py-2.5">
+                        <td key={col.key} className="px-3.5 py-2.5">
                           <CeldaHoja
                             col={col}
                             valor={fila[col.key]}
                             editable={editable}
                             acento={acento}
+                            acentoInk={acentoInk}
                             onGuardar={(v) => actualizarCelda(fila.id, col.key, v)}
                           />
                         </td>
                       ))}
                       {editable && (
-                        <td className="px-3 py-2.5 text-right whitespace-nowrap">
+                        <td className="px-3.5 py-2.5 text-right whitespace-nowrap">
                           <div className="inline-flex items-center gap-2">
                             {hoja.tipo === "ideas" && onPasarIdeaAParrilla && (
                               <button
@@ -598,8 +600,8 @@ export function HojasTrabajoVista({
                                 onClick={() => manejarPasarAParrilla(fila)}
                                 className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold cursor-pointer disabled:opacity-50"
                                 style={{
-                                  backgroundColor: `color-mix(in srgb, ${acento} 18%, transparent)`,
-                                  color: acento,
+                                  backgroundColor: `color-mix(in srgb, ${acento} 16%, var(--surface-alt))`,
+                                  color: acentoInk,
                                 }}
                                 title="Convertir esta idea en pieza dentro de la Parrilla"
                               >
@@ -628,7 +630,7 @@ export function HojasTrabajoVista({
               <button
                 type="button"
                 onClick={agregarFila}
-                className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium text-muted hover:text-white hover:bg-white/[0.04] border-t border-white/[0.07] cursor-pointer"
+                className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-alt border-t border-border cursor-pointer"
               >
                 <Plus size={14} />
                 <span>Agregar fila</span>
@@ -646,24 +648,25 @@ function CeldaHoja({
   valor,
   editable,
   acento,
+  acentoInk,
   onGuardar,
 }: {
   col: ColumnaHoja;
   valor: ValorCelda;
   editable: boolean;
   acento: string;
+  acentoInk: string;
   onGuardar: (v: ValorCelda) => void;
 }) {
-  // Checkbox interactivo (tomas / cierres)
   if (col.tipo === "check") {
     const marcado = valor === true || valor === "Sí" || valor === "Si";
     if (!editable) {
       return marcado ? (
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-emerald-500/20 text-emerald-400">
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-teal-600/15 text-teal-700">
           <Check size={12} weight="bold" />
         </span>
       ) : (
-        <span className="inline-block h-5 w-5 rounded-md border border-white/15" />
+        <span className="inline-block h-5 w-5 rounded-md border border-border" />
       );
     }
     return (
@@ -674,7 +677,7 @@ function CeldaHoja({
         style={
           marcado
             ? { backgroundColor: acento, borderColor: acento, color: "#09090B" }
-            : { borderColor: "rgba(255,255,255,0.22)", backgroundColor: "transparent" }
+            : { borderColor: "var(--border)", backgroundColor: "transparent" }
         }
         aria-label={marcado ? "Marcar como pendiente" : "Marcar como hecho"}
       >
@@ -683,19 +686,18 @@ function CeldaHoja({
     );
   }
 
-  // Oportunidad destacada (Matriz de ángulos)
   if (col.tipo === "oportunidad") {
     const txt = String(valor ?? "").trim();
-    if (!txt) return <span className="text-xs text-white/25">—</span>;
+    if (!txt) return <span className="text-xs text-muted/50">—</span>;
     const esOportunidad = /oportunidad/i.test(txt);
     if (esOportunidad) {
       return (
         <span
           className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap"
           style={{
-            backgroundColor: `color-mix(in srgb, ${acento} 22%, transparent)`,
-            color: acento,
-            border: `1px solid color-mix(in srgb, ${acento} 45%, transparent)`,
+            backgroundColor: `color-mix(in srgb, ${acento} 18%, var(--surface))`,
+            color: acentoInk,
+            border: `1px solid color-mix(in srgb, ${acento} 44%, var(--border))`,
           }}
         >
           <Sparkle size={11} weight="fill" />
@@ -706,7 +708,6 @@ function CeldaHoja({
     return <span className="text-xs text-muted">{txt}</span>;
   }
 
-  // Puntaje 1–5 con barra visual (Benchmarking)
   if (col.tipo === "puntaje") {
     const num = Number(valor);
     if (!Number.isFinite(num) || num <= 0) {
@@ -723,26 +724,25 @@ function CeldaHoja({
     }
     const pct = Math.min(100, Math.round((num / 5) * 100));
     return (
-      <div className="flex items-center gap-2 min-w-[84px]">
-        <span className="text-xs font-semibold text-white tabular-nums">{num.toFixed(1)}</span>
-        <div className="h-1.5 flex-1 rounded-full bg-white/[0.08] overflow-hidden">
+      <div className="flex items-center gap-2 min-w-[88px]">
+        <span className="text-xs font-semibold text-foreground tabular-nums">{num.toFixed(1)}</span>
+        <div className="h-1.5 flex-1 rounded-full bg-surface-alt overflow-hidden">
           <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: acento }} />
         </div>
       </div>
     );
   }
 
-  // Select con pills de color
   if (col.tipo === "select") {
     const str = String(valor ?? "");
-    const color = COLOR_OPCION_HOJA[str] ?? "#8b93a6";
+    const color = COLOR_OPCION_HOJA[str] ?? "#64748b";
     if (!editable) {
       return str ? (
         <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap" style={tinte(color)}>
           {str}
         </span>
       ) : (
-        <span className="text-xs text-white/25">—</span>
+        <span className="text-xs text-muted/50">—</span>
       );
     }
     const opciones = col.opciones ? [...col.opciones] : [];
@@ -764,14 +764,13 @@ function CeldaHoja({
     );
   }
 
-  // Número formateado
   if (col.tipo === "numero") {
     const str = String(valor ?? "").trim();
     if (!editable) {
-      if (!str) return <span className="text-xs text-white/25">—</span>;
+      if (!str) return <span className="text-xs text-muted/50">—</span>;
       const n = Number(str);
       return (
-        <span className="text-xs tabular-nums text-white/85">
+        <span className="text-xs tabular-nums font-medium text-foreground">
           {Number.isFinite(n) ? n.toLocaleString("es-CO") : str}
         </span>
       );
@@ -786,18 +785,17 @@ function CeldaHoja({
     );
   }
 
-  // Texto (con soporte especial para celdas "Sí" en matriz)
   const str = String(valor ?? "");
   if (!editable) {
-    if (!str) return <span className="text-xs text-white/25">—</span>;
+    if (!str) return <span className="text-xs text-muted/50">—</span>;
     if (str === "Sí") {
       return (
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-white">
+        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-600/15 text-teal-700">
           <Check size={11} weight="bold" />
         </span>
       );
     }
-    return <span className="text-xs leading-relaxed text-white/85">{str}</span>;
+    return <span className="text-xs leading-relaxed text-foreground">{str}</span>;
   }
 
   return (

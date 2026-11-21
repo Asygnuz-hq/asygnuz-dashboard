@@ -1,8 +1,8 @@
 "use client";
 
 // Parrilla de contenido v2 tipo Excel + Calendario + Aprobación 1 clic + Importar/Exportar .xlsx.
-// Compartida entre /portal-admin/[tenantId]/parrilla (editable, ASYGNUZ) y
-// /portal/parrilla (vista ejecutiva cliente con aprobación en 1 clic).
+// Usa tokens semánticos (bg-surface, bg-surface-alt, border-border, text-foreground, text-muted)
+// para lucir impecable tanto en el portal cliente claro (.portal-light) como en portal-admin.
 
 import { useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import * as XLSX from "xlsx";
@@ -82,8 +82,8 @@ const PILDORA: CSSProperties = { borderRadius: 999, padding: "2px 10px" };
 function tinte(color: string): CSSProperties {
   return {
     ...PILDORA,
-    background: `color-mix(in srgb, ${color} 18%, transparent)`,
-    color,
+    background: `color-mix(in srgb, ${color} 14%, transparent)`,
+    color: `color-mix(in srgb, ${color} 82%, var(--foreground))`,
     borderColor: "transparent",
   };
 }
@@ -114,7 +114,6 @@ function parsearExcelParrilla(buffer: ArrayBuffer, nombreArchivo: string): FilaI
   const ws = wb.Sheets[hojaPref];
   const matriz = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: "" });
 
-  // Busca la fila de encabezados real (donde aparezca "Pieza", "Tema", "Reel", "Título"...)
   let idxHeader = matriz.findIndex((row) =>
     row.some((cell) => {
       const k = normalizarClave(String(cell ?? ""));
@@ -134,8 +133,7 @@ function parsearExcelParrilla(buffer: ArrayBuffer, nombreArchivo: string): FilaI
       if (h) obj[h] = String(fila[i] ?? "").trim();
     });
 
-    const titulo =
-      obj["pieza"] || obj["tema"] || obj["reel"] || obj["titulo"] || obj["idea"] || "";
+    const titulo = obj["pieza"] || obj["tema"] || obj["reel"] || obj["titulo"] || obj["idea"] || "";
     if (!titulo || titulo.length > 160) continue;
 
     const usoRaw = obj["uso"] || obj["tipo"] || "";
@@ -149,7 +147,8 @@ function parsearExcelParrilla(buffer: ArrayBuffer, nombreArchivo: string): FilaI
             ? "Orgánico"
             : usoRaw || undefined;
 
-    const formato = obj["formato"] || (/anuncio/i.test(usoRaw) ? "Anuncio" : /historia/i.test(usoRaw) ? "Historia" : "Reels");
+    const formato =
+      obj["formato"] || (/anuncio/i.test(usoRaw) ? "Anuncio" : /historia/i.test(usoRaw) ? "Historia" : "Reels");
 
     resultados.push({
       titulo,
@@ -165,9 +164,14 @@ function parsearExcelParrilla(buffer: ArrayBuffer, nombreArchivo: string): FilaI
       cuerpo: (obj["cuerpo"] || obj["que hacemos"] || "").slice(0, 4000) || undefined,
       cta: (obj["cierre cta"] || obj["cta"] || "").slice(0, 1000) || undefined,
       copy: (obj["copy"] || obj["que hacemos"] || "").slice(0, 4000) || undefined,
-      notas: [obj["dia pub"] && `Publicación: ${obj["dia pub"]}`, obj["tomas clave"] && `Tomas: ${obj["tomas clave"]}`, obj["sale"] && `Sale: ${obj["sale"]}`]
-        .filter(Boolean)
-        .join(" · ") || undefined,
+      notas:
+        [
+          obj["dia pub"] && `Publicación: ${obj["dia pub"]}`,
+          obj["tomas clave"] && `Tomas: ${obj["tomas clave"]}`,
+          obj["sale"] && `Sale: ${obj["sale"]}`,
+        ]
+          .filter(Boolean)
+          .join(" · ") || undefined,
       visibleCliente: true,
       guionVisibleCliente: false,
     });
@@ -186,6 +190,7 @@ export default function ParrillaVista({
   onAprobar,
 }: Props) {
   const acento = colorAcento || "#C9A45C";
+  const acentoInk = `color-mix(in srgb, ${acento} 74%, var(--foreground))`;
   const [vista, setVista] = useState<"tabla" | "calendario">("tabla");
   const [filtroCampana, setFiltroCampana] = useState<string>("");
   const [filtroUso, setFiltroUso] = useState<string>("");
@@ -279,24 +284,27 @@ export default function ParrillaVista({
     const ws = XLSX.utils.json_to_sheet(filas);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Parrilla");
-    XLSX.writeFile(wb, `parrilla-${filtroCampana ? filtroCampana.toLowerCase().replace(/\s+/g, "-") : "completa"}.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `parrilla-${filtroCampana ? filtroCampana.toLowerCase().replace(/\s+/g, "-") : "completa"}.xlsx`
+    );
   }
 
   return (
     <div className="flex flex-col gap-4">
       {/* Pestañas de Campaña / Jornada */}
       {campanas.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-white/[0.07] pb-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
           <button
             type="button"
             onClick={() => setFiltroCampana("")}
-            className="rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
+            className="rounded-full px-4 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
             style={
               filtroCampana === ""
                 ? {
-                    backgroundColor: `color-mix(in srgb, ${acento} 20%, transparent)`,
-                    color: "#FFFFFF",
-                    border: `1px solid color-mix(in srgb, ${acento} 45%, transparent)`,
+                    backgroundColor: `color-mix(in srgb, ${acento} 15%, var(--surface))`,
+                    color: "var(--foreground)",
+                    border: `1px solid color-mix(in srgb, ${acento} 48%, var(--border))`,
                   }
                 : { color: "var(--muted)", border: "1px solid transparent" }
             }
@@ -311,15 +319,15 @@ export default function ParrillaVista({
                 key={camp}
                 type="button"
                 onClick={() => setFiltroCampana(camp)}
-                className="rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
+                className="rounded-full px-4 py-1.5 text-xs font-semibold transition-colors cursor-pointer"
                 style={
                   activa
                     ? {
-                        backgroundColor: `color-mix(in srgb, ${acento} 20%, transparent)`,
-                        color: "#FFFFFF",
-                        border: `1px solid color-mix(in srgb, ${acento} 45%, transparent)`,
+                        backgroundColor: `color-mix(in srgb, ${acento} 15%, var(--surface))`,
+                        color: "var(--foreground)",
+                        border: `1px solid color-mix(in srgb, ${acento} 48%, var(--border))`,
                       }
-                    : { color: "var(--muted)", border: "1px solid rgba(255,255,255,0.08)" }
+                    : { color: "var(--muted)", border: "1px solid var(--border)", backgroundColor: "var(--surface)" }
                 }
               >
                 {camp} · {n}
@@ -329,7 +337,7 @@ export default function ParrillaVista({
         </div>
       )}
 
-      {/* Barra de herramientas: vista + filtros + importar/exportar Excel */}
+      {/* Barra de herramientas */}
       <div className="flex flex-wrap items-center justify-between gap-2.5">
         <div className="flex flex-wrap items-center gap-2">
           <div className="portal-card rounded-full p-1 flex gap-1">
@@ -338,8 +346,8 @@ export default function ParrillaVista({
                 key={v}
                 type="button"
                 onClick={() => setVista(v)}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold cursor-pointer ${
-                  vista === v ? "bg-white/12 text-white" : "text-muted hover:text-foreground"
+                className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-semibold cursor-pointer ${
+                  vista === v ? "bg-foreground text-background" : "text-muted hover:text-foreground"
                 }`}
               >
                 {v === "tabla" ? <Table size={13} /> : <CalendarBlank size={13} />}
@@ -405,7 +413,7 @@ export default function ParrillaVista({
                 type="button"
                 disabled={importando}
                 onClick={() => fileRef.current?.click()}
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-foreground hover:border-white/30 cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-foreground hover:bg-surface-alt cursor-pointer disabled:opacity-50"
               >
                 <UploadSimple size={14} />
                 <span>{importando ? "Importando..." : "Importar Excel"}</span>
@@ -415,16 +423,16 @@ export default function ParrillaVista({
           <button
             type="button"
             onClick={exportarExcel}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/12 px-3 py-1.5 text-xs text-muted hover:text-foreground hover:border-white/25 cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 py-1.5 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-alt cursor-pointer"
           >
-            <FileXls size={14} />
+            <FileXls size={14} style={{ color: acentoInk }} />
             <span>Exportar .xlsx</span>
           </button>
         </div>
       </div>
 
       {avisoImport && (
-        <div className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs text-foreground">
+        <div className="rounded-xl border border-border bg-surface px-4 py-2 text-xs text-foreground">
           {avisoImport}
         </div>
       )}
@@ -462,7 +470,9 @@ function BotonFiltro({ activo, onClick, children }: { activo: boolean; onClick: 
       type="button"
       onClick={onClick}
       className={`rounded-full px-3 py-1 text-xs font-semibold border flex items-center gap-1.5 cursor-pointer ${
-        activo ? "border-white/35 bg-white/10 text-white" : "border-white/10 text-muted hover:text-foreground"
+        activo
+          ? "border-foreground/30 bg-surface-alt text-foreground"
+          : "border-border bg-surface text-muted hover:text-foreground"
       }`}
     >
       {children}
@@ -504,9 +514,9 @@ function Tabla({
     <div className="portal-card rounded-2xl overflow-x-auto">
       <table className="w-full text-sm min-w-[1220px]">
         <thead>
-          <tr className="text-left text-[11px] uppercase tracking-wider text-muted border-b border-white/[0.08] bg-white/[0.02]">
+          <tr className="text-left text-[11px] uppercase tracking-wider text-muted border-b border-border bg-surface-alt/75">
             {columnas.map((c) => (
-              <th key={c} className="px-3 py-3 font-semibold whitespace-nowrap">
+              <th key={c} className="px-3.5 py-3 font-semibold whitespace-nowrap">
                 {c}
               </th>
             ))}
@@ -537,7 +547,7 @@ function Tabla({
         <button
           type="button"
           onClick={onAgregar}
-          className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium text-muted hover:text-foreground hover:bg-white/[0.04] border-t border-white/[0.07] cursor-pointer"
+          className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-alt border-t border-border cursor-pointer"
         >
           <Plus size={14} />
           <span>Nueva pieza en parrilla</span>
@@ -570,8 +580,8 @@ function SemanaFilas({
   }
   return (
     <>
-      <tr className="bg-white/[0.03]">
-        <td colSpan={colCount} className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
+      <tr className="bg-surface-alt/45 border-b border-border/60">
+        <td colSpan={colCount} className="px-3.5 py-2 text-[11px] font-semibold uppercase tracking-wider text-muted">
           {titulo} · {filas.length} {filas.length === 1 ? "pieza" : "piezas"}
         </td>
       </tr>
@@ -599,17 +609,17 @@ function Fila({
 
   return (
     <tr
-      className={`border-b border-white/[0.05] hover:bg-white/[0.03] align-middle ${
+      className={`border-b border-border/60 hover:bg-surface-alt/55 align-middle transition-colors ${
         ocultaCliente ? "opacity-60" : ""
       }`}
     >
-      <td className="px-3 py-2.5">
+      <td className="px-3.5 py-2.5">
         <ChipSelect valor={c.uso ?? null} catalogo={USOS} guardar={guardar && g("uso")} vacio="Uso" />
       </td>
-      <td className="px-3 py-2.5">
+      <td className="px-3.5 py-2.5">
         <ChipSelect valor={c.plataforma} catalogo={CANALES} guardar={guardar && g("plataforma")} vacio="Canal" />
       </td>
-      <td className="px-3 py-2.5 whitespace-nowrap">
+      <td className="px-3.5 py-2.5 whitespace-nowrap">
         {guardar ? (
           <input
             type="date"
@@ -619,44 +629,44 @@ function Fila({
             style={SIN_BORDE}
           />
         ) : c.fecha_publicacion ? (
-          <span className="text-xs">
-            <span className="text-muted mr-1">{diaCorto(c.fecha_publicacion)}</span>
+          <span className="text-xs font-medium text-foreground">
+            <span className="text-muted font-normal mr-1">{diaCorto(c.fecha_publicacion)}</span>
             {fechaCorta(c.fecha_publicacion)}
           </span>
         ) : (
           <span className="text-xs text-muted">—</span>
         )}
       </td>
-      <td className="px-3 py-2.5">
+      <td className="px-3.5 py-2.5">
         <ChipEstado valor={c.estado} guardar={guardar && g("estado")} />
       </td>
-      <td className="px-3 py-2.5 whitespace-nowrap">
+      <td className="px-3.5 py-2.5 whitespace-nowrap">
         <button
           type="button"
           onClick={() => abrir(c.id)}
           className="rounded-full px-2.5 py-0.5 text-[11px] font-semibold cursor-pointer"
-          style={tinte(APROBACION_COLOR[estadoAprob] ?? "#8b93a6")}
+          style={tinte(APROBACION_COLOR[estadoAprob] ?? "#64748b")}
           title={c.comentario_cliente || "Ver detalle / aprobación"}
         >
           {APROBACION_LABEL[estadoAprob] ?? estadoAprob}
         </button>
       </td>
       {editable && (
-        <td className="px-3 py-2.5">
+        <td className="px-3.5 py-2.5">
           <ChipSelect valor={c.pilar} catalogo={PILARES} guardar={guardar && g("pilar")} vacio="Pilar" />
         </td>
       )}
-      <td className="px-3 py-2.5 min-w-[130px]">
+      <td className="px-3.5 py-2.5 min-w-[130px]">
         {guardar ? (
           <TextoCelda valor={c.procedimiento ?? ""} placeholder="Procedimiento" guardar={g("procedimiento")} />
         ) : (
           <span className="text-xs text-muted">{c.procedimiento || "—"}</span>
         )}
       </td>
-      <td className="px-3 py-2.5">
+      <td className="px-3.5 py-2.5">
         <ChipSelect valor={c.tipo} catalogo={FORMATOS} guardar={guardar && g("tipo")} vacio="Formato" />
       </td>
-      <td className="px-3 py-2.5 min-w-[210px]">
+      <td className="px-3.5 py-2.5 min-w-[210px]">
         <div className="flex items-center gap-1.5">
           {editable && ocultaCliente && (
             <span title="Oculta para el cliente (solo ASYGNUZ)" className="text-muted shrink-0">
@@ -664,19 +674,19 @@ function Fila({
             </span>
           )}
           {guardar ? (
-            <TextoCelda valor={c.titulo} guardar={g("titulo")} className="font-medium" />
+            <TextoCelda valor={c.titulo} guardar={g("titulo")} className="font-medium text-foreground" />
           ) : (
             <button
               type="button"
               onClick={() => abrir(c.id)}
-              className="font-medium text-left hover:underline cursor-pointer"
+              className="font-semibold text-foreground text-left hover:underline cursor-pointer"
             >
               {c.titulo}
             </button>
           )}
         </div>
       </td>
-      <td className="px-3 py-2.5 max-w-[240px]">
+      <td className="px-3.5 py-2.5 max-w-[240px]">
         <button
           type="button"
           onClick={() => abrir(c.id)}
@@ -685,10 +695,10 @@ function Fila({
           {c.copy || (editable && c.gancho ? `Guion: ${c.gancho}` : null) || (guardar ? "+ Abrir detalle / guion" : "Ver detalle")}
         </button>
       </td>
-      <td className="px-3 py-2.5 whitespace-nowrap">
+      <td className="px-3.5 py-2.5 whitespace-nowrap">
         <Enlace url={c.link_drive} texto="Drive" guardar={guardar && g("link_drive")} />
       </td>
-      <td className="px-3 py-2.5 whitespace-nowrap">
+      <td className="px-3.5 py-2.5 whitespace-nowrap">
         <Enlace url={c.link} texto="Post" guardar={guardar && g("link")} />
       </td>
     </tr>
@@ -739,7 +749,7 @@ function ChipSelect({
 }
 
 function ChipEstado({ valor, guardar }: { valor: string; guardar?: (v: string) => void }) {
-  const color = ESTADO_COLOR[valor] ?? "var(--muted)";
+  const color = ESTADO_COLOR[valor] ?? "#64748b";
   const clase = "rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap";
   if (!guardar) {
     return (
@@ -823,7 +833,7 @@ function Enlace({ url, texto, guardar }: { url: string | null; texto: string; gu
           href={url}
           target="_blank"
           rel="noreferrer"
-          className="rounded-full px-2.5 py-0.5 text-xs font-medium border border-white/15 hover:border-white/35"
+          className="rounded-full px-2.5 py-0.5 text-xs font-medium border border-border bg-surface hover:bg-surface-alt text-foreground"
         >
           {texto} ↗
         </a>
@@ -885,7 +895,7 @@ function Calendario({ filas, abrir }: { filas: Contenido[]; abrir: (id: string) 
         >
           ←
         </button>
-        <span className="text-sm font-semibold">{titulo}</span>
+        <span className="text-sm font-semibold text-foreground">{titulo}</span>
         <button
           type="button"
           onClick={() => setMes(new Date(mes.getFullYear(), mes.getMonth() + 1, 1))}
@@ -894,9 +904,9 @@ function Calendario({ filas, abrir }: { filas: Contenido[]; abrir: (id: string) 
           →
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-px rounded-xl overflow-hidden border border-white/[0.08] bg-white/[0.06]">
+      <div className="grid grid-cols-7 gap-px rounded-xl overflow-hidden border border-border bg-border">
         {DIAS.map((d) => (
-          <div key={d} className="bg-[#0B0C10] px-2 py-1.5 text-[11px] uppercase tracking-wider text-muted font-semibold">
+          <div key={d} className="bg-surface-alt px-2 py-2 text-[11px] uppercase tracking-wider text-muted font-semibold">
             {d}
           </div>
         ))}
@@ -904,30 +914,36 @@ function Calendario({ filas, abrir }: { filas: Contenido[]; abrir: (id: string) 
           const clave = iso(d);
           const delMes = d.getMonth() === mes.getMonth();
           return (
-            <div key={clave} className={`bg-[#0B0C10] min-h-[108px] p-1.5 flex flex-col gap-1 ${delMes ? "" : "opacity-35"}`}>
+            <div key={clave} className={`bg-surface min-h-[108px] p-1.5 flex flex-col gap-1 ${delMes ? "" : "opacity-45"}`}>
               <span
                 className={`text-xs w-6 h-6 flex items-center justify-center rounded-full ${
-                  clave === hoy ? "bg-white text-black font-semibold" : "text-muted"
+                  clave === hoy ? "bg-foreground text-background font-semibold" : "text-muted"
                 }`}
               >
                 {d.getDate()}
               </span>
-              {(porDia[clave] ?? []).map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => abrir(c.id)}
-                  className="text-left rounded-md px-1.5 py-1 text-[11px] leading-tight hover:brightness-125 cursor-pointer"
-                  style={{ background: `color-mix(in srgb, ${colorDe(USOS, c.uso) || colorDe(FORMATOS, c.tipo)} 18%, transparent)` }}
-                >
-                  <span className="flex items-center gap-1 font-semibold" style={{ color: colorDe(USOS, c.uso) }}>
-                    <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: colorDe(CANALES, c.plataforma) }} />
-                    {c.uso || c.tipo || "Pieza"}
-                    {c.hora && <span className="text-muted font-normal">· {horaCorta(c.hora)}</span>}
-                  </span>
-                  <span className="block truncate text-foreground">{c.titulo}</span>
-                </button>
-              ))}
+              {(porDia[clave] ?? []).map((c) => {
+                const color = colorDe(USOS, c.uso) || colorDe(FORMATOS, c.tipo);
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => abrir(c.id)}
+                    className="text-left rounded-lg px-2 py-1 text-[11px] leading-tight hover:opacity-90 cursor-pointer"
+                    style={{ background: `color-mix(in srgb, ${color} 14%, var(--surface-alt))` }}
+                  >
+                    <span
+                      className="flex items-center gap-1 font-semibold"
+                      style={{ color: `color-mix(in srgb, ${color} 80%, var(--foreground))` }}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full shrink-0" style={{ background: colorDe(CANALES, c.plataforma) }} />
+                      {c.uso || c.tipo || "Pieza"}
+                      {c.hora && <span className="text-muted font-normal">· {horaCorta(c.hora)}</span>}
+                    </span>
+                    <span className="block truncate text-foreground font-medium">{c.titulo}</span>
+                  </button>
+                );
+              })}
             </div>
           );
         })}
@@ -959,6 +975,7 @@ function Detalle({
   const [comentario, setComentario] = useState(c.comentario_cliente ?? "");
   const [enviandoAprob, setEnviandoAprob] = useState(false);
 
+  const acentoInk = `color-mix(in srgb, ${acento} 74%, var(--foreground))`;
   const mostrarGuion = editable || c.guion_visible_cliente === true;
   const estadoAprob = c.aprobacion_cliente ?? "pendiente";
 
@@ -974,15 +991,14 @@ function Detalle({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm p-4"
       onClick={cerrar}
     >
       <div
-        className="portal-card rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 flex flex-col gap-5"
-        style={{ backgroundColor: "#0E1016" }}
+        className="portal-card rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 flex flex-col gap-5 bg-surface text-foreground shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between gap-3 border-b border-white/[0.08] pb-4">
+        <div className="flex items-start justify-between gap-3 border-b border-border pb-4">
           <div className="flex flex-col gap-1">
             <p className="text-xs text-muted">
               {[
@@ -996,12 +1012,12 @@ function Detalle({
                 .filter(Boolean)
                 .join(" · ")}
             </p>
-            <h3 className="text-lg font-semibold text-white">{c.titulo}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{c.titulo}</h3>
           </div>
           <button
             type="button"
             onClick={cerrar}
-            className="rounded-lg p-1 text-muted hover:text-white cursor-pointer"
+            className="rounded-lg p-1 text-muted hover:text-foreground cursor-pointer"
             aria-label="Cerrar"
           >
             <X size={18} />
@@ -1010,7 +1026,7 @@ function Detalle({
 
         {/* Controles de campaña, duración y visibilidad (solo admin) */}
         {guardar && (
-          <div className="grid gap-3 sm:grid-cols-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-3.5">
+          <div className="grid gap-3 sm:grid-cols-3 rounded-xl border border-border bg-surface-alt/60 p-3.5">
             <label className="flex flex-col gap-1 text-xs text-muted">
               Campaña / Jornada
               <input
@@ -1052,17 +1068,17 @@ function Detalle({
           </div>
         )}
 
-        {/* Bloque de Aprobación 1 clic (vista cliente) o feedback recibido (vista admin) */}
+        {/* Bloque de Aprobación 1 clic */}
         {onAprobar ? (
           <div
             className="rounded-xl border p-4 flex flex-col gap-3"
             style={{
-              borderColor: `color-mix(in srgb, ${acento} 32%, rgba(255,255,255,0.08))`,
-              backgroundColor: `color-mix(in srgb, ${acento} 6%, rgba(255,255,255,0.02))`,
+              borderColor: `color-mix(in srgb, ${acento} 38%, var(--border))`,
+              backgroundColor: `color-mix(in srgb, ${acento} 7%, var(--surface-alt))`,
             }}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-white/80">
+              <span className="text-xs font-semibold uppercase tracking-wider text-foreground">
                 Tu revisión de esta pieza
               </span>
               <span
@@ -1084,7 +1100,7 @@ function Detalle({
                 type="button"
                 disabled={enviandoAprob}
                 onClick={() => enviarAprobacion("aprobado")}
-                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white hover:bg-emerald-500 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-4 py-1.5 text-xs font-semibold text-white hover:bg-teal-600 disabled:opacity-50 cursor-pointer"
               >
                 <CheckCircle size={14} weight="fill" />
                 <span>Aprobar pieza</span>
@@ -1093,7 +1109,7 @@ function Detalle({
                 type="button"
                 disabled={enviandoAprob}
                 onClick={() => enviarAprobacion("cambios")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/40 bg-amber-500/15 px-4 py-1.5 text-xs font-semibold text-amber-300 hover:bg-amber-500/25 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-600/40 bg-amber-500/15 px-4 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-500/25 disabled:opacity-50 cursor-pointer"
               >
                 <WarningCircle size={14} weight="fill" />
                 <span>Pedir ajuste</span>
@@ -1102,8 +1118,8 @@ function Detalle({
           </div>
         ) : (
           c.comentario_cliente && (
-            <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs">
-              <p className="font-semibold text-amber-300">
+            <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 p-3.5 text-xs">
+              <p className="font-semibold text-amber-700">
                 Comentario del cliente ({APROBACION_LABEL[estadoAprob]}):
               </p>
               <p className="mt-1 text-foreground whitespace-pre-wrap">{c.comentario_cliente}</p>
@@ -1141,15 +1157,15 @@ function Detalle({
               placeholder="Resumen visible para el cliente o copy del post…"
             />
           ) : (
-            <p className="text-sm whitespace-pre-wrap leading-relaxed text-white/85">{c.copy || "—"}</p>
+            <p className="text-sm whitespace-pre-wrap leading-relaxed text-foreground">{c.copy || "—"}</p>
           )}
         </div>
 
-        {/* Guion estructurado (Gancho / Cuerpo / CTA) */}
+        {/* Guion estructurado */}
         {mostrarGuion && (editable || c.gancho || c.cuerpo || c.cta) && (
-          <div className="flex flex-col gap-3 rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-alt/55 p-4">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: acento }}>
+              <span className="text-[11px] uppercase tracking-wider font-semibold" style={{ color: acentoInk }}>
                 Guion estructurado
               </span>
               {editable && !c.guion_visible_cliente && (
@@ -1157,7 +1173,8 @@ function Detalle({
               )}
             </div>
             {(["gancho", "cuerpo", "cta"] as const).map((campo) => {
-              const etiqueta = campo === "gancho" ? "Gancho (aperturas)" : campo === "cuerpo" ? "Cuerpo" : "Cierre / CTA";
+              const etiqueta =
+                campo === "gancho" ? "Gancho (aperturas)" : campo === "cuerpo" ? "Cuerpo" : "Cierre / CTA";
               const valor = c[campo] ?? "";
               if (!guardar && !valor) return null;
               return (
@@ -1171,7 +1188,7 @@ function Detalle({
                       className="w-full text-xs leading-relaxed"
                     />
                   ) : (
-                    <p className="text-xs whitespace-pre-wrap leading-relaxed text-white/85">{valor}</p>
+                    <p className="text-xs whitespace-pre-wrap leading-relaxed text-foreground">{valor}</p>
                   )}
                 </div>
               );
@@ -1206,7 +1223,7 @@ function Detalle({
               href={c.link_drive}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-muted hover:text-white ml-auto"
+              className="inline-flex items-center gap-1 text-xs text-muted hover:text-foreground ml-auto"
             >
               <DownloadSimple size={13} /> Material
             </a>

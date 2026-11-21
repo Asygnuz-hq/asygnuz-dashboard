@@ -123,23 +123,28 @@ export default function VistaPreviaPage({ params }: { params: Promise<{ tenantId
         </button>
       </div>
 
-      <VistaPortal
-        nombreTenant={nombreTenant}
-        logoUrl={logoUrl}
-        taglinePortal={taglinePortal}
-        colorAcento={colorAcento}
-        proyecto={proyecto}
-        pilares={pilares}
-        contenido={contenido}
-        enlaces={enlaces}
-        archivos={archivos}
-        reuniones={reuniones}
-        hojas={hojas}
-        hrefParrilla={`/portal-admin/${tenantId}/parrilla`}
-        hrefHojas={`/portal-admin/${tenantId}/hojas`}
-        onDescargarArchivo={descargar}
-        avance={avance}
-      />
+      <div
+        className="portal-light rounded-3xl p-6 sm:p-8 border border-border"
+        style={{ "--portal-accent": colorAcento || "#C9A45C" } as React.CSSProperties}
+      >
+        <VistaPortal
+          nombreTenant={nombreTenant}
+          logoUrl={logoUrl}
+          taglinePortal={taglinePortal}
+          colorAcento={colorAcento}
+          proyecto={proyecto}
+          pilares={pilares}
+          contenido={contenido}
+          enlaces={enlaces}
+          archivos={archivos}
+          reuniones={reuniones}
+          hojas={hojas}
+          hrefParrilla={`/portal-admin/${tenantId}/parrilla`}
+          hrefHojas={`/portal-admin/${tenantId}/hojas`}
+          onDescargarArchivo={descargar}
+          avance={avance}
+        />
+      </div>
     </div>
   );
 }
