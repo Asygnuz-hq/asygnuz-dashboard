@@ -1,6 +1,6 @@
-// Bloque visual compartido entre /portal (tema claro arquitectónico) y
-// /portal-admin (tema del dashboard). Usa tokens semánticos (--surface,
-// --surface-alt, --border, --foreground, --muted) para verse impecable en ambos.
+// Bloque visual compartido entre /portal (Liquid Glass Light/Dark) y
+// /portal-admin. Usa exclusivamente variables semánticas (--p-*, --foreground,
+// --muted) para garantizar contraste impecable en cualquier tema.
 
 import type { ReactNode } from "react";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
@@ -20,37 +20,45 @@ export function TarjetaSeccion({
   acento?: string;
   children: ReactNode;
 }) {
-  const acentoInk = acento ? `color-mix(in srgb, ${acento} 76%, var(--foreground))` : "var(--foreground)";
+  const colorAcento = acento || "var(--p-accent, #C9A45C)";
 
   return (
-    <section className="portal-card rounded-2xl overflow-hidden">
-      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-border bg-surface-alt/65">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm"
-            style={{
-              backgroundColor: acento
-                ? `color-mix(in srgb, ${acento} 14%, transparent)`
-                : "var(--surface)",
-              color: acentoInk,
-            }}
-            aria-hidden
-          >
-            {icono}
-          </span>
-          <div className="min-w-0">
-            <h2
-              className="text-sm font-semibold tracking-tight text-foreground truncate"
-              style={{ fontFamily: FUENTE_DISPLAY }}
+    <section className="portal-bezel">
+      <div className="portal-bezel-core overflow-hidden">
+        <div
+          className="flex items-center justify-between gap-3 px-6 py-4 border-b"
+          style={{ borderColor: "var(--p-border, var(--border))" }}
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border"
+              style={{
+                backgroundColor: `color-mix(in srgb, ${colorAcento} 14%, var(--p-surface-subtle, var(--surface-alt)))`,
+                borderColor: `color-mix(in srgb, ${colorAcento} 32%, var(--p-border, var(--border)))`,
+                color: "var(--p-accent-ink, var(--foreground))",
+              }}
+              aria-hidden
             >
-              {titulo}
-            </h2>
-            {subtitulo && <p className="text-[11px] text-muted truncate">{subtitulo}</p>}
+              {icono}
+            </span>
+            <div className="min-w-0">
+              <h2
+                className="text-base font-semibold tracking-tight truncate"
+                style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink, var(--foreground))" }}
+              >
+                {titulo}
+              </h2>
+              {subtitulo && (
+                <p className="text-xs truncate" style={{ color: "var(--p-muted, var(--muted))" }}>
+                  {subtitulo}
+                </p>
+              )}
+            </div>
           </div>
+          {accion && <div className="shrink-0">{accion}</div>}
         </div>
-        {accion && <div className="shrink-0">{accion}</div>}
+        <div className="p-6 flex flex-col gap-4">{children}</div>
       </div>
-      <div className="p-5 flex flex-col gap-4">{children}</div>
     </section>
   );
 }
@@ -59,7 +67,9 @@ export function Chip({ label, color }: { label: string; color: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide whitespace-nowrap">
       <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: color }} aria-hidden />
-      <span style={{ color }}>{label}</span>
+      <span style={{ color: `color-mix(in srgb, ${color} 58%, var(--p-ink, var(--foreground)))` }}>
+        {label}
+      </span>
     </span>
   );
 }

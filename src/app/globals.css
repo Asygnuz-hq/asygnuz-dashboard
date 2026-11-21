@@ -461,59 +461,240 @@ textarea:focus {
 }
 
 .portal-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
-  transition: border-color 180ms ease, transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms ease;
+  background: var(--p-glass, var(--surface));
+  border: 1px solid var(--p-border, var(--border));
+  box-shadow: var(--p-shadow, 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 28px rgba(15, 23, 42, 0.05));
+  transition: border-color 180ms ease, transform 240ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 240ms ease;
 }
 
-/* Tema arquitectónico luminoso para todos los portales de clientes
-   (Cold Luxury / Clinical Editorial White). Independiente del tema oscuro
-   del dashboard interno de ASYGNUZ. */
-.portal-light {
-  --background: #f6f7f9;
+/* =========================================================================
+   Portal Exclusivo — Sistema Liquid Atelier Glass (Light + Dark)
+   Un solo juego de tokens semánticos que blindan contraste ≥ 4.5:1 en TODO
+   el árbol (hero, tarjetas, tablas Excel, inputs, selects, modales y avance).
+   ========================================================================= */
+
+.portal-shell {
+  --p-accent: var(--portal-accent, #c9a45c);
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background-color 260ms ease, color 220ms ease;
+  position: relative;
+  isolation: isolate;
+}
+
+.portal-shell[data-portal-mode="light"] {
+  color-scheme: light;
+  --background: #f3f1ec;
   --surface: #ffffff;
-  --surface-alt: #f1f4f8;
-  --border: #e2e8f0;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --accent: #0f172a;
-  --accent-bright: #334155;
+  --surface-alt: #f5f3ef;
+  --border: rgba(15, 23, 42, 0.09);
+  --foreground: #0c1220;
+  --muted: #525f73;
+  --accent: #0c1220;
+  --accent-bright: #1e293b;
   --accent-foreground: #ffffff;
   --danger: #dc2626;
   --warning: #b45309;
   --success: #0f766e;
-  --portal-ink-accent: color-mix(in srgb, var(--portal-accent, #c9a45c) 72%, #1e293b);
-  color: var(--foreground);
-  background-color: var(--background);
+
+  --p-bg: #f4f2ee;
+  --p-surface: #ffffff;
+  --p-surface-subtle: rgba(255, 255, 255, 0.72);
+  --p-glass: rgba(255, 255, 255, 0.74);
+  --p-glass-strong: rgba(255, 255, 255, 0.9);
+  --p-island: rgba(255, 255, 255, 0.76);
+  --p-bezel: rgba(15, 23, 42, 0.035);
+  --p-bezel-border: rgba(15, 23, 42, 0.08);
+  --p-border: rgba(15, 23, 42, 0.09);
+  --p-border-strong: rgba(15, 23, 42, 0.16);
+  --p-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  --p-shadow: 0 2px 6px rgba(15, 23, 42, 0.04), 0 16px 40px rgba(15, 23, 42, 0.065);
+  --p-shadow-hover: 0 6px 14px rgba(15, 23, 42, 0.06), 0 24px 52px rgba(15, 23, 42, 0.1);
+  --p-ink: #0c1220;
+  --p-ink-soft: #2e3a4e;
+  --p-muted: #58657a;
+  --p-accent-ink: color-mix(in srgb, var(--p-accent) 56%, #0c1220);
+  --p-accent-bg: color-mix(in srgb, var(--p-accent) 14%, rgba(255, 255, 255, 0.85));
+  --p-accent-border: color-mix(in srgb, var(--p-accent) 44%, rgba(15, 23, 42, 0.1));
+  --p-btn-bg: #0c1220;
+  --p-btn-fg: #ffffff;
+  --p-scrim: rgba(12, 18, 32, 0.36);
+  --p-table-head: rgba(15, 23, 42, 0.035);
+  --p-table-row-hover: rgba(15, 23, 42, 0.025);
+  --p-orb-1: color-mix(in srgb, var(--p-accent) 26%, transparent);
+  --p-orb-2: color-mix(in srgb, var(--p-accent) 18%, transparent);
+  --p-orb-3: color-mix(in srgb, var(--p-accent) 12%, transparent);
 }
 
-.portal-light input,
-.portal-light select,
-.portal-light textarea {
-  background: #ffffff;
-  border: 1px solid #d5dce6;
-  color: #0f172a;
+.portal-shell[data-portal-mode="dark"] {
+  color-scheme: dark;
+  --background: #07080b;
+  --surface: #11131a;
+  --surface-alt: #181c26;
+  --border: rgba(255, 255, 255, 0.1);
+  --foreground: #f4f3ef;
+  --muted: #9aa4b6;
+  --accent: #f4f3ef;
+  --accent-bright: #e2e8f0;
+  --accent-foreground: #090b10;
+  --danger: #f87171;
+  --warning: #fbbf24;
+  --success: #34d399;
+
+  --p-bg: #07080b;
+  --p-surface: #11131a;
+  --p-surface-subtle: rgba(255, 255, 255, 0.055);
+  --p-glass: rgba(18, 21, 30, 0.68);
+  --p-glass-strong: rgba(20, 24, 34, 0.88);
+  --p-island: rgba(16, 19, 27, 0.72);
+  --p-bezel: rgba(255, 255, 255, 0.035);
+  --p-bezel-border: rgba(255, 255, 255, 0.09);
+  --p-border: rgba(255, 255, 255, 0.1);
+  --p-border-strong: rgba(255, 255, 255, 0.18);
+  --p-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --p-shadow: 0 4px 12px rgba(0, 0, 0, 0.35), 0 22px 54px rgba(0, 0, 0, 0.45);
+  --p-shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.45), 0 30px 64px rgba(0, 0, 0, 0.6);
+  --p-ink: #f5f4f0;
+  --p-ink-soft: #cfd5e1;
+  --p-muted: #98a3b6;
+  --p-accent-ink: color-mix(in srgb, var(--p-accent) 88%, #ffffff);
+  --p-accent-bg: color-mix(in srgb, var(--p-accent) 18%, rgba(18, 21, 30, 0.75));
+  --p-accent-border: color-mix(in srgb, var(--p-accent) 46%, rgba(255, 255, 255, 0.12));
+  --p-btn-bg: var(--p-accent);
+  --p-btn-fg: #0b0c10;
+  --p-scrim: rgba(0, 0, 0, 0.68);
+  --p-table-head: rgba(255, 255, 255, 0.04);
+  --p-table-row-hover: rgba(255, 255, 255, 0.035);
+  --p-orb-1: color-mix(in srgb, var(--p-accent) 24%, transparent);
+  --p-orb-2: color-mix(in srgb, var(--p-accent) 15%, transparent);
+  --p-orb-3: color-mix(in srgb, var(--p-accent) 10%, transparent);
 }
 
-.portal-light input:focus,
-.portal-light select:focus,
-.portal-light textarea:focus {
-  outline: 2px solid color-mix(in srgb, var(--portal-accent, #c9a45c) 45%, transparent);
-  border-color: var(--portal-ink-accent, #9a742b);
+.portal-shell {
+  background-color: var(--p-bg);
+  color: var(--p-ink);
+  background-image:
+    radial-gradient(860px circle at 8% -6%, var(--p-orb-1), transparent 58%),
+    radial-gradient(680px circle at 92% 4%, var(--p-orb-2), transparent 56%),
+    radial-gradient(760px circle at 52% 106%, var(--p-orb-3), transparent 62%);
+  background-attachment: fixed;
 }
 
-.portal-light .glass {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 10px 28px rgba(15, 23, 42, 0.05);
+.portal-shell ::selection {
+  background: color-mix(in srgb, var(--p-accent) 30%, transparent);
+  color: var(--p-ink);
+}
+
+.portal-shell input,
+.portal-shell select,
+.portal-shell textarea {
+  background: var(--p-glass-strong);
+  border: 1px solid var(--p-border-strong);
+  color: var(--p-ink);
+  border-radius: 0.625rem;
+}
+
+.portal-shell input::placeholder,
+.portal-shell textarea::placeholder {
+  color: var(--p-muted);
+  opacity: 0.85;
+}
+
+.portal-shell input:focus,
+.portal-shell select:focus,
+.portal-shell textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--p-accent) 45%, transparent);
+  border-color: var(--p-accent-ink);
+}
+
+.portal-shell .glass {
+  background: var(--p-glass);
+  border: 1px solid var(--p-border);
+  box-shadow: var(--p-shadow), var(--p-highlight);
+  backdrop-filter: blur(20px) saturate(155%);
+  -webkit-backdrop-filter: blur(20px) saturate(155%);
+}
+
+/* Double-Bezel (Doppelrand): carcasa exterior translúcida + núcleo de vidrio */
+.portal-bezel {
+  background: var(--p-bezel, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--p-bezel-border, var(--border));
+  border-radius: 2rem;
+  padding: 0.45rem;
+  box-shadow: var(--p-shadow, 0 8px 28px rgba(0, 0, 0, 0.16));
+}
+
+.portal-bezel-core {
+  background: var(--p-glass, var(--surface));
+  border: 1px solid var(--p-border, var(--border));
+  border-radius: calc(2rem - 0.45rem);
+  box-shadow: var(--p-highlight, none);
+  backdrop-filter: blur(24px) saturate(165%);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+}
+
+/* Isla flotante de navegación (Fluid Island) */
+.portal-island {
+  background: var(--p-island, var(--surface));
+  border: 1px solid var(--p-border-strong, var(--border));
+  box-shadow: var(--p-shadow, 0 8px 28px rgba(0, 0, 0, 0.16)), var(--p-highlight, none);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.portal-glass {
+  background: var(--p-glass, var(--surface));
+  border: 1px solid var(--p-border, var(--border));
+  box-shadow: var(--p-shadow, 0 8px 24px rgba(0, 0, 0, 0.12)), var(--p-highlight, none);
+  backdrop-filter: blur(20px) saturate(155%);
+  -webkit-backdrop-filter: blur(20px) saturate(155%);
+  transition: border-color 200ms ease, transform 260ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 260ms ease;
+}
+
+/* CTA Button-in-Button */
+.portal-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border-radius: 9999px;
+  padding: 0.4rem 0.45rem 0.4rem 1.2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--p-btn-bg);
+  color: var(--p-btn-fg);
+  transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), opacity 180ms ease;
+}
+.portal-cta:active {
+  transform: scale(0.975);
+}
+.portal-cta-orb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 9999px;
+  transition: transform 240ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .portal-card-interactive:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--portal-accent, #c9a45c) 48%, #cbd5e1);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09), 0 0 0 1px color-mix(in srgb, var(--portal-accent, #c9a45c) 18%, transparent);
+    border-color: var(--p-accent-border, var(--border));
+    box-shadow: var(--p-shadow-hover, 0 16px 36px rgba(15, 23, 42, 0.1));
+  }
+  .portal-cta:hover .portal-cta-orb {
+    transform: translate(1.5px, -1px) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .portal-island,
+  .portal-bezel-core,
+  .portal-shell .glass {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: var(--p-surface);
   }
 }
 

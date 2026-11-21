@@ -82,9 +82,9 @@ const PILDORA: CSSProperties = { borderRadius: 999, padding: "2px 10px" };
 function tinte(color: string): CSSProperties {
   return {
     ...PILDORA,
-    background: `color-mix(in srgb, ${color} 14%, transparent)`,
-    color: `color-mix(in srgb, ${color} 82%, var(--foreground))`,
-    borderColor: "transparent",
+    background: `color-mix(in srgb, ${color} 16%, transparent)`,
+    color: `color-mix(in srgb, ${color} 55%, var(--p-ink, var(--foreground)))`,
+    border: `1px solid color-mix(in srgb, ${color} 28%, transparent)`,
   };
 }
 
@@ -511,48 +511,57 @@ function Tabla({
   }, [filas]);
 
   return (
-    <div className="portal-card rounded-2xl overflow-x-auto">
-      <table className="w-full text-sm min-w-[1220px]">
-        <thead>
-          <tr className="text-left text-[11px] uppercase tracking-wider text-muted border-b border-border bg-surface-alt/75">
-            {columnas.map((c) => (
-              <th key={c} className="px-3.5 py-3 font-semibold whitespace-nowrap">
-                {c}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {semanas.length === 0 && (
-            <tr>
-              <td colSpan={columnas.length} className="px-3 py-8 text-center text-muted">
-                No hay publicaciones con estos filtros.
-              </td>
+    <div className="portal-bezel">
+      <div className="portal-bezel-core overflow-x-auto">
+        <table className="w-full text-sm min-w-[1220px]">
+          <thead>
+            <tr
+              className="text-left text-[11px] uppercase tracking-wider border-b"
+              style={{
+                backgroundColor: "var(--p-table-head, var(--surface-alt))",
+                borderColor: "var(--p-border, var(--border))",
+                color: "var(--p-muted, var(--muted))",
+              }}
+            >
+              {columnas.map((c) => (
+                <th key={c} className="px-3.5 py-3 font-semibold whitespace-nowrap">
+                  {c}
+                </th>
+              ))}
             </tr>
-          )}
-          {semanas.map((s) => (
-            <SemanaFilas
-              key={s.clave}
-              clave={s.clave}
-              filas={s.filas}
-              colCount={columnas.length}
-              editable={editable}
-              guardar={guardar}
-              abrir={abrir}
-            />
-          ))}
-        </tbody>
-      </table>
-      {onAgregar && (
-        <button
-          type="button"
-          onClick={onAgregar}
-          className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-alt border-t border-border cursor-pointer"
-        >
-          <Plus size={14} />
-          <span>Nueva pieza en parrilla</span>
-        </button>
-      )}
+          </thead>
+          <tbody>
+            {semanas.length === 0 && (
+              <tr>
+                <td colSpan={columnas.length} className="px-3 py-8 text-center text-muted">
+                  No hay publicaciones con estos filtros.
+                </td>
+              </tr>
+            )}
+            {semanas.map((s) => (
+              <SemanaFilas
+                key={s.clave}
+                clave={s.clave}
+                filas={s.filas}
+                colCount={columnas.length}
+                editable={editable}
+                guardar={guardar}
+                abrir={abrir}
+              />
+            ))}
+          </tbody>
+        </table>
+        {onAgregar && (
+          <button
+            type="button"
+            onClick={onAgregar}
+            className="flex w-full items-center gap-2 px-4 py-3 text-xs font-medium text-muted hover:text-foreground hover:bg-surface-alt border-t border-border cursor-pointer"
+          >
+            <Plus size={14} />
+            <span>Nueva pieza en parrilla</span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }
@@ -886,7 +895,8 @@ function Calendario({ filas, abrir }: { filas: Contenido[]; abrir: (id: string) 
   const titulo = t.charAt(0).toUpperCase() + t.slice(1);
 
   return (
-    <div className="portal-card rounded-2xl p-4">
+    <div className="portal-bezel">
+      <div className="portal-bezel-core p-4 sm:p-5">
       <div className="flex items-center justify-between px-1 pb-3">
         <button
           type="button"
@@ -948,6 +958,7 @@ function Calendario({ filas, abrir }: { filas: Contenido[]; abrir: (id: string) 
           );
         })}
       </div>
+      </div>
     </div>
   );
 }
@@ -991,12 +1002,20 @@ function Detalle({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md p-4"
+      style={{ backgroundColor: "var(--p-scrim, rgba(0, 0, 0, 0.58))" }}
       onClick={cerrar}
     >
       <div
-        className="portal-card rounded-2xl w-full max-w-2xl max-h-[88vh] overflow-y-auto p-6 flex flex-col gap-5 bg-surface text-foreground shadow-2xl"
+        className="portal-bezel w-full max-w-2xl max-h-[88vh] flex"
         onClick={(e) => e.stopPropagation()}
+      >
+      <div
+        className="portal-bezel-core w-full overflow-y-auto p-6 flex flex-col gap-5 shadow-2xl"
+        style={{
+          backgroundColor: "var(--p-glass-strong, var(--surface))",
+          color: "var(--p-ink, var(--foreground))",
+        }}
       >
         <div className="flex items-start justify-between gap-3 border-b border-border pb-4">
           <div className="flex flex-col gap-1">
@@ -1100,7 +1119,8 @@ function Detalle({
                 type="button"
                 disabled={enviandoAprob}
                 onClick={() => enviarAprobacion("aprobado")}
-                className="inline-flex items-center gap-1.5 rounded-full bg-teal-700 px-4 py-1.5 text-xs font-semibold text-white hover:bg-teal-600 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                style={{ backgroundColor: "#0f766e", color: "#ffffff" }}
               >
                 <CheckCircle size={14} weight="fill" />
                 <span>Aprobar pieza</span>
@@ -1109,7 +1129,12 @@ function Detalle({
                 type="button"
                 disabled={enviandoAprob}
                 onClick={() => enviarAprobacion("cambios")}
-                className="inline-flex items-center gap-1.5 rounded-full border border-amber-600/40 bg-amber-500/15 px-4 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-500/25 disabled:opacity-50 cursor-pointer"
+                className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold hover:opacity-90 disabled:opacity-50 cursor-pointer"
+                style={{
+                  borderColor: "color-mix(in srgb, var(--warning) 44%, var(--border))",
+                  backgroundColor: "color-mix(in srgb, var(--warning) 15%, transparent)",
+                  color: "var(--warning)",
+                }}
               >
                 <WarningCircle size={14} weight="fill" />
                 <span>Pedir ajuste</span>
@@ -1118,8 +1143,14 @@ function Detalle({
           </div>
         ) : (
           c.comentario_cliente && (
-            <div className="rounded-xl border border-amber-500/35 bg-amber-500/10 p-3.5 text-xs">
-              <p className="font-semibold text-amber-700">
+            <div
+              className="rounded-xl border p-3.5 text-xs"
+              style={{
+                borderColor: "color-mix(in srgb, var(--warning) 40%, var(--border))",
+                backgroundColor: "color-mix(in srgb, var(--warning) 12%, transparent)",
+              }}
+            >
+              <p className="font-semibold" style={{ color: "var(--warning)" }}>
                 Comentario del cliente ({APROBACION_LABEL[estadoAprob]}):
               </p>
               <p className="mt-1 text-foreground whitespace-pre-wrap">{c.comentario_cliente}</p>
@@ -1244,6 +1275,7 @@ function Detalle({
             <span>Borrar publicación</span>
           </button>
         )}
+      </div>
       </div>
     </div>
   );

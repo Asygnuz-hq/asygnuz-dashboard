@@ -23,7 +23,7 @@ import {
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { SeccionAvance, type EstadoAvance } from "./SeccionAvance";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
-import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
+import { FUENTE_DISPLAY, FUENTE_MONO } from "@/lib/portal/fuente";
 import { SeccionAutomatizacionesPortal } from "./SeccionAutomatizacionesPortal";
 import { ETIQUETA_TIPO_HOJA, type HojaTrabajo, type TipoHoja } from "@/lib/portal/hojasTipos";
 
@@ -58,20 +58,21 @@ function formatearFecha(f: string | null) {
 function IconoTipoHoja({ tipo }: { tipo: TipoHoja }) {
   switch (tipo) {
     case "ideas":
-      return <Lightbulb size={16} weight="regular" />;
+      return <Lightbulb size={17} weight="light" />;
     case "benchmarking":
-      return <ChartBar size={16} weight="regular" />;
+      return <ChartBar size={17} weight="light" />;
     case "matriz":
-      return <GridFour size={16} weight="regular" />;
+      return <GridFour size={17} weight="light" />;
     case "tomas":
-      return <CheckSquare size={16} weight="regular" />;
+      return <CheckSquare size={17} weight="light" />;
     default:
-      return <Table size={16} weight="regular" />;
+      return <Table size={17} weight="light" />;
   }
 }
 
-// Vista unificada del Portal de Cliente — estética blanca arquitectónica
-// (Cold Luxury / Editorial Studio) adaptada al logo y color del cliente.
+// Vista unificada del Portal Exclusivo de Cliente — Sistema Liquid Atelier Glass
+// (Light + Dark). 100% gobernada por variables semánticas --p-* para blindar
+// contraste ≥ 4.5:1 en cualquier tema y color de marca.
 export function VistaPortal({
   nombreTenant,
   logoUrl,
@@ -106,7 +107,6 @@ export function VistaPortal({
   avance?: EstadoAvance;
 }) {
   const acento = colorAcento || "#C9A45C";
-  const acentoInk = `color-mix(in srgb, ${acento} 72%, #1e293b)`;
   const duracion =
     proyecto && (proyecto.fecha_inicio || proyecto.fecha_fin)
       ? `${formatearFecha(proyecto.fecha_inicio) ?? "En curso"} — ${formatearFecha(proyecto.fecha_fin) ?? "Continuo"}`
@@ -120,332 +120,521 @@ export function VistaPortal({
 
   return (
     <div
-      className="flex flex-col gap-9 pb-12"
+      className="flex flex-col gap-10 pb-12"
       style={{ "--portal-accent": acento } as React.CSSProperties}
     >
-      {/* Hero arquitectónico luminoso (2 columnas: marca + pulso del proyecto) */}
-      <section className="relative overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.06)]">
-        {/* Acento lineal superior en color de marca */}
-        <div
-          className="h-[3px] w-full"
-          style={{
-            background: `linear-gradient(90deg, ${acento} 0%, color-mix(in srgb, ${acento} 45%, transparent) 55%, transparent 100%)`,
-          }}
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full"
-          style={{
-            background: `radial-gradient(circle, color-mix(in srgb, ${acento} 13%, transparent) 0%, transparent 70%)`,
-          }}
-          aria-hidden
-        />
+      {/* Hero Liquid Atelier Glass (Double-Bezel + Asimetría Editorial) */}
+      <section className="portal-bezel">
+        <div className="portal-bezel-core relative overflow-hidden">
+          {/* Filete superior de luz de marca */}
+          <div
+            className="h-[2px] w-full"
+            style={{
+              background: `linear-gradient(90deg, ${acento} 0%, color-mix(in srgb, ${acento} 42%, transparent) 52%, transparent 100%)`,
+            }}
+            aria-hidden
+          />
+          {/* Orbe ambiental interno para profundidad de vidrio */}
+          <div
+            className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full"
+            style={{
+              background: `radial-gradient(circle, color-mix(in srgb, ${acento} 22%, transparent) 0%, transparent 68%)`,
+            }}
+            aria-hidden
+          />
 
-        <div className="relative p-6 sm:p-10 flex flex-col gap-8">
-          <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
-            {/* Columna izquierda: identidad + propuesta + acciones */}
-            <div className="lg:col-span-7 flex flex-col gap-5">
-              <div className="flex flex-col gap-3">
-                {logoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={logoUrl}
-                    alt={nombreTenant ?? "Portal"}
-                    className="h-14 sm:h-16 w-auto max-w-[260px] object-contain self-start"
-                  />
-                ) : (
-                  <h1
-                    className="text-3xl sm:text-5xl font-semibold tracking-tight text-slate-900 leading-[1.08]"
-                    style={{ fontFamily: FUENTE_DISPLAY }}
-                  >
-                    {nombreTenant ?? "Bienvenido"}
-                  </h1>
-                )}
+          <div className="relative p-6 sm:p-10 flex flex-col gap-8">
+            <div className="grid gap-8 lg:grid-cols-12 lg:items-center">
+              {/* Columna izquierda: identidad + propuesta + acciones */}
+              <div className="lg:col-span-7 flex flex-col gap-5">
+                <div className="flex flex-col gap-3.5">
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={logoUrl}
+                      alt={nombreTenant ?? "Portal"}
+                      className="h-14 sm:h-16 w-auto max-w-[260px] object-contain self-start"
+                    />
+                  ) : (
+                    <h1
+                      className="text-3xl sm:text-5xl font-semibold tracking-tight leading-[1.06]"
+                      style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink)" }}
+                    >
+                      {nombreTenant ?? "Bienvenido"}
+                    </h1>
+                  )}
 
-                {taglinePortal && (
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: acentoInk }}>
-                    {taglinePortal}
-                  </p>
-                )}
+                  {taglinePortal && (
+                    <h1
+                      className="text-xl sm:text-[1.75rem] font-semibold tracking-tight leading-[1.18] max-w-[30ch]"
+                      style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink)" }}
+                    >
+                      {taglinePortal}
+                    </h1>
+                  )}
 
-                {proyecto?.descripcion && (
-                  <p className="text-sm sm:text-[15px] leading-relaxed text-slate-600 max-w-[58ch]">
-                    {proyecto.descripcion}
-                  </p>
-                )}
-              </div>
+                  {proyecto?.descripcion && (
+                    <p
+                      className="text-sm sm:text-[15px] leading-relaxed max-w-[56ch]"
+                      style={{ color: "var(--p-ink-soft)" }}
+                    >
+                      {proyecto.descripcion}
+                    </p>
+                  )}
+                </div>
 
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <Link
-                  href={hrefParrilla}
-                  className="inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-slate-900 px-5 py-2.5 text-xs font-semibold text-white hover:bg-slate-800 transition-transform active:scale-[0.98]"
-                >
-                  <CalendarDots size={15} weight="regular" style={{ color: acento }} />
-                  <span>Abrir parrilla</span>
-                </Link>
-                {hrefHojas && (
-                  <Link
-                    href={hrefHojas}
-                    className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border border-slate-200 bg-slate-50/80 px-5 py-2.5 text-xs font-semibold text-slate-800 hover:border-slate-300 hover:bg-slate-100/80 transition-colors"
-                  >
-                    <Table size={15} weight="regular" style={{ color: acentoInk }} />
-                    <span>Hojas de trabajo</span>
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <Link href={hrefParrilla} className="portal-cta">
+                    <span>Abrir parrilla</span>
+                    <span
+                      className="portal-cta-orb"
+                      style={{
+                        backgroundColor: "color-mix(in srgb, var(--p-btn-fg) 14%, transparent)",
+                      }}
+                    >
+                      <ArrowUpRight size={14} weight="bold" />
+                    </span>
                   </Link>
+
+                  {hrefHojas && (
+                    <Link
+                      href={hrefHojas}
+                      className="inline-flex items-center gap-2 whitespace-nowrap rounded-full border px-5 py-2.5 text-xs font-semibold transition-colors active:scale-[0.98]"
+                      style={{
+                        borderColor: "var(--p-border-strong)",
+                        backgroundColor: "var(--p-surface-subtle)",
+                        color: "var(--p-ink)",
+                      }}
+                    >
+                      <Table size={15} weight="light" style={{ color: "var(--p-accent-ink)" }} />
+                      <span>Hojas de trabajo</span>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
+              {/* Columna derecha: Panel de pulso operativo (Ledger de cristal) */}
+              <div className="lg:col-span-5">
+                <div
+                  className="rounded-2xl border p-5 flex flex-col divide-y"
+                  style={{
+                    borderColor: "var(--p-border)",
+                    backgroundColor: "var(--p-surface-subtle)",
+                    boxShadow: "var(--p-highlight)",
+                  }}
+                >
+                  <div
+                    className="flex items-center justify-between gap-4 pb-3.5"
+                    style={{ borderColor: "var(--p-border)" }}
+                  >
+                    <div>
+                      <p className="text-xs font-semibold" style={{ color: "var(--p-ink)" }}>
+                        Piezas en parrilla
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--p-muted)" }}>
+                        {publicadas > 0 ? `${publicadas} publicadas` : "En producción activa"}
+                      </p>
+                    </div>
+                    <span
+                      className="text-2xl font-semibold tabular-nums tracking-tight"
+                      style={{ fontFamily: FUENTE_MONO, color: "var(--p-ink)" }}
+                    >
+                      {String(contenido.length).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <Link
+                    href={hrefParrilla}
+                    className="flex items-center justify-between gap-4 py-3.5 group"
+                    style={{ borderColor: "var(--p-border)" }}
+                  >
+                    <div>
+                      <p
+                        className="text-xs font-semibold flex items-center gap-2"
+                        style={{ color: "var(--p-ink)" }}
+                      >
+                        <span>Por tu aprobación</span>
+                        {porAprobar > 0 && (
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: acento }}
+                            aria-hidden
+                          />
+                        )}
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--p-muted)" }}>
+                        {aprobadas > 0 ? `${aprobadas} aprobadas hasta hoy` : "Revisión en un clic"}
+                      </p>
+                    </div>
+                    <span
+                      className="text-2xl font-semibold tabular-nums tracking-tight"
+                      style={{
+                        fontFamily: FUENTE_MONO,
+                        color: porAprobar > 0 ? "var(--p-accent-ink)" : "var(--p-ink)",
+                      }}
+                    >
+                      {String(porAprobar).padStart(2, "0")}
+                    </span>
+                  </Link>
+
+                  <div
+                    className="flex items-center justify-between gap-4 py-3.5"
+                    style={{ borderColor: "var(--p-border)" }}
+                  >
+                    <div>
+                      <p className="text-xs font-semibold" style={{ color: "var(--p-ink)" }}>
+                        Hojas de trabajo
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--p-muted)" }}>
+                        Campañas, ideas y benchmarking vivos
+                      </p>
+                    </div>
+                    <span
+                      className="text-2xl font-semibold tabular-nums tracking-tight"
+                      style={{ fontFamily: FUENTE_MONO, color: "var(--p-ink)" }}
+                    >
+                      {String(hojas.length).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <div
+                    className="flex items-center justify-between gap-4 pt-3.5"
+                    style={{ borderColor: "var(--p-border)" }}
+                  >
+                    <div>
+                      <p className="text-xs font-semibold" style={{ color: "var(--p-ink)" }}>
+                        Sesiones y entregables
+                      </p>
+                      <p className="text-[11px] mt-0.5" style={{ color: "var(--p-muted)" }}>
+                        {enlaces.length} enlaces clave · {archivos.length} documentos
+                      </p>
+                    </div>
+                    <span
+                      className="text-2xl font-semibold tabular-nums tracking-tight"
+                      style={{ fontFamily: FUENTE_MONO, color: "var(--p-ink)" }}
+                    >
+                      {String(reuniones.length).padStart(2, "0")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ficha ejecutiva inferior */}
+            {(proyecto?.tipo_proyecto || duracion || proyecto?.responsable_nombre) && (
+              <div
+                className="grid gap-5 border-t pt-6 sm:grid-cols-3"
+                style={{ borderColor: "var(--p-border)" }}
+              >
+                {proyecto?.tipo_proyecto && (
+                  <div>
+                    <p
+                      className="text-[11px] font-medium"
+                      style={{ color: "var(--p-muted)" }}
+                    >
+                      Alcance del proyecto
+                    </p>
+                    <p
+                      className="mt-1 text-sm font-semibold"
+                      style={{ color: "var(--p-ink)" }}
+                    >
+                      {proyecto.tipo_proyecto}
+                    </p>
+                  </div>
+                )}
+                {duracion && (
+                  <div>
+                    <p
+                      className="text-[11px] font-medium"
+                      style={{ color: "var(--p-muted)" }}
+                    >
+                      Vigencia
+                    </p>
+                    <p
+                      className="mt-1 text-sm font-semibold tabular-nums"
+                      style={{ color: "var(--p-ink)" }}
+                    >
+                      {duracion}
+                    </p>
+                  </div>
+                )}
+                {proyecto?.responsable_nombre && (
+                  <div>
+                    <p
+                      className="text-[11px] font-medium"
+                      style={{ color: "var(--p-muted)" }}
+                    >
+                      Dirección ASYGNUZ
+                    </p>
+                    <p
+                      className="mt-1 text-sm font-semibold"
+                      style={{ color: "var(--p-ink)" }}
+                    >
+                      {proyecto.responsable_nombre}
+                      {proyecto.responsable_email && (
+                        <>
+                          {" · "}
+                          <a
+                            href={`mailto:${proyecto.responsable_email}`}
+                            className="text-xs font-medium underline underline-offset-4"
+                            style={{ color: "var(--p-accent-ink)" }}
+                          >
+                            {proyecto.responsable_email}
+                          </a>
+                        </>
+                      )}
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
-
-            {/* Columna derecha: Bento de 4 métricas reales del portal */}
-            <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 flex flex-col gap-1">
-                <span className="text-[11px] font-medium text-slate-500">Piezas en parrilla</span>
-                <span
-                  className="text-2xl font-semibold tracking-tight text-slate-900 tabular-nums"
-                  style={{ fontFamily: FUENTE_DISPLAY }}
-                >
-                  {contenido.length}
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  {publicadas > 0 ? `${publicadas} publicadas` : "En producción activa"}
-                </span>
-              </div>
-
-              <div
-                className="rounded-2xl border p-4 flex flex-col gap-1"
-                style={{
-                  borderColor:
-                    porAprobar > 0
-                      ? `color-mix(in srgb, ${acento} 48%, #e2e8f0)`
-                      : "rgba(226, 232, 240, 0.8)",
-                  backgroundColor:
-                    porAprobar > 0
-                      ? `color-mix(in srgb, ${acento} 9%, #ffffff)`
-                      : "rgba(248, 250, 252, 0.7)",
-                }}
-              >
-                <span className="text-[11px] font-medium text-slate-500">Por tu aprobación</span>
-                <span
-                  className="text-2xl font-semibold tracking-tight tabular-nums"
-                  style={{ fontFamily: FUENTE_DISPLAY, color: porAprobar > 0 ? acentoInk : "#0F172A" }}
-                >
-                  {porAprobar}
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  {aprobadas > 0 ? `${aprobadas} aprobadas` : "Todo al día"}
-                </span>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 flex flex-col gap-1">
-                <span className="text-[11px] font-medium text-slate-500">Hojas de trabajo</span>
-                <span
-                  className="text-2xl font-semibold tracking-tight text-slate-900 tabular-nums"
-                  style={{ fontFamily: FUENTE_DISPLAY }}
-                >
-                  {hojas.length}
-                </span>
-                <span className="text-[11px] text-slate-500">Planes y análisis vivos</span>
-              </div>
-
-              <div className="rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 flex flex-col gap-1">
-                <span className="text-[11px] font-medium text-slate-500">Sesiones registradas</span>
-                <span
-                  className="text-2xl font-semibold tracking-tight text-slate-900 tabular-nums"
-                  style={{ fontFamily: FUENTE_DISPLAY }}
-                >
-                  {reuniones.length}
-                </span>
-                <span className="text-[11px] text-slate-500">
-                  {enlaces.length} enlaces · {archivos.length} archivos
-                </span>
-              </div>
-            </div>
+            )}
           </div>
-
-          {/* Ficha ejecutiva inferior */}
-          {(proyecto?.tipo_proyecto || duracion || proyecto?.responsable_nombre) && (
-            <div className="grid gap-5 border-t border-slate-100 pt-6 sm:grid-cols-3">
-              {proyecto?.tipo_proyecto && (
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Alcance del proyecto
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-800">{proyecto.tipo_proyecto}</p>
-                </div>
-              )}
-              {duracion && (
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Vigencia
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-800">{duracion}</p>
-                </div>
-              )}
-              {proyecto?.responsable_nombre && (
-                <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-                    Dirección ASYGNUZ
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-slate-800">
-                    {proyecto.responsable_nombre}
-                    {proyecto.responsable_email && (
-                      <>
-                        {" · "}
-                        <a
-                          href={`mailto:${proyecto.responsable_email}`}
-                          className="text-xs font-medium underline decoration-slate-300 hover:decoration-slate-700"
-                          style={{ color: acentoInk }}
-                        >
-                          {proyecto.responsable_email}
-                        </a>
-                      </>
-                    )}
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </section>
 
       {/* Panel de avance en vivo (si tiene Kaneo/Meta conectado) */}
       {avance && <SeccionAvance estado={avance} acento={acento} />}
 
-      {/* Hojas de trabajo tipo Excel (protagonistas arriba para acceso inmediato) */}
+      {/* Hojas de trabajo tipo Excel — Bento asimétrico con vista previa real */}
       {hrefHojas && hojas.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <div className="flex items-end justify-between gap-4">
+        <section className="flex flex-col gap-5">
+          <div className="flex items-end justify-between gap-4 flex-wrap">
             <div>
               <h2
-                className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900"
-                style={{ fontFamily: FUENTE_DISPLAY }}
+                className="text-xl sm:text-2xl font-semibold tracking-tight"
+                style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink)" }}
               >
                 Hojas de trabajo
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <p className="text-xs sm:text-sm mt-1" style={{ color: "var(--p-muted)" }}>
                 Planes de campaña, banco de ideas, benchmarking y matriz de oportunidades
               </p>
             </div>
             <Link
               href={hrefHojas}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold hover:underline shrink-0"
-              style={{ color: acentoInk }}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold hover:underline underline-offset-4 shrink-0"
+              style={{ color: "var(--p-accent-ink)" }}
             >
-              Abrir libro completo
+              <span>Abrir libro completo</span>
               <ArrowRight size={13} />
             </Link>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {hojas.map((h) => (
-              <Link
-                key={h.id}
-                href={`${hrefHojas}?hoja=${h.id}`}
-                className="portal-card portal-card-interactive rounded-2xl p-5 flex flex-col justify-between gap-5"
-              >
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <span
-                      className="flex h-9 w-9 items-center justify-center rounded-xl"
-                      style={{
-                        backgroundColor: `color-mix(in srgb, ${acento} 13%, #f8fafc)`,
-                        color: acentoInk,
-                      }}
-                    >
-                      <IconoTipoHoja tipo={h.tipo} />
-                    </span>
-                    <ArrowUpRight size={16} className="text-slate-400" />
-                  </div>
-                  <div>
-                    <p
-                      className="text-sm font-semibold text-slate-900"
-                      style={{ fontFamily: FUENTE_DISPLAY }}
-                    >
-                      {h.titulo}
-                    </p>
-                    {h.descripcion && (
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed mt-1">
-                        {h.descripcion}
-                      </p>
+
+          <div className="grid gap-4 md:grid-cols-6">
+            {hojas.map((h, idx) => {
+              const destacada = idx === 0 && hojas.length >= 2;
+              const colSpan =
+                hojas.length === 1
+                  ? "md:col-span-6"
+                  : destacada
+                    ? "md:col-span-4"
+                    : idx === 1
+                      ? "md:col-span-2"
+                      : hojas.length === 4
+                        ? "md:col-span-3"
+                        : "md:col-span-2";
+
+              const filas = Array.isArray(h.filas) ? h.filas : [];
+              const colsPreview = Array.isArray(h.columnas) ? h.columnas.slice(0, 3) : [];
+              const filasPreview = filas.slice(0, 3);
+
+              return (
+                <Link
+                  key={h.id}
+                  href={`${hrefHojas}?hoja=${h.id}`}
+                  className={`${colSpan} portal-glass portal-card-interactive rounded-3xl p-6 flex flex-col justify-between gap-5`}
+                >
+                  <div className="flex flex-col gap-3.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <span
+                        className="flex h-10 w-10 items-center justify-center rounded-2xl border"
+                        style={{
+                          backgroundColor: "var(--p-accent-bg)",
+                          borderColor: "var(--p-accent-border)",
+                          color: "var(--p-accent-ink)",
+                        }}
+                      >
+                        <IconoTipoHoja tipo={h.tipo} />
+                      </span>
+                      <span
+                        className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-medium"
+                        style={{
+                          borderColor: "var(--p-border)",
+                          backgroundColor: "var(--p-surface-subtle)",
+                          color: "var(--p-muted)",
+                        }}
+                      >
+                        <span>{ETIQUETA_TIPO_HOJA[h.tipo] ?? "Tabla"}</span>
+                        <ArrowUpRight size={13} style={{ color: "var(--p-accent-ink)" }} />
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3
+                        className={`${destacada ? "text-lg" : "text-base"} font-semibold tracking-tight`}
+                        style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink)" }}
+                      >
+                        {h.titulo}
+                      </h3>
+                      {h.descripcion && (
+                        <p
+                          className="text-xs leading-relaxed mt-1 line-clamp-2"
+                          style={{ color: "var(--p-muted)" }}
+                        >
+                          {h.descripcion}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Mini vista previa viva en la hoja principal */}
+                    {destacada && colsPreview.length > 0 && filasPreview.length > 0 && (
+                      <div
+                        className="rounded-2xl border overflow-hidden mt-1"
+                        style={{
+                          borderColor: "var(--p-border)",
+                          backgroundColor: "var(--p-surface-subtle)",
+                        }}
+                      >
+                        <div
+                          className="grid grid-cols-3 gap-2 px-3.5 py-2 text-[10px] font-semibold uppercase tracking-wider border-b"
+                          style={{
+                            borderColor: "var(--p-border)",
+                            backgroundColor: "var(--p-table-head)",
+                            color: "var(--p-muted)",
+                          }}
+                        >
+                          {colsPreview.map((col) => (
+                            <span key={col.key} className="truncate">
+                              {col.label}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="divide-y" style={{ borderColor: "var(--p-border)" }}>
+                          {filasPreview.map((fila) => (
+                            <div
+                              key={fila.id}
+                              className="grid grid-cols-3 gap-2 px-3.5 py-2 text-xs"
+                              style={{ borderColor: "var(--p-border)" }}
+                            >
+                              {colsPreview.map((col, cIdx) => {
+                                const val = fila[col.key];
+                                const texto =
+                                  typeof val === "boolean"
+                                    ? val
+                                      ? "Sí"
+                                      : "Pendiente"
+                                    : String(val ?? "—") || "—";
+                                return (
+                                  <span
+                                    key={col.key}
+                                    className={`truncate ${cIdx === 0 ? "font-medium" : ""}`}
+                                    style={{
+                                      color: cIdx === 0 ? "var(--p-ink)" : "var(--p-muted)",
+                                    }}
+                                  >
+                                    {texto}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
-                </div>
-                <div className="flex items-center justify-between border-t border-slate-100 pt-3 text-[11px]">
-                  <span className="font-medium text-slate-500">{ETIQUETA_TIPO_HOJA[h.tipo] ?? "Tabla"}</span>
-                  <span className="font-semibold text-slate-700 tabular-nums">
-                    {Array.isArray(h.filas) ? h.filas.length : 0} filas
-                  </span>
-                </div>
-              </Link>
-            ))}
+
+                  <div
+                    className="flex items-center justify-between border-t pt-3.5 text-xs"
+                    style={{ borderColor: "var(--p-border)" }}
+                  >
+                    <span style={{ color: "var(--p-muted)" }}>Registros activos</span>
+                    <span
+                      className="font-semibold tabular-nums"
+                      style={{ fontFamily: FUENTE_MONO, color: "var(--p-ink)" }}
+                    >
+                      {filas.length} {filas.length === 1 ? "fila" : "filas"}
+                    </span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}
 
-      {/* Resumen estratégico — pilares numerados */}
+      {/* Pilares estratégicos — Bloque editorial en grilla arquitectónica */}
       {pilares.length > 0 && (
-        <section className="flex flex-col gap-4">
-          <div className="flex items-end justify-between gap-4">
-            <div>
-              <h2
-                className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900"
-                style={{ fontFamily: FUENTE_DISPLAY }}
-              >
-                Pilares estratégicos
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Ejes editoriales y comerciales que guían toda la comunicación de la marca
-              </p>
-            </div>
+        <section className="flex flex-col gap-5">
+          <div>
+            <h2
+              className="text-xl sm:text-2xl font-semibold tracking-tight"
+              style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink)" }}
+            >
+              Pilares estratégicos
+            </h2>
+            <p className="text-xs sm:text-sm mt-1" style={{ color: "var(--p-muted)" }}>
+              Ejes editoriales y comerciales que guían la comunicación de la marca
+            </p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {pilares.map((pl, idx) => (
-              <div
-                key={pl.id}
-                className="portal-card portal-card-interactive rounded-2xl p-6 flex flex-col gap-3"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-xs font-bold tabular-nums"
-                    style={{
-                      backgroundColor: `color-mix(in srgb, ${acento} 15%, #f8fafc)`,
-                      color: acentoInk,
-                      fontFamily: FUENTE_DISPLAY,
-                    }}
+
+          <div className="portal-bezel">
+            <div className="portal-bezel-core overflow-hidden">
+              <div className="grid md:grid-cols-2">
+                {pilares.map((pl, idx) => (
+                  <div
+                    key={pl.id}
+                    className="p-6 sm:p-7 flex flex-col gap-3 border-b md:odd:border-r last:border-b-0 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
+                    style={{ borderColor: "var(--p-border)" }}
                   >
-                    {String(idx + 1).padStart(2, "0")}
-                  </span>
-                  <h3
-                    className="text-base font-semibold text-slate-900"
-                    style={{ fontFamily: FUENTE_DISPLAY }}
-                  >
-                    {pl.titulo}
-                  </h3>
-                </div>
-                <p className="text-sm leading-relaxed text-slate-600">{pl.texto}</p>
+                    <div className="flex items-baseline gap-3">
+                      <span
+                        className="text-xs font-semibold tabular-nums"
+                        style={{ fontFamily: FUENTE_MONO, color: "var(--p-accent-ink)" }}
+                      >
+                        {String(idx + 1).padStart(2, "0")}
+                      </span>
+                      <h3
+                        className="text-base font-semibold tracking-tight"
+                        style={{ fontFamily: FUENTE_DISPLAY, color: "var(--p-ink)" }}
+                      >
+                        {pl.titulo}
+                      </h3>
+                    </div>
+                    <p
+                      className="text-sm leading-relaxed pl-7"
+                      style={{ color: "var(--p-ink-soft)" }}
+                    >
+                      {pl.texto}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </section>
       )}
 
       {/* Parrilla de contenido + aprobaciones */}
       <TarjetaSeccion
-        icono={<CalendarDots size={16} weight="regular" />}
+        icono={<CalendarDots size={17} weight="light" />}
         titulo="Parrilla de contenido"
         subtitulo="Calendario de campañas, entregas y aprobaciones"
         acento={acento}
         accion={
           <Link
             href={hrefParrilla}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold hover:underline"
-            style={{ color: acentoInk }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold hover:underline underline-offset-4"
+            style={{ color: "var(--p-accent-ink)" }}
           >
-            Ver completa
+            <span>Ver completa</span>
             <ArrowRight size={13} />
           </Link>
         }
       >
         {contenido.length === 0 ? (
-          <p className="text-sm text-muted">Todavía no hay piezas cargadas en la parrilla.</p>
+          <p className="text-sm" style={{ color: "var(--p-muted)" }}>
+            Todavía no hay piezas cargadas en la parrilla.
+          </p>
         ) : (
           <div className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-x-6 gap-y-2.5">
@@ -463,26 +652,34 @@ export function VistaPortal({
             </div>
 
             {(porAprobar > 0 || aprobadas > 0) && (
-              <div className="flex flex-wrap items-center gap-4 border-t border-border pt-3.5 text-xs">
+              <div
+                className="flex flex-wrap items-center gap-4 border-t pt-4 text-xs"
+                style={{ borderColor: "var(--p-border)" }}
+              >
                 {porAprobar > 0 && (
                   <Link
                     href={hrefParrilla}
-                    className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-semibold"
+                    className="inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-semibold"
                     style={{
-                      backgroundColor: `color-mix(in srgb, ${acento} 15%, #ffffff)`,
-                      color: acentoInk,
-                      border: `1px solid color-mix(in srgb, ${acento} 40%, #e2e8f0)`,
+                      backgroundColor: "var(--p-accent-bg)",
+                      color: "var(--p-accent-ink)",
+                      borderColor: "var(--p-accent-border)",
                     }}
                   >
                     <WarningCircle size={14} weight="fill" />
                     <span>
                       {porAprobar}{" "}
-                      {porAprobar === 1 ? "pieza esperando tu aprobación" : "piezas esperando tu aprobación"}
+                      {porAprobar === 1
+                        ? "pieza esperando tu aprobación"
+                        : "piezas esperando tu aprobación"}
                     </span>
                   </Link>
                 )}
                 {aprobadas > 0 && (
-                  <span className="inline-flex items-center gap-1.5 font-medium text-teal-700">
+                  <span
+                    className="inline-flex items-center gap-1.5 font-semibold"
+                    style={{ color: "var(--success)" }}
+                  >
                     <CheckCircle size={14} weight="fill" />
                     <span>
                       {aprobadas} {aprobadas === 1 ? "aprobada" : "aprobadas"}
@@ -497,7 +694,7 @@ export function VistaPortal({
 
       {/* Automatizaciones de Instagram */}
       <TarjetaSeccion
-        icono={<Lightning size={16} weight="regular" />}
+        icono={<Lightning size={17} weight="light" />}
         titulo="Automatizaciones de Instagram"
         acento={acento}
       >
@@ -507,24 +704,27 @@ export function VistaPortal({
       {/* Enlaces y Entregables */}
       <div className="grid gap-6 sm:grid-cols-2">
         <TarjetaSeccion
-          icono={<LinkSimple size={16} weight="regular" />}
+          icono={<LinkSimple size={17} weight="light" />}
           titulo="Enlaces clave"
           acento={acento}
         >
           {enlaces.length === 0 ? (
-            <p className="text-sm text-muted">Sin enlaces cargados todavía.</p>
+            <p className="text-sm" style={{ color: "var(--p-muted)" }}>
+              Sin enlaces cargados todavía.
+            </p>
           ) : (
-            <div className="divide-y divide-border -mx-2">
+            <div className="divide-y -mx-2" style={{ borderColor: "var(--p-border)" }}>
               {enlaces.map((e) => (
                 <a
                   key={e.id}
                   href={e.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 text-sm font-medium text-foreground hover:bg-surface-alt transition-colors"
+                  className="flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors"
+                  style={{ color: "var(--p-ink)", borderColor: "var(--p-border)" }}
                 >
                   <span className="truncate">{e.titulo}</span>
-                  <ArrowUpRight size={15} className="shrink-0 text-muted" />
+                  <ArrowUpRight size={15} className="shrink-0" style={{ color: "var(--p-muted)" }} />
                 </a>
               ))}
             </div>
@@ -532,26 +732,38 @@ export function VistaPortal({
         </TarjetaSeccion>
 
         <TarjetaSeccion
-          icono={<FolderSimple size={16} weight="regular" />}
+          icono={<FolderSimple size={17} weight="light" />}
           titulo="Documentos y archivos"
           acento={acento}
         >
           {archivos.length === 0 ? (
-            <p className="text-sm text-muted">Sin archivos cargados todavía.</p>
+            <p className="text-sm" style={{ color: "var(--p-muted)" }}>
+              Sin archivos cargados todavía.
+            </p>
           ) : (
-            <div className="divide-y divide-border -mx-2">
+            <div className="divide-y -mx-2" style={{ borderColor: "var(--p-border)" }}>
               {archivos.map((a) => (
                 <button
                   key={a.id}
                   type="button"
                   onClick={() => onDescargarArchivo(a)}
-                  className="flex w-full items-center justify-between gap-3 rounded-xl px-2.5 py-2.5 text-sm font-medium text-left text-foreground hover:bg-surface-alt transition-colors cursor-pointer"
+                  className="flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-left transition-colors cursor-pointer"
+                  style={{ color: "var(--p-ink)", borderColor: "var(--p-border)" }}
                 >
                   <span className="flex items-center gap-2.5 min-w-0">
-                    <FileText size={16} style={{ color: acentoInk }} className="shrink-0" />
+                    <FileText
+                      size={16}
+                      weight="light"
+                      style={{ color: "var(--p-accent-ink)" }}
+                      className="shrink-0"
+                    />
                     <span className="truncate">{a.nombre}</span>
                   </span>
-                  <DownloadSimple size={15} className="shrink-0 text-muted" />
+                  <DownloadSimple
+                    size={15}
+                    className="shrink-0"
+                    style={{ color: "var(--p-muted)" }}
+                  />
                 </button>
               ))}
             </div>
@@ -561,25 +773,45 @@ export function VistaPortal({
 
       {/* Bitácora de reuniones */}
       <TarjetaSeccion
-        icono={<Notebook size={16} weight="regular" />}
+        icono={<Notebook size={17} weight="light" />}
         titulo="Bitácora de reuniones"
         acento={acento}
       >
         {reuniones.length === 0 ? (
-          <p className="text-sm text-muted">Sin reuniones registradas todavía.</p>
+          <p className="text-sm" style={{ color: "var(--p-muted)" }}>
+            Sin reuniones registradas todavía.
+          </p>
         ) : (
-          <div className="flex flex-col divide-y divide-border">
+          <div className="flex flex-col divide-y" style={{ borderColor: "var(--p-border)" }}>
             {reuniones.map((r) => (
-              <div key={r.id} className="py-3.5 first:pt-0 last:pb-0 flex flex-col gap-1.5">
+              <div
+                key={r.id}
+                className="py-4 first:pt-0 last:pb-0 flex flex-col gap-1.5"
+                style={{ borderColor: "var(--p-border)" }}
+              >
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-foreground">{r.titulo}</p>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-alt px-2.5 py-0.5 text-xs font-medium text-muted">
+                  <p className="text-sm font-semibold" style={{ color: "var(--p-ink)" }}>
+                    {r.titulo}
+                  </p>
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium tabular-nums"
+                    style={{
+                      borderColor: "var(--p-border)",
+                      backgroundColor: "var(--p-surface-subtle)",
+                      color: "var(--p-muted)",
+                    }}
+                  >
                     <CalendarBlank size={12} />
                     {formatearFecha(r.fecha)}
                   </span>
                 </div>
                 {r.notas && (
-                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-muted">{r.notas}</p>
+                  <p
+                    className="whitespace-pre-wrap text-xs leading-relaxed"
+                    style={{ color: "var(--p-ink-soft)" }}
+                  >
+                    {r.notas}
+                  </p>
                 )}
               </div>
             ))}

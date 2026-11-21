@@ -2,25 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
+import type { ModoPortal } from "@/components/portal/PortalThemeContext";
 
 type Props = {
   nombre: string;
   logoUrl: string | null;
   colorAcento: string | null;
   tagline?: string | null;
+  modo?: ModoPortal;
   claveSesion?: string;
   forzar?: boolean;
   onTerminar?: () => void;
 };
 
-const DURACION_TOTAL_MS = 2100;
-const INICIO_SALIDA_MS = 1680;
+const DURACION_TOTAL_MS = 2150;
+const INICIO_SALIDA_MS = 1720;
 
 export function AperturaLogo({
   nombre,
   logoUrl,
   colorAcento,
   tagline,
+  modo = "light",
   claveSesion,
   forzar = false,
   onTerminar,
@@ -38,7 +41,10 @@ export function AperturaLogo({
   const [saliendo, setSaliendo] = useState(false);
 
   const acento = colorAcento || "#C9A45C";
-  const acentoTexto = `color-mix(in srgb, ${acento} 72%, #1e293b)`;
+  const oscuro = modo === "dark";
+  const acentoTexto = oscuro
+    ? `color-mix(in srgb, ${acento} 88%, #ffffff)`
+    : `color-mix(in srgb, ${acento} 68%, #1e293b)`;
 
   useEffect(() => {
     if (!visible) return;
@@ -92,8 +98,10 @@ export function AperturaLogo({
       aria-label={`Bienvenida a ${nombre}`}
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden select-none"
       style={{
-        backgroundColor: "#FCFCFD",
-        backgroundImage: `radial-gradient(640px circle at 50% 42%, color-mix(in srgb, ${acento} 13%, transparent), transparent 68%)`,
+        backgroundColor: oscuro ? "#07080B" : "#F6F4F0",
+        backgroundImage: oscuro
+          ? `radial-gradient(620px circle at 50% 45%, color-mix(in srgb, ${acento} 24%, transparent), transparent 68%)`
+          : `radial-gradient(640px circle at 50% 45%, color-mix(in srgb, ${acento} 20%, transparent), transparent 68%)`,
         opacity: saliendo ? 0 : 1,
         transform: saliendo ? "scale(1.02)" : "scale(1)",
         transition:
@@ -101,49 +109,60 @@ export function AperturaLogo({
         pointerEvents: saliendo ? "none" : "auto",
       }}
     >
-      {/* Halo arquitectónico sutil */}
+      {/* Aro arquitectónico de vidrio */}
       <div
-        className="portal-halo pointer-events-none absolute h-[440px] w-[440px] rounded-full border"
+        className="portal-halo pointer-events-none absolute h-[420px] w-[420px] rounded-full border"
         style={{
-          borderColor: `color-mix(in srgb, ${acento} 22%, transparent)`,
-          background: `radial-gradient(circle, color-mix(in srgb, ${acento} 11%, transparent) 0%, transparent 70%)`,
+          borderColor: `color-mix(in srgb, ${acento} 28%, transparent)`,
+          background: `radial-gradient(circle, color-mix(in srgb, ${acento} ${oscuro ? "18%" : "14%"}, transparent) 0%, transparent 70%)`,
         }}
         aria-hidden
       />
 
-      {/* Línea fina de luz en el color de marca */}
+      {/* Línea horizontal de luz en color de marca */}
       <div
-        className="portal-beam pointer-events-none absolute h-px w-[min(72vw,520px)]"
+        className="portal-beam pointer-events-none absolute h-px w-[min(74vw,540px)]"
         style={{
-          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${acento} 75%, transparent) 50%, transparent 100%)`,
+          background: `linear-gradient(90deg, transparent 0%, color-mix(in srgb, ${acento} 85%, ${oscuro ? "#ffffff" : acento}) 50%, transparent 100%)`,
         }}
         aria-hidden
       />
 
-      {/* Logo protagonista nítido sobre blanco puro */}
+      {/* Logo en pedestal limpio con barrido de brillo */}
       <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
-        <div className="portal-logo-emerge relative overflow-hidden px-5 py-3">
+        <div
+          className="portal-logo-emerge relative overflow-hidden rounded-[2rem] border px-10 py-7"
+          style={{
+            backgroundColor: oscuro ? "rgba(18, 21, 30, 0.72)" : "rgba(255, 255, 255, 0.78)",
+            borderColor: `color-mix(in srgb, ${acento} 32%, ${oscuro ? "rgba(255,255,255,0.1)" : "rgba(15,23,42,0.08)"})`,
+            boxShadow: oscuro
+              ? "0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12)"
+              : "0 20px 52px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.95)",
+            backdropFilter: "blur(24px) saturate(160%)",
+            WebkitBackdropFilter: "blur(24px) saturate(160%)",
+          }}
+        >
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={logoUrl}
               alt={nombre}
-              className="max-h-24 sm:max-h-28 w-auto max-w-[min(76vw,360px)] object-contain"
+              className="max-h-20 sm:max-h-24 w-auto max-w-[min(70vw,320px)] object-contain"
             />
           ) : (
             <span
-              className="text-4xl sm:text-5xl font-semibold tracking-tight text-slate-900"
-              style={{ fontFamily: FUENTE_DISPLAY }}
+              className="text-4xl sm:text-5xl font-semibold tracking-tight"
+              style={{ fontFamily: FUENTE_DISPLAY, color: oscuro ? "#F5F4F0" : "#0C1220" }}
             >
               {nombre}
             </span>
           )}
-          {/* Destello luminoso único */}
           <div
             className="portal-shimmer pointer-events-none absolute inset-y-0 -left-1/3 w-1/3"
             style={{
-              background:
-                "linear-gradient(90deg, transparent, rgba(255,255,255,0.78), transparent)",
+              background: oscuro
+                ? `linear-gradient(90deg, transparent, color-mix(in srgb, ${acento} 40%, rgba(255,255,255,0.55)), transparent)`
+                : "linear-gradient(90deg, transparent, rgba(255,255,255,0.85), transparent)",
             }}
             aria-hidden
           />
@@ -154,22 +173,31 @@ export function AperturaLogo({
             className="text-[11px] font-semibold uppercase tracking-[0.26em]"
             style={{ color: acentoTexto }}
           >
-            Portal exclusivo de cliente
+            Portal privado
           </p>
           {tagline && (
-            <p className="max-w-md text-xs text-slate-500 tracking-wide">{tagline}</p>
+            <p
+              className="max-w-md text-xs tracking-wide"
+              style={{ color: oscuro ? "rgba(245,244,240,0.62)" : "#58657A" }}
+            >
+              {tagline}
+            </p>
           )}
         </div>
       </div>
 
-      {/* Firma discreta y acción para saltar */}
-      <div className="portal-tag-rise absolute bottom-8 inset-x-0 flex items-center justify-center gap-5 px-6 text-[11px] text-slate-400">
+      {/* Firma discreta y botón Entrar */}
+      <div
+        className="portal-tag-rise absolute bottom-8 inset-x-0 flex items-center justify-center gap-5 px-6 text-[11px]"
+        style={{ color: oscuro ? "rgba(245,244,240,0.42)" : "#64748B" }}
+      >
         <span className="tracking-[0.22em] uppercase">ASYGNUZ</span>
         <span aria-hidden>·</span>
         <button
           type="button"
           onClick={saltar}
-          className="text-slate-500 hover:text-slate-900 transition-colors cursor-pointer font-medium"
+          className="font-semibold transition-opacity hover:opacity-100 opacity-80 cursor-pointer"
+          style={{ color: oscuro ? "#F5F4F0" : "#0C1220" }}
         >
           Entrar
         </button>

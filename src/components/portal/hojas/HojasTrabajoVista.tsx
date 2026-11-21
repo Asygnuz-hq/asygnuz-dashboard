@@ -57,9 +57,9 @@ function tinte(color: string): CSSProperties {
   return {
     borderRadius: 999,
     padding: "2px 10px",
-    background: `color-mix(in srgb, ${color} 14%, transparent)`,
-    color: `color-mix(in srgb, ${color} 80%, var(--foreground))`,
-    borderColor: "transparent",
+    background: `color-mix(in srgb, ${color} 16%, transparent)`,
+    color: `color-mix(in srgb, ${color} 55%, var(--p-ink, var(--foreground)))`,
+    border: `1px solid color-mix(in srgb, ${color} 26%, transparent)`,
   };
 }
 
@@ -543,11 +543,19 @@ export function HojasTrabajoVista({
             </div>
           )}
 
-          {/* Tabla tipo Excel */}
-          <div className="portal-card rounded-2xl overflow-x-auto">
+          {/* Tabla tipo Excel en Double-Bezel Liquid Glass */}
+          <div className="portal-bezel">
+            <div className="portal-bezel-core overflow-x-auto">
             <table className="w-full text-sm min-w-[780px]">
               <thead>
-                <tr className="text-left text-[11px] uppercase tracking-wider text-muted border-b border-border bg-surface-alt/75">
+                <tr
+                  className="text-left text-[11px] uppercase tracking-wider border-b"
+                  style={{
+                    backgroundColor: "var(--p-table-head, var(--surface-alt))",
+                    borderColor: "var(--p-border, var(--border))",
+                    color: "var(--p-muted, var(--muted))",
+                  }}
+                >
                   {hoja.columnas.map((col) => (
                     <th
                       key={col.key}
@@ -636,6 +644,7 @@ export function HojasTrabajoVista({
                 <span>Agregar fila</span>
               </button>
             )}
+            </div>
           </div>
         </div>
       )}
@@ -662,7 +671,13 @@ function CeldaHoja({
     const marcado = valor === true || valor === "Sí" || valor === "Si";
     if (!editable) {
       return marcado ? (
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-teal-600/15 text-teal-700">
+        <span
+          className="inline-flex h-5 w-5 items-center justify-center rounded-md"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--success) 16%, transparent)",
+            color: "var(--success)",
+          }}
+        >
           <Check size={12} weight="bold" />
         </span>
       ) : (
@@ -790,7 +805,13 @@ function CeldaHoja({
     if (!str) return <span className="text-xs text-muted/50">—</span>;
     if (str === "Sí") {
       return (
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-teal-600/15 text-teal-700">
+        <span
+          className="inline-flex h-5 w-5 items-center justify-center rounded-full"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--success) 16%, transparent)",
+            color: "var(--success)",
+          }}
+        >
           <Check size={11} weight="bold" />
         </span>
       );

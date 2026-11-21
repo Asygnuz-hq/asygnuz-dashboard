@@ -14,6 +14,11 @@ import {
   type ContenidoVista,
 } from "@/components/portal/VistaPortal";
 import { AperturaLogo } from "@/components/portal/AperturaLogo";
+import {
+  BotonTemaPortal,
+  PortalThemeProvider,
+  usePortalTheme,
+} from "@/components/portal/PortalThemeContext";
 import type { HojaTrabajo } from "@/lib/portal/hojasTipos";
 
 async function api(url: string) {
@@ -23,10 +28,19 @@ async function api(url: string) {
   return data;
 }
 
-// Vista previa exacta del portal del cliente, incluyendo un botón para
-// disparar en vivo la apertura cinematográfica con el logo del cliente.
+// Vista previa exacta del portal del cliente, incluyendo selector Light/Dark
+// y botón para disparar en vivo la apertura con el logo del cliente.
 export default function VistaPreviaPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = use(params);
+  return (
+    <PortalThemeProvider inicial="light">
+      <VistaPreviaInterior tenantId={tenantId} />
+    </PortalThemeProvider>
+  );
+}
+
+function VistaPreviaInterior({ tenantId }: { tenantId: string }) {
+  const { modo } = usePortalTheme();
   const avance = useAvance(`/api/portal-admin/clientes/${tenantId}/avance`);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,20 +95,30 @@ export default function VistaPreviaPage({ params }: { params: Promise<{ tenantId
   if (loading) return <p className="text-muted p-6">Cargando...</p>;
   if (error) return <p className="text-muted p-6">{error}</p>;
 
+  const acento = colorAcento || "#C9A45C";
+
   return (
     <div className="flex flex-col gap-5">
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+
       {probandoSplash && (
         <AperturaLogo
           nombre={nombreTenant ?? "Portal"}
           logoUrl={logoUrl}
-          colorAcento={colorAcento}
+          colorAcento={acento}
           tagline={taglinePortal}
+          modo={modo}
           forzar
           onTerminar={() => setProbandoSplash(false)}
         />
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface px-4 py-3">
         <div>
           <Link
             href={`/portal-admin/${tenantId}`}
@@ -108,30 +132,49 @@ export default function VistaPreviaPage({ params }: { params: Promise<{ tenantId
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setProbandoSplash(true)}
-          className="inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-semibold cursor-pointer"
-          style={{
-            borderColor: `color-mix(in srgb, ${colorAcento || "#C9A45C"} 45%, transparent)`,
-            backgroundColor: `color-mix(in srgb, ${colorAcento || "#C9A45C"} 14%, transparent)`,
-            color: colorAcento || "#C9A45C",
-          }}
+        <div
+          className="portal-shell flex items-center gap-2 rounded-full bg-transparent!"
+          data-portal-mode={modo}
+          style={
+            {
+              "--portal-accent": acento,
+              background: "transparent",
+              backgroundImage: "none",
+            } as React.CSSProperties
+          }
         >
-          <Sparkle size={14} weight="fill" />
-          <span>Probar apertura con logo</span>
-        </button>
+          <BotonTemaPortal />
+          <button
+            type="button"
+            onClick={() => setProbandoSplash(true)}
+            className="inline-flex h-9 items-center gap-1.5 rounded-full border px-4 text-xs font-semibold cursor-pointer"
+            style={{
+              borderColor: `color-mix(in srgb, ${acento} 48%, transparent)`,
+              backgroundColor: `color-mix(in srgb, ${acento} 16%, transparent)`,
+              color: acento,
+            }}
+          >
+            <Sparkle size={14} weight="fill" />
+            <span>Probar apertura con logo</span>
+          </button>
+        </div>
       </div>
 
       <div
-        className="portal-light rounded-3xl p-6 sm:p-8 border border-border"
-        style={{ "--portal-accent": colorAcento || "#C9A45C" } as React.CSSProperties}
+        className="portal-shell rounded-3xl p-6 sm:p-8 border"
+        data-portal-mode={modo}
+        style={
+          {
+            "--portal-accent": acento,
+            borderColor: "var(--p-border)",
+          } as React.CSSProperties
+        }
       >
         <VistaPortal
           nombreTenant={nombreTenant}
           logoUrl={logoUrl}
           taglinePortal={taglinePortal}
-          colorAcento={colorAcento}
+          colorAcento={acento}
           proyecto={proyecto}
           pilares={pilares}
           contenido={contenido}

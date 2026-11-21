@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Lightning, Sparkle } from "@phosphor-icons/react";
 import { DiagramaFlujoVisual } from "@/components/bandeja/DiagramaFlujoVisual";
 import type { IgFlujo } from "@/lib/bandeja/tipos";
-import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
+import { FUENTE_MONO } from "@/lib/portal/fuente";
 
 interface AutomatizacionesPortalData {
   resumenHumano: string;
@@ -37,33 +38,76 @@ export function SeccionAutomatizacionesPortal({ colorAcento }: { colorAcento?: s
   }, []);
 
   if (loading) {
-    return <div className="text-xs text-muted p-4">Cargando automatizaciones...</div>;
+    return (
+      <div className="text-xs p-4" style={{ color: "var(--p-muted, var(--muted))" }}>
+        Cargando automatizaciones...
+      </div>
+    );
   }
+
+  const acento = colorAcento || "var(--p-accent, #C9A45C)";
+  const acentoInk = `var(--p-accent-ink, ${acento})`;
 
   if (!data || data.flujos.length === 0) {
     return (
-      <div className="rounded-2xl bg-surface-alt p-6 border border-border text-center flex flex-col items-center gap-2">
-        <span className="text-2xl">⚡</span>
-        <p className="text-xs font-semibold text-foreground">Automatizaciones de Instagram en preparación</p>
-        <p className="text-[11px] text-muted max-w-sm">
+      <div
+        className="rounded-2xl p-6 border text-center flex flex-col items-center gap-2.5"
+        style={{
+          backgroundColor: "var(--p-surface-subtle, var(--surface-alt))",
+          borderColor: "var(--p-border, var(--border))",
+        }}
+      >
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-2xl border"
+          style={{
+            backgroundColor: "var(--p-accent-bg, transparent)",
+            borderColor: "var(--p-accent-border, var(--border))",
+            color: acentoInk,
+          }}
+        >
+          <Lightning size={18} weight="light" />
+        </span>
+        <p className="text-xs font-semibold" style={{ color: "var(--p-ink, var(--foreground))" }}>
+          Automatizaciones de Instagram en preparación
+        </p>
+        <p className="text-xs max-w-sm leading-relaxed" style={{ color: "var(--p-muted, var(--muted))" }}>
           Tu equipo en ASYGNUZ está configurando los disparadores de respuestas automáticas a comentarios y DMs.
         </p>
       </div>
     );
   }
 
-  const acento = colorAcento || "var(--success)";
-
   return (
     <div className="flex flex-col gap-5">
       {/* Resumen Humano */}
-      <div className="rounded-2xl p-4.5 bg-surface-alt border border-border flex items-start gap-3">
-        <span className="text-2xl shrink-0">✨</span>
+      <div
+        className="rounded-2xl p-4 border flex items-start gap-3"
+        style={{
+          backgroundColor: "var(--p-surface-subtle, var(--surface-alt))",
+          borderColor: "var(--p-border, var(--border))",
+        }}
+      >
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border"
+          style={{
+            backgroundColor: "var(--p-accent-bg, transparent)",
+            borderColor: "var(--p-accent-border, var(--border))",
+            color: acentoInk,
+          }}
+        >
+          <Sparkle size={16} weight="light" />
+        </span>
         <div>
-          <p className="text-xs font-bold text-foreground uppercase tracking-wider">
-            Resumen del Mes
+          <p
+            className="text-[11px] font-semibold uppercase tracking-wider"
+            style={{ color: "var(--p-muted, var(--muted))" }}
+          >
+            Resumen del mes
           </p>
-          <p className="text-sm text-foreground mt-0.5 leading-relaxed font-medium">
+          <p
+            className="text-sm mt-0.5 leading-relaxed font-medium"
+            style={{ color: "var(--p-ink, var(--foreground))" }}
+          >
             {data.resumenHumano}
           </p>
         </div>
@@ -71,30 +115,39 @@ export function SeccionAutomatizacionesPortal({ colorAcento }: { colorAcento?: s
 
       {/* KPI Cards rápidas */}
       <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl bg-surface-alt p-3.5 border border-border text-center">
-          <p className="text-[10px] uppercase font-bold text-muted">Personas Atendidas</p>
-          <p className="text-lg font-bold mt-1" style={{ fontFamily: FUENTE_DISPLAY, color: acento }}>
-            {data.metricas.totalAtendidos}
-          </p>
-        </div>
-        <div className="rounded-xl bg-surface-alt p-3.5 border border-border text-center">
-          <p className="text-[10px] uppercase font-bold text-muted">Clics en Enlace</p>
-          <p className="text-lg font-bold mt-1" style={{ fontFamily: FUENTE_DISPLAY, color: acento }}>
-            {data.metricas.totalClics}
-          </p>
-        </div>
-        <div className="rounded-xl bg-surface-alt p-3.5 border border-border text-center">
-          <p className="text-[10px] uppercase font-bold text-muted">Flujos Activos</p>
-          <p className="text-lg font-bold mt-1" style={{ fontFamily: FUENTE_DISPLAY, color: acento }}>
-            {data.metricas.flujosActivos}
-          </p>
-        </div>
+        {[
+          { label: "Personas atendidas", valor: data.metricas.totalAtendidos },
+          { label: "Clics en enlace", valor: data.metricas.totalClics },
+          { label: "Flujos activos", valor: data.metricas.flujosActivos },
+        ].map((item) => (
+          <div
+            key={item.label}
+            className="rounded-2xl p-3.5 border text-center"
+            style={{
+              backgroundColor: "var(--p-surface-subtle, var(--surface-alt))",
+              borderColor: "var(--p-border, var(--border))",
+            }}
+          >
+            <p className="text-[11px] font-medium" style={{ color: "var(--p-muted, var(--muted))" }}>
+              {item.label}
+            </p>
+            <p
+              className="text-xl font-semibold mt-1 tabular-nums"
+              style={{ fontFamily: FUENTE_MONO, color: acentoInk }}
+            >
+              {item.valor}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Diagramas Visuales tipo ManyChat de solo lectura */}
+      {/* Diagramas Visuales de solo lectura */}
       <div className="flex flex-col gap-3">
-        <p className="text-xs font-bold uppercase tracking-wider text-muted">
-          Tus Reglas Activas de Instagram
+        <p
+          className="text-xs font-semibold uppercase tracking-wider"
+          style={{ color: "var(--p-muted, var(--muted))" }}
+        >
+          Reglas activas de Instagram
         </p>
         {data.flujos.map((flujo) => (
           <DiagramaFlujoVisual key={flujo.id} flujo={flujo} modoSoloLectura={true} />
