@@ -13,6 +13,7 @@ import {
   type ArchivoVista,
   type ContenidoVista,
 } from "@/components/portal/VistaPortal";
+import type { HojaTrabajo } from "@/lib/portal/hojasTipos";
 
 type ArchivoConRuta = ArchivoVista & { storage_path: string };
 
@@ -26,17 +27,19 @@ export default function PortalClientePage() {
   const [reuniones, setReuniones] = useState<ReunionVista[]>([]);
   const [archivos, setArchivos] = useState<ArchivoConRuta[]>([]);
   const [contenido, setContenido] = useState<ContenidoVista[]>([]);
+  const [hojas, setHojas] = useState<HojaTrabajo[]>([]);
 
   useEffect(() => {
     async function cargar() {
       const supabase = createClient();
-      const [p, pi, e, r, a, c] = await Promise.all([
+      const [p, pi, e, r, a, c, h] = await Promise.all([
         supabase.from("portal_proyecto").select("*").maybeSingle(),
         supabase.from("portal_pilares").select("*").order("orden"),
         supabase.from("portal_enlaces").select("*").order("orden"),
         supabase.from("portal_reuniones").select("*").order("fecha", { ascending: false }),
         supabase.from("portal_archivos").select("*").order("subido_en", { ascending: false }),
-        supabase.from("portal_contenido").select("id, estado").order("orden"),
+        supabase.from("portal_contenido").select("id, estado, aprobacion_cliente").order("orden"),
+        supabase.from("portal_hojas").select("*").order("orden"),
       ]);
       setProyecto(p.data);
       setPilares(pi.data ?? []);
@@ -44,6 +47,7 @@ export default function PortalClientePage() {
       setReuniones(r.data ?? []);
       setArchivos(a.data ?? []);
       setContenido(c.data ?? []);
+      setHojas((h.data ?? []) as HojaTrabajo[]);
       setLoading(false);
     }
     cargar();
@@ -63,11 +67,23 @@ export default function PortalClientePage() {
     window.open(data.signedUrl, "_blank");
   }
 
-  if (loading) return <p className="text-muted p-6">Cargando...</p>;
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="skeleton h-56 rounded-3xl" />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="skeleton h-36 rounded-2xl" />
+          <div className="skeleton h-36 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <VistaPortal
       nombreTenant={tenant?.nombre ?? null}
+      logoUrl={tenant?.logoUrl ?? null}
+      taglinePortal={tenant?.taglinePortal ?? null}
       colorAcento={tenant?.colorAcento ?? null}
       proyecto={proyecto}
       pilares={pilares}
@@ -75,7 +91,9 @@ export default function PortalClientePage() {
       enlaces={enlaces}
       archivos={archivos}
       reuniones={reuniones}
+      hojas={hojas}
       hrefParrilla="/portal/parrilla"
+      hrefHojas="/portal/hojas"
       onDescargarArchivo={descargar}
       avance={avance}
     />

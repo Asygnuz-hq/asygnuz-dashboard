@@ -13,7 +13,7 @@ export async function GET() {
   const admin = createAdminClient();
   const { data, error } = await admin
     .from("tenants")
-    .select("id, nombre, slug, creado_en")
+    .select("id, nombre, slug, subdominio, logo_url, color_acento, creado_en")
     .eq("modulos_habilitados->>portal_cliente", "true")
     .order("creado_en", { ascending: false });
 
@@ -27,19 +27,36 @@ export async function POST(request: Request) {
 
   const validado = await bodyValido(request, crearClienteSchema);
   if (validado instanceof Response) return validado;
-  const { nombre, slug, fechaInicio, fechaFin, tipoProyecto, descripcion, contactoNombre, contactoEmail, responsableNombre, responsableEmail } = validado.data;
+  const {
+    nombre,
+    slug,
+    subdominio,
+    fechaInicio,
+    fechaFin,
+    tipoProyecto,
+    descripcion,
+    contactoNombre,
+    contactoEmail,
+    responsableNombre,
+    responsableEmail,
+  } = validado.data;
 
   const admin = createAdminClient();
   const { data: tenant, error: errorTenant } = await admin
     .from("tenants")
-    .insert({ nombre, slug, modulos_habilitados: { portal_cliente: true } })
-    .select("id, nombre, slug")
+    .insert({
+      nombre,
+      slug,
+      subdominio: subdominio || slug,
+      modulos_habilitados: { portal_cliente: true },
+    })
+    .select("id, nombre, slug, subdominio")
     .single();
 
   if (errorTenant) {
     const yaExiste = errorTenant.code === "23505";
     return Response.json(
-      { error: yaExiste ? `Ya existe un cliente con el slug "${slug}".` : errorTenant.message },
+      { error: yaExiste ? `Ya existe un cliente con el slug o subdominio "${subdominio || slug}".` : errorTenant.message },
       { status: yaExiste ? 409 : 500 }
     );
   }
@@ -57,9 +74,6 @@ export async function POST(request: Request) {
   });
 
   if (errorProyecto) {
-    // El tenant ya quedó creado — no se revierte (igual pasa con crear_tenant
-    // a mano): mejor un portal con la ficha vacía por completar que perder
-    // el tenant recién creado por un error de red a mitad de camino.
     return Response.json(
       { error: `Cliente creado, pero falló guardar la ficha del proyecto: ${errorProyecto.message}` },
       { status: 500 }

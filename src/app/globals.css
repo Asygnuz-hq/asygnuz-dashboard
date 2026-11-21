@@ -361,6 +361,139 @@ textarea:focus {
   }
 }
 
+/* =========================================================================
+   Portal Exclusivo de Cliente — Apertura cinematográfica del logo y
+   superficies boutique ("Del negro a la luz").
+   GPU-accelerated (transform, opacity, clip-path). Curva strong ease-out
+   cubic-bezier(0.23, 1, 0.32, 1).
+   ========================================================================= */
+
+@keyframes portal-beam-open {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.08);
+  }
+  45% {
+    opacity: 0.95;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0.28;
+    transform: scaleX(1.12);
+  }
+}
+
+@keyframes portal-halo-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  60% {
+    opacity: 0.55;
+    transform: scale(1.03);
+  }
+  100% {
+    opacity: 0.38;
+    transform: scale(1);
+  }
+}
+
+@keyframes portal-logo-emerge {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+    filter: brightness(0.75);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: brightness(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes portal-shimmer-sweep {
+  0% {
+    transform: translateX(-140%) skewX(-22deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateX(240%) skewX(-22deg);
+    opacity: 0;
+  }
+}
+
+@keyframes portal-tag-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.portal-beam {
+  animation: portal-beam-open 1.25s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.portal-halo {
+  animation: portal-halo-in 1.4s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+.portal-logo-emerge {
+  animation: portal-logo-emerge 1.05s cubic-bezier(0.23, 1, 0.32, 1) 180ms both;
+}
+.portal-shimmer {
+  animation: portal-shimmer-sweep 1.15s cubic-bezier(0.23, 1, 0.32, 1) 620ms both;
+}
+.portal-tag-rise {
+  animation: portal-tag-rise 0.7s cubic-bezier(0.23, 1, 0.32, 1) 680ms both;
+}
+
+.portal-card {
+  background: linear-gradient(180deg, rgba(20, 22, 28, 0.86) 0%, rgba(12, 13, 18, 0.92) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: border-color 180ms ease, transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .portal-card-interactive:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--portal-accent, #C9A45C) 38%, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 20px 44px rgba(0, 0, 0, 0.46), 0 0 28px color-mix(in srgb, var(--portal-accent, #C9A45C) 14%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-beam,
+  .portal-halo,
+  .portal-logo-emerge,
+  .portal-shimmer,
+  .portal-tag-rise {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+  .portal-shimmer {
+    display: none;
+  }
+  .portal-card-interactive:hover {
+    transform: none;
+  }
+}
+
 /* Reportes en PDF (window.print desde /metricas/reporte y
    /metricas/clientes): sin esto, el navegador imprime en carta vertical y
    las tablas anchas (muchas columnas de métricas) quedan cortadas al borde

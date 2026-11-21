@@ -2,13 +2,40 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import {
+  ArrowRight,
+  CalendarDots,
+  ChartBar,
+  Eye,
+  FolderSimple,
+  Globe,
+  InstagramLogo,
+  Key,
+  LinkSimple,
+  Notebook,
+  PaintBrush,
+  Sparkle,
+  Table,
+  Target,
+  UploadSimple,
+} from "@phosphor-icons/react";
 import { PageHeader } from "@/components/PageHeader";
 import { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 import { TarjetaSeccion, Chip, ESTADO_LABEL, ESTADO_COLOR } from "@/components/portal/TarjetaSeccion";
 import { FuentesAvance } from "@/components/portal/FuentesAvance";
 import { SeccionInstagramCliente } from "@/components/portal/SeccionInstagramCliente";
+import type { HojaTrabajo } from "@/lib/portal/hojasTipos";
 
-type Cliente = { id: string; nombre: string; slug: string; color_acento: string | null };
+type Cliente = {
+  id: string;
+  nombre: string;
+  slug: string;
+  subdominio: string | null;
+  logo_url: string | null;
+  color_acento: string | null;
+  tagline_portal: string | null;
+  splash_habilitado: boolean;
+};
 type Pilar = { id: string; icono: string; titulo: string; texto: string };
 type Proyecto = {
   fecha_inicio: string | null;
@@ -29,6 +56,7 @@ type Contenido = {
   tipo: string | null;
   fecha_publicacion: string | null;
   estado: (typeof ESTADOS_CONTENIDO)[number];
+  aprobacion_cliente?: string | null;
   notas: string | null;
   link: string | null;
 };
@@ -43,6 +71,14 @@ const PROYECTO_VACIO: Proyecto = {
   responsable_nombre: null,
   responsable_email: null,
 };
+
+const PALETAS_SUGERIDAS = [
+  { label: "Dorado Lumia", hex: "#C9A45C" },
+  { label: "Navy Médico", hex: "#16233D" },
+  { label: "Esmeralda", hex: "#1D9E75" },
+  { label: "Cobre", hex: "#C67D52" },
+  { label: "Plata", hex: "#94A3B8" },
+];
 
 async function api(url: string, opts?: RequestInit) {
   const res = await fetch(url, {
@@ -59,34 +95,48 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
   const [cliente, setCliente] = useState<Cliente | null>(null);
   const [proyecto, setProyecto] = useState<Proyecto>(PROYECTO_VACIO);
   const [colorAcento, setColorAcento] = useState("");
+  const [subdominio, setSubdominio] = useState("");
+  const [taglinePortal, setTaglinePortal] = useState("");
+  const [splashHabilitado, setSplashHabilitado] = useState(true);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [subiendoLogo, setSubiendoLogo] = useState(false);
   const [pilares, setPilares] = useState<Pilar[]>([]);
   const [enlaces, setEnlaces] = useState<Enlace[]>([]);
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
   const [archivos, setArchivos] = useState<Archivo[]>([]);
   const [contenido, setContenido] = useState<Contenido[]>([]);
+  const [hojas, setHojas] = useState<HojaTrabajo[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<string | null>(null);
 
-  async function cargar() {
-    try {
-      const data = await api(`/api/portal-admin/clientes/${tenantId}`);
-      setCliente(data.cliente);
-      setProyecto(data.proyecto ?? PROYECTO_VACIO);
-      setColorAcento(data.cliente?.color_acento ?? "");
-      setPilares(data.pilares ?? []);
-      setEnlaces(data.enlaces);
-      setReuniones(data.reuniones);
-      setArchivos(data.archivos);
-      setContenido(data.contenido);
-    } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Error cargando el cliente.");
-    }
-    setLoading(false);
-  }
-
   useEffect(() => {
-    cargar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let cancelado = false;
+    api(`/api/portal-admin/clientes/${tenantId}`)
+      .then((data) => {
+        if (cancelado) return;
+        setCliente(data.cliente);
+        setProyecto(data.proyecto ?? PROYECTO_VACIO);
+        setColorAcento(data.cliente?.color_acento ?? "");
+        setSubdominio(data.cliente?.subdominio ?? data.cliente?.slug ?? "");
+        setTaglinePortal(data.cliente?.tagline_portal ?? "");
+        setSplashHabilitado(data.cliente?.splash_habilitado ?? true);
+        setLogoUrl(data.cliente?.logo_url ?? "");
+        setPilares(data.pilares ?? []);
+        setEnlaces(data.enlaces ?? []);
+        setReuniones(data.reuniones ?? []);
+        setArchivos(data.archivos ?? []);
+        setContenido(data.contenido ?? []);
+        setHojas(data.hojas ?? []);
+      })
+      .catch((err) => {
+        if (!cancelado) setMessage(err instanceof Error ? err.message : "Error cargando el cliente.");
+      })
+      .finally(() => {
+        if (!cancelado) setLoading(false);
+      });
+    return () => {
+      cancelado = true;
+    };
   }, [tenantId]);
 
   async function guardarProyecto(e: React.FormEvent) {
@@ -94,18 +144,53 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
     try {
       await api(`/api/portal-admin/clientes/${tenantId}`, {
         method: "PUT",
-        body: JSON.stringify({ ...proyecto, colorAcento }),
+        body: JSON.stringify({
+          ...proyecto,
+          colorAcento,
+          subdominio: subdominio.trim().toLowerCase(),
+          taglinePortal: taglinePortal.trim(),
+          splashHabilitado,
+          logoUrl: logoUrl.trim(),
+        }),
       });
-      setCliente((prev) => (prev ? { ...prev, color_acento: colorAcento || null } : prev));
-      setMessage("Ficha del proyecto guardada.");
+      setCliente((prev) =>
+        prev
+          ? {
+              ...prev,
+              color_acento: colorAcento || null,
+              subdominio: subdominio.trim().toLowerCase() || null,
+              tagline_portal: taglinePortal.trim() || null,
+              splash_habilitado: splashHabilitado,
+              logo_url: logoUrl.trim() || null,
+            }
+          : prev
+      );
+      setMessage("Marca y ficha del portal guardadas.");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "Error guardando.");
     }
   }
 
-  // Los botones de abajo llaman a la API sin try/catch propio: si fallaba
-  // (URL sin https://, 403, etc.) el error se perdía y el botón parecía muerto.
-  // Esto lo muestra en el aviso fijo de arriba.
+  async function subirLogo(file: File) {
+    setSubiendoLogo(true);
+    setMessage(null);
+    try {
+      const form = new FormData();
+      form.append("logo", file);
+      const data = await api(`/api/portal-admin/clientes/${tenantId}/logo`, {
+        method: "POST",
+        body: form,
+      });
+      setLogoUrl(data.logoUrl);
+      setCliente((prev) => (prev ? { ...prev, logo_url: data.logoUrl } : prev));
+      setMessage("Logo actualizado.");
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "No se pudo subir el logo.");
+    } finally {
+      setSubiendoLogo(false);
+    }
+  }
+
   function avisarError(err: unknown, porDefecto: string) {
     setMessage(err instanceof Error ? err.message : porDefecto);
   }
@@ -143,7 +228,6 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
   }
 
   async function agregarEnlace(titulo: string, url: string) {
-    // "valentinamkt.online" sin esquema no pasa la validación de URL: se completa.
     const urlCompleta = /^[a-z][a-z0-9+.-]*:\/\//i.test(url.trim()) ? url.trim() : `https://${url.trim()}`;
     try {
       const data = await api(`/api/portal-admin/clientes/${tenantId}/enlaces`, {
@@ -184,9 +268,6 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
     }
   }
 
-  // Agregar/editar/borrar contenido ahora vive en /portal-admin/[tenantId]/parrilla
-  // (pantalla propia, con filtros) — acá solo se necesitan los conteos.
-
   async function subirArchivo(file: File) {
     const form = new FormData();
     form.append("archivo", file);
@@ -205,28 +286,203 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
   if (loading) return <p className="text-muted p-6">Cargando...</p>;
   if (!cliente) return <p className="text-muted p-6">{message || "Cliente no encontrado."}</p>;
 
+  const acento = colorAcento || "#C9A45C";
+  const hojasVisibles = hojas.filter((h) => h.visible_cliente).length;
+  const hojasInternas = hojas.length - hojasVisibles;
+
   return (
-    <div className="flex flex-col gap-6 max-w-3xl pb-10">
-      <div className="flex items-start justify-between gap-4">
-        <PageHeader title={cliente.nombre} subtitle={`Portal del cliente — ${cliente.slug}`} />
-        <Link
-          href={`/portal-admin/${tenantId}/vista-previa`}
-          className="shrink-0 rounded-md bg-accent text-accent-foreground px-4 py-2 text-sm font-medium"
-        >
-          👁️ Ver como lo ve el cliente
-        </Link>
+    <div className="flex flex-col gap-6 max-w-4xl pb-12">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title={cliente.nombre}
+          subtitle={`${subdominio || cliente.slug}.asygnuz.com · Portal exclusivo`}
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/portal-admin/${tenantId}/vista-previa`}
+            className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-4 py-2 text-xs font-semibold"
+          >
+            <Eye size={15} />
+            <span>Ver como lo ve el cliente</span>
+          </Link>
+        </div>
       </div>
 
       {message && (
-        <div className="sticky top-2 z-20 rounded-lg border border-border bg-surface-alt px-4 py-2 text-sm text-foreground shadow-md">{message}</div>
+        <div className="sticky top-2 z-20 rounded-xl border border-white/15 bg-surface-alt px-4 py-2.5 text-sm text-foreground shadow-lg">
+          {message}
+        </div>
       )}
 
-      <TarjetaSeccion icono="🔑" titulo="Acceso del cliente">
+      {/* Accesos rápidos a las 2 herramientas tipo Excel */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Link
+          href={`/portal-admin/${tenantId}/parrilla`}
+          className="portal-card portal-card-interactive rounded-2xl p-5 flex items-center justify-between gap-4"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+              <CalendarDots size={17} style={{ color: acento }} />
+              Parrilla de contenido
+            </span>
+            <p className="text-xs text-muted">
+              {contenido.length} piezas · importar .xlsx, guiones y aprobaciones
+            </p>
+          </div>
+          <ArrowRight size={16} className="text-muted shrink-0" />
+        </Link>
+
+        <Link
+          href={`/portal-admin/${tenantId}/hojas`}
+          className="portal-card portal-card-interactive rounded-2xl p-5 flex items-center justify-between gap-4"
+        >
+          <div className="flex flex-col gap-1">
+            <span className="inline-flex items-center gap-2 text-sm font-semibold text-white">
+              <Table size={17} style={{ color: acento }} />
+              Hojas de trabajo (Excel)
+            </span>
+            <p className="text-xs text-muted">
+              {hojasVisibles} visibles al cliente · {hojasInternas} internas ASYGNUZ
+            </p>
+          </div>
+          <ArrowRight size={16} className="text-muted shrink-0" />
+        </Link>
+      </div>
+
+      <TarjetaSeccion icono={<Key size={16} />} titulo="Acceso del cliente" acento={acento}>
         <VincularUsuario onVincular={vincular} />
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="📌" titulo="Ficha del proyecto">
-        <form onSubmit={guardarProyecto} className="flex flex-col gap-4">
+      {/* Identidad, Subdominio, Logo animado y Ficha */}
+      <TarjetaSeccion
+        icono={<PaintBrush size={16} />}
+        titulo="Marca exclusiva, subdominio y ficha"
+        subtitulo="Logo de apertura, subdominio propio y datos generales del proyecto"
+        acento={acento}
+      >
+        <form onSubmit={guardarProyecto} className="flex flex-col gap-5">
+          {/* Logo del cliente */}
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 flex flex-col gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-16 w-40 items-center justify-center rounded-xl border border-white/10 bg-[#050507] p-2.5">
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoUrl} alt={cliente.nombre} className="max-h-11 w-auto object-contain" />
+                  ) : (
+                    <span className="text-xs text-white/35">Sin logo</span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium text-white">Logo del portal y apertura</p>
+                  <p className="text-xs text-muted">PNG o SVG con fondo transparente (ideal sobre fondo negro).</p>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-semibold cursor-pointer mt-1" style={{ color: acento }}>
+                    <UploadSimple size={14} />
+                    <span>{subiendoLogo ? "Subiendo..." : "Subir archivo de logo"}</span>
+                    <input
+                      type="file"
+                      accept="image/png,image/svg+xml,image/webp,image/jpeg"
+                      className="hidden"
+                      disabled={subiendoLogo}
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) subirLogo(f);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+            <label className="flex flex-col gap-1 text-xs text-muted">
+              O ruta/URL del logo (ej. /lumia/media/lumia-logo.png)
+              <input
+                type="text"
+                value={logoUrl}
+                onChange={(e) => setLogoUrl(e.target.value)}
+                placeholder="/lumia/media/lumia-logo.png"
+              />
+            </label>
+          </div>
+
+          {/* Subdominio y apertura animada */}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="inline-flex items-center gap-1.5">
+                <Globe size={14} style={{ color: acento }} />
+                Subdominio del portal
+              </span>
+              <div className="flex items-center gap-1.5">
+                <input
+                  type="text"
+                  value={subdominio}
+                  onChange={(e) => setSubdominio(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                  placeholder="lumia"
+                  className="flex-1"
+                />
+                <span className="text-xs text-muted shrink-0">.asygnuz.com</span>
+              </div>
+              {subdominio && (
+                <a
+                  href={`https://${subdominio}.asygnuz.com`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs underline mt-0.5"
+                  style={{ color: acento }}
+                >
+                  https://{subdominio}.asygnuz.com ↗
+                </a>
+              )}
+            </label>
+
+            <label className="flex flex-col gap-1 text-sm">
+              Tagline del portal (subtítulo bajo el logo)
+              <input
+                type="text"
+                value={taglinePortal}
+                onChange={(e) => setTaglinePortal(e.target.value)}
+                placeholder="Clínica de autor · Diseño de sonrisa e implantología"
+              />
+            </label>
+          </div>
+
+          {/* Color de marca + swatches + toggle apertura */}
+          <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-xs text-muted">
+                Color de marca
+                <input
+                  type="color"
+                  value={colorAcento || "#C9A45C"}
+                  onChange={(e) => setColorAcento(e.target.value)}
+                  className="h-8 w-11 shrink-0 cursor-pointer p-0.5"
+                />
+              </label>
+              <div className="flex items-center gap-1.5">
+                {PALETAS_SUGERIDAS.map((p) => (
+                  <button
+                    key={p.hex}
+                    type="button"
+                    onClick={() => setColorAcento(p.hex)}
+                    title={p.label}
+                    className="h-6 w-6 rounded-full border border-white/25 cursor-pointer"
+                    style={{ backgroundColor: p.hex }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <label className="inline-flex items-center gap-2 text-xs text-foreground cursor-pointer">
+              <input
+                type="checkbox"
+                checked={splashHabilitado}
+                onChange={(e) => setSplashHabilitado(e.target.checked)}
+              />
+              <Sparkle size={14} style={{ color: acento }} />
+              <span>Apertura cinematográfica con logo</span>
+            </label>
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Campo label="Tipo de proyecto" value={proyecto.tipo_proyecto} onChange={(v) => setProyecto({ ...proyecto, tipo_proyecto: v })} />
             <Campo label="Fecha de inicio" type="date" value={proyecto.fecha_inicio} onChange={(v) => setProyecto({ ...proyecto, fecha_inicio: v })} />
@@ -236,47 +492,34 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
             <Campo label="Responsable ASYGNUZ" value={proyecto.responsable_nombre} onChange={(v) => setProyecto({ ...proyecto, responsable_nombre: v })} />
             <Campo label="Correo del responsable" type="email" value={proyecto.responsable_email} onChange={(v) => setProyecto({ ...proyecto, responsable_email: v })} />
           </div>
-          <label className="flex items-center gap-3 text-sm">
-            Color de marca (el portal de este cliente usa este color en vez del verde de ASYGNUZ)
-            <input
-              type="color"
-              value={colorAcento || "#1d9e75"}
-              onChange={(e) => setColorAcento(e.target.value)}
-              className="h-9 w-14 shrink-0 cursor-pointer p-0.5"
-            />
-            {colorAcento && (
-              <button type="button" onClick={() => setColorAcento("")} className="text-xs text-muted hover:text-foreground">
-                Quitar
-              </button>
-            )}
-          </label>
+
           <label className="flex flex-col gap-1 text-sm">
-            Descripción del proyecto (resumen corto — el detalle largo va en Pilares, abajo)
+            Descripción ejecutiva del proyecto
             <textarea
               value={proyecto.descripcion ?? ""}
               onChange={(e) => setProyecto({ ...proyecto, descripcion: e.target.value })}
-              rows={4}
+              rows={3}
             />
           </label>
-          <button type="submit" className="rounded-md bg-accent text-accent-foreground font-medium py-2 w-fit px-4">
-            Guardar ficha
+          <button type="submit" className="rounded-md bg-accent text-accent-foreground font-medium py-2 w-fit px-5 cursor-pointer">
+            Guardar marca y ficha
           </button>
         </form>
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="📊" titulo="Fuentes del avance (Kaneo y Meta)">
+      <TarjetaSeccion icono={<ChartBar size={16} />} titulo="Fuentes del avance (Kaneo y Meta)" acento={acento}>
         <FuentesAvance tenantId={tenantId} />
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="📸" titulo="Instagram & Automatizaciones">
+      <TarjetaSeccion icono={<InstagramLogo size={16} />} titulo="Instagram & Automatizaciones" acento={acento}>
         <SeccionInstagramCliente tenantId={tenantId} />
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="🎯" titulo="Pilares estratégicos">
+      <TarjetaSeccion icono={<Target size={16} />} titulo="Pilares estratégicos" acento={acento}>
         <ListaPilares pilares={pilares} onAgregar={agregarPilar} onBorrar={borrarPilar} />
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="🚀" titulo="Parrilla de contenido">
+      <TarjetaSeccion icono={<CalendarDots size={16} />} titulo="Parrilla de contenido" acento={acento}>
         {contenido.length === 0 ? (
           <p className="text-sm text-muted">Todavía no hay contenido cargado.</p>
         ) : (
@@ -295,15 +538,15 @@ export default function GestionarClientePage({ params }: { params: Promise<{ ten
         </Link>
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="🔗" titulo="Enlaces">
+      <TarjetaSeccion icono={<LinkSimple size={16} />} titulo="Enlaces" acento={acento}>
         <ListaEnlaces enlaces={enlaces} onAgregar={agregarEnlace} onBorrar={borrarEnlace} />
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="📁" titulo="Archivos">
+      <TarjetaSeccion icono={<FolderSimple size={16} />} titulo="Archivos" acento={acento}>
         <ListaArchivos archivos={archivos} onSubir={subirArchivo} onVer={verArchivo} onBorrar={borrarArchivo} />
       </TarjetaSeccion>
 
-      <TarjetaSeccion icono="📝" titulo="Reuniones">
+      <TarjetaSeccion icono={<Notebook size={16} />} titulo="Reuniones" acento={acento}>
         <ListaReuniones reuniones={reuniones} onAgregar={agregarReunion} onBorrar={borrarReunion} />
       </TarjetaSeccion>
     </div>
@@ -344,10 +587,10 @@ function VincularUsuario({ onVincular }: { onVincular: (email: string) => Promis
       className="flex flex-wrap items-end gap-2"
     >
       <label className="flex flex-col gap-1 text-sm flex-1 min-w-[200px]">
-        Correo (ya creado en Authentication → Users)
+        Correo (creado en Supabase → Authentication → Users)
         <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="cliente@correo.com" />
       </label>
-      <button type="submit" disabled={enviando} className="rounded-md bg-accent text-accent-foreground px-4 py-2 text-sm font-medium disabled:opacity-60">
+      <button type="submit" disabled={enviando} className="rounded-md bg-accent text-accent-foreground px-4 py-2 text-sm font-medium disabled:opacity-60 cursor-pointer">
         {enviando ? "Vinculando..." : "Vincular"}
       </button>
     </form>
@@ -376,7 +619,7 @@ function ListaEnlaces({
               <a href={e.url} target="_blank" rel="noreferrer" className="underline flex-1 truncate">
                 {e.titulo}
               </a>
-              <button onClick={() => onBorrar(e.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+              <button onClick={() => onBorrar(e.id)} className="text-xs text-muted hover:text-foreground shrink-0 cursor-pointer">
                 Borrar
               </button>
             </div>
@@ -394,7 +637,7 @@ function ListaEnlaces({
       >
         <input placeholder="Título" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1 min-w-[140px]" />
         <input placeholder="https://..." required value={url} onChange={(e) => setUrl(e.target.value)} className="flex-1 min-w-[180px]" />
-        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium">
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium cursor-pointer">
           Agregar
         </button>
       </form>
@@ -411,26 +654,22 @@ function ListaPilares({
   onAgregar: (icono: string, titulo: string, texto: string) => Promise<void>;
   onBorrar: (id: string) => Promise<void>;
 }) {
-  const [icono, setIcono] = useState("🎯");
+  const [icono, setIcono] = useState("01");
   const [titulo, setTitulo] = useState("");
   const [texto, setTexto] = useState("");
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs text-muted">
-        Bloques cortos para explicar la estrategia (posicionamiento, mercado, pauta, blindaje legal...) en vez de un
-        solo párrafo largo.
-      </p>
       {pilares.length === 0 ? (
         <p className="text-sm text-muted">Sin pilares todavía.</p>
       ) : (
         <div className="grid gap-2 sm:grid-cols-2">
-          {pilares.map((p) => (
+          {pilares.map((p, idx) => (
             <div key={p.id} className="rounded-lg bg-surface-alt p-3 text-sm">
               <div className="flex items-start justify-between gap-2">
                 <span className="font-medium">
-                  {p.icono} {p.titulo}
+                  {String(idx + 1).padStart(2, "0")} · {p.titulo}
                 </span>
-                <button onClick={() => onBorrar(p.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+                <button onClick={() => onBorrar(p.id)} className="text-xs text-muted hover:text-foreground shrink-0 cursor-pointer">
                   Borrar
                 </button>
               </div>
@@ -443,18 +682,17 @@ function ListaPilares({
         onSubmit={async (e) => {
           e.preventDefault();
           await onAgregar(icono, titulo, texto);
-          setIcono("🎯");
           setTitulo("");
           setTexto("");
         }}
         className="flex flex-col gap-2 pt-2 border-t border-border"
       >
         <div className="flex gap-2">
-          <input value={icono} onChange={(e) => setIcono(e.target.value)} className="w-14 text-center" maxLength={4} />
-          <input placeholder="Título (ej. Posicionamiento)" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1" />
+          <input value={icono} onChange={(e) => setIcono(e.target.value)} className="w-16 text-center" maxLength={4} />
+          <input placeholder="Título (ej. Criterio del Dr. Alejo)" required value={titulo} onChange={(e) => setTitulo(e.target.value)} className="flex-1" />
         </div>
         <textarea placeholder="Texto del pilar" required value={texto} onChange={(e) => setTexto(e.target.value)} rows={2} />
-        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium w-fit">
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium w-fit cursor-pointer">
           Agregar pilar
         </button>
       </form>
@@ -482,10 +720,10 @@ function ListaArchivos({
         <div className="rounded-lg bg-surface-alt divide-y divide-border overflow-hidden">
           {archivos.map((a) => (
             <div key={a.id} className="flex items-center gap-2 px-3 py-2 text-sm">
-              <button onClick={() => onVer(a.id)} className="flex-1 truncate text-left underline decoration-dotted">
-                📄 {a.nombre}
+              <button onClick={() => onVer(a.id)} className="flex-1 truncate text-left underline decoration-dotted cursor-pointer">
+                {a.nombre}
               </button>
-              <button onClick={() => onBorrar(a.id)} className="text-xs text-muted hover:text-foreground shrink-0">
+              <button onClick={() => onBorrar(a.id)} className="text-xs text-muted hover:text-foreground shrink-0 cursor-pointer">
                 Borrar
               </button>
             </div>
@@ -502,8 +740,6 @@ function ListaArchivos({
           if (files.length === 0) return;
           setSubiendo(true);
           try {
-            // Uno por uno (no en paralelo): si uno falla, se sabe cuál y
-            // los de antes ya quedaron subidos.
             for (const file of files) await onSubir(file);
           } finally {
             setSubiendo(false);
@@ -538,7 +774,7 @@ function ListaReuniones({
               <div className="flex items-center gap-2">
                 <span className="font-medium flex-1">{r.titulo}</span>
                 <span className="text-xs text-muted">{r.fecha}</span>
-                <button onClick={() => onBorrar(r.id)} className="text-xs text-muted hover:text-foreground">
+                <button onClick={() => onBorrar(r.id)} className="text-xs text-muted hover:text-foreground cursor-pointer">
                   Borrar
                 </button>
               </div>
@@ -562,7 +798,7 @@ function ListaReuniones({
           <input type="date" required value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
         <textarea placeholder="Notas de la reunión" value={notas} onChange={(e) => setNotas(e.target.value)} rows={2} />
-        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium w-fit">
+        <button type="submit" className="rounded-md bg-accent text-accent-foreground px-3 py-2 text-sm font-medium w-fit cursor-pointer">
           Agregar
         </button>
       </form>

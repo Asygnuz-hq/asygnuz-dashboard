@@ -2,11 +2,12 @@
 
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
+import { ArrowLeft } from "@phosphor-icons/react";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
-import ParrillaVista from "@/components/portal/parrilla/ParrillaVista";
+import ParrillaVista, { type FilaImportable } from "@/components/portal/parrilla/ParrillaVista";
 import { CAMPO_API, type Contenido } from "@/components/portal/parrilla/tipos";
 
-type Cliente = { id: string; nombre: string; slug: string };
+type Cliente = { id: string; nombre: string; slug: string; color_acento?: string | null };
 
 async function api(url: string, opts?: RequestInit) {
   const res = await fetch(url, {
@@ -29,17 +30,19 @@ export default function ParrillaAdminPage({ params }: { params: Promise<{ tenant
     api(`/api/portal-admin/clientes/${tenantId}`)
       .then((data) => {
         setCliente(data.cliente);
-        setContenido(data.contenido);
+        setContenido(data.contenido ?? []);
       })
       .catch((err) => setMessage(err instanceof Error ? err.message : "Error cargando."))
       .finally(() => setLoading(false));
   }, [tenantId]);
 
-  // Optimista: la celda cambia al instante; si la API falla se revierte y
-  // se muestra el error arriba.
-  async function actualizar(id: string, campo: keyof Contenido, valor: string) {
+  async function actualizar(id: string, campo: keyof Contenido, valor: string | boolean) {
     const antes = contenido;
-    setContenido((prev) => prev.map((c) => (c.id === id ? { ...c, [campo]: valor || null } : c)));
+    setContenido((prev) =>
+      prev.map((c) =>
+        c.id === id ? { ...c, [campo]: typeof valor === "boolean" ? valor : valor || null } : c
+      )
+    );
     try {
       const data = await api(`/api/portal-admin/clientes/${tenantId}/contenido/${id}`, {
         method: "PUT",
@@ -53,16 +56,33 @@ export default function ParrillaAdminPage({ params }: { params: Promise<{ tenant
     }
   }
 
-  async function agregar(fecha: string) {
+  async function agregar(fecha: string, campana?: string) {
     try {
       const data = await api(`/api/portal-admin/clientes/${tenantId}/contenido`, {
         method: "POST",
-        body: JSON.stringify({ titulo: "Nueva publicación", plataforma: "Instagram", estado: "idea", fechaPublicacion: fecha }),
+        body: JSON.stringify({
+          titulo: "Nueva pieza",
+          plataforma: "Instagram",
+          uso: "Orgánico",
+          estado: "idea",
+          fechaPublicacion: fecha,
+          campana: campana || undefined,
+          visibleCliente: true,
+          guionVisibleCliente: false,
+        }),
       });
       setContenido((prev) => [...prev, data.contenido]);
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "No se pudo agregar.");
     }
+  }
+
+  async function importar(filas: FilaImportable[], campana?: string) {
+    const data = await api(`/api/portal-admin/clientes/${tenantId}/contenido/importar`, {
+      method: "POST",
+      body: JSON.stringify({ filas, campana }),
+    });
+    setContenido((prev) => [...prev, ...(data.insertados ?? [])]);
   }
 
   async function borrar(id: string) {
@@ -76,18 +96,34 @@ export default function ParrillaAdminPage({ params }: { params: Promise<{ tenant
   return (
     <div className="flex flex-col gap-5 pb-10">
       <div>
-        <Link href={`/portal-admin/${tenantId}`} className="text-sm text-muted hover:text-foreground">
-          ← {cliente.nombre}
+        <Link
+          href={`/portal-admin/${tenantId}`}
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-foreground"
+        >
+          <ArrowLeft size={13} />
+          <span>{cliente.nombre}</span>
         </Link>
-        <h1 className="text-2xl font-bold mt-1" style={{ fontFamily: FUENTE_DISPLAY }}>🚀 Parrilla de contenido</h1>
-        <p className="text-sm text-muted mt-1">Clic en cualquier celda para editarla. El copy y las notas se abren en el detalle.</p>
+        <h1 className="text-2xl font-bold mt-1" style={{ fontFamily: FUENTE_DISPLAY }}>
+          Parrilla de contenido
+        </h1>
+        <p className="text-sm text-muted mt-1">
+          Edición directa tipo Excel. Abre una fila para gestionar guion (gancho/cuerpo/CTA), visibilidad y aprobaciones.
+        </p>
       </div>
 
       {message && (
         <div className="rounded-lg border border-border bg-surface-alt px-4 py-2 text-sm text-muted">{message}</div>
       )}
 
-      <ParrillaVista contenido={contenido} editable onActualizar={actualizar} onAgregar={agregar} onBorrar={borrar} />
+      <ParrillaVista
+        contenido={contenido}
+        editable
+        colorAcento={cliente.color_acento}
+        onActualizar={actualizar}
+        onAgregar={agregar}
+        onImportar={importar}
+        onBorrar={borrar}
+      />
     </div>
   );
 }

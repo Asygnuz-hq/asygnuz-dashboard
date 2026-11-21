@@ -1,37 +1,57 @@
-// Bloque visual compartido entre /portal (lo que ve el cliente) y
-// /portal-admin (donde ASYGNUZ lo carga) — mismo look en los dos lados a
-// propósito, para que lo que JM arma se vea igual a lo que ella recibe.
-// Inspirado en los "callouts" con ícono de Notion: encabezado con color
-// propio en vez de un simple <h2>, tarjeta con borde redondeado.
+// Bloque visual compartido entre /portal y /portal-admin.
+// Acepta ícono ReactNode (@phosphor-icons/react) o string (compatibilidad).
 
+import type { ReactNode } from "react";
 import { FUENTE_DISPLAY } from "@/lib/portal/fuente";
 
 export function TarjetaSeccion({
   icono,
   titulo,
+  subtitulo,
+  accion,
+  acento,
   children,
 }: {
-  icono: string;
+  icono: ReactNode;
   titulo: string;
-  children: React.ReactNode;
+  subtitulo?: string;
+  accion?: ReactNode;
+  acento?: string;
+  children: ReactNode;
 }) {
   return (
-    <section className="glass glass-hover rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-border bg-surface-alt/60">
-        <span className="text-lg leading-none" aria-hidden>
-          {icono}
-        </span>
-        <h2 className="text-sm font-semibold tracking-wide" style={{ fontFamily: FUENTE_DISPLAY }}>{titulo}</h2>
+    <section className="portal-card rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-white/[0.07] bg-white/[0.02]">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-sm"
+            style={{
+              backgroundColor: acento
+                ? `color-mix(in srgb, ${acento} 15%, transparent)`
+                : "rgba(255,255,255,0.06)",
+              color: acento || "var(--foreground)",
+            }}
+            aria-hidden
+          >
+            {icono}
+          </span>
+          <div className="min-w-0">
+            <h2
+              className="text-sm font-semibold tracking-wide truncate"
+              style={{ fontFamily: FUENTE_DISPLAY }}
+            >
+              {titulo}
+            </h2>
+            {subtitulo && <p className="text-[11px] text-muted truncate">{subtitulo}</p>}
+          </div>
+        </div>
+        {accion && <div className="shrink-0">{accion}</div>}
       </div>
-      <div className="p-4 flex flex-col gap-4">{children}</div>
+      <div className="p-5 flex flex-col gap-4">{children}</div>
     </section>
   );
 }
 
-// Puntito + texto de color, sin fondo relleno — el estilo que JM eligió
-// entre las 2 propuestas (opción "oscura"). Usa los tokens de tema
-// (--success, --warning, --accent-bright, --muted), no colores fijos: sigue
-// funcionando igual si cambia de tema claro/oscuro.
 export function Chip({ label, color }: { label: string; color: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide whitespace-nowrap">
@@ -49,13 +69,24 @@ export const ESTADO_LABEL: Record<string, string> = {
   programado: "Programado",
   publicado: "Publicado",
 };
-// Mismo criterio de color que labels.ts de Kaneo: gris = por hacer, ámbar =
-// en revisión, azul = en curso, verde = terminado.
+
 export const ESTADO_COLOR: Record<string, string> = {
   idea: "var(--muted)",
-  grabacion: "var(--muted)",
+  grabacion: "#94a3b8",
   edicion: "var(--accent-bright)",
   revision: "var(--warning)",
   programado: "#a78bfa",
   publicado: "var(--success)",
+};
+
+export const APROBACION_LABEL: Record<string, string> = {
+  pendiente: "Por aprobar",
+  aprobado: "Aprobada",
+  cambios: "Con ajustes",
+};
+
+export const APROBACION_COLOR: Record<string, string> = {
+  pendiente: "#8b93a6",
+  aprobado: "#1d9e75",
+  cambios: "#d97706",
 };

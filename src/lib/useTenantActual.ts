@@ -3,7 +3,16 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-export type TenantActual = { id: string; nombre: string; logoUrl: string | null; colorAcento: string | null };
+export type TenantActual = {
+  id: string;
+  nombre: string;
+  slug: string | null;
+  logoUrl: string | null;
+  colorAcento: string | null;
+  subdominio: string | null;
+  taglinePortal: string | null;
+  splashHabilitado: boolean;
+};
 
 export function useTenantActual() {
   const [tenant, setTenant] = useState<TenantActual | null>(null);
@@ -15,7 +24,16 @@ export function useTenantActual() {
       const { data } = await supabase.rpc("tenant_actual");
       const fila = Array.isArray(data) ? data[0] : data;
       if (!cancelado && fila) {
-        setTenant({ id: fila.id, nombre: fila.nombre, logoUrl: fila.logo_url ?? null, colorAcento: fila.color_acento ?? null });
+        setTenant({
+          id: fila.id,
+          nombre: fila.nombre,
+          slug: fila.slug ?? null,
+          logoUrl: fila.logo_url ?? null,
+          colorAcento: fila.color_acento ?? null,
+          subdominio: fila.subdominio ?? null,
+          taglinePortal: fila.tagline_portal ?? null,
+          splashHabilitado: fila.splash_habilitado ?? true,
+        });
       }
     }
     load();

@@ -1,13 +1,13 @@
-// Tipos y catálogos de la parrilla tipo tabla (portal de cliente).
+// Tipos y catálogos de la parrilla tipo hoja de cálculo (portal de cliente).
 // Los catálogos son sugerencias: la base guarda texto libre, así que un
-// canal/pilar/formato que no esté aquí se sigue mostrando (en gris).
+// canal/pilar/formato/uso que no esté aquí se sigue mostrando (en gris).
 
-import type { ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
+import type { ESTADOS_APROBACION, ESTADOS_CONTENIDO } from "@/lib/portal/schemas";
 
 export type Contenido = {
   id: string;
   titulo: string;
-  tipo: string | null; // formato: Carrusel, Reels, Foto...
+  tipo: string | null; // formato: Reels, Carrusel, Anuncio, Historia, En vivo...
   plataforma: string | null; // canal
   fecha_publicacion: string | null;
   hora: string | null;
@@ -19,6 +19,19 @@ export type Contenido = {
   link_drive: string | null;
   link: string | null;
   orden: number;
+  // Parrilla v2
+  campana?: string | null;
+  uso?: string | null;
+  procedimiento?: string | null;
+  duracion?: string | null;
+  gancho?: string | null;
+  cuerpo?: string | null;
+  cta?: string | null;
+  visible_cliente?: boolean;
+  guion_visible_cliente?: boolean;
+  aprobacion_cliente?: (typeof ESTADOS_APROBACION)[number] | null;
+  comentario_cliente?: string | null;
+  aprobado_en?: string | null;
 };
 
 // Campos editables → nombre que espera la API (camelCase del schema zod).
@@ -35,10 +48,22 @@ export const CAMPO_API: Record<string, string> = {
   link_referencia: "linkReferencia",
   link_drive: "linkDrive",
   link: "link",
+  campana: "campana",
+  uso: "uso",
+  procedimiento: "procedimiento",
+  duracion: "duracion",
+  gancho: "gancho",
+  cuerpo: "cuerpo",
+  cta: "cta",
+  visible_cliente: "visibleCliente",
+  guion_visible_cliente: "guionVisibleCliente",
+  aprobacion_cliente: "aprobacionCliente",
+  comentario_cliente: "comentarioCliente",
 };
 
 export const CANALES: Record<string, string> = {
   Instagram: "#e1306c",
+  "Meta Ads": "#4f8ef7",
   TikTok: "#25c2d6",
   Facebook: "#4f7bd9",
   LinkedIn: "#2f86d6",
@@ -47,7 +72,19 @@ export const CANALES: Record<string, string> = {
   X: "#9aa3b2",
 };
 
+export const USOS: Record<string, string> = {
+  Pauta: "#ef6b5b",
+  "Orgánico": "#C9A45C",
+  "Orgánico + pauta": "#a78bfa",
+  Historias: "#b07ef0",
+  "En vivo": "#ec6aa8",
+};
+
 export const PILARES: Record<string, string> = {
+  "Criterio del Dr. Alejo": "#C9A45C",
+  "Hecho en Lumia": "#22b3a3",
+  "Pacientes reales": "#34c27a",
+  "Experiencia Lumia": "#a78bfa",
   Educativo: "#4f8ef7",
   Lifestyle: "#f2a33a",
   Tendencia: "#e85d9e",
@@ -58,17 +95,19 @@ export const PILARES: Record<string, string> = {
 };
 
 export const FORMATOS: Record<string, string> = {
-  Carrusel: "#5b9cf2",
   Reels: "#ec6aa8",
+  Anuncio: "#ef6b5b",
+  Carrusel: "#5b9cf2",
+  Historia: "#b07ef0",
+  "En vivo": "#f2a33a",
   Foto: "#3fbf8f",
   Post: "#e8b23a",
-  Historia: "#b07ef0",
   Video: "#ef6b6b",
 };
 
 export const GRIS = "#8b93a6";
 
-export function colorDe(catalogo: Record<string, string>, valor: string | null) {
+export function colorDe(catalogo: Record<string, string>, valor: string | null | undefined) {
   return (valor && catalogo[valor]) || GRIS;
 }
 
@@ -94,7 +133,6 @@ export function horaCorta(h: string | null) {
   return `${((hh + 11) % 12) + 1}:${String(mm).padStart(2, "0")} ${sufijo}`;
 }
 
-/** Lunes de la semana de una fecha AAAA-MM-DD, como AAAA-MM-DD. */
 export function lunesDe(f: string) {
   const d = fechaLocal(f);
   d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
